@@ -9,6 +9,10 @@
 /storage/logs/
 /storage/exports/
 /storage/imports/
+/storage/*.log
+
+# Claude Code local settings
+/.claude/
 
 # OS & IDE
 .DS_Store

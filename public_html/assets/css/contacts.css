@@ -14,68 +14,7 @@
     color: var(--color-text-muted);
 }
 
-/* Filter card */
-.contacts-filters {
-    background: var(--color-white);
-    border: 1px solid var(--color-neutral-200);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    padding: 20px 20px 16px;
-    margin-bottom: 20px;
-}
-
-.contacts-filters .filter-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px 16px;
-    margin-bottom: 14px;
-}
-
-.contacts-filters .field {
-    margin-bottom: 0;
-}
-
-.contacts-filters label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--color-neutral);
-    margin-bottom: 4px;
-    text-transform: none;
-}
-
-.contacts-filters input[type="text"],
-.contacts-filters input[type="date"],
-.contacts-filters select {
-    max-width: 100%;
-    width: 100%;
-    padding: 7px 10px;
-    font-size: 13px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-neutral-300);
-    background: var(--color-white);
-    color: var(--color-text);
-    height: 34px;
-}
-
-.contacts-filters select { appearance: auto; }
-
-.contacts-filters input:focus,
-.contacts-filters select:focus {
-    outline: none;
-    border-color: var(--color-tertiary);
-    box-shadow: 0 0 0 3px rgba(99,102,241,.1);
-}
-
-/* higher specificity (0,0,2,0) to override .contacts-filters .filter-grid */
-.contacts-filters .filter-grid--extra {
-    display: none;
-    border-top: 1px solid var(--color-neutral-100);
-    padding-top: 14px;
-    margin-top: 2px;
-    margin-bottom: 14px;
-}
-
-.contacts-filters .filter-grid--extra.open { display: grid; }
+/* Filter styles → base.css as .filter-panel */
 
 /* full-width divider row inside the extended grid */
 .filter-grid-sep {
@@ -83,46 +22,6 @@
     height: 1px;
     background: var(--color-neutral-100);
     margin: 4px 0;
-}
-
-.contacts-filter-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 4px;
-}
-
-.filter-toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    border: none;
-    padding: 0;
-    font-size: 12.5px;
-    font-family: inherit;
-    color: var(--color-neutral);
-    cursor: pointer;
-    transition: color .15s;
-}
-
-.filter-toggle-btn:hover { background: transparent; color: var(--color-text); }
-
-.filter-toggle-chevron {
-    width: 10px;
-    height: 6px;
-    flex-shrink: 0;
-    transition: transform .2s ease;
-}
-
-.filter-toggle-btn.open .filter-toggle-chevron { transform: rotate(180deg); }
-
-.contacts-filter-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 /* Table card */
@@ -589,12 +488,7 @@
 .export-filters-info svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
 
 /* Responsive */
-@media (max-width: 1024px) {
-    .contacts-filters .filter-grid { grid-template-columns: repeat(3, 1fr); }
-}
-
 @media (max-width: 768px) {
-    .contacts-filters .filter-grid { grid-template-columns: repeat(2, 1fr); }
     .contacts-table { min-width: 940px; }
     .contacts-pagination { flex-direction: column; align-items: flex-start; }
     .contact-detail-layout { grid-template-columns: 1fr; }
@@ -604,5 +498,5 @@
 }
 
 @media (max-width: 480px) {
-    .contacts-filters .filter-grid { grid-template-columns: 1fr; }
+    .filter-panel .filter-grid { grid-template-columns: 1fr; }
 }

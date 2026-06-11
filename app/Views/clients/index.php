@@ -24,14 +24,69 @@ $from = ($page - 1) * $perPage + 1;
 $to   = min($page * $perPage, $total);
 if ($total === 0) { $from = 0; $to = 0; }
 $canCreateClients = Auth::can('clients.create');
-$canEditClients = Auth::can('clients.edit');
+$canEditClients   = Auth::can('clients.edit');
 $canDeleteClients = Auth::can('clients.delete');
+
 $selectedFilterTagIds = $filters['tag_ids'] ?? [];
 $preselectedFilterTagsJson = json_encode(array_values(array_map(function ($tag) {
     return ['id' => (int) $tag['id'], 'name' => $tag['name'], 'color' => $tag['color'] ?? null];
 }, array_filter($filterTags, function ($tag) use ($selectedFilterTagIds) {
     return in_array((int) $tag['id'], $selectedFilterTagIds ?? [], true);
 }))));
+
+/* --- Build filter chips ---------------------------------------- */
+$selectedTagObjects = array_values(array_filter($filterTags, function ($tag) use ($selectedFilterTagIds) {
+    return in_array((int) $tag['id'], array_map('intval', $selectedFilterTagIds ?? []), true);
+}));
+
+$chips = [];
+$base  = Auth::url('/clients');
+
+$textCols = [
+    'commercial_name' => 'Name',
+    'legal_name'      => 'Legal name',
+    'cif'             => 'CIF',
+    'city'            => 'City',
+    'province'        => 'Province',
+    'country'         => 'Country',
+    'address'         => 'Address',
+    'postal_code'     => 'Postal code',
+    'website'         => 'Website',
+    'notes'           => 'Notes',
+    'created_from'    => 'Created ≥',
+    'created_to'      => 'Created ≤',
+    'updated_from'    => 'Updated ≥',
+    'updated_to'      => 'Updated ≤',
+];
+
+foreach ($textCols as $key => $label) {
+    if (!empty($filters[$key])) {
+        $f = $filters; unset($f[$key], $f['page']);
+        $chips[] = ['text' => $label . ': ' . $filters[$key], 'href' => $base . '?' . http_build_query($f)];
+    }
+}
+
+if (!empty($filters['sector_id'])) {
+    $sName = '';
+    foreach ($filterSectors as $s) {
+        if ((int) $s['id'] === (int) $filters['sector_id']) { $sName = $s['name']; break; }
+    }
+    $f = $filters; unset($f['sector_id'], $f['page']);
+    $chips[] = ['text' => 'Sector: ' . $sName, 'href' => $base . '?' . http_build_query($f)];
+}
+
+foreach ($selectedTagObjects as $tag) {
+    $f = $filters;
+    $f['tag_ids'] = array_values(array_filter($f['tag_ids'] ?? [], fn ($id) => (int) $id !== (int) $tag['id']));
+    if (empty($f['tag_ids'])) unset($f['tag_ids']);
+    unset($f['page']);
+    $chips[] = ['text' => 'Tag: ' . $tag['name'], 'href' => $base . '?' . http_build_query($f)];
+}
+
+$hasExtended = (bool) array_filter(
+    ['address', 'postal_code', 'website', 'notes', 'created_from', 'created_to', 'updated_from', 'updated_to'],
+    fn ($k) => !empty($filters[$k])
+);
 ?>
 
 <!-- Header -->
@@ -52,12 +107,33 @@ $preselectedFilterTagsJson = json_encode(array_values(array_map(function ($tag) 
     </div>
 </div>
 
-<!-- Filters -->
-<?php
-$extendedKeys = ['address', 'postal_code', 'website', 'notes', 'created_from', 'created_to', 'updated_from', 'updated_to'];
-$hasExtended = (bool) array_filter($extendedKeys, fn ($key) => !empty($filters[$key]));
-?>
-<div class="clients-filters">
+<!-- Filter bar (compact row) -->
+<div class="filter-bar">
+    <button type="button" class="filter-bar-btn" id="filterBarBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"/>
+        </svg>
+        Filters
+        <?php if ($chips): ?>
+        <span class="filter-bar-count"><?= count($chips) ?></span>
+        <?php endif; ?>
+    </button>
+
+    <?php if ($chips): ?>
+    <div class="filter-bar-chips">
+        <?php foreach ($chips as $chip): ?>
+        <a class="filter-chip" href="<?= htmlspecialchars($chip['href'], ENT_QUOTES, 'UTF-8') ?>">
+            <?= htmlspecialchars($chip['text'], ENT_QUOTES, 'UTF-8') ?>
+            <span class="filter-chip-x" aria-hidden="true">×</span>
+        </a>
+        <?php endforeach; ?>
+    </div>
+    <a class="filter-bar-reset" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">Reset all</a>
+    <?php endif; ?>
+</div>
+
+<!-- Collapsible filter panel -->
+<div class="filter-panel" id="filterPanel">
     <form method="get" action="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="filter-grid">
             <div class="field">
@@ -157,7 +233,7 @@ $hasExtended = (bool) array_filter($extendedKeys, fn ($key) => !empty($filters[$
             </div>
         </div>
 
-        <div class="clients-filter-footer">
+        <div class="filter-footer">
             <button type="button" id="clientFilterToggleBtn"
                     class="filter-toggle-btn <?= $hasExtended ? 'open' : '' ?>">
                 <span class="filter-toggle-label"><?= $hasExtended ? 'Less filters' : 'More filters' ?></span>
@@ -165,25 +241,13 @@ $hasExtended = (bool) array_filter($extendedKeys, fn ($key) => !empty($filters[$
                     <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </button>
-            <div class="clients-filter-actions">
+            <div class="filter-actions">
                 <button class="btn btn-primary" type="submit">Filter</button>
                 <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">Reset</a>
             </div>
         </div>
     </form>
 </div>
-<script>
-(function () {
-    var btn = document.getElementById('clientFilterToggleBtn');
-    var extra = document.getElementById('clientFilterExtra');
-    if (!btn || !extra) { return; }
-    btn.addEventListener('click', function () {
-        var open = extra.classList.toggle('open');
-        btn.classList.toggle('open', open);
-        btn.querySelector('.filter-toggle-label').textContent = open ? 'Less filters' : 'More filters';
-    });
-})();
-</script>
 
 <!-- Table card -->
 <div class="clients-table-card">
@@ -191,31 +255,20 @@ $hasExtended = (bool) array_filter($extendedKeys, fn ($key) => !empty($filters[$
     <?php if (empty($clients)): ?>
         <p style="padding:24px 16px;color:var(--color-text-muted);font-size:14px;">No clients found.</p>
     <?php else: ?>
+
     <?php if ($canEditClients): ?>
-    <form method="post" action="<?= htmlspecialchars(Auth::url('/clients/bulk-tags'), ENT_QUOTES, 'UTF-8') ?>">
+    <form id="clientsBulkForm" method="post" action="<?= htmlspecialchars(Auth::url('/clients/bulk-tags'), ENT_QUOTES, 'UTF-8') ?>">
         <?= Csrf::field() ?>
-        <div class="bulk-tags-bar">
-            <div class="bulk-tags-picker">
-                <div class="token-picker token-picker--filter"
-                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
-                     data-name="tag_ids[]"
-                     data-with-color="1"
-                     data-placeholder="Choose tags..."
-                     data-selected="[]">
-                </div>
-            </div>
-            <select name="bulk_action" aria-label="Bulk tag action">
-                <option value="add">Add tags</option>
-                <option value="remove">Remove tags</option>
-            </select>
-            <button class="btn btn-outlined" type="submit">Apply</button>
-        </div>
     <?php endif; ?>
 
     <table class="clients-table">
         <thead>
             <tr>
-                <th class="col-select"></th>
+                <th class="col-select">
+                    <?php if ($canEditClients): ?>
+                    <input type="checkbox" id="clientsSelectAll" aria-label="Select all">
+                    <?php endif; ?>
+                </th>
                 <th class="col-id">#</th>
                 <th>Commercial name</th>
                 <th>Legal name</th>
@@ -275,12 +328,31 @@ $hasExtended = (bool) array_filter($extendedKeys, fn ($key) => !empty($filters[$
     </table>
 
     <?php if ($canEditClients): ?>
+    <!-- Selection bar: visible only when rows are checked -->
+    <div class="selection-bar" id="selectionBar" role="toolbar" aria-label="Bulk actions">
+        <span class="selection-count" id="selectionCount">0 selected</span>
+        <div class="selection-bar-tags">
+            <div class="token-picker token-picker--filter"
+                 data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
+                 data-name="tag_ids[]"
+                 data-with-color="1"
+                 data-placeholder="Choose tags..."
+                 data-selected="[]">
+            </div>
+        </div>
+        <select class="selection-bar-action" name="bulk_action">
+            <option value="add">Add tags</option>
+            <option value="remove">Remove tags</option>
+        </select>
+        <button type="submit" class="btn-apply">Apply</button>
+        <button type="button" class="btn-deselect" id="selectionClearBtn">Deselect all</button>
+    </div>
     </form>
     <?php endif; ?>
 
     <!-- Pagination -->
     <div class="clients-pagination">
-        <span>Showing <?= $from ?>-<?= $to ?> of <?= (int) $total ?></span>
+        <span>Showing <?= $from ?>–<?= $to ?> of <?= (int) $total ?></span>
 
         <div class="pagination-pages">
             <?php if ($page > 1): ?>
@@ -308,3 +380,69 @@ $hasExtended = (bool) array_filter($extendedKeys, fn ($key) => !empty($filters[$
 
     <?php endif; ?>
 </div>
+
+<script>
+(function () {
+    /* Filter panel toggle */
+    var filterBarBtn = document.getElementById('filterBarBtn');
+    var filterPanel  = document.getElementById('filterPanel');
+    if (filterBarBtn && filterPanel) {
+        filterBarBtn.addEventListener('click', function () {
+            var open = filterPanel.classList.toggle('open');
+            filterBarBtn.classList.toggle('active', open);
+        });
+    }
+
+    /* More/Less filters inside the panel */
+    var moreBtn   = document.getElementById('clientFilterToggleBtn');
+    var moreExtra = document.getElementById('clientFilterExtra');
+    if (moreBtn && moreExtra) {
+        moreBtn.addEventListener('click', function () {
+            var open = moreExtra.classList.toggle('open');
+            moreBtn.classList.toggle('open', open);
+            moreBtn.querySelector('.filter-toggle-label').textContent = open ? 'Less filters' : 'More filters';
+        });
+    }
+
+    /* Selection bar */
+    var bulkForm   = document.getElementById('clientsBulkForm');
+    var selBar     = document.getElementById('selectionBar');
+    var countEl    = document.getElementById('selectionCount');
+    var clearBtn   = document.getElementById('selectionClearBtn');
+    var selectAll  = document.getElementById('clientsSelectAll');
+
+    if (!bulkForm || !selBar) { return; }
+
+    function updateBar() {
+        var checked = bulkForm.querySelectorAll('input[name="client_ids[]"]:checked');
+        var n = checked.length;
+        selBar.classList.toggle('visible', n > 0);
+        if (countEl) { countEl.textContent = n + ' selected'; }
+        if (selectAll) {
+            var total = bulkForm.querySelectorAll('input[name="client_ids[]"]').length;
+            selectAll.indeterminate = n > 0 && n < total;
+            selectAll.checked = n > 0 && n === total;
+        }
+    }
+
+    bulkForm.addEventListener('change', function (e) {
+        if (e.target.name === 'client_ids[]') { updateBar(); }
+    });
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            bulkForm.querySelectorAll('input[name="client_ids[]"]').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+            updateBar();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            bulkForm.querySelectorAll('input[name="client_ids[]"]').forEach(function (cb) { cb.checked = false; });
+            updateBar();
+        });
+    }
+})();
+</script>
