@@ -68,16 +68,31 @@ class ExportService
         return empty($valid) ? ['id'] : $valid;
     }
 
-    // ── Row count ──────────────────────────────────────────────────────────
+    // ── Row count ─────────────────────────────────────────────────────────
+    // Use own filter builders so the count matches what we actually export.
 
     public function countContacts(array $filters): int
     {
-        return (new ContactRepository())->countAll($filters);
+        $pdo = Database::connect();
+        [$whereSql, $params] = $this->buildContactsFilterSql($filters);
+        $stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM contacts $whereSql");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+        return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
     public function countClients(array $filters): int
     {
-        return (new ClientRepository())->countAll($filters);
+        $pdo = Database::connect();
+        [$whereSql, $params] = $this->buildClientsFilterSql($filters);
+        $stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM clients $whereSql");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+        return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
     // ── CSV streaming ──────────────────────────────────────────────────────

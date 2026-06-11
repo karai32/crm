@@ -194,6 +194,12 @@
     color: var(--color-tertiary);
 }
 
+.format-option.format-option--disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .format-option svg { width: 14px; height: 14px; }
 
 .export-options-footer {

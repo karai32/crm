@@ -3,9 +3,6 @@ $activeFilters = array_filter($filters, function ($value) {
     return is_array($value) ? !empty($value) : ($value !== '' && $value !== 0 && $value !== null);
 });
 
-$exportUrl     = Auth::url('/exports/contacts'      . (!empty($activeFilters) ? '?' . http_build_query($activeFilters) : ''));
-$exportXlsxUrl = Auth::url('/exports/contacts-xlsx' . (!empty($activeFilters) ? '?' . http_build_query($activeFilters) : ''));
-$canExport          = Auth::can('exports.use');
 $canCreateContacts  = Auth::can('contacts.create');
 $canEditContacts    = Auth::can('contacts.edit');
 $canDeleteContacts  = Auth::can('contacts.delete');
@@ -138,14 +135,6 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
         <span class="count-label"><?= (int) $total ?> contacts found</span>
     </div>
     <div class="page-actions">
-        <?php if ($canExport): ?>
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/exports?entity=contacts'), ENT_QUOTES, 'UTF-8') ?>">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
-            </svg>
-            Export
-        </a>
-        <?php endif; ?>
         <?php if ($canCreateContacts): ?>
         <a class="btn btn-green" href="<?= htmlspecialchars(Auth::url('/contacts/create'), ENT_QUOTES, 'UTF-8') ?>">Create contact</a>
         <?php endif; ?>
