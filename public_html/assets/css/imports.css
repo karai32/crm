@@ -1,0 +1,348 @@
+/* --- Imports pages ---------------------------------------- */
+
+/* Header */
+.imports-header { margin-bottom: 20px; }
+.imports-header h1 { font-size: 26px; font-weight: 700; margin: 0 0 2px; }
+.imports-header .count-label { font-size: 13px; color: var(--color-text-muted); }
+
+/* --- Import status badges --------------------------------- */
+.import-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.import-status-completed  { background: #D1FAE5; color: #065F46; }
+.import-status-partial    { background: #FEF9C3; color: #854D0E; }
+.import-status-pending    { background: #F3F4F6; color: #374151; }
+.import-status-processing { background: #DBEAFE; color: #1E40AF; }
+.import-status-failed     { background: #FEE2E2; color: #991B1B; }
+
+/* --- History table ---------------------------------------- */
+.imports-table-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.imports-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+}
+
+.imports-table th {
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--color-neutral);
+    border-bottom: 1px solid var(--color-neutral-200);
+    white-space: nowrap;
+}
+
+.imports-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    vertical-align: middle;
+    font-size: 13.5px;
+}
+
+.imports-table tr:last-child td { border-bottom: none; }
+.imports-table tbody tr:hover td { background: var(--color-neutral-50); }
+
+.imports-table .col-file { font-weight: 500; color: var(--color-text); }
+.imports-table .col-num  { color: var(--color-neutral); font-size: 13px; text-align: right; }
+.imports-table .col-date { color: var(--color-neutral); font-size: 13px; white-space: nowrap; }
+
+/* --- Upload card ------------------------------------------ */
+.import-upload-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    max-width: 520px;
+}
+
+.import-upload-body { padding: 24px; }
+
+.import-upload-body .field { margin-bottom: 0; }
+
+.import-upload-body label { font-size: 13px; margin-bottom: 5px; }
+
+.import-upload-body input[type="file"] {
+    width: 100%;
+    font-size: 13.5px;
+    padding: 8px 11px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-sm);
+    background: var(--color-white);
+    cursor: pointer;
+}
+
+.import-upload-hint {
+    font-size: 12.5px;
+    color: var(--color-text-muted);
+    margin-top: 6px;
+}
+
+.import-upload-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: var(--color-neutral-50);
+    border-top: 1px solid var(--color-neutral-200);
+}
+
+/* --- Preview: data table ---------------------------------- */
+.import-preview-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.import-card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.import-card-header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.import-card-header-meta {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.import-data-scroll { overflow-x: auto; }
+
+.import-data-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.import-data-table th {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--color-neutral);
+    border-bottom: 1px solid var(--color-neutral-200);
+    background: var(--color-neutral-50);
+}
+
+.import-data-table td {
+    padding: 8px 12px;
+    font-size: 12.5px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.import-data-table tr:last-child td { border-bottom: none; }
+
+/* --- Mapping table ---------------------------------------- */
+.import-mapping-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+}
+
+.import-mapping-table th {
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--color-neutral);
+    border-bottom: 1px solid var(--color-neutral-200);
+    white-space: nowrap;
+}
+
+.import-mapping-table td {
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    vertical-align: middle;
+    font-size: 13.5px;
+}
+
+.import-mapping-table tr:last-child td { border-bottom: none; }
+.import-mapping-table tbody tr:hover td { background: var(--color-neutral-50); }
+
+.import-mapping-table .col-csv {
+    font-weight: 600;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--color-text);
+    width: 200px;
+}
+
+.import-mapping-table select {
+    font-size: 13px;
+    padding: 6px 9px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-sm);
+    background: var(--color-white);
+    color: var(--color-text);
+    width: 100%;
+    max-width: 280px;
+    cursor: pointer;
+}
+
+.import-mapping-table select:focus {
+    outline: none;
+    border-color: var(--color-tertiary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+
+/* Custom field settings cell */
+.custom-field-settings {
+    display: none;
+}
+
+.custom-field-settings.visible {
+    display: table-cell;
+}
+
+.custom-field-settings select {
+    max-width: 140px;
+    margin-right: 6px;
+}
+
+.mapping-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    background: var(--color-neutral-50);
+    border-top: 1px solid var(--color-neutral-200);
+}
+
+/* --- Result summary --------------------------------------- */
+.import-result-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.import-stat-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    text-align: center;
+}
+
+.import-stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.import-stat-value--green  { color: var(--color-secondary); }
+.import-stat-value--amber  { color: #D97706; }
+.import-stat-value--red    { color: var(--color-danger); }
+
+.import-stat-label {
+    font-size: 12.5px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.import-result-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* --- Errors table ----------------------------------------- */
+.import-errors-table {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: collapse;
+}
+
+.import-errors-table th {
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--color-neutral);
+    border-bottom: 1px solid var(--color-neutral-200);
+    white-space: nowrap;
+}
+
+.import-errors-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    font-size: 13px;
+    vertical-align: top;
+}
+
+.import-errors-table tr:last-child td { border-bottom: none; }
+.import-errors-table tbody tr:hover td { background: #FFF5F5; }
+
+.import-errors-table .col-row {
+    color: var(--color-neutral);
+    font-size: 12px;
+    width: 60px;
+    text-align: center;
+}
+
+.import-errors-table .col-error { color: var(--color-danger); }
+
+.import-errors-table .col-raw {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--color-neutral);
+    max-width: 300px;
+    word-break: break-all;
+}
+
+/* --- Responsive ------------------------------------------- */
+@media (max-width: 1024px) {
+    .import-result-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .imports-table { min-width: 860px; }
+    .import-result-grid { grid-template-columns: repeat(2, 1fr); }
+    .import-data-scroll { overflow-x: auto; }
+    .import-errors-table { min-width: 780px; }
+}
+
+@media (max-width: 480px) {
+    .import-result-grid { grid-template-columns: 1fr 1fr; }
+    .import-upload-card { max-width: 100%; }
+}

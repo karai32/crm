@@ -1,0 +1,9 @@
+-- Optional notes for existing databases.
+--
+-- The main indexes are now included directly in database/schema.sql.
+-- If your local crm database was created before that update, compare the
+-- indexes in schema.sql with your current tables and add only the missing ones
+-- manually in phpMyAdmin.
+--
+-- This file is intentionally not executable as a full script, because MySQL
+-- will fail when CREATE INDEX is run for an index that already exists.

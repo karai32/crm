@@ -1,0 +1,19 @@
+# Dependencies
+/vendor/
+
+# Real config files with credentials (use *.example.php as templates)
+/config/database.php
+/config/mail.php
+
+# Storage runtime data
+/storage/logs/
+/storage/exports/
+/storage/imports/
+
+# OS & IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db

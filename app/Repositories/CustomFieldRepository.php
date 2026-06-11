@@ -1,0 +1,223 @@
+<?php
+
+class CustomFieldRepository
+{
+    public function all(): array
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('SELECT * FROM custom_fields ORDER BY entity_type ASC, sort_order ASC, name ASC');
+        $statement->execute();
+
+        return $statement->fetchAll();
+    }
+
+    public function find(int $id): ?array
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('SELECT * FROM custom_fields WHERE id = :id LIMIT 1');
+        $statement->execute(['id' => $id]);
+        $field = $statement->fetch();
+
+        return $field ?: null;
+    }
+
+    public function findByEntityAndSlug(string $entityType, string $slug): ?array
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('
+            SELECT *
+            FROM custom_fields
+            WHERE entity_type = :entity_type AND slug = :slug
+            LIMIT 1
+        ');
+        $statement->execute([
+            'entity_type' => $entityType,
+            'slug' => $slug,
+        ]);
+        $field = $statement->fetch();
+
+        return $field ?: null;
+    }
+
+    public function create(array $data): int
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('
+            INSERT INTO custom_fields (entity_type, name, slug, field_type, is_required, is_filterable, sort_order)
+            VALUES (:entity_type, :name, :slug, :field_type, :is_required, :is_filterable, :sort_order)
+        ');
+        $statement->execute($data);
+
+        return (int) $pdo->lastInsertId();
+    }
+
+    public function update(int $id, array $data): void
+    {
+        $pdo = Database::connect();
+        $data['id'] = $id;
+
+        $statement = $pdo->prepare('
+            UPDATE custom_fields
+            SET entity_type = :entity_type,
+                name = :name,
+                slug = :slug,
+                field_type = :field_type,
+                is_required = :is_required,
+                is_filterable = :is_filterable,
+                sort_order = :sort_order
+            WHERE id = :id
+        ');
+        $statement->execute($data);
+    }
+
+    public function delete(int $id): void
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('DELETE FROM custom_fields WHERE id = :id');
+        $statement->execute(['id' => $id]);
+    }
+
+    public function setOptions(int $fieldId, array $options): void
+    {
+        $pdo = Database::connect();
+        $pdo->prepare('DELETE FROM custom_field_options WHERE field_id = :field_id')->execute(['field_id' => $fieldId]);
+
+        $insert = $pdo->prepare('
+            INSERT INTO custom_field_options (field_id, value, label, sort_order)
+            VALUES (:field_id, :value, :label, :sort_order)
+        ');
+
+        foreach (array_values($options) as $index => $option) {
+            $insert->execute([
+                'field_id' => $fieldId,
+                'value' => $option,
+                'label' => $option,
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    public function optionsForField(int $fieldId): array
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('SELECT * FROM custom_field_options WHERE field_id = :field_id ORDER BY sort_order ASC, label ASC');
+        $statement->execute(['field_id' => $fieldId]);
+
+        return $statement->fetchAll();
+    }
+
+    public function fieldsForEntity(string $entityType): array
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('SELECT * FROM custom_fields WHERE entity_type = :entity_type ORDER BY sort_order ASC, name ASC');
+        $statement->execute(['entity_type' => $entityType]);
+        $fields = $statement->fetchAll();
+
+        foreach ($fields as $index => $field) {
+            $fields[$index]['options'] = $field['field_type'] === 'select'
+                ? $this->optionsForField((int) $field['id'])
+                : [];
+        }
+
+        return $fields;
+    }
+
+    public function filterableFieldsForEntity(string $entityType): array
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('
+            SELECT *
+            FROM custom_fields
+            WHERE entity_type = :entity_type AND is_filterable = 1
+            ORDER BY sort_order ASC, name ASC
+        ');
+        $statement->execute(['entity_type' => $entityType]);
+
+        return $statement->fetchAll();
+    }
+
+    public function valuesForEntity(string $entityType, int $entityId): array
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('
+            SELECT *
+            FROM custom_field_values
+            WHERE entity_type = :entity_type AND entity_id = :entity_id
+        ');
+        $statement->execute([
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+        ]);
+
+        $values = [];
+
+        foreach ($statement->fetchAll() as $row) {
+            $values[(int) $row['field_id']] = $row;
+        }
+
+        return $values;
+    }
+
+    public function saveValues(string $entityType, int $entityId, array $fields, array $inputValues): void
+    {
+        $pdo = Database::connect();
+
+        $sql = '
+            INSERT INTO custom_field_values (
+                field_id, entity_type, entity_id, value_text, value_number, value_date, value_bool
+            ) VALUES (
+                :field_id, :entity_type, :entity_id, :value_text, :value_number, :value_date, :value_bool
+            )
+            ON DUPLICATE KEY UPDATE
+                value_text = VALUES(value_text),
+                value_number = VALUES(value_number),
+                value_date = VALUES(value_date),
+                value_bool = VALUES(value_bool)
+        ';
+
+        $statement = $pdo->prepare($sql);
+
+        foreach ($fields as $field) {
+            $fieldId = (int) $field['id'];
+            $rawValue = $inputValues[$fieldId] ?? null;
+            $valueText = null;
+            $valueNumber = null;
+            $valueDate = null;
+            $valueBool = null;
+
+            if ($field['field_type'] === 'checkbox') {
+                $valueBool = $rawValue ? 1 : 0;
+            } elseif ($field['field_type'] === 'number') {
+                $valueNumber = trim((string) $rawValue) === '' ? null : (float) $rawValue;
+            } elseif ($field['field_type'] === 'date') {
+                $valueDate = trim((string) $rawValue) === '' ? null : trim((string) $rawValue);
+            } else {
+                $valueText = trim((string) $rawValue) === '' ? null : trim((string) $rawValue);
+            }
+
+            $statement->execute([
+                'field_id' => $fieldId,
+                'entity_type' => $entityType,
+                'entity_id' => $entityId,
+                'value_text' => $valueText,
+                'value_number' => $valueNumber,
+                'value_date' => $valueDate,
+                'value_bool' => $valueBool,
+            ]);
+        }
+    }
+
+    public function displayValue(array $field, ?array $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        return match ($field['field_type']) {
+            'checkbox' => ((int) ($value['value_bool'] ?? 0) === 1) ? 'Yes' : 'No',
+            'number' => (string) ($value['value_number'] ?? ''),
+            'date' => (string) ($value['value_date'] ?? ''),
+            default => (string) ($value['value_text'] ?? ''),
+        };
+    }
+}

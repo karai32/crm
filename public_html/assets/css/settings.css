@@ -1,0 +1,492 @@
+/* --- Settings pages (sectors, tags, etc.) --------------- */
+
+/* Header */
+.settings-header { margin-bottom: 20px; }
+.settings-header h1 { font-size: 26px; font-weight: 700; margin: 0 0 2px; }
+.settings-header .count-label { font-size: 13px; color: var(--color-text-muted); }
+
+/* --- Simple table card ------------------------------------ */
+/* Live search */
+.settings-search-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.settings-live-search {
+    width: 100%;
+    max-width: 100%;
+    height: 36px;
+    padding: 8px 11px;
+    font-size: 13.5px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-sm);
+    background: var(--color-white);
+    color: var(--color-text);
+}
+
+.settings-live-search:focus {
+    outline: none;
+    border-color: var(--color-tertiary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+
+.settings-search-empty {
+    padding: 24px 16px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+.settings-color-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-neutral);
+}
+
+.settings-color-value code {
+    font-size: 12px;
+}
+
+.settings-table-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.settings-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+}
+
+.settings-table th {
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--color-neutral);
+    border-bottom: 1px solid var(--color-neutral-200);
+    white-space: nowrap;
+}
+
+.settings-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    vertical-align: middle;
+    font-size: 13.5px;
+}
+
+.settings-table tr:last-child td { border-bottom: none; }
+.settings-table tbody tr:hover td { background: var(--color-neutral-50); }
+
+.settings-table .col-name { font-weight: 600; color: var(--color-text); }
+.settings-table .col-slug { color: var(--color-neutral); font-size: 13px; font-family: monospace; }
+
+/* Action links */
+.action-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.action-edit   { color: var(--color-secondary); font-size: 13px; font-weight: 500; }
+.action-delete { color: var(--color-danger);    font-size: 13px; font-weight: 500; }
+.action-edit:hover, .action-delete:hover { text-decoration: underline; }
+
+/* Status badge */
+.badge-active {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.badge-inactive {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--color-neutral-100);
+    color: var(--color-neutral);
+}
+
+/* Color dot (tags) */
+.color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid rgba(0,0,0,.08);
+}
+
+/* --- Simple form card ------------------------------------- */
+.settings-form-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    max-width: 560px;
+}
+
+.settings-form-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settings-form-body .field { margin-bottom: 0; }
+
+.settings-form-body input[type="text"],
+.settings-form-body input[type="url"],
+.settings-form-body input[type="color"],
+.settings-form-body select {
+    width: 100%;
+    font-size: 13.5px;
+    padding: 8px 11px;
+}
+
+.settings-form-body label {
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.settings-form-body .checkbox-field label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    margin-bottom: 0;
+}
+
+.settings-form-body .checkbox-field input[type="checkbox"] {
+    width: auto;
+    max-width: none;
+    padding: 0;
+}
+
+/* Color input row */
+.color-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-input-row input[type="text"] {
+    flex: 1;
+    font-family: monospace;
+}
+
+.color-preview {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-neutral-200);
+    flex-shrink: 0;
+    background: var(--color-neutral-100);
+    transition: background .12s;
+}
+
+.settings-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: var(--color-neutral-50);
+    border-top: 1px solid var(--color-neutral-200);
+}
+
+@media (max-width: 768px) {
+    .settings-table { min-width: 720px; }
+    .settings-form-card { max-width: 100%; }
+    .settings-form-grid { grid-template-columns: 1fr; }
+    .settings-form-grid .field-full { grid-column: 1; }
+}
+
+/* --- Custom fields: wider card & 2-col grid --------------- */
+.settings-form-card--lg { max-width: 700px; }
+
+.settings-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
+}
+
+.settings-form-grid .field { margin-bottom: 0; }
+.settings-form-grid .field-full { grid-column: 1 / -1; }
+
+.settings-form-grid input,
+.settings-form-grid select,
+.settings-form-grid textarea {
+    width: 100%;
+    font-size: 13.5px;
+    padding: 8px 11px;
+}
+
+.settings-form-grid label {
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.settings-form-grid .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-top: 24px;
+    grid-column: 1 / -1;
+}
+
+.settings-form-grid .checkbox-row label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 400;
+    margin-bottom: 0;
+    cursor: pointer;
+    font-size: 13.5px;
+}
+
+.settings-form-grid .checkbox-row input[type="checkbox"] {
+    width: auto;
+    max-width: none;
+    padding: 0;
+}
+
+/* Entity / type badges */
+.badge-entity {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.badge-contact { background: #EEF2FF; color: #4338CA; }
+.badge-client  { background: #D1FAE5; color: #065F46; }
+
+.badge-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: monospace;
+    background: var(--color-neutral-100);
+    color: var(--color-neutral);
+}
+
+/* --- User pages ------------------------------------------- */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-cell-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-cell-name {
+    color: var(--color-text);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.user-current-label {
+    margin-left: 4px;
+    color: var(--color-neutral);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.user-cell-email {
+    color: var(--color-text-muted);
+    font-size: 12.5px;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-tertiary-bg);
+    color: var(--color-tertiary);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+}
+
+.badge-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.badge-role-admin { background: #EEF2FF; color: #4338CA; }
+.badge-role-user  { background: var(--color-neutral-100); color: var(--color-neutral); }
+
+.permission-icons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.permission-icon {
+    width: 27px;
+    height: 27px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-neutral-200);
+    background: var(--color-neutral-50);
+    color: var(--color-neutral);
+}
+
+.permission-icon svg {
+    width: 17px;
+    height: 17px;
+    display: block;
+}
+
+.permission-icon-contacts-create,
+.permission-icon-contacts-edit,
+.permission-icon-contacts-delete {
+    background: var(--color-tertiary-bg);
+    color: var(--color-tertiary);
+    border-color: #C7D2FE;
+}
+
+.permission-icon-clients-create,
+.permission-icon-clients-edit,
+.permission-icon-clients-delete {
+    background: var(--color-secondary-bg);
+    color: #059669;
+    border-color: #A7F3D0;
+}
+
+.permission-icon-exports-use,
+.permission-icon-imports-manage {
+    background: #EFF6FF;
+    color: #2563EB;
+    border-color: #BFDBFE;
+}
+
+.permission-icon-sectors-manage {
+    background: #FEF3C7;
+    color: #D97706;
+    border-color: #FDE68A;
+}
+
+.permission-icon-tags-manage {
+    background: #FCE7F3;
+    color: #DB2777;
+    border-color: #FBCFE8;
+}
+
+.permission-icon-custom-fields-manage {
+    background: #F3E8FF;
+    color: #7C3AED;
+    border-color: #DDD6FE;
+}
+
+.permission-icon-muted {
+    background: var(--color-neutral-100);
+    color: var(--color-text-muted);
+    opacity: .72;
+}
+
+.permissions-panel {
+    margin-top: 8px;
+    padding: 16px;
+    border-top: 1px solid var(--color-neutral-200);
+}
+
+.permissions-panel.is-hidden {
+    display: none;
+}
+
+.permissions-panel-header {
+    margin-bottom: 12px;
+}
+
+.permissions-panel-header h2 {
+    font-size: 14.5px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.permissions-panel-header p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 8px 12px;
+}
+
+.permission-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-neutral-50);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.permission-option input {
+    width: auto;
+    max-width: none;
+}
+
+.field-hint {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+    display: block;
+}

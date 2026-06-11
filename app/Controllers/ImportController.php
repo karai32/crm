@@ -1,0 +1,117 @@
+<?php
+
+class ImportController
+{
+    private ImportRepository $imports;
+    private ImportService $importService;
+
+    public function __construct()
+    {
+        $this->imports = new ImportRepository();
+        $this->importService = new ImportService();
+    }
+
+    public function index(): void
+    {
+        Auth::requirePermission('imports.manage');
+
+        View::render('imports/index', [
+            'title'   => 'Imports',
+            'styles'  => ['imports.css'],
+            'batches' => $this->imports->allBatches(),
+        ]);
+    }
+
+    public function upload(): void
+    {
+        Auth::requirePermission('imports.manage');
+
+        View::render('imports/upload', [
+            'title'  => 'Upload import file',
+            'styles' => ['imports.css'],
+            'error'  => null,
+        ]);
+    }
+
+    public function storeUpload(): void
+    {
+        Auth::requirePermission('imports.manage');
+
+        $user = Auth::user();
+        $result = $this->importService->uploadFile($_FILES['csv_file'] ?? [], $user['id'] ?? null);
+
+        if (!$result['success']) {
+            View::render('imports/upload', [
+                'title'  => 'Upload import file',
+                'styles' => ['imports.css'],
+                'error'  => $result['message'],
+            ]);
+            return;
+        }
+
+        Auth::redirect('/imports/preview?id=' . $result['batch_id']);
+    }
+
+    public function preview(): void
+    {
+        Auth::requirePermission('imports.manage');
+
+        $preview = $this->importService->preview((int) ($_GET['id'] ?? 0));
+
+        if ($preview === null) {
+            http_response_code(404);
+            echo 'Import batch not found';
+            return;
+        }
+
+        View::render('imports/preview', [
+            'title'   => 'Import preview',
+            'styles'  => ['imports.css'],
+            'preview' => $preview,
+        ]);
+    }
+
+    public function errors(): void
+    {
+        Auth::requirePermission('imports.manage');
+
+        $batchId = (int) ($_GET['id'] ?? 0);
+        $batch = $this->imports->findBatch($batchId);
+
+        if ($batch === null) {
+            http_response_code(404);
+            echo 'Import batch not found';
+            return;
+        }
+
+        View::render('imports/errors', [
+            'title'  => 'Import errors',
+            'styles' => ['imports.css'],
+            'batch'  => $batch,
+            'errors' => $this->imports->errorsForBatch($batchId),
+        ]);
+    }
+
+    public function process(): void
+    {
+        Auth::requirePermission('imports.manage');
+
+        $result = $this->importService->process(
+            (int) ($_POST['id'] ?? 0),
+            $_POST['mapping'] ?? [],
+            $_POST['custom_fields'] ?? []
+        );
+
+        if ($result === null) {
+            http_response_code(404);
+            echo 'Import batch not found';
+            return;
+        }
+
+        View::render('imports/result', [
+            'title'  => 'Import result',
+            'styles' => ['imports.css'],
+            'result' => $result,
+        ]);
+    }
+}
