@@ -20,13 +20,30 @@ class ExportRepository
         ');
 
         $statement->execute([
-            'user_id' => $userId,
-            'file_type' => $fileType,
+            'user_id'         => $userId,
+            'file_type'       => $fileType,
             'stored_filename' => $fileName,
-            'filters' => json_encode($filters),
+            'filters'         => json_encode($filters),
             'selected_fields' => json_encode($fields),
-            'total_rows' => $totalRows,
-            'status' => 'completed',
+            'total_rows'      => $totalRows,
+            'status'          => 'completed',
         ]);
+    }
+
+    public function recentExports(int $limit = 15): array
+    {
+        $pdo = Database::connect();
+
+        $statement = $pdo->prepare('
+            SELECT eb.*, u.name AS user_name
+            FROM export_batches eb
+            LEFT JOIN users u ON u.id = eb.user_id
+            ORDER BY eb.id DESC
+            LIMIT :limit
+        ');
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll();
     }
 }

@@ -2,151 +2,107 @@
 
 class ExportController
 {
-    private ContactRepository $contacts;
+    private ExportService $service;
     private ExportRepository $exports;
+    private CustomFieldRepository $customFields;
 
     public function __construct()
     {
-        $this->contacts = new ContactRepository();
-        $this->exports = new ExportRepository();
+        $this->service      = new ExportService();
+        $this->exports      = new ExportRepository();
+        $this->customFields = new CustomFieldRepository();
     }
 
-    public function contactsForm(): void
+    // ── Hub page ───────────────────────────────────────────────────────────
+
+    public function index(): void
     {
         Auth::requirePermission('exports.use');
 
-        $filters = $this->filtersFromRequest();
-        $defaultFields = ['id', 'first_name', 'last_name', 'email', 'phone', 'created_at'];
+        $entity = in_array($_GET['entity'] ?? '', ['contacts', 'clients'], true)
+            ? $_GET['entity']
+            : 'contacts';
 
-        View::render('exports/contacts', [
-            'title'          => 'Export contacts',
-            'styles'         => ['contacts.css'],
-            'fields'         => $this->contacts->exportableFields(),
-            'selectedFields' => $defaultFields,
-            'filters'        => $filters,
-            'actionUrl'      => Auth::url('/contacts/export-csv'),
-            'buttonText'     => 'Download CSV',
-            'exportTitle'    => 'Export contacts to CSV',
-            'error'          => null,
+        $cfEntityType = $entity === 'contacts' ? 'contact' : 'client';
+        $customFields = $this->customFields->fieldsForEntity($cfEntityType);
+
+        $fieldDefs = $entity === 'contacts'
+            ? $this->service->contactsFieldDefs($customFields)
+            : $this->service->clientsFieldDefs($customFields);
+
+        $defaultFields = $entity === 'contacts'
+            ? ['id', 'first_name', 'last_name', 'email', 'phone', 'created_at']
+            : ['id', 'commercial_name', 'legal_name', 'city', 'country', 'created_at'];
+
+        View::render('exports/index', [
+            'title'         => 'Export data',
+            'styles'        => ['data.css'],
+            'entity'        => $entity,
+            'fieldDefs'     => $fieldDefs,
+            'defaultFields' => $defaultFields,
+            'recentExports' => $this->exports->recentExports(12),
         ]);
     }
 
-    public function contactsXlsxForm(): void
+    // ── Unified download endpoint ─────────────────────────────────────────
+
+    public function download(): void
     {
         Auth::requirePermission('exports.use');
 
-        $filters = $this->filtersFromRequest();
-        $defaultFields = ['id', 'first_name', 'last_name', 'email', 'phone', 'created_at'];
-        $error = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)
-            ? null
-            : 'PhpSpreadsheet is not installed. Run: composer require phpoffice/phpspreadsheet';
+        $entity = in_array($_POST['entity'] ?? '', ['contacts', 'clients'], true)
+            ? $_POST['entity']
+            : 'contacts';
 
-        View::render('exports/contacts', [
-            'title'          => 'Export contacts XLSX',
-            'styles'         => ['contacts.css'],
-            'fields'         => $this->contacts->exportableFields(),
-            'selectedFields' => $defaultFields,
-            'filters'        => $filters,
-            'actionUrl'      => Auth::url('/exports/contacts-xlsx'),
-            'buttonText'     => 'Download XLSX',
-            'exportTitle'    => 'Export contacts to XLSX',
-            'error'          => $error,
-        ]);
-    }
+        $format = in_array($_POST['format'] ?? '', ['csv', 'xlsx'], true)
+            ? $_POST['format']
+            : 'csv';
 
-    public function contactsCsv(): void
-    {
-        Auth::requirePermission('exports.use');
+        $cfEntityType = $entity === 'contacts' ? 'contact' : 'client';
+        $customFields = $this->customFields->fieldsForEntity($cfEntityType);
 
-        $filters = $this->filtersFromPost();
-        $fields = $this->selectedFieldsFromRequest();
-        $totalRows = $this->contacts->countAll($filters);
-        $fileName = 'contacts-' . date('Y-m-d-H-i-s') . '.csv';
-        $user = Auth::user();
+        $fieldDefs = $entity === 'contacts'
+            ? $this->service->contactsFieldDefs($customFields)
+            : $this->service->clientsFieldDefs($customFields);
 
-        $this->exports->createCompletedCsvExport(
-            $user['id'] ?? null,
-            $filters,
-            $fields,
-            $totalRows,
-            $fileName
+        $selectedFields = $this->service->sanitizeFields(
+            (array) ($_POST['fields'] ?? []),
+            $fieldDefs
         );
 
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        $filters   = $entity === 'contacts' ? $this->contactFiltersFromPost() : $this->clientFiltersFromPost();
+        $totalRows = $entity === 'contacts'
+            ? $this->service->countContacts($filters)
+            : $this->service->countClients($filters);
 
-        $output = fopen('php://output', 'w');
-        fputcsv($output, $fields);
-        $statement = $this->contacts->exportStatement($filters, $fields);
+        $fileName = $entity . '-' . date('Y-m-d-H-i-s') . '.' . $format;
+        $user     = Auth::user();
 
-        while ($row = $statement->fetch()) {
-            $csvRow = [];
+        $this->exports->createCompletedExport($user['id'] ?? null, $format, $filters, $selectedFields, $totalRows, $fileName);
 
-            foreach ($fields as $field) {
-                $csvRow[] = $row[$field] ?? '';
+        if ($format === 'csv') {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $fileName . '"');
+            $output = fopen('php://output', 'w');
+
+            if ($entity === 'contacts') {
+                $this->service->streamContactsCsv($filters, $selectedFields, $fieldDefs, $output);
+            } else {
+                $this->service->streamClientsCsv($filters, $selectedFields, $fieldDefs, $output);
             }
 
-            fputcsv($output, $csvRow);
+            fclose($output);
+            exit;
         }
 
-        fclose($output);
-        exit;
-    }
-
-    public function contactsXlsx(): void
-    {
-        Auth::requirePermission('exports.use');
-
+        // XLSX
         if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
-            View::render('exports/contacts', [
-                'title'          => 'Export contacts XLSX',
-                'styles'         => ['contacts.css'],
-                'fields'         => $this->contacts->exportableFields(),
-                'selectedFields' => $this->selectedFieldsFromRequest(),
-                'filters'        => $this->filtersFromPost(),
-                'actionUrl'      => Auth::url('/exports/contacts-xlsx'),
-                'buttonText'     => 'Download XLSX',
-                'exportTitle'    => 'Export contacts to XLSX',
-                'error'          => 'PhpSpreadsheet is not installed. Run: composer require phpoffice/phpspreadsheet',
-            ]);
-            return;
+            Auth::redirect('/exports?entity=' . $entity . '&error=phpspreadsheet');
         }
 
-        $filters = $this->filtersFromPost();
-        $fields = $this->selectedFieldsFromRequest();
-        $totalRows = $this->contacts->countAll($filters);
-        $fileName = 'contacts-' . date('Y-m-d-H-i-s') . '.xlsx';
-        $user = Auth::user();
-
-        $this->exports->createCompletedExport(
-            $user['id'] ?? null,
-            'xlsx',
-            $filters,
-            $fields,
-            $totalRows,
-            $fileName
-        );
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Contacts');
-
-        foreach ($fields as $columnIndex => $field) {
-            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1) . '1';
-            $sheet->setCellValue($cell, $field);
-        }
-
-        $statement = $this->contacts->exportStatement($filters, $fields);
-        $rowIndex = 2;
-
-        while ($row = $statement->fetch()) {
-            foreach ($fields as $columnIndex => $field) {
-                $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1) . $rowIndex;
-                $sheet->setCellValue($cell, $row[$field] ?? '');
-            }
-
-            $rowIndex++;
-        }
+        $spreadsheet = $entity === 'contacts'
+            ? $this->service->buildContactsXlsx($filters, $selectedFields, $fieldDefs)
+            : $this->service->buildClientsXlsx($filters, $selectedFields, $fieldDefs);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -157,103 +113,128 @@ class ExportController
         exit;
     }
 
-    private function filtersFromRequest(): array
+    // ── Template downloads ────────────────────────────────────────────────
+
+    public function templateContacts(): void
     {
-        return [
-            'first_name' => trim($_GET['first_name'] ?? ''),
-            'last_name' => trim($_GET['last_name'] ?? ''),
-            'email' => trim($_GET['email'] ?? ''),
-            'phone' => trim($_GET['phone'] ?? ''),
-            'is_company' => trim($_GET['is_company'] ?? ''),
-            'client_id' => (int) ($_GET['client_id'] ?? 0),
-            'sector_id' => (int) ($_GET['sector_id'] ?? 0),
-            'tag_id' => (int) ($_GET['tag_id'] ?? 0),
-            'tag_ids' => $this->tagIdsFromArray($_GET),
-            'country' => trim($_GET['country'] ?? ''),
-            'province' => trim($_GET['province'] ?? ''),
-            'created_from' => trim($_GET['created_from'] ?? ''),
-            'created_to' => trim($_GET['created_to'] ?? ''),
-            'updated_from' => trim($_GET['updated_from'] ?? ''),
-            'updated_to' => trim($_GET['updated_to'] ?? ''),
-            'custom_fields' => $this->customFieldFilters($_GET['custom_fields'] ?? []),
-        ];
+        Auth::requirePermission('exports.use');
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="contacts-import-template.csv"');
+        echo $this->service->contactTemplateCsv();
+        exit;
     }
 
-    private function filtersFromPost(): array
+    public function templateClients(): void
+    {
+        Auth::requirePermission('exports.use');
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="clients-import-template.csv"');
+        echo $this->service->clientTemplateCsv();
+        exit;
+    }
+
+    // ── Legacy routes (redirect to hub) ──────────────────────────────────
+
+    public function contactsForm(): void
+    {
+        Auth::requirePermission('exports.use');
+        Auth::redirect('/exports?entity=contacts');
+    }
+
+    public function contactsXlsxForm(): void
+    {
+        Auth::requirePermission('exports.use');
+        Auth::redirect('/exports?entity=contacts');
+    }
+
+    public function contactsCsv(): void
+    {
+        Auth::requirePermission('exports.use');
+
+        $customFields = $this->customFields->fieldsForEntity('contact');
+        $fieldDefs    = $this->service->contactsFieldDefs($customFields);
+        $filters      = $this->contactFiltersFromPost();
+        $fields       = $this->service->sanitizeFields((array) ($_POST['fields'] ?? []), $fieldDefs);
+
+        if (empty($fields)) {
+            $fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'created_at'];
+        }
+
+        $totalRows = $this->service->countContacts($filters);
+        $fileName  = 'contacts-' . date('Y-m-d-H-i-s') . '.csv';
+        $user      = Auth::user();
+
+        $this->exports->createCompletedExport($user['id'] ?? null, 'csv', $filters, $fields, $totalRows, $fileName);
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        $output = fopen('php://output', 'w');
+        $this->service->streamContactsCsv($filters, $fields, $fieldDefs, $output);
+        fclose($output);
+        exit;
+    }
+
+    public function contactsXlsx(): void
+    {
+        Auth::requirePermission('exports.use');
+
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            Auth::redirect('/exports?entity=contacts&error=phpspreadsheet');
+        }
+
+        $customFields = $this->customFields->fieldsForEntity('contact');
+        $fieldDefs    = $this->service->contactsFieldDefs($customFields);
+        $filters      = $this->contactFiltersFromPost();
+        $fields       = $this->service->sanitizeFields((array) ($_POST['fields'] ?? []), $fieldDefs);
+
+        if (empty($fields)) {
+            $fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'created_at'];
+        }
+
+        $totalRows   = $this->service->countContacts($filters);
+        $fileName    = 'contacts-' . date('Y-m-d-H-i-s') . '.xlsx';
+        $user        = Auth::user();
+
+        $this->exports->createCompletedExport($user['id'] ?? null, 'xlsx', $filters, $fields, $totalRows, $fileName);
+
+        $spreadsheet = $this->service->buildContactsXlsx($filters, $fields, $fieldDefs);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    // ── Filter helpers ────────────────────────────────────────────────────
+
+    private function contactFiltersFromPost(): array
     {
         return [
             'first_name' => trim($_POST['first_name'] ?? ''),
-            'last_name' => trim($_POST['last_name'] ?? ''),
-            'email' => trim($_POST['email'] ?? ''),
-            'phone' => trim($_POST['phone'] ?? ''),
+            'last_name'  => trim($_POST['last_name'] ?? ''),
+            'email'      => trim($_POST['email'] ?? ''),
+            'phone'      => trim($_POST['phone'] ?? ''),
             'is_company' => trim($_POST['is_company'] ?? ''),
-            'client_id' => (int) ($_POST['client_id'] ?? 0),
-            'sector_id' => (int) ($_POST['sector_id'] ?? 0),
-            'tag_id' => (int) ($_POST['tag_id'] ?? 0),
-            'tag_ids' => $this->tagIdsFromArray($_POST),
-            'country' => trim($_POST['country'] ?? ''),
-            'province' => trim($_POST['province'] ?? ''),
-            'created_from' => trim($_POST['created_from'] ?? ''),
-            'created_to' => trim($_POST['created_to'] ?? ''),
-            'updated_from' => trim($_POST['updated_from'] ?? ''),
-            'updated_to' => trim($_POST['updated_to'] ?? ''),
-            'custom_fields' => $this->customFieldFilters($_POST['custom_fields'] ?? []),
+            'client_id'  => (int) ($_POST['client_id'] ?? 0),
+            'tag_ids'    => array_values(array_filter(array_map('intval', (array) ($_POST['tag_ids'] ?? [])), fn ($id) => $id > 0)),
         ];
     }
 
-    private function customFieldFilters(mixed $values): array
+    private function clientFiltersFromPost(): array
     {
-        if (!is_array($values)) {
-            return [];
-        }
-
-        $clean = [];
-
-        foreach ($values as $fieldId => $value) {
-            $fieldId = (int) $fieldId;
-            $value = trim((string) $value);
-
-            if ($fieldId > 0 && $value !== '') {
-                $clean[$fieldId] = $value;
-            }
-        }
-
-        return $clean;
-    }
-
-    private function tagIdsFromArray(array $source): array
-    {
-        $tagIds = $source['tag_ids'] ?? [];
-
-        if (!empty($source['tag_id'])) {
-            if (!is_array($tagIds)) {
-                $tagIds = [];
-            }
-
-            $tagIds[] = $source['tag_id'];
-        }
-
-        if (!is_array($tagIds)) {
-            return [];
-        }
-
-        $tagIds = array_map('intval', $tagIds);
-        $tagIds = array_filter($tagIds, fn ($id) => $id > 0);
-
-        return array_values(array_unique($tagIds));
-    }
-
-    private function selectedFieldsFromRequest(): array
-    {
-        $allowedFields = array_keys($this->contacts->exportableFields());
-        $fields = $_POST['fields'] ?? [];
-
-        if (!is_array($fields)) {
-            return ['id'];
-        }
-
-        $fields = array_values(array_intersect($fields, $allowedFields));
-
-        return empty($fields) ? ['id'] : $fields;
+        return [
+            'commercial_name' => trim($_POST['commercial_name'] ?? ''),
+            'legal_name'      => trim($_POST['legal_name'] ?? ''),
+            'city'            => trim($_POST['city'] ?? ''),
+            'country'         => trim($_POST['country'] ?? ''),
+            'province'        => trim($_POST['province'] ?? ''),
+            'sector_id'       => (int) ($_POST['sector_id'] ?? 0),
+            'tag_ids'         => array_values(array_filter(array_map('intval', (array) ($_POST['tag_ids'] ?? [])), fn ($id) => $id > 0)),
+        ];
     }
 }

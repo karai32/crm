@@ -23,6 +23,13 @@
                        required>
                 <span class="import-upload-hint">Supported formats: CSV and XLSX. XLSX requires PhpSpreadsheet.</span>
             </div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--color-neutral-200)">
+                <span style="font-size:12.5px;color:var(--color-neutral)">Not sure about the format?</span>
+                <a href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>"
+                   style="font-size:12.5px;color:var(--color-tertiary);margin-left:6px">
+                    Download contacts template
+                </a>
+            </div>
         </div>
         <div class="import-upload-actions">
             <button class="btn btn-primary" type="submit">

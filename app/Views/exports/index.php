@@ -1,1 +1,245 @@
-<!-- TODO: Exports view. -->
+<?php
+// Group fields by their 'group' key
+$groupedFields = [];
+foreach ($fieldDefs as $key => $def) {
+    $groupedFields[$def['group']][$key] = $def;
+}
+
+// Entity label
+$entityLabel      = $entity === 'contacts' ? 'Contacts' : 'Clients';
+$otherEntity      = $entity === 'contacts' ? 'clients' : 'contacts';
+$otherEntityLabel = $entity === 'contacts' ? 'Clients' : 'Contacts';
+
+$xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
+?>
+
+<!-- Header -->
+<div class="page-header exports-header">
+    <div>
+        <h1>Export data</h1>
+        <span class="count-label">Download contacts and clients as CSV or XLSX</span>
+    </div>
+</div>
+
+<?php if (isset($_GET['error']) && $_GET['error'] === 'phpspreadsheet'): ?>
+<div class="export-notice">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+    </svg>
+    PhpSpreadsheet is not installed. XLSX export is unavailable. Run: <code>composer require phpoffice/phpspreadsheet</code>
+</div>
+<?php endif; ?>
+
+<!-- Entity tabs -->
+<div class="data-tabs">
+    <a href="<?= htmlspecialchars(Auth::url('/exports?entity=contacts'), ENT_QUOTES, 'UTF-8') ?>"
+       class="data-tab <?= $entity === 'contacts' ? 'active' : '' ?>">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+        </svg>
+        Contacts
+    </a>
+    <a href="<?= htmlspecialchars(Auth::url('/exports?entity=clients'), ENT_QUOTES, 'UTF-8') ?>"
+       class="data-tab <?= $entity === 'clients' ? 'active' : '' ?>">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z"/>
+        </svg>
+        Clients
+    </a>
+</div>
+
+<!-- Main form -->
+<form method="post" action="<?= htmlspecialchars(Auth::url('/exports/download'), ENT_QUOTES, 'UTF-8') ?>" id="exportForm">
+    <?= Csrf::field() ?>
+    <input type="hidden" name="entity" value="<?= htmlspecialchars($entity, ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="format" value="csv" id="formatInput">
+
+    <div class="export-layout">
+
+        <!-- Left: field selection -->
+        <div class="export-fields-card">
+            <?php foreach ($groupedFields as $groupName => $groupFields): ?>
+            <div class="export-section">
+                <div class="export-section-title">
+                    <?= htmlspecialchars($groupName, ENT_QUOTES, 'UTF-8') ?>
+                    <div style="display:flex;gap:8px">
+                        <button type="button" onclick="toggleGroup(this, true)">All</button>
+                        <button type="button" onclick="toggleGroup(this, false)">None</button>
+                    </div>
+                </div>
+                <div class="export-fields-grid">
+                    <?php foreach ($groupFields as $key => $def): ?>
+                    <label class="export-field-label">
+                        <input type="checkbox"
+                               name="fields[]"
+                               value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>"
+                               <?= in_array($key, $defaultFields, true) ? 'checked' : '' ?>>
+                        <?= htmlspecialchars($def['label'], ENT_QUOTES, 'UTF-8') ?>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Right: options + download -->
+        <div class="export-sidebar">
+
+            <!-- Format selection -->
+            <div class="export-options-card">
+                <div class="export-options-body">
+                    <label>Format</label>
+                    <div class="format-options">
+                        <label class="format-option selected" id="formatCsv" onclick="selectFormat('csv', this)">
+                            <input type="radio" name="_format_display" value="csv" checked>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
+                            </svg>
+                            CSV
+                        </label>
+                        <label class="format-option <?= !$xlsxAvailable ? 'format-option--disabled' : '' ?>" id="formatXlsx" onclick="<?= $xlsxAvailable ? "selectFormat('xlsx', this)" : '' ?>">
+                            <input type="radio" name="_format_display" value="xlsx" <?= !$xlsxAvailable ? 'disabled' : '' ?>>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 19.5m9.375-14.625c0-.621-.504-1.125-1.125-1.125H3.75A1.125 1.125 0 0 0 2.625 4.875v14.25A1.125 1.125 0 0 0 3.75 20.25h16.5a1.125 1.125 0 0 0 1.125-1.125V4.875Z"/>
+                            </svg>
+                            XLSX
+                            <?php if (!$xlsxAvailable): ?>
+                            <span style="font-size:10px;color:var(--color-danger)">N/A</span>
+                            <?php endif; ?>
+                        </label>
+                    </div>
+                </div>
+                <div class="export-options-footer">
+                    <button type="submit" class="btn-download" id="downloadBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
+                        </svg>
+                        Download <?= htmlspecialchars($entityLabel, ENT_QUOTES, 'UTF-8') ?>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="export-summary-card">
+                <div class="export-summary-title">Selection</div>
+                <div class="export-summary-row">
+                    <span>Entity</span>
+                    <span><?= htmlspecialchars($entityLabel, ENT_QUOTES, 'UTF-8') ?></span>
+                </div>
+                <div class="export-summary-row">
+                    <span>Fields selected</span>
+                    <span id="selectedCount"><?= count($defaultFields) ?></span>
+                </div>
+                <div class="export-summary-row">
+                    <span>Format</span>
+                    <span id="selectedFormat">CSV</span>
+                </div>
+            </div>
+
+            <!-- Import templates -->
+            <div class="export-templates-card">
+                <div class="export-templates-title">Import templates</div>
+                <a class="export-template-link"
+                   href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                    </svg>
+                    Contacts CSV template
+                </a>
+                <a class="export-template-link"
+                   href="<?= htmlspecialchars(Auth::url('/exports/template/clients'), ENT_QUOTES, 'UTF-8') ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                    </svg>
+                    Clients CSV template
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</form>
+
+<!-- Export history -->
+<div class="export-history-section">
+    <div class="export-history-header">Recent exports</div>
+
+    <div class="export-history-card">
+        <?php if (empty($recentExports)): ?>
+            <p style="padding:20px 16px;color:var(--color-text-muted);font-size:13.5px;">No exports yet.</p>
+        <?php else: ?>
+        <table class="export-history-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Entity</th>
+                    <th>File</th>
+                    <th>Format</th>
+                    <th style="text-align:right">Rows</th>
+                    <th>By</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($recentExports as $export): ?>
+                <?php
+                    $filename  = $export['stored_filename'] ?? '';
+                    $entityKey = str_starts_with($filename, 'clients-') ? 'clients' : 'contacts';
+                    $entityBadgeClass = 'export-entity-' . $entityKey;
+                    $entityBadgeLabel = ucfirst($entityKey);
+                ?>
+                <tr>
+                    <td style="color:var(--color-neutral);font-size:12.5px"><?= (int) $export['id'] ?></td>
+                    <td>
+                        <span class="export-entity-badge <?= $entityBadgeClass ?>">
+                            <?= $entityBadgeLabel ?>
+                        </span>
+                    </td>
+                    <td style="font-size:12.5px;color:var(--color-neutral);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                        <?= htmlspecialchars($filename, ENT_QUOTES, 'UTF-8') ?>
+                    </td>
+                    <td>
+                        <span class="export-format-badge">
+                            <?= htmlspecialchars(strtoupper($export['file_type'] ?? 'CSV'), ENT_QUOTES, 'UTF-8') ?>
+                        </span>
+                    </td>
+                    <td class="col-num"><?= number_format((int) ($export['total_rows'] ?? 0)) ?></td>
+                    <td style="font-size:12.5px;color:var(--color-neutral)">
+                        <?= htmlspecialchars($export['user_name'] ?? '—', ENT_QUOTES, 'UTF-8') ?>
+                    </td>
+                    <td style="font-size:12.5px;color:var(--color-neutral);white-space:nowrap">
+                        <?= htmlspecialchars(substr($export['finished_at'] ?? $export['created_at'] ?? '', 0, 16), ENT_QUOTES, 'UTF-8') ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
+    </div>
+</div>
+
+<script>
+function selectFormat(fmt, el) {
+    document.getElementById('formatInput').value = fmt;
+    document.getElementById('selectedFormat').textContent = fmt.toUpperCase();
+    document.querySelectorAll('.format-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+function toggleGroup(btn, check) {
+    const section = btn.closest('.export-section');
+    section.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+    updateCount();
+}
+
+function updateCount() {
+    const count = document.querySelectorAll('input[name="fields[]"]:checked').length;
+    document.getElementById('selectedCount').textContent = count;
+}
+
+document.querySelectorAll('input[name="fields[]"]').forEach(cb => {
+    cb.addEventListener('change', updateCount);
+});
+
+updateCount();
+</script>

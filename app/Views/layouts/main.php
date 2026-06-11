@@ -25,8 +25,9 @@ $canManageSectors = class_exists('Auth') && Auth::can('sectors.manage');
 $canManageTags = class_exists('Auth') && Auth::can('tags.manage');
 $canManageCustomFields = class_exists('Auth') && Auth::can('custom_fields.manage');
 $canManageImports = class_exists('Auth') && Auth::can('imports.manage');
+$canUseExports = class_exists('Auth') && Auth::can('exports.use');
 $canManageUsers = class_exists('Auth') && Auth::isAdmin();
-$showSettingsNav = $canManageSectors || $canManageTags || $canManageCustomFields || $canManageImports || $canManageUsers;
+$showSettingsNav = $canManageSectors || $canManageTags || $canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers;
 if ($authUser) {
     $parts    = explode(' ', trim($authUser['name'] ?? ''));
     $initials = strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1));
@@ -100,7 +101,7 @@ if ($authUser) {
             </a>
             <?php endif; ?>
 
-            <?php if ($canManageCustomFields || $canManageImports || $canManageUsers): ?>
+            <?php if ($canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers): ?>
             <div class="sidebar-section-label">Settings</div>
             <?php endif; ?>
 
@@ -121,6 +122,16 @@ if ($authUser) {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
                 </svg>
                 Imports
+            </a>
+            <?php endif; ?>
+
+            <?php if ($canUseExports): ?>
+            <a href="<?= htmlspecialchars(Auth::url('/exports'), ENT_QUOTES, 'UTF-8') ?>"
+               class="nav-item <?= $isActive('/exports') ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
+                </svg>
+                Exports
             </a>
             <?php endif; ?>
 
