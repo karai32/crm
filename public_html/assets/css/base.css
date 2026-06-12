@@ -928,6 +928,9 @@ textarea { min-height: 90px; resize: vertical; }
 
 .actions-panel-section--danger .actions-section-label { color: var(--color-danger); }
 
+/* Prevent delete button from stretching in column-flex section */
+.actions-panel-section--danger { align-items: flex-start; }
+
 .actions-panel-footer {
     display: flex;
     align-items: center;
@@ -942,12 +945,14 @@ textarea { min-height: 90px; resize: vertical; }
     color: var(--color-neutral);
 }
 
-.actions-deselect-btn {
+/* Use .actions-panel-footer parent for higher specificity than admin.css button { background: #1f2933 } */
+.actions-panel-footer .actions-deselect-btn {
     display: inline-flex;
     align-items: center;
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
+    background-color: transparent;
     border: none;
     padding: 0;
     font-size: 12.5px;
@@ -957,7 +962,7 @@ textarea { min-height: 90px; resize: vertical; }
     transition: color .12s;
 }
 
-.actions-deselect-btn:hover { color: var(--color-danger); }
+.actions-panel-footer .actions-deselect-btn:hover { color: var(--color-danger); background: transparent; }
 
 .actions-bar-btn--has-items {
     background: var(--color-neutral-50);
