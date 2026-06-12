@@ -3,13 +3,17 @@
 class Router
 {
     private array $routes = [
-        'GET'  => [],
-        'POST' => [],
+        'GET'    => [],
+        'POST'   => [],
+        'PATCH'  => [],
+        'DELETE' => [],
     ];
 
     private array $patterns = [
-        'GET'  => [],
-        'POST' => [],
+        'GET'    => [],
+        'POST'   => [],
+        'PATCH'  => [],
+        'DELETE' => [],
     ];
 
     public function get(string $path, callable $handler): void
@@ -27,6 +31,24 @@ class Router
             $this->patterns['POST'][$path] = $handler;
         } else {
             $this->routes['POST'][$path] = $handler;
+        }
+    }
+
+    public function patch(string $path, callable $handler): void
+    {
+        if (str_contains($path, '{')) {
+            $this->patterns['PATCH'][$path] = $handler;
+        } else {
+            $this->routes['PATCH'][$path] = $handler;
+        }
+    }
+
+    public function delete(string $path, callable $handler): void
+    {
+        if (str_contains($path, '{')) {
+            $this->patterns['DELETE'][$path] = $handler;
+        } else {
+            $this->routes['DELETE'][$path] = $handler;
         }
     }
 

@@ -108,6 +108,16 @@ class ContactRepository
         return (bool) $statement->fetch();
     }
 
+    public function emailTakenByOther(string $email, int $excludeId): bool
+    {
+        $pdo = Database::connect();
+
+        $statement = $pdo->prepare('SELECT id FROM contacts WHERE email = :email AND id != :id LIMIT 1');
+        $statement->execute(['email' => $email, 'id' => $excludeId]);
+
+        return (bool) $statement->fetch();
+    }
+
     public function search(string $query, int $limit = 10): array
     {
         $pdo = Database::connect();
