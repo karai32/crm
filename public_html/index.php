@@ -58,6 +58,7 @@ require_once __DIR__ . '/../app/Repositories/ApiKeyRepository.php';
 require_once __DIR__ . '/../app/Controllers/ApiKeyController.php';
 require_once __DIR__ . '/../app/Controllers/ApiV1Controller.php';
 require_once __DIR__ . '/../app/Controllers/ApiV1ClientController.php';
+require_once __DIR__ . '/../app/Controllers/ApiV1SectorController.php';
 
 $router = new Router();
 $authController = new AuthController();
@@ -72,9 +73,10 @@ $importController = new ImportController();
 $userController = new UserController();
 $ajaxController   = new AjaxController();
 $helpController   = new HelpController();
-$apiKeyController      = new ApiKeyController();
-$apiV1Controller       = new ApiV1Controller();
-$apiV1ClientController = new ApiV1ClientController();
+$apiKeyController       = new ApiKeyController();
+$apiV1Controller        = new ApiV1Controller();
+$apiV1ClientController  = new ApiV1ClientController();
+$apiV1SectorController  = new ApiV1SectorController();
 
 $router->get('/', function () {
     Auth::redirect(Auth::check() ? '/dashboard' : '/login');
@@ -159,6 +161,11 @@ $router->get('/api/v1/clients', [$apiV1ClientController, 'clientsList']);
 $router->get('/api/v1/clients/{id}', [$apiV1ClientController, 'clientsShow']);
 $router->patch('/api/v1/clients/{id}', [$apiV1ClientController, 'clientsUpdate']);
 $router->delete('/api/v1/clients/{id}', [$apiV1ClientController, 'clientsDestroy']);
+$router->post('/api/v1/sectors', [$apiV1SectorController, 'sectors']);
+$router->get('/api/v1/sectors', [$apiV1SectorController, 'sectorsList']);
+$router->get('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsShow']);
+$router->patch('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsUpdate']);
+$router->delete('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsDestroy']);
 $router->get('/ajax/global-search', [$ajaxController, 'globalSearch']);
 $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch']);
 $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);
