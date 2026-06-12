@@ -9,12 +9,73 @@ class HelpController
         $locale  = $this->localeFromRequest();
         $content = $this->content()[$locale];
 
+        $cards = array_map(static fn($s) => [
+            'id'      => $s['id'],
+            'icon'    => $s['icon'],
+            'accent'  => $s['accent'],
+            'title'   => $s['title'],
+            'summary' => $s['summary'],
+        ], $content['sections']);
+
+        $cards[] = [
+            'id'      => 'api',
+            'icon'    => 'key',
+            'accent'  => 'slate',
+            'title'   => 'API Reference',
+            'summary' => $locale === 'es'
+                ? 'Documentacion completa de la API REST: autenticacion con clave, endpoints de contactos, clientes, sectores y tags, con ejemplos de uso.'
+                : 'Full REST API documentation: key authentication, endpoints for contacts, clients, sectors and tags, with usage examples.',
+        ];
+
         View::render('help/index', [
-            'title'             => $content['page_title'],
-            'styles'            => ['help.css'],
-            'locale'            => $locale,
-            'available_locales' => ['es' => 'ES', 'en' => 'EN'],
-            'content'           => $content,
+            'title'            => $content['page_title'],
+            'styles'           => ['help.css'],
+            'locale'           => $locale,
+            'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
+            'content'          => $content,
+            'cards'            => $cards,
+        ]);
+    }
+
+    public function show(): void
+    {
+        Auth::requireLogin();
+
+        $topic  = (string) ($_GET['topic'] ?? '');
+        $locale = $this->localeFromRequest();
+
+        if ($topic === 'api') {
+            View::render('help/api', [
+                'title'            => 'API Reference',
+                'styles'           => ['help.css', 'api.css'],
+                'locale'           => $locale,
+                'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
+            ]);
+            return;
+        }
+
+        $content = $this->content()[$locale];
+        $section = null;
+
+        foreach ($content['sections'] as $s) {
+            if ($s['id'] === $topic) {
+                $section = $s;
+                break;
+            }
+        }
+
+        if ($section === null) {
+            Auth::redirect('/help');
+            return;
+        }
+
+        View::render('help/show', [
+            'title'            => $section['title'],
+            'styles'           => ['help.css'],
+            'locale'           => $locale,
+            'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
+            'content'          => $content,
+            'section'          => $section,
         ]);
     }
 

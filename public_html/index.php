@@ -149,6 +149,7 @@ $router->get('/users/edit', [$userController, 'edit']);
 $router->post('/users/update', [$userController, 'update']);
 $router->get('/users/delete', [$userController, 'delete']);
 $router->get('/help', [$helpController, 'index']);
+$router->get('/help/{topic}', [$helpController, 'show']);
 $router->get('/api-keys', [$apiKeyController, 'index']);
 $router->post('/api-keys/store', [$apiKeyController, 'store']);
 $router->get('/api-keys/revoke', [$apiKeyController, 'revoke']);
