@@ -1,7 +1,7 @@
 # Dependencies
 /vendor/
 
-# Real config files with credentials (use *.example.php as templates)
+# Real config files with credentials
 /config/database.php
 /config/mail.php
 
@@ -11,13 +11,15 @@
 /storage/imports/
 /storage/*.log
 
+# Local editor / FTP settings
+.vscode/sftp.json
+
 # Claude Code local settings
-/.claude/
+.claude/
 
 # OS & IDE
 .DS_Store
 .idea/
-.vscode/
 *.swp
 *.swo
 Thumbs.db
