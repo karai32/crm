@@ -17,7 +17,8 @@ class ApiKeyController
         unset($_SESSION['new_api_key']);
 
         View::render('api/index', [
-            'title'   => 'API Keys',
+            'title'   => 'API Reference',
+            'styles'  => ['help.css', 'api.css'],
             'apiKeys' => $this->apiKeys->all(),
             'newKey'  => $newKey,
         ]);
