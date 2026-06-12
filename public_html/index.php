@@ -59,6 +59,7 @@ require_once __DIR__ . '/../app/Controllers/ApiKeyController.php';
 require_once __DIR__ . '/../app/Controllers/ApiV1Controller.php';
 require_once __DIR__ . '/../app/Controllers/ApiV1ClientController.php';
 require_once __DIR__ . '/../app/Controllers/ApiV1SectorController.php';
+require_once __DIR__ . '/../app/Controllers/ApiV1TagController.php';
 
 $router = new Router();
 $authController = new AuthController();
@@ -77,6 +78,7 @@ $apiKeyController       = new ApiKeyController();
 $apiV1Controller        = new ApiV1Controller();
 $apiV1ClientController  = new ApiV1ClientController();
 $apiV1SectorController  = new ApiV1SectorController();
+$apiV1TagController     = new ApiV1TagController();
 
 $router->get('/', function () {
     Auth::redirect(Auth::check() ? '/dashboard' : '/login');
@@ -166,6 +168,11 @@ $router->get('/api/v1/sectors', [$apiV1SectorController, 'sectorsList']);
 $router->get('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsShow']);
 $router->patch('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsUpdate']);
 $router->delete('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsDestroy']);
+$router->post('/api/v1/tags', [$apiV1TagController, 'tags']);
+$router->get('/api/v1/tags', [$apiV1TagController, 'tagsList']);
+$router->get('/api/v1/tags/{id}', [$apiV1TagController, 'tagsShow']);
+$router->patch('/api/v1/tags/{id}', [$apiV1TagController, 'tagsUpdate']);
+$router->delete('/api/v1/tags/{id}', [$apiV1TagController, 'tagsDestroy']);
 $router->get('/ajax/global-search', [$ajaxController, 'globalSearch']);
 $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch']);
 $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);
