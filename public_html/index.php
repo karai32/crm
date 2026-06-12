@@ -148,6 +148,8 @@ $router->post('/api-keys/store', [$apiKeyController, 'store']);
 $router->get('/api-keys/revoke', [$apiKeyController, 'revoke']);
 $router->get('/api-keys/delete', [$apiKeyController, 'delete']);
 $router->post('/api/v1/contacts', [$apiV1Controller, 'contacts']);
+$router->get('/api/v1/contacts', [$apiV1Controller, 'contactsList']);
+$router->get('/api/v1/contacts/{id}', [$apiV1Controller, 'contactsShow']);
 $router->get('/ajax/global-search', [$ajaxController, 'globalSearch']);
 $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch']);
 $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);

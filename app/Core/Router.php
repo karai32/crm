@@ -3,33 +3,66 @@
 class Router
 {
     private array $routes = [
-        'GET' => [],
+        'GET'  => [],
+        'POST' => [],
+    ];
+
+    private array $patterns = [
+        'GET'  => [],
         'POST' => [],
     ];
 
     public function get(string $path, callable $handler): void
     {
-        $this->routes['GET'][$path] = $handler;
+        if (str_contains($path, '{')) {
+            $this->patterns['GET'][$path] = $handler;
+        } else {
+            $this->routes['GET'][$path] = $handler;
+        }
     }
 
     public function post(string $path, callable $handler): void
     {
-        $this->routes['POST'][$path] = $handler;
+        if (str_contains($path, '{')) {
+            $this->patterns['POST'][$path] = $handler;
+        } else {
+            $this->routes['POST'][$path] = $handler;
+        }
     }
 
     public function dispatch(string $method, string $uri): void
     {
-        $path = $this->getPath($uri);
+        $path   = $this->getPath($uri);
         $routes = $this->routes[$method] ?? [];
-        $handler = $routes[$path] ?? null;
 
-        if ($handler === null) {
-            http_response_code(404);
-            echo '404 - Page not found';
+        // Exact match
+        if (isset($routes[$path])) {
+            ($routes[$path])();
             return;
         }
 
-        $handler();
+        // Pattern match for routes with {param} segments
+        foreach ($this->patterns[$method] ?? [] as $routePath => $handler) {
+            $regex = $this->compilePattern($routePath);
+            if (preg_match($regex, $path, $matches)) {
+                foreach ($matches as $key => $value) {
+                    if (is_string($key)) {
+                        $_GET[$key] = $value;
+                    }
+                }
+                $handler();
+                return;
+            }
+        }
+
+        http_response_code(404);
+        echo '404 - Page not found';
+    }
+
+    private function compilePattern(string $path): string
+    {
+        $regex = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', '(?P<$1>[^/]+)', $path);
+        return '#^' . $regex . '$#';
     }
 
     private function getPath(string $uri): string

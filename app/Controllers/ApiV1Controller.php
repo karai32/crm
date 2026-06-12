@@ -173,6 +173,179 @@ class ApiV1Controller
         }
     }
 
+    public function contactsList(): void
+    {
+        $startTime = microtime(true);
+        $method    = 'GET';
+        $path      = '/api/v1/contacts';
+        $ip        = $_SERVER['REMOTE_ADDR'] ?? null;
+
+        $apiKey = $this->authenticate();
+
+        if ($apiKey === null) {
+            $response = $this->errorResponse('unauthorized', 'Invalid or missing API key');
+            $this->respond(401, $response);
+            $this->log(null, $method, $path, null, 401, $response, $ip, $startTime);
+            return;
+        }
+
+        $scopes = json_decode($apiKey['scopes'] ?? '[]', true) ?? [];
+        if (!$this->canRead($scopes)) {
+            $response = $this->errorResponse('forbidden', 'API key lacks contacts:read scope');
+            $this->respond(403, $response);
+            $this->log((int) $apiKey['id'], $method, $path, null, 403, $response, $ip, $startTime);
+            return;
+        }
+
+        $this->apiKeys->updateLastUsed((int) $apiKey['id']);
+
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = min(100, max(1, (int) ($_GET['per_page'] ?? 25)));
+
+        $filters = [
+            'first_name'   => $_GET['first_name'] ?? '',
+            'last_name'    => $_GET['last_name'] ?? '',
+            'email'        => $_GET['email'] ?? '',
+            'phone'        => $_GET['phone'] ?? '',
+            'is_company'   => $_GET['is_company'] ?? '',
+            'client_id'    => $_GET['client_id'] ?? '',
+            'tag_ids'      => isset($_GET['tag_id']) ? [(int) $_GET['tag_id']] : [],
+            'created_from' => $_GET['created_from'] ?? '',
+            'created_to'   => $_GET['created_to'] ?? '',
+        ];
+
+        $total      = $this->contacts->countAll($filters);
+        $items      = $this->contacts->paginate($page, $perPage, $filters);
+        $contactIds = array_column($items, 'id');
+
+        $tagsMap    = $this->contacts->tagsForContacts($contactIds);
+        $clientsMap = $this->contacts->clientsForContacts($contactIds);
+
+        $data = [];
+        foreach ($items as $contact) {
+            $id     = (int) $contact['id'];
+            $data[] = [
+                'id'         => $id,
+                'first_name' => $contact['first_name'],
+                'last_name'  => $contact['last_name'],
+                'email'      => $contact['email'],
+                'phone'      => $contact['phone'],
+                'created_at' => $contact['created_at'],
+                'tags'       => array_map(
+                    fn($t) => ['id' => (int) $t['id'], 'name' => $t['name']],
+                    $tagsMap[$id] ?? []
+                ),
+                'clients'    => array_map(
+                    fn($c) => ['id' => (int) $c['id'], 'name' => $c['commercial_name']],
+                    $clientsMap[$id] ?? []
+                ),
+            ];
+        }
+
+        $response = [
+            'success' => true,
+            'data'    => [
+                'items'       => $data,
+                'total'       => $total,
+                'page'        => $page,
+                'per_page'    => $perPage,
+                'total_pages' => $total > 0 ? (int) ceil($total / $perPage) : 0,
+            ],
+        ];
+
+        $this->respond(200, $response);
+        $this->log((int) $apiKey['id'], $method, $path, null, 200, null, $ip, $startTime);
+    }
+
+    public function contactsShow(): void
+    {
+        $startTime = microtime(true);
+        $method    = 'GET';
+        $path      = '/api/v1/contacts/{id}';
+        $ip        = $_SERVER['REMOTE_ADDR'] ?? null;
+
+        $apiKey = $this->authenticate();
+
+        if ($apiKey === null) {
+            $response = $this->errorResponse('unauthorized', 'Invalid or missing API key');
+            $this->respond(401, $response);
+            $this->log(null, $method, $path, null, 401, $response, $ip, $startTime);
+            return;
+        }
+
+        $scopes = json_decode($apiKey['scopes'] ?? '[]', true) ?? [];
+        if (!$this->canRead($scopes)) {
+            $response = $this->errorResponse('forbidden', 'API key lacks contacts:read scope');
+            $this->respond(403, $response);
+            $this->log((int) $apiKey['id'], $method, $path, null, 403, $response, $ip, $startTime);
+            return;
+        }
+
+        $this->apiKeys->updateLastUsed((int) $apiKey['id']);
+
+        $id      = (int) ($_GET['id'] ?? 0);
+        $contact = $id > 0 ? $this->contacts->find($id) : null;
+
+        if ($contact === null) {
+            $response = $this->errorResponse('not_found', 'Contact not found');
+            $this->respond(404, $response);
+            $this->log((int) $apiKey['id'], $method, $path, null, 404, $response, $ip, $startTime);
+            return;
+        }
+
+        $tags     = $this->contacts->tagsForContact($id);
+        $clients  = $this->contacts->clientsForContact($id);
+        $cfFields = $this->customFields->fieldsForEntity('contact');
+        $cfValues = $this->customFields->valuesForEntity('contact', $id);
+
+        $customFields = [];
+        foreach ($cfFields as $field) {
+            $fieldId = (int) $field['id'];
+            $value   = null;
+            if (isset($cfValues[$fieldId])) {
+                $row   = $cfValues[$fieldId];
+                $value = match ($field['field_type']) {
+                    'number'  => $row['value_number'] !== null ? (float) $row['value_number'] : null,
+                    'date'    => $row['value_date'],
+                    'boolean' => $row['value_bool'] !== null ? (bool) $row['value_bool'] : null,
+                    default   => $row['value_text'],
+                };
+            }
+            $customFields[$field['slug']] = $value;
+        }
+
+        $response = [
+            'success' => true,
+            'data'    => [
+                'id'            => (int) $contact['id'],
+                'first_name'    => $contact['first_name'],
+                'last_name'     => $contact['last_name'],
+                'email'         => $contact['email'],
+                'phone'         => $contact['phone'],
+                'is_company'    => (bool) $contact['is_company'],
+                'created_at'    => $contact['created_at'],
+                'updated_at'    => $contact['updated_at'] ?? null,
+                'tags'          => array_map(
+                    fn($t) => ['id' => (int) $t['id'], 'name' => $t['name']],
+                    $tags
+                ),
+                'clients'       => array_map(
+                    fn($c) => ['id' => (int) $c['id'], 'name' => $c['commercial_name']],
+                    $clients
+                ),
+                'custom_fields' => $customFields,
+            ],
+        ];
+
+        $this->respond(200, $response);
+        $this->log((int) $apiKey['id'], $method, $path, null, 200, $response, $ip, $startTime);
+    }
+
+    private function canRead(array $scopes): bool
+    {
+        return in_array('contacts:read', $scopes, true) || in_array('contacts:write', $scopes, true);
+    }
+
     private function authenticate(): ?array
     {
         $key = $_SERVER['HTTP_X_API_KEY'] ?? '';
