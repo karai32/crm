@@ -54,6 +54,9 @@ require_once __DIR__ . '/../app/Controllers/ImportController.php';
 require_once __DIR__ . '/../app/Controllers/UserController.php';
 require_once __DIR__ . '/../app/Controllers/AjaxController.php';
 require_once __DIR__ . '/../app/Controllers/HelpController.php';
+require_once __DIR__ . '/../app/Repositories/ApiKeyRepository.php';
+require_once __DIR__ . '/../app/Controllers/ApiKeyController.php';
+require_once __DIR__ . '/../app/Controllers/ApiV1Controller.php';
 
 $router = new Router();
 $authController = new AuthController();
@@ -66,8 +69,10 @@ $customFieldController = new CustomFieldController();
 $exportController = new ExportController();
 $importController = new ImportController();
 $userController = new UserController();
-$ajaxController = new AjaxController();
-$helpController = new HelpController();
+$ajaxController   = new AjaxController();
+$helpController   = new HelpController();
+$apiKeyController = new ApiKeyController();
+$apiV1Controller  = new ApiV1Controller();
 
 $router->get('/', function () {
     Auth::redirect(Auth::check() ? '/dashboard' : '/login');
@@ -138,6 +143,11 @@ $router->get('/users/edit', [$userController, 'edit']);
 $router->post('/users/update', [$userController, 'update']);
 $router->get('/users/delete', [$userController, 'delete']);
 $router->get('/help', [$helpController, 'index']);
+$router->get('/api-keys', [$apiKeyController, 'index']);
+$router->post('/api-keys/store', [$apiKeyController, 'store']);
+$router->get('/api-keys/revoke', [$apiKeyController, 'revoke']);
+$router->get('/api-keys/delete', [$apiKeyController, 'delete']);
+$router->post('/api/v1/contacts', [$apiV1Controller, 'contacts']);
 $router->get('/ajax/global-search', [$ajaxController, 'globalSearch']);
 $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch']);
 $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);
@@ -163,7 +173,9 @@ $router->get('/db-test', function () {
 });
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Csrf::validate($_POST['_csrf_token'] ?? null)) {
+    $isApiRequest = str_contains($_SERVER['REQUEST_URI'] ?? '/', '/api/v1/');
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiRequest && !Csrf::validate($_POST['_csrf_token'] ?? null)) {
         http_response_code(419);
         echo 'Invalid form token. Please go back and try again.';
         exit;

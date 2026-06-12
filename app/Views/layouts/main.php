@@ -26,8 +26,9 @@ $canManageTags = class_exists('Auth') && Auth::can('tags.manage');
 $canManageCustomFields = class_exists('Auth') && Auth::can('custom_fields.manage');
 $canManageImports = class_exists('Auth') && Auth::can('imports.manage');
 $canUseExports = class_exists('Auth') && Auth::can('exports.use');
-$canManageUsers = class_exists('Auth') && Auth::isAdmin();
-$showSettingsNav = $canManageSectors || $canManageTags || $canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers;
+$canManageUsers   = class_exists('Auth') && Auth::isAdmin();
+$canManageApiKeys = class_exists('Auth') && Auth::isAdmin();
+$showSettingsNav = $canManageSectors || $canManageTags || $canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers || $canManageApiKeys;
 if ($authUser) {
     $parts    = explode(' ', trim($authUser['name'] ?? ''));
     $initials = strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1));
@@ -142,6 +143,16 @@ if ($authUser) {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
                 </svg>
                 Users
+            </a>
+            <?php endif; ?>
+
+            <?php if ($canManageApiKeys): ?>
+            <a href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>"
+               class="nav-item <?= $isActive('/api-keys') ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/>
+                </svg>
+                API Keys
             </a>
             <?php endif; ?>
 
