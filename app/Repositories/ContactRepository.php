@@ -174,6 +174,42 @@ class ContactRepository
         $statement->execute(['id' => $id]);
     }
 
+    public function deleteMultiple(array $ids): void
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
+
+        if (empty($ids)) {
+            return;
+        }
+
+        $pdo = Database::connect();
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $statement = $pdo->prepare("DELETE FROM contacts WHERE id IN ($placeholders)");
+        $statement->execute($ids);
+    }
+
+    public function addClientsToContacts(array $contactIds, array $clientIds): void
+    {
+        $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), fn ($id) => $id > 0)));
+        $clientIds  = array_values(array_unique(array_filter(array_map('intval', $clientIds),  fn ($id) => $id > 0)));
+
+        if (empty($contactIds) || empty($clientIds)) {
+            return;
+        }
+
+        $pdo = Database::connect();
+        $insert = $pdo->prepare('
+            INSERT IGNORE INTO client_contacts (client_id, contact_id)
+            VALUES (:client_id, :contact_id)
+        ');
+
+        foreach ($contactIds as $contactId) {
+            foreach ($clientIds as $clientId) {
+                $insert->execute(['client_id' => $clientId, 'contact_id' => $contactId]);
+            }
+        }
+    }
+
     public function tagsForContacts(array $contactIds): array
     {
         if (empty($contactIds)) {

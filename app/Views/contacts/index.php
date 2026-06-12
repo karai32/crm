@@ -6,6 +6,7 @@ $activeFilters = array_filter($filters, function ($value) {
 $canCreateContacts  = Auth::can('contacts.create');
 $canEditContacts    = Auth::can('contacts.edit');
 $canDeleteContacts  = Auth::can('contacts.delete');
+$hasBulkActions     = $canEditContacts || $canDeleteContacts;
 
 $selectedFilterTagIds = $filters['tag_ids'] ?? [];
 $preselectedFilterTagsJson = json_encode(array_values(array_map(function ($tag) {
@@ -153,6 +154,16 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
         <?php endif; ?>
     </button>
 
+    <?php if ($hasBulkActions): ?>
+    <button type="button" class="filter-bar-btn actions-bar-btn" id="actionsBarBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"/>
+        </svg>
+        Actions
+        <span class="filter-bar-count" id="actionsBarCount" style="display:none">0</span>
+    </button>
+    <?php endif; ?>
+
     <?php if ($chips): ?>
     <div class="filter-bar-chips">
         <?php foreach ($chips as $chip): ?>
@@ -299,6 +310,76 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
     </form>
 </div>
 
+<!-- Actions panel -->
+<?php if ($hasBulkActions): ?>
+<div class="actions-panel" id="actionsPanel">
+    <form id="contactsBulkForm" method="post" action="<?= htmlspecialchars(Auth::url('/contacts/bulk-action'), ENT_QUOTES, 'UTF-8') ?>">
+        <?= Csrf::field() ?>
+        <div class="actions-panel-body">
+
+            <?php if ($canEditContacts): ?>
+            <div class="actions-panel-section">
+                <div class="actions-section-label">Tags</div>
+                <div class="actions-section-row">
+                    <div class="actions-section-picker">
+                        <div class="token-picker token-picker--filter"
+                             data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
+                             data-name="tag_ids[]"
+                             data-with-color="1"
+                             data-placeholder="Choose tags…"
+                             data-selected="[]">
+                        </div>
+                    </div>
+                    <div class="actions-section-btns">
+                        <button type="submit" name="bulk_action" value="add_tags" class="btn btn-sm btn-primary">Add tags</button>
+                        <button type="submit" name="bulk_action" value="remove_tags" class="btn btn-sm btn-outlined">Remove tags</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-panel-sep"></div>
+
+            <div class="actions-panel-section">
+                <div class="actions-section-label">Link to client</div>
+                <div class="actions-section-row">
+                    <div class="actions-section-picker">
+                        <div class="token-picker token-picker--filter"
+                             data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/search'), ENT_QUOTES, 'UTF-8') ?>"
+                             data-name="link_client_ids[]"
+                             data-placeholder="Search clients…"
+                             data-selected="[]">
+                        </div>
+                    </div>
+                    <div class="actions-section-btns">
+                        <button type="submit" name="bulk_action" value="link_client" class="btn btn-sm btn-green">Link</button>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($canEditContacts && $canDeleteContacts): ?>
+            <div class="actions-panel-sep"></div>
+            <?php endif; ?>
+
+            <?php if ($canDeleteContacts): ?>
+            <div class="actions-panel-section actions-panel-section--danger">
+                <div class="actions-section-label">Delete</div>
+                <button type="submit" name="bulk_action" value="delete" class="btn btn-sm btn-danger" id="bulkDeleteBtn"
+                        onclick="return confirm('Delete selected contacts? This cannot be undone.')">
+                    Delete <span id="deleteCountLabel">0</span> selected
+                </button>
+            </div>
+            <?php endif; ?>
+
+        </div>
+        <div class="actions-panel-footer">
+            <span class="actions-selected-hint" id="actionsSelectedHint">0 selected</span>
+            <button type="button" class="actions-deselect-btn" id="actionsDeselectBtn">Deselect all</button>
+        </div>
+    </form>
+</div>
+<?php endif; ?>
+
 <!-- Table -->
 <?php if (empty($contacts)): ?>
     <div class="contacts-table-card" style="padding:28px 20px; color:var(--color-neutral); font-size:14px;">
@@ -307,16 +388,11 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 <?php else: ?>
 <div class="contacts-table-card">
 
-    <?php if ($canEditContacts): ?>
-    <form id="contactsBulkForm" method="post" action="<?= htmlspecialchars(Auth::url('/contacts/bulk-tags'), ENT_QUOTES, 'UTF-8') ?>">
-        <?= Csrf::field() ?>
-    <?php endif; ?>
-
     <table class="contacts-table">
         <thead>
             <tr>
                 <th class="col-select">
-                    <?php if ($canEditContacts): ?>
+                    <?php if ($hasBulkActions): ?>
                     <input type="checkbox" id="contactsSelectAll" aria-label="Select all">
                     <?php endif; ?>
                 </th>
@@ -333,8 +409,9 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
             <?php foreach ($contacts as $contact): ?>
             <tr>
                 <td class="col-select">
-                    <?php if ($canEditContacts): ?>
-                    <input type="checkbox" name="contact_ids[]" value="<?= (int) $contact['id'] ?>" aria-label="Select contact">
+                    <?php if ($hasBulkActions): ?>
+                    <input type="checkbox" name="contact_ids[]" value="<?= (int) $contact['id'] ?>"
+                           form="contactsBulkForm" aria-label="Select contact">
                     <?php endif; ?>
                 </td>
                 <td class="col-id"><?= (int) $contact['id'] ?></td>
@@ -380,29 +457,6 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
         </tbody>
     </table>
 
-    <?php if ($canEditContacts): ?>
-    <!-- Selection bar: visible only when rows are checked -->
-    <div class="selection-bar" id="selectionBar" role="toolbar" aria-label="Bulk actions">
-        <span class="selection-count" id="selectionCount">0 selected</span>
-        <div class="selection-bar-tags">
-            <div class="token-picker token-picker--filter"
-                 data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
-                 data-name="tag_ids[]"
-                 data-with-color="1"
-                 data-placeholder="Choose tags..."
-                 data-selected="[]">
-            </div>
-        </div>
-        <select class="selection-bar-action" name="bulk_action">
-            <option value="add">Add tags</option>
-            <option value="remove">Remove tags</option>
-        </select>
-        <button type="submit" class="btn-apply">Apply</button>
-        <button type="button" class="btn-deselect" id="selectionClearBtn">Deselect all</button>
-    </div>
-    </form>
-    <?php endif; ?>
-
     <div class="contacts-pagination">
         <span>Showing <?= $from ?> to <?= $to ?> of <?= (int) $total ?> entries</span>
 
@@ -444,19 +498,31 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 
 <script>
 (function () {
+    var filterBarBtn  = document.getElementById('filterBarBtn');
+    var filterPanel   = document.getElementById('filterPanel');
+    var actionsBarBtn = document.getElementById('actionsBarBtn');
+    var actionsPanel  = document.getElementById('actionsPanel');
+    var actionsCount  = document.getElementById('actionsBarCount');
+    var deleteCountEl = document.getElementById('deleteCountLabel');
+    var hintEl        = document.getElementById('actionsSelectedHint');
+    var deselectBtn   = document.getElementById('actionsDeselectBtn');
+    var selectAll     = document.getElementById('contactsSelectAll');
+    var moreBtn       = document.getElementById('filterToggleBtn');
+    var moreExtra     = document.getElementById('filterExtra');
+
     /* Filter panel toggle */
-    var filterBarBtn = document.getElementById('filterBarBtn');
-    var filterPanel  = document.getElementById('filterPanel');
     if (filterBarBtn && filterPanel) {
         filterBarBtn.addEventListener('click', function () {
             var open = filterPanel.classList.toggle('open');
             filterBarBtn.classList.toggle('active', open);
+            if (open && actionsPanel) {
+                actionsPanel.classList.remove('open');
+                if (actionsBarBtn) actionsBarBtn.classList.remove('active');
+            }
         });
     }
 
-    /* More/Less filters inside the panel */
-    var moreBtn   = document.getElementById('filterToggleBtn');
-    var moreExtra = document.getElementById('filterExtra');
+    /* More/Less filters */
     if (moreBtn && moreExtra) {
         moreBtn.addEventListener('click', function () {
             var open = moreExtra.classList.toggle('open');
@@ -465,44 +531,62 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
         });
     }
 
-    /* Selection bar */
-    var bulkForm  = document.getElementById('contactsBulkForm');
-    var selBar    = document.getElementById('selectionBar');
-    var countEl   = document.getElementById('selectionCount');
-    var clearBtn  = document.getElementById('selectionClearBtn');
-    var selectAll = document.getElementById('contactsSelectAll');
+    /* Actions panel toggle */
+    if (actionsBarBtn && actionsPanel) {
+        actionsBarBtn.addEventListener('click', function () {
+            if (getCheckedCount() === 0) { return; }
+            var open = actionsPanel.classList.toggle('open');
+            actionsBarBtn.classList.toggle('active', open);
+            if (open && filterPanel) {
+                filterPanel.classList.remove('open');
+                if (filterBarBtn) filterBarBtn.classList.remove('active');
+            }
+        });
+    }
 
-    if (!bulkForm || !selBar) { return; }
+    function getCheckedCount() {
+        return document.querySelectorAll('input[name="contact_ids[]"]:checked').length;
+    }
 
-    function updateBar() {
-        var checked = bulkForm.querySelectorAll('input[name="contact_ids[]"]:checked');
-        var n = checked.length;
-        selBar.classList.toggle('visible', n > 0);
-        if (countEl) { countEl.textContent = n + ' selected'; }
+    function updateActions() {
+        var n     = getCheckedCount();
+        var total = document.querySelectorAll('input[name="contact_ids[]"]').length;
+
+        if (actionsCount)  { actionsCount.textContent = n; actionsCount.style.display = n > 0 ? '' : 'none'; }
+        if (deleteCountEl) { deleteCountEl.textContent = n; }
+        if (hintEl)        { hintEl.textContent = n + ' selected'; }
+        if (actionsBarBtn) { actionsBarBtn.classList.toggle('actions-bar-btn--has-items', n > 0); }
+
         if (selectAll) {
-            var total = bulkForm.querySelectorAll('input[name="contact_ids[]"]').length;
             selectAll.indeterminate = n > 0 && n < total;
-            selectAll.checked = n > 0 && n === total;
+            selectAll.checked = total > 0 && n === total;
+        }
+
+        if (n === 0 && actionsPanel) {
+            actionsPanel.classList.remove('open');
+            if (actionsBarBtn) actionsBarBtn.classList.remove('active');
         }
     }
 
-    bulkForm.addEventListener('change', function (e) {
-        if (e.target.name === 'contact_ids[]') { updateBar(); }
+    /* Checkboxes use form="contactsBulkForm" so listen on document */
+    document.addEventListener('change', function (e) {
+        if (e.target.name === 'contact_ids[]') { updateActions(); }
     });
 
     if (selectAll) {
         selectAll.addEventListener('change', function () {
-            bulkForm.querySelectorAll('input[name="contact_ids[]"]').forEach(function (cb) {
+            document.querySelectorAll('input[name="contact_ids[]"]').forEach(function (cb) {
                 cb.checked = selectAll.checked;
             });
-            updateBar();
+            updateActions();
         });
     }
 
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-            bulkForm.querySelectorAll('input[name="contact_ids[]"]').forEach(function (cb) { cb.checked = false; });
-            updateBar();
+    if (deselectBtn) {
+        deselectBtn.addEventListener('click', function () {
+            document.querySelectorAll('input[name="contact_ids[]"]').forEach(function (cb) { cb.checked = false; });
+            if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
+            updateActions();
         });
     }
 })();

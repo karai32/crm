@@ -175,6 +175,20 @@ class ClientRepository
         $statement->execute(['id' => $id]);
     }
 
+    public function deleteMultiple(array $ids): void
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
+
+        if (empty($ids)) {
+            return;
+        }
+
+        $pdo = Database::connect();
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $statement = $pdo->prepare("DELETE FROM clients WHERE id IN ($placeholders)");
+        $statement->execute($ids);
+    }
+
     public function contactsForClient(int $clientId): array
     {
         $pdo = Database::connect();

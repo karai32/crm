@@ -211,6 +211,35 @@ class ClientController
         Auth::redirect('/clients');
     }
 
+    public function bulkAction(): void
+    {
+        Auth::requireLogin();
+
+        $clientIds = $this->entityIdsFromPost('client_ids');
+        $action = $_POST['bulk_action'] ?? '';
+
+        if (!empty($clientIds)) {
+            if ($action === 'delete') {
+                Auth::requirePermission('clients.delete');
+                $this->clients->deleteMultiple($clientIds);
+            } elseif ($action === 'remove_tags') {
+                Auth::requirePermission('clients.edit');
+                $tagIds = $this->tagIdsFromRequest();
+                if (!empty($tagIds)) {
+                    $this->clients->removeTagsFromClients($clientIds, $tagIds);
+                }
+            } else {
+                Auth::requirePermission('clients.edit');
+                $tagIds = $this->tagIdsFromRequest();
+                if (!empty($tagIds)) {
+                    $this->clients->addTagsToClients($clientIds, $tagIds);
+                }
+            }
+        }
+
+        Auth::redirect('/clients');
+    }
+
     private function clientDataFromRequest(): array
     {
         return [

@@ -221,6 +221,41 @@ class ContactController
         Auth::redirect('/contacts');
     }
 
+    public function bulkAction(): void
+    {
+        Auth::requireLogin();
+
+        $contactIds = $this->entityIdsFromPost('contact_ids');
+        $action = $_POST['bulk_action'] ?? '';
+
+        if (!empty($contactIds)) {
+            if ($action === 'delete') {
+                Auth::requirePermission('contacts.delete');
+                $this->contacts->deleteMultiple($contactIds);
+            } elseif ($action === 'link_client') {
+                Auth::requirePermission('contacts.edit');
+                $clientIds = $this->linkClientIdsFromRequest();
+                if (!empty($clientIds)) {
+                    $this->contacts->addClientsToContacts($contactIds, $clientIds);
+                }
+            } elseif ($action === 'remove_tags') {
+                Auth::requirePermission('contacts.edit');
+                $tagIds = $this->tagIdsFromRequest();
+                if (!empty($tagIds)) {
+                    $this->contacts->removeTags($contactIds, $tagIds);
+                }
+            } else {
+                Auth::requirePermission('contacts.edit');
+                $tagIds = $this->tagIdsFromRequest();
+                if (!empty($tagIds)) {
+                    $this->contacts->addTags($contactIds, $tagIds);
+                }
+            }
+        }
+
+        Auth::redirect('/contacts');
+    }
+
     private function contactDataFromRequest(): array
     {
         return [
@@ -251,6 +286,20 @@ class ContactController
         $tagIds = array_filter($tagIds, fn ($id) => $id > 0);
 
         return array_values(array_unique($tagIds));
+    }
+
+    private function linkClientIdsFromRequest(): array
+    {
+        $clientIds = $_POST['link_client_ids'] ?? [];
+
+        if (!is_array($clientIds)) {
+            return [];
+        }
+
+        $clientIds = array_map('intval', $clientIds);
+        $clientIds = array_filter($clientIds, fn ($id) => $id > 0);
+
+        return array_values(array_unique($clientIds));
     }
 
     private function clientIdsFromRequest(): array
