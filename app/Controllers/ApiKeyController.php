@@ -36,7 +36,7 @@ class ApiKeyController
         $rawKey  = 'crm_' . bin2hex(random_bytes(32));
         $prefix  = substr($rawKey, 0, 12);
         $hash    = hash('sha256', $rawKey);
-        $scopes  = ['contacts:write', 'contacts:read'];
+        $scopes  = ['contacts:write', 'contacts:read', 'clients:write', 'clients:read'];
 
         $this->apiKeys->create($name, $prefix, $hash, $scopes);
 

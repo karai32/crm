@@ -41,18 +41,14 @@
             <div class="field">
                 <label>Scopes</label>
                 <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    <?php foreach (['contacts:write', 'contacts:read', 'clients:write', 'clients:read'] as $scopeLabel): ?>
                     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-sm)">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" style="width:14px;height:14px;color:var(--color-secondary);flex-shrink:0">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
                         </svg>
-                        <span style="font-size:13px;font-weight:500">contacts:write</span>
+                        <span style="font-size:13px;font-weight:500"><?= $scopeLabel ?></span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:var(--radius-sm)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" style="width:14px;height:14px;color:var(--color-secondary);flex-shrink:0">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                        </svg>
-                        <span style="font-size:13px;font-weight:500">contacts:read</span>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
                 <span style="font-size:12px;color:var(--color-text-muted);margin-top:4px;display:block">More scopes will be available as the API expands.</span>
             </div>
