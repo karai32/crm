@@ -162,6 +162,18 @@ class ContactApiService extends AbstractApiService
 
     private function createOne(array $item): array
     {
+        // Support dot-notation keys: "custom_fields.notes" → custom_fields["notes"]
+        foreach ($item as $key => $value) {
+            if (str_starts_with($key, 'custom_fields.')) {
+                $slug = substr($key, 14);
+                if (!isset($item['custom_fields']) || !is_array($item['custom_fields'])) {
+                    $item['custom_fields'] = [];
+                }
+                $item['custom_fields'][$slug] = $value;
+                unset($item[$key]);
+            }
+        }
+
         $firstName = trim((string) ($item['first_name'] ?? ''));
         $email = trim((string) ($item['email'] ?? ''));
         $errors = [];
