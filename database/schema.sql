@@ -324,18 +324,22 @@ CREATE TABLE api_keys (
 CREATE TABLE api_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     api_key_id INT UNSIGNED NULL,
+    request_id CHAR(24) NOT NULL,
     method VARCHAR(10) NOT NULL,
     path VARCHAR(255) NOT NULL,
-    request_body JSON NULL,
     response_status SMALLINT UNSIGNED NOT NULL,
-    response_body JSON NULL,
+    error_code VARCHAR(64) NULL,
+    items_count INT UNSIGNED NULL,
     ip_address VARCHAR(45) NULL,
     duration_ms INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_api_logs_key FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    UNIQUE KEY uq_api_logs_request_id (request_id),
     INDEX idx_api_logs_key_id (api_key_id),
     INDEX idx_api_logs_created_at (created_at),
-    INDEX idx_api_logs_status (response_status)
+    INDEX idx_api_logs_status (response_status),
+    INDEX idx_api_logs_key_created (api_key_id, created_at),
+    INDEX idx_api_logs_status_created (response_status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO roles (name, label) VALUES

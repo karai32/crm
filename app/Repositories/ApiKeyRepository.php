@@ -15,20 +15,6 @@ class ApiKeyRepository
         return $statement->fetchAll();
     }
 
-    public function find(int $id): ?array
-    {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            SELECT id, name, client_id, scopes, is_active, last_used_at, created_at
-            FROM api_keys
-            WHERE id = :id
-            LIMIT 1
-        ');
-        $statement->execute(['id' => $id]);
-
-        return $statement->fetch() ?: null;
-    }
-
     public function findActiveByClientId(string $clientId): ?array
     {
         $pdo = Database::connect();
@@ -67,10 +53,15 @@ class ApiKeyRepository
         $statement->execute(['scopes' => json_encode($scopes), 'id' => $id]);
     }
 
-    public function updateLastUsed(int $id): void
+    public function touchLastUsed(int $id): void
     {
         $pdo = Database::connect();
-        $statement = $pdo->prepare('UPDATE api_keys SET last_used_at = NOW() WHERE id = :id');
+        $statement = $pdo->prepare('
+            UPDATE api_keys
+            SET last_used_at = NOW()
+            WHERE id = :id
+              AND (last_used_at IS NULL OR last_used_at < NOW() - INTERVAL 5 MINUTE)
+        ');
         $statement->execute(['id' => $id]);
     }
 
@@ -94,45 +85,37 @@ class ApiKeyRepository
 
     public function log(
         ?int $apiKeyId,
+        string $requestId,
         string $method,
         string $path,
-        ?array $requestBody,
         int $responseStatus,
-        ?array $responseBody,
+        ?string $errorCode,
+        ?int $itemsCount,
         ?string $ip,
         int $durationMs
     ): void {
         $pdo = Database::connect();
         $statement = $pdo->prepare('
-            INSERT INTO api_logs (api_key_id, method, path, request_body, response_status, response_body, ip_address, duration_ms)
-            VALUES (:api_key_id, :method, :path, :request_body, :response_status, :response_body, :ip_address, :duration_ms)
+            INSERT INTO api_logs (
+                api_key_id, request_id, method, path, response_status,
+                error_code, items_count, ip_address, duration_ms
+            )
+            VALUES (
+                :api_key_id, :request_id, :method, :path, :response_status,
+                :error_code, :items_count, :ip_address, :duration_ms
+            )
         ');
         $statement->execute([
             'api_key_id'      => $apiKeyId,
+            'request_id'      => $requestId,
             'method'          => $method,
             'path'            => $path,
-            'request_body'    => $requestBody !== null ? json_encode($requestBody, JSON_UNESCAPED_UNICODE) : null,
             'response_status' => $responseStatus,
-            'response_body'   => $responseBody !== null ? json_encode($responseBody, JSON_UNESCAPED_UNICODE) : null,
+            'error_code'      => $errorCode,
+            'items_count'     => $itemsCount,
             'ip_address'      => $ip,
             'duration_ms'     => $durationMs,
         ]);
     }
 
-    public function recentLogs(int $apiKeyId, int $limit = 20): array
-    {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            SELECT id, method, path, response_status, ip_address, duration_ms, created_at
-            FROM api_logs
-            WHERE api_key_id = :key_id
-            ORDER BY created_at DESC
-            LIMIT :lim
-        ');
-        $statement->bindValue('key_id', $apiKeyId, PDO::PARAM_INT);
-        $statement->bindValue('lim', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
-    }
 }

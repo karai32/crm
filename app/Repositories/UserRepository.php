@@ -117,24 +117,6 @@ class UserRepository
         }
     }
 
-    public function adminExists(): bool
-    {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT users.id
-            FROM users
-            INNER JOIN roles ON roles.id = users.role_id
-            WHERE roles.name = :role
-            LIMIT 1
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['role' => 'admin']);
-
-        return (bool) $statement->fetch();
-    }
-
     public function create(array $data): int
     {
         $pdo = Database::connect();

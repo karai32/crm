@@ -1,4 +1,5 @@
 {
+    "license": "proprietary",
     "require": {
         "phpoffice/phpspreadsheet": "^5.8"
     }

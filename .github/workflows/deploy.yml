@@ -30,6 +30,8 @@ jobs:
             **/.github/**
             **/.vscode/**
             **/.claude/**
+            **/tests/**
+            **/database/**
             **/node_modules/**
             vendor/**
             config/database.php

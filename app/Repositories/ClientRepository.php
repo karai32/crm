@@ -10,7 +10,8 @@ class ClientRepository
 
         $sql = "
             SELECT clients.id, clients.commercial_name, clients.legal_name, clients.city,
-                   clients.province, clients.country, sectors.name AS sector_name
+                   clients.province, clients.country, clients.created_at, clients.updated_at,
+                   sectors.name AS sector_name
             FROM clients
             LEFT JOIN sectors ON sectors.id = clients.sector_id
             {$whereSql}

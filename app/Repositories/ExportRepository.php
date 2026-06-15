@@ -2,11 +2,6 @@
 
 class ExportRepository
 {
-    public function createCompletedCsvExport(?int $userId, array $filters, array $fields, int $totalRows, string $fileName): void
-    {
-        $this->createCompletedExport($userId, 'csv', $filters, $fields, $totalRows, $fileName);
-    }
-
     public function createCompletedExport(?int $userId, string $fileType, array $filters, array $fields, int $totalRows, string $fileName): void
     {
         $pdo = Database::connect();

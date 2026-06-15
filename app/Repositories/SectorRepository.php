@@ -22,6 +22,30 @@ class SectorRepository
         return $statement->fetchAll();
     }
 
+    public function filter(string $name = '', mixed $isActive = ''): array
+    {
+        $pdo = Database::connect();
+        $where = [];
+        $params = [];
+
+        if ($name !== '') {
+            $where[] = 'name LIKE :name';
+            $params['name'] = '%' . $name . '%';
+        }
+        if ($isActive !== '' && $isActive !== null) {
+            $where[] = 'is_active = :is_active';
+            $params['is_active'] = (int) $isActive;
+        }
+
+        $sql = 'SELECT * FROM sectors'
+            . ($where === [] ? '' : ' WHERE ' . implode(' AND ', $where))
+            . ' ORDER BY is_active DESC, name ASC';
+        $statement = $pdo->prepare($sql);
+        $statement->execute($params);
+
+        return $statement->fetchAll();
+    }
+
     public function find(int $id): ?array
     {
         $pdo = Database::connect();

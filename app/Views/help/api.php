@@ -160,8 +160,9 @@ CODE); ?>
 
             <div class="help-card-body">
                 <p style="font-size:13.5px;line-height:1.65;margin:0 0 16px;color:var(--color-text-muted)">
-                    Contacts represent individual people. Each contact requires an email (unique), a tag, and a client.
-                    If the tag or client don't exist yet, they are <strong style="color:var(--color-text)">created automatically</strong>.
+                    Contacts represent individual people. Only the first name is required.
+                    When an email is provided it must be valid and unique. Optional tags and clients are
+                    <strong style="color:var(--color-text)">created automatically</strong> when they don't exist.
                     Custom fields are saved silently — unknown field slugs are ignored.
                 </p>
 
@@ -206,9 +207,9 @@ CODE); ?>
                     </thead>
                     <tbody>
                         <tr><td><code>first_name</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-req">required</span></td><td>First name</td></tr>
-                        <tr><td><code>email</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-req">required</span></td><td>Unique email address</td></tr>
-                        <tr><td><code>tag</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-req">required</span></td><td>Tag name — created if it doesn't exist</td></tr>
-                        <tr><td><code>client</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-req">required</span></td><td>Client commercial name — created if it doesn't exist</td></tr>
+                        <tr><td><code>email</code></td><td><span class="api-type">string|null</span></td><td><span class="api-badge-opt">optional</span></td><td>Unique email address when provided</td></tr>
+                        <tr><td><code>tag</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Tag name — created if it doesn't exist</td></tr>
+                        <tr><td><code>client</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Client commercial name — created if it doesn't exist</td></tr>
                         <tr><td><code>last_name</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Last name</td></tr>
                         <tr><td><code>phone</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Phone number</td></tr>
                         <tr><td><code>is_company</code></td><td><span class="api-type">boolean</span></td><td><span class="api-badge-opt">optional</span></td><td>Whether this contact represents a company</td></tr>
@@ -216,7 +217,9 @@ CODE); ?>
                     </tbody>
                 </table>
                 <p style="font-size:12px;color:var(--color-text-muted);margin:6px 0 0">
-                    PATCH: all fields are optional — only keys present in the body are updated.
+                    PATCH: all fields are optional — only keys present in the body are updated. Pass
+                    <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:11.5px">"email": null</code>
+                    or an empty string to clear the email.
                     <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:11.5px">tags</code> and
                     <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:11.5px">clients</code> accept an array of name strings and replace the current list.
                 </p>

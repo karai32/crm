@@ -12,6 +12,23 @@ class TagRepository
         return $statement->fetchAll();
     }
 
+    public function filter(string $name = ''): array
+    {
+        $pdo = Database::connect();
+        $sql = 'SELECT * FROM tags';
+        $params = [];
+
+        if ($name !== '') {
+            $sql .= ' WHERE name LIKE :name';
+            $params['name'] = '%' . $name . '%';
+        }
+
+        $statement = $pdo->prepare($sql . ' ORDER BY name ASC');
+        $statement->execute($params);
+
+        return $statement->fetchAll();
+    }
+
     public function find(int $id): ?array
     {
         $pdo = Database::connect();

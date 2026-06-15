@@ -97,7 +97,7 @@ class Router
             $path = substr($path, strlen($basePath));
         }
 
-        // Also support URLs like /CRM/public/index.php/db-test.
+        // Also support URLs that include index.php before the route path.
         if (str_starts_with($path, '/index.php')) {
             $path = substr($path, strlen('/index.php')) ?: '/';
         }

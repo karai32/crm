@@ -69,7 +69,7 @@ class TwoFactorService
         return $user;
     }
 
-    public function pending(): ?array
+    private function pending(): ?array
     {
         return $_SESSION[self::SESSION_KEY] ?? null;
     }

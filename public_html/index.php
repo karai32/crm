@@ -57,10 +57,18 @@ require_once __DIR__ . '/../app/Controllers/HelpController.php';
 require_once __DIR__ . '/../app/Repositories/ApiKeyRepository.php';
 require_once __DIR__ . '/../app/Services/ApiAuthenticator.php';
 require_once __DIR__ . '/../app/Controllers/ApiKeyController.php';
-require_once __DIR__ . '/../app/Controllers/ApiV1Controller.php';
-require_once __DIR__ . '/../app/Controllers/ApiV1ClientController.php';
-require_once __DIR__ . '/../app/Controllers/ApiV1SectorController.php';
-require_once __DIR__ . '/../app/Controllers/ApiV1TagController.php';
+require_once __DIR__ . '/../app/Controllers/Api/ApiException.php';
+require_once __DIR__ . '/../app/Controllers/Api/ApiResult.php';
+require_once __DIR__ . '/../app/Controllers/Api/AbstractApiController.php';
+require_once __DIR__ . '/../app/Services/Api/AbstractApiService.php';
+require_once __DIR__ . '/../app/Services/Api/ContactApiService.php';
+require_once __DIR__ . '/../app/Services/Api/ClientApiService.php';
+require_once __DIR__ . '/../app/Services/Api/SectorApiService.php';
+require_once __DIR__ . '/../app/Services/Api/TagApiService.php';
+require_once __DIR__ . '/../app/Controllers/Api/ContactApiController.php';
+require_once __DIR__ . '/../app/Controllers/Api/ClientApiController.php';
+require_once __DIR__ . '/../app/Controllers/Api/SectorApiController.php';
+require_once __DIR__ . '/../app/Controllers/Api/TagApiController.php';
 
 $router = new Router();
 $authController = new AuthController();
@@ -76,10 +84,10 @@ $userController = new UserController();
 $ajaxController   = new AjaxController();
 $helpController   = new HelpController();
 $apiKeyController       = new ApiKeyController();
-$apiV1Controller        = new ApiV1Controller();
-$apiV1ClientController  = new ApiV1ClientController();
-$apiV1SectorController  = new ApiV1SectorController();
-$apiV1TagController     = new ApiV1TagController();
+$contactApiController = new ContactApiController();
+$clientApiController  = new ClientApiController();
+$sectorApiController  = new SectorApiController();
+$tagApiController     = new TagApiController();
 
 $router->get('/', function () {
     Auth::redirect(Auth::check() ? '/dashboard' : '/login');
@@ -91,7 +99,6 @@ $router->get('/login/verify', [$authController, 'showTwoFactor']);
 $router->post('/login/verify', [$authController, 'verifyTwoFactor']);
 $router->post('/login/resend-code', [$authController, 'resendTwoFactor']);
 $router->get('/logout', [$authController, 'logout']);
-$router->get('/create-admin', [$authController, 'createAdmin']);
 $router->get('/dashboard', [$dashboardController, 'index']);
 $router->get('/sectors', [$sectorController, 'index']);
 $router->get('/sectors/create', [$sectorController, 'create']);
@@ -110,7 +117,6 @@ $router->get('/clients/create', [$clientController, 'create']);
 $router->post('/clients/store', [$clientController, 'store']);
 $router->get('/clients/edit', [$clientController, 'edit']);
 $router->post('/clients/update', [$clientController, 'update']);
-$router->post('/clients/bulk-tags', [$clientController, 'bulkTags']);
 $router->post('/clients/bulk-action', [$clientController, 'bulkAction']);
 $router->get('/clients/show', [$clientController, 'show']);
 $router->get('/clients/delete', [$clientController, 'delete']);
@@ -119,7 +125,6 @@ $router->get('/contacts/create', [$contactController, 'create']);
 $router->post('/contacts/store', [$contactController, 'store']);
 $router->get('/contacts/edit', [$contactController, 'edit']);
 $router->post('/contacts/update', [$contactController, 'update']);
-$router->post('/contacts/bulk-tags', [$contactController, 'bulkTags']);
 $router->post('/contacts/bulk-action', [$contactController, 'bulkAction']);
 $router->get('/contacts/show', [$contactController, 'show']);
 $router->get('/contacts/delete', [$contactController, 'delete']);
@@ -133,10 +138,6 @@ $router->get('/exports', [$exportController, 'index']);
 $router->post('/exports/download', [$exportController, 'download']);
 $router->get('/exports/template/contacts', [$exportController, 'templateContacts']);
 $router->get('/exports/template/clients', [$exportController, 'templateClients']);
-$router->get('/exports/contacts', [$exportController, 'contactsForm']);
-$router->post('/contacts/export-csv', [$exportController, 'contactsCsv']);
-$router->get('/exports/contacts-xlsx', [$exportController, 'contactsXlsxForm']);
-$router->post('/exports/contacts-xlsx', [$exportController, 'contactsXlsx']);
 $router->get('/imports', [$importController, 'index']);
 $router->get('/imports/upload', [$importController, 'upload']);
 $router->post('/imports/upload', [$importController, 'storeUpload']);
@@ -156,49 +157,30 @@ $router->post('/api-keys/store', [$apiKeyController, 'store']);
 $router->post('/api-keys/revoke', [$apiKeyController, 'revoke']);
 $router->post('/api-keys/sync-scopes', [$apiKeyController, 'syncScopes']);
 $router->post('/api-keys/delete', [$apiKeyController, 'delete']);
-$router->post('/api/v1/contacts', [$apiV1Controller, 'contacts']);
-$router->get('/api/v1/contacts', [$apiV1Controller, 'contactsList']);
-$router->get('/api/v1/contacts/{id}', [$apiV1Controller, 'contactsShow']);
-$router->patch('/api/v1/contacts/{id}', [$apiV1Controller, 'contactsUpdate']);
-$router->delete('/api/v1/contacts/{id}', [$apiV1Controller, 'contactsDestroy']);
-$router->post('/api/v1/clients', [$apiV1ClientController, 'clients']);
-$router->get('/api/v1/clients', [$apiV1ClientController, 'clientsList']);
-$router->get('/api/v1/clients/{id}', [$apiV1ClientController, 'clientsShow']);
-$router->patch('/api/v1/clients/{id}', [$apiV1ClientController, 'clientsUpdate']);
-$router->delete('/api/v1/clients/{id}', [$apiV1ClientController, 'clientsDestroy']);
-$router->post('/api/v1/sectors', [$apiV1SectorController, 'sectors']);
-$router->get('/api/v1/sectors', [$apiV1SectorController, 'sectorsList']);
-$router->get('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsShow']);
-$router->patch('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsUpdate']);
-$router->delete('/api/v1/sectors/{id}', [$apiV1SectorController, 'sectorsDestroy']);
-$router->post('/api/v1/tags', [$apiV1TagController, 'tags']);
-$router->get('/api/v1/tags', [$apiV1TagController, 'tagsList']);
-$router->get('/api/v1/tags/{id}', [$apiV1TagController, 'tagsShow']);
-$router->patch('/api/v1/tags/{id}', [$apiV1TagController, 'tagsUpdate']);
-$router->delete('/api/v1/tags/{id}', [$apiV1TagController, 'tagsDestroy']);
+$router->post('/api/v1/contacts', [$contactApiController, 'create']);
+$router->get('/api/v1/contacts', [$contactApiController, 'index']);
+$router->get('/api/v1/contacts/{id}', [$contactApiController, 'show']);
+$router->patch('/api/v1/contacts/{id}', [$contactApiController, 'update']);
+$router->delete('/api/v1/contacts/{id}', [$contactApiController, 'destroy']);
+$router->post('/api/v1/clients', [$clientApiController, 'create']);
+$router->get('/api/v1/clients', [$clientApiController, 'index']);
+$router->get('/api/v1/clients/{id}', [$clientApiController, 'show']);
+$router->patch('/api/v1/clients/{id}', [$clientApiController, 'update']);
+$router->delete('/api/v1/clients/{id}', [$clientApiController, 'destroy']);
+$router->post('/api/v1/sectors', [$sectorApiController, 'create']);
+$router->get('/api/v1/sectors', [$sectorApiController, 'index']);
+$router->get('/api/v1/sectors/{id}', [$sectorApiController, 'show']);
+$router->patch('/api/v1/sectors/{id}', [$sectorApiController, 'update']);
+$router->delete('/api/v1/sectors/{id}', [$sectorApiController, 'destroy']);
+$router->post('/api/v1/tags', [$tagApiController, 'create']);
+$router->get('/api/v1/tags', [$tagApiController, 'index']);
+$router->get('/api/v1/tags/{id}', [$tagApiController, 'show']);
+$router->patch('/api/v1/tags/{id}', [$tagApiController, 'update']);
+$router->delete('/api/v1/tags/{id}', [$tagApiController, 'destroy']);
 $router->get('/ajax/global-search', [$ajaxController, 'globalSearch']);
 $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch']);
 $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);
 $router->get('/ajax/sectors/search', [$ajaxController, 'sectorsSearch']);
-
-$router->get('/db-test', function () {
-    $message = 'Database connection is working';
-    $success = true;
-
-    try {
-        Database::connect();
-    } catch (Throwable $exception) {
-        // Keep the user-facing error simple and safe.
-        $message = 'Could not connect to the database. Check the connection settings.';
-        $success = false;
-    }
-
-    View::render('dashboard/db-test', [
-        'title' => 'Database test',
-        'message' => $message,
-        'success' => $success,
-    ]);
-});
 
 try {
     $isApiRequest = str_contains($_SERVER['REQUEST_URI'] ?? '/', '/api/v1/');

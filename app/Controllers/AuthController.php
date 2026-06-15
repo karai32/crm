@@ -118,19 +118,4 @@ class AuthController
         Auth::redirect('/login');
     }
 
-    public function createAdmin(): void
-    {
-        if (Auth::check() && !Auth::isAdmin()) {
-            http_response_code(403);
-            echo 'Access denied';
-            return;
-        }
-
-        $message = $this->authService->createFirstAdmin();
-
-        View::render('auth/create-admin', [
-            'title' => 'Create admin',
-            'message' => $message,
-        ], 'auth');
-    }
 }

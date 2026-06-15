@@ -42,51 +42,6 @@ class ContactRepository
         return (int) ($row['total'] ?? 0);
     }
 
-    public function exportStatement(array $filters = [], array $fields = []): PDOStatement
-    {
-        $pdo = Database::connect();
-        [$whereSql, $params] = $this->buildFilterSql($filters);
-        $allowedFields = $this->exportableFields();
-        $fields = empty($fields) ? array_keys($allowedFields) : $fields;
-        $fields = array_values(array_filter($fields, fn ($field) => isset($allowedFields[$field])));
-        $fields = empty($fields) ? ['id'] : $fields;
-        $selectSql = implode(', ', array_map(fn ($field) => 'contacts.' . $field, $fields));
-
-        $sql = "
-            SELECT {$selectSql}
-            FROM contacts
-            {$whereSql}
-            ORDER BY id DESC
-        ";
-
-        $statement = $pdo->prepare($sql);
-        foreach ($params as $name => $value) {
-            $statement->bindValue($name, $value);
-        }
-        $statement->execute();
-
-        return $statement;
-    }
-
-    public function exportRows(array $filters = [], array $fields = []): array
-    {
-        return $this->exportStatement($filters, $fields)->fetchAll();
-    }
-
-    public function exportableFields(): array
-    {
-        return [
-            'id'         => 'ID',
-            'first_name' => 'First name',
-            'last_name'  => 'Last name',
-            'email'      => 'Email',
-            'phone'      => 'Phone',
-            'is_company' => 'Is company',
-            'created_at' => 'Created',
-            'updated_at' => 'Updated',
-        ];
-    }
-
     public function find(int $id): ?array
     {
         $pdo = Database::connect();
@@ -272,16 +227,6 @@ class ContactRepository
         return $result;
     }
 
-    public function allTags(): array
-    {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM tags ORDER BY name ASC');
-        $statement->execute();
-
-        return $statement->fetchAll();
-    }
-
     public function firstTags(int $limit = 50): array
     {
         $pdo = Database::connect();
@@ -378,16 +323,6 @@ class ContactRepository
             AND tag_id IN ($tagPlaceholders)
         ");
         $statement->execute(array_merge($contactIds, $tagIds));
-    }
-
-    public function allClients(): array
-    {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT id, commercial_name, legal_name FROM clients ORDER BY commercial_name ASC');
-        $statement->execute();
-
-        return $statement->fetchAll();
     }
 
     public function firstClients(int $limit = 50): array

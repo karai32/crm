@@ -202,25 +202,6 @@ class ContactController
         Auth::redirect('/contacts');
     }
 
-    public function bulkTags(): void
-    {
-        Auth::requirePermission('contacts.edit');
-
-        $contactIds = $this->entityIdsFromPost('contact_ids');
-        $tagIds = $this->tagIdsFromRequest();
-        $action = $_POST['bulk_action'] ?? '';
-
-        if (!empty($contactIds) && !empty($tagIds)) {
-            if ($action === 'remove') {
-                $this->contacts->removeTags($contactIds, $tagIds);
-            } else {
-                $this->contacts->addTags($contactIds, $tagIds);
-            }
-        }
-
-        Auth::redirect('/contacts');
-    }
-
     public function bulkAction(): void
     {
         Auth::requireLogin();

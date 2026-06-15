@@ -192,25 +192,6 @@ class ClientController
         Auth::redirect('/clients');
     }
 
-    public function bulkTags(): void
-    {
-        Auth::requirePermission('clients.edit');
-
-        $clientIds = $this->entityIdsFromPost('client_ids');
-        $tagIds = $this->tagIdsFromRequest();
-        $action = $_POST['bulk_action'] ?? '';
-
-        if (!empty($clientIds) && !empty($tagIds)) {
-            if ($action === 'remove') {
-                $this->clients->removeTagsFromClients($clientIds, $tagIds);
-            } else {
-                $this->clients->addTagsToClients($clientIds, $tagIds);
-            }
-        }
-
-        Auth::redirect('/clients');
-    }
-
     public function bulkAction(): void
     {
         Auth::requireLogin();
