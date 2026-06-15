@@ -39,16 +39,19 @@ class AuthController
             return;
         }
 
-        if (!$this->twoFactorService->start($user)) {
-            View::render('auth/login', [
-                'title' => 'Login',
-                'error' => 'Password is correct, but the verification email could not be sent. Check mail settings.',
-                'email' => $email,
-            ], 'auth');
-            return;
-        }
+        // 2FA temporarily disabled — skip email verification
+        // if (!$this->twoFactorService->start($user)) {
+        //     View::render('auth/login', [
+        //         'title' => 'Login',
+        //         'error' => 'Password is correct, but the verification email could not be sent. Check mail settings.',
+        //         'email' => $email,
+        //     ], 'auth');
+        //     return;
+        // }
+        // Auth::redirect('/login/verify');
 
-        Auth::redirect('/login/verify');
+        $this->authService->completeLogin($user);
+        Auth::redirect('/dashboard');
     }
 
     public function showTwoFactor(): void
