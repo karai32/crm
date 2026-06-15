@@ -83,10 +83,27 @@ abstract class AbstractApiController
 
     protected function jsonBatch(int $limit = 100): array
     {
-        $body = $this->decodeJson('[');
+        $rawBody = trim((string) file_get_contents('php://input'));
+
+        if ($rawBody === '' || ($rawBody[0] !== '[' && $rawBody[0] !== '{')) {
+            throw new ApiException(422, 'validation_error', 'Request body must be a JSON array or object');
+        }
+
+        try {
+            $decoded = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            throw new ApiException(422, 'validation_error', 'Request body must contain valid JSON');
+        }
+
+        if (!is_array($decoded)) {
+            throw new ApiException(422, 'validation_error', 'Request body must be a JSON array or object');
+        }
+
+        // Accept both a single object {"first_name":...} and an array [{...},...]
+        $body = array_is_list($decoded) ? $decoded : [$decoded];
 
         if ($body === []) {
-            throw new ApiException(422, 'validation_error', 'Request body must be a non-empty JSON array');
+            throw new ApiException(422, 'validation_error', 'Request body must not be empty');
         }
 
         if (count($body) > $limit) {
