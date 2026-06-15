@@ -11,7 +11,7 @@ class ClientImportProcessor extends AbstractImportProcessor
         $this->clients = new ClientRepository();
     }
 
-    public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): array
+    public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): void
     {
         $name = trim((string) ($mapped['commercial_name'] ?? ''));
         if ($name === '') {
@@ -44,13 +44,6 @@ class ClientImportProcessor extends AbstractImportProcessor
         $this->saveCustomFields('client', $clientId, $raw, $mapping, $customFieldTypes);
         $this->clientCache[$key] = $clientId;
 
-        return ['client_id' => $clientId];
-    }
-
-    public function resetCaches(): void
-    {
-        parent::resetCaches();
-        $this->clientCache = [];
     }
 
     private function lower(string $value): string

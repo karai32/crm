@@ -97,15 +97,6 @@ class ExportService
         return empty($valid) ? ['id'] : $valid;
     }
 
-    // ── Row count ─────────────────────────────────────────────────────────
-    // Use own filter builders so the count matches what we actually export.
-
-    // ── CSV streaming ──────────────────────────────────────────────────────
-
-    // ── XLSX building ──────────────────────────────────────────────────────
-
-    // ── Template CSV ───────────────────────────────────────────────────────
-
     // ── Internal SQL builders ──────────────────────────────────────────────
 
     private function buildContactsSql(array $filters, array $fields, array $fieldDefs): array
@@ -350,7 +341,5 @@ class ExportService
         $ids = array_map('intval', (array) ($source['tag_ids'] ?? []));
         return array_values(array_unique(array_filter($ids, fn ($id) => $id > 0)));
     }
-
-    // ── Common streaming/building helpers ─────────────────────────────────
 
 }

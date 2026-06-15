@@ -42,17 +42,23 @@ class ImportManager
         }
 
         $stored = $entityType . '-' . date('Y-m-d-H-i-s') . '-' . bin2hex(random_bytes(6)) . '.' . $extension;
-        if (!move_uploaded_file((string) $file['tmp_name'], $directory . '/' . $stored)) {
+        $target = $directory . '/' . $stored;
+        if (!move_uploaded_file((string) $file['tmp_name'], $target)) {
             return ['success' => false, 'message' => 'Could not save uploaded file.'];
         }
 
-        $id = $this->imports->createBatch(
-            $userId,
-            (string) $file['name'],
-            $stored,
-            $extension,
-            $entityType
-        );
+        try {
+            $id = $this->imports->createBatch(
+                $userId,
+                (string) $file['name'],
+                $stored,
+                $extension,
+                $entityType
+            );
+        } catch (Throwable $exception) {
+            @unlink($target);
+            throw $exception;
+        }
 
         return ['success' => true, 'batch_id' => $id];
     }
@@ -60,12 +66,16 @@ class ImportManager
     public function preview(int $batchId): ?array
     {
         $batch = $this->imports->findBatch($batchId);
-        if ($batch === null || !$this->canPreview($batch)) {
+        if ($batch === null || !in_array($batch['status'], ['uploaded', 'previewed'], true)) {
+            return null;
+        }
+        $path = $this->path((string) $batch['stored_filename']);
+        if (!is_file($path)) {
             return null;
         }
 
         $parsed = $this->reader->preview(
-            $this->path((string) $batch['stored_filename']),
+            $path,
             (string) $batch['file_type']
         );
         $this->imports->markPreviewed($batchId, $parsed['total_rows'], $parsed['headers']);
@@ -89,18 +99,23 @@ class ImportManager
         if ($batch === null) {
             return null;
         }
-        if (!in_array($batch['status'], ['uploaded', 'previewed', 'failed'], true)) {
+        if (!in_array($batch['status'], ['uploaded', 'previewed'], true)) {
             return $this->result($batch, true, 'This import has already been processed.');
         }
 
         $entityType = $batch['entity_type'] ?? 'contacts';
         $mapping = $this->mapping->clean($mapping, $entityType);
         $customFields = $this->mapping->cleanCustomFields($customFields);
-        $processor = $entityType === 'clients'
-            ? new ClientImportProcessor()
-            : new ContactImportProcessor();
+        $required = $entityType === 'clients' ? 'commercial_name' : 'first_name';
+        if (!in_array($required, $mapping, true)) {
+            return $this->result($batch, true, "Map a column to {$required} before importing.");
+        }
 
-        $this->imports->markProcessing($batchId);
+        $processor = $this->processor($entityType);
+
+        if (!$this->imports->claimForProcessing($batchId)) {
+            return $this->result($this->imports->findBatch($batchId) ?? $batch, true, 'This import is already processing.');
+        }
         $this->imports->clearBatchDetails($batchId);
         $this->imports->updateMapping($batchId, 0, [
             'mapping' => $mapping,
@@ -136,7 +151,7 @@ class ImportManager
                     if ($pdo->inTransaction()) {
                         $pdo->rollBack();
                     }
-                    $processor->resetCaches();
+                    $processor = $this->processor($entityType);
                     $errors++;
                     error_log("Import row {$rowNumber} failed: " . $exception->getMessage());
                     $this->imports->recordIssue($batchId, $rowNumber, $row, 'error', 'Unable to import this row.');
@@ -180,15 +195,14 @@ class ImportManager
         return $mime === false || in_array($mime, $allowed, true);
     }
 
-    private function canPreview(array $batch): bool
-    {
-        return in_array($batch['status'], ['uploaded', 'previewed', 'failed'], true)
-            && is_file($this->path((string) $batch['stored_filename']));
-    }
-
     private function path(string $filename): string
     {
         return dirname(__DIR__, 3) . '/storage/imports/' . basename($filename);
+    }
+
+    private function processor(string $entityType): AbstractImportProcessor
+    {
+        return $entityType === 'clients' ? new ClientImportProcessor() : new ContactImportProcessor();
     }
 
     private function result(array $batch, bool $failed, string $message): array

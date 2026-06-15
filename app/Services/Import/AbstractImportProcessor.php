@@ -16,14 +16,7 @@ abstract class AbstractImportProcessor
         $this->customFields = new CustomFieldRepository();
     }
 
-    abstract public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): array;
-
-    public function resetCaches(): void
-    {
-        $this->tagCache = [];
-        $this->sectorCache = [];
-        $this->customFieldCache = [];
-    }
+    abstract public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): void;
 
     protected function tagIds(string $value): array
     {
@@ -96,7 +89,7 @@ abstract class AbstractImportProcessor
 
     protected function boolValue(string $value): int
     {
-        return in_array($this->lower(trim($value)), ['1', 'yes', 'true', 'si', 'sí'], true) ? 1 : 0;
+        return in_array($this->lower(trim($value)), ['1', 'yes', 'true', 'si'], true) ? 1 : 0;
     }
 
     private function customField(string $column, string $entity, string $type): array

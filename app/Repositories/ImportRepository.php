@@ -108,20 +108,22 @@ class ImportRepository
         ]);
     }
 
-    public function markProcessing(int $id): void
+    public function claimForProcessing(int $id): bool
     {
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('
             UPDATE import_batches
             SET status = :status, started_at = NOW()
-            WHERE id = :id
+            WHERE id = :id AND status IN (\'uploaded\', \'previewed\')
         ');
 
         $statement->execute([
             'id' => $id,
             'status' => 'processing',
         ]);
+
+        return $statement->rowCount() === 1;
     }
 
     public function clearBatchDetails(int $id): void
@@ -134,9 +136,24 @@ class ImportRepository
 
     public function finishBatch(int $id, int $totalRows, int $importedRows, int $skippedRows, int $errorRows): void
     {
-        $pdo = Database::connect();
-        $status = ($skippedRows > 0 || $errorRows > 0) ? 'partial' : 'completed';
+        $status = ($skippedRows || $errorRows) ? 'partial' : 'completed';
+        $this->finish($id, $status, $totalRows, $importedRows, $skippedRows, $errorRows);
+    }
 
+    public function failBatch(int $id, int $totalRows, int $importedRows, int $skippedRows, int $errorRows): void
+    {
+        $this->finish($id, 'failed', $totalRows, $importedRows, $skippedRows, $errorRows);
+    }
+
+    private function finish(
+        int $id,
+        string $status,
+        int $totalRows,
+        int $importedRows,
+        int $skippedRows,
+        int $errorRows
+    ): void {
+        $pdo = Database::connect();
         $statement = $pdo->prepare('
             UPDATE import_batches
             SET status = :status,
@@ -151,31 +168,6 @@ class ImportRepository
         $statement->execute([
             'id' => $id,
             'status' => $status,
-            'total_rows' => $totalRows,
-            'imported_rows' => $importedRows,
-            'skipped_rows' => $skippedRows,
-            'error_rows' => $errorRows,
-        ]);
-    }
-
-    public function failBatch(int $id, int $totalRows, int $importedRows, int $skippedRows, int $errorRows): void
-    {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            UPDATE import_batches
-            SET status = :status,
-                total_rows = :total_rows,
-                imported_rows = :imported_rows,
-                skipped_rows = :skipped_rows,
-                error_rows = :error_rows,
-                finished_at = NOW()
-            WHERE id = :id
-        ');
-
-        $statement->execute([
-            'id' => $id,
-            'status' => 'failed',
             'total_rows' => $totalRows,
             'imported_rows' => $importedRows,
             'skipped_rows' => $skippedRows,

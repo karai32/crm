@@ -14,7 +14,7 @@ class ContactImportProcessor extends AbstractImportProcessor
         $this->clients = new ClientRepository();
     }
 
-    public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): array
+    public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): void
     {
         $firstName = trim((string) ($mapped['first_name'] ?? ''));
         $email = trim((string) ($mapped['email'] ?? ''));
@@ -58,14 +58,6 @@ class ContactImportProcessor extends AbstractImportProcessor
             $this->emailCache[$this->lower($email)] = true;
         }
 
-        return ['contact_id' => $contactId, 'client_id' => $clientId];
-    }
-
-    public function resetCaches(): void
-    {
-        parent::resetCaches();
-        $this->clientCache = [];
-        $this->emailCache = [];
     }
 
     private function emailExists(string $email): bool

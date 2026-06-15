@@ -5,16 +5,14 @@ class ExportManager
     private ExportService $queries;
     private ExportRepository $exports;
     private CustomFieldRepository $customFields;
-    private ExportCsvWriter $csv;
-    private ExportXlsxWriter $xlsx;
+    private ExportWriter $writer;
 
     public function __construct()
     {
         $this->queries = new ExportService();
         $this->exports = new ExportRepository();
         $this->customFields = new CustomFieldRepository();
-        $this->csv = new ExportCsvWriter();
-        $this->xlsx = new ExportXlsxWriter();
+        $this->writer = new ExportWriter();
     }
 
     public function page(string $entity): array
@@ -45,18 +43,15 @@ class ExportManager
         string $filename,
         $output
     ): int {
-        $entity = $this->entity($entity);
-        [$fields, $plan] = $this->plan($entity, $filters, $selectedFields);
-        $batchId = $this->exports->start($userId, $entity, 'csv', $filters, $fields, $filename);
-
-        try {
-            $rows = $this->csv->write($plan['sql'], $plan['params'], $plan['headers'], $output);
-            $this->exports->complete($batchId, $rows);
-            return $rows;
-        } catch (Throwable $exception) {
-            $this->exports->fail($batchId);
-            throw $exception;
-        }
+        return $this->export(
+            $entity,
+            'csv',
+            $filters,
+            $selectedFields,
+            $userId,
+            $filename,
+            fn (array $plan, string $_entity): int => $this->writer->csv($plan, $output)
+        );
     }
 
     public function writeXlsx(
@@ -67,18 +62,36 @@ class ExportManager
         string $filename,
         string $target = 'php://output'
     ): int {
+        return $this->export(
+            $entity,
+            'xlsx',
+            $filters,
+            $selectedFields,
+            $userId,
+            $filename,
+            fn (array $plan, string $normalizedEntity): int => $this->writer->xlsx(
+                $plan,
+                ucfirst($normalizedEntity),
+                $target
+            )
+        );
+    }
+
+    private function export(
+        string $entity,
+        string $format,
+        array $filters,
+        array $selectedFields,
+        ?int $userId,
+        string $filename,
+        callable $write
+    ): int {
         $entity = $this->entity($entity);
         [$fields, $plan] = $this->plan($entity, $filters, $selectedFields);
-        $batchId = $this->exports->start($userId, $entity, 'xlsx', $filters, $fields, $filename);
+        $batchId = $this->exports->start($userId, $entity, $format, $filters, $fields, $filename);
 
         try {
-            $rows = $this->xlsx->write(
-                $plan['sql'],
-                $plan['params'],
-                $plan['headers'],
-                $entity === 'contacts' ? 'Contacts' : 'Clients',
-                $target
-            );
+            $rows = $write($plan, $entity);
             $this->exports->complete($batchId, $rows);
             return $rows;
         } catch (Throwable $exception) {
