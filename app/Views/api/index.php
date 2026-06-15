@@ -1,11 +1,10 @@
 <!-- Page header -->
-<div class="page-header settings-header" style="margin-bottom:20px">
+<div class="page-header settings-header api-header">
     <div>
         <h1>API Credentials</h1>
         <span class="count-label"><?= count($apiKeys) ?> integration<?= count($apiKeys) !== 1 ? 's' : '' ?></span>
     </div>
-    <a href="<?= htmlspecialchars(Auth::url('/help/api'), ENT_QUOTES, 'UTF-8') ?>"
-       style="font-size:13px;color:var(--color-text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:5px">
+    <a href="<?= htmlspecialchars(Auth::url('/help/api'), ENT_QUOTES, 'UTF-8') ?>" class="api-back-link">
         API Reference
     </a>
 </div>
@@ -16,23 +15,23 @@ $clientId = (string) ($newCredentials['client_id'] ?? '');
 $secret = (string) ($newCredentials['secret'] ?? '');
 $basicAuth = $clientId . ':' . $secret;
 ?>
-<div style="display:flex;gap:14px;align-items:flex-start;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:20px">
-    <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:3px">API credentials created - copy the secret now</div>
-        <div style="font-size:12.5px;color:#15803d;margin-bottom:12px">The secret will not be shown again. Use the Basic Auth value in Formidable Forms.</div>
-        <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center">
-            <strong style="font-size:12px;color:#166534">Client ID</strong>
-            <code style="background:#dcfce7;border:1px solid #86efac;padding:6px 12px;border-radius:6px;font-size:12.5px;color:#14532d;word-break:break-all"><?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8') ?></code>
+<div class="api-new-credentials">
+    <div class="api-new-credentials-body">
+        <div class="api-new-credentials-title">API credentials created - copy the secret now</div>
+        <div class="api-new-credentials-subtitle">The secret will not be shown again. Use the Basic Auth value in Formidable Forms.</div>
+        <div class="api-new-credentials-grid">
+            <strong class="api-new-credentials-label">Client ID</strong>
+            <code class="api-new-credentials-code"><?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8') ?></code>
             <span></span>
 
-            <strong style="font-size:12px;color:#166534">Secret</strong>
-            <code id="newSecretValue" style="background:#dcfce7;border:1px solid #86efac;padding:6px 12px;border-radius:6px;font-size:12.5px;color:#14532d;word-break:break-all"><?= htmlspecialchars($secret, ENT_QUOTES, 'UTF-8') ?></code>
-            <button type="button" id="copyNewSecret" style="padding:6px 14px;border-radius:6px;border:1px solid #86efac;background:#dcfce7;color:#166534;font-size:12.5px;font-weight:600;cursor:pointer"
+            <strong class="api-new-credentials-label">Secret</strong>
+            <code id="newSecretValue" class="api-new-credentials-code"><?= htmlspecialchars($secret, ENT_QUOTES, 'UTF-8') ?></code>
+            <button type="button" id="copyNewSecret" class="api-new-credentials-copy"
                     onclick="copyCredential('newSecretValue', this, 'Copy secret')">Copy secret</button>
 
-            <strong style="font-size:12px;color:#166534">Basic Auth</strong>
-            <code id="newBasicAuthValue" style="background:#dcfce7;border:1px solid #86efac;padding:6px 12px;border-radius:6px;font-size:12.5px;color:#14532d;word-break:break-all"><?= htmlspecialchars($basicAuth, ENT_QUOTES, 'UTF-8') ?></code>
-            <button type="button" id="copyNewBasicAuth" style="padding:6px 14px;border-radius:6px;border:1px solid #86efac;background:#dcfce7;color:#166534;font-size:12.5px;font-weight:600;cursor:pointer"
+            <strong class="api-new-credentials-label">Basic Auth</strong>
+            <code id="newBasicAuthValue" class="api-new-credentials-code"><?= htmlspecialchars($basicAuth, ENT_QUOTES, 'UTF-8') ?></code>
+            <button type="button" id="copyNewBasicAuth" class="api-new-credentials-copy"
                     onclick="copyCredential('newBasicAuthValue', this, 'Copy Basic Auth')">Copy Basic Auth</button>
         </div>
     </div>
@@ -47,33 +46,33 @@ function copyCredential(elementId, button, originalLabel) {
 </script>
 <?php endif; ?>
 
-<div style="background:var(--color-white);border:1px solid var(--color-neutral-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden">
-    <div style="padding:20px 22px;border-bottom:1px solid var(--color-neutral-100)">
-        <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--color-neutral);margin-bottom:14px">Create API credentials</div>
+<div class="api-card">
+    <div class="api-card-create">
+        <div class="api-section-label">Create API credentials</div>
         <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/store'), ENT_QUOTES, 'UTF-8') ?>">
             <?= Csrf::field() ?>
-            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
-                <div class="field" style="flex:1;min-width:200px;margin:0">
-                    <label for="keyName" style="font-size:12px;font-weight:600;color:var(--color-text-muted);margin-bottom:5px;display:block">
-                        Integration name <span style="color:var(--color-danger)">*</span>
+            <div class="api-create-row">
+                <div class="field api-name-field">
+                    <label for="keyName">
+                        Integration name <span class="required-star">*</span>
                     </label>
-                    <input id="keyName" type="text" name="name" placeholder="e.g. Website contact form" required style="margin:0">
+                    <input id="keyName" type="text" name="name" placeholder="e.g. Website contact form" required class="api-name-input">
                 </div>
-                <button class="btn btn-primary" type="submit" style="flex-shrink:0">Create credentials</button>
+                <button class="btn btn-primary api-submit-btn" type="submit">Create credentials</button>
             </div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px">
+            <div class="api-scopes-row">
                 <?php foreach (['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'] as $scope): ?>
                 <span class="api-scope"><?= htmlspecialchars($scope, ENT_QUOTES, 'UTF-8') ?></span>
                 <?php endforeach; ?>
             </div>
-            <p style="font-size:12px;color:var(--color-text-muted);margin:5px 0 0">All new integrations receive these scopes by default.</p>
+            <p class="api-scopes-note">All new integrations receive these scopes by default.</p>
         </form>
     </div>
 
     <?php if (!empty($apiKeys)): ?>
-    <div style="padding:16px 22px 20px">
-        <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--color-neutral);margin-bottom:12px">Existing integrations</div>
-        <div style="overflow-x:auto;border:1px solid var(--color-neutral-200);border-radius:var(--radius-sm)">
+    <div class="api-card-list">
+        <div class="api-section-label">Existing integrations</div>
+        <div class="api-table-scroll">
             <table class="api-keys-table">
                 <thead>
                     <tr>
@@ -88,17 +87,17 @@ function copyCredential(elementId, button, originalLabel) {
                 <tbody>
                     <?php foreach ($apiKeys as $key): ?>
                     <tr>
-                        <td style="font-weight:500"><?= htmlspecialchars($key['name'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td><code style="background:var(--color-neutral-100);padding:2px 6px;border-radius:3px;font-size:11.5px"><?= htmlspecialchars($key['client_id'], ENT_QUOTES, 'UTF-8') ?></code></td>
+                        <td class="col-key-name"><?= htmlspecialchars($key['name'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><code class="api-key-code"><?= htmlspecialchars($key['client_id'], ENT_QUOTES, 'UTF-8') ?></code></td>
                         <td>
                             <?php if ((int) $key['is_active'] === 1): ?>
-                                <span class="tag-badge" style="background:#f0fdf4;border-color:#86efac;color:#166534">Active</span>
+                                <span class="tag-badge api-badge-active">Active</span>
                             <?php else: ?>
-                                <span class="tag-badge" style="background:var(--color-neutral-100);border-color:var(--color-neutral-300);color:var(--color-neutral)">Revoked</span>
+                                <span class="tag-badge api-badge-revoked">Revoked</span>
                             <?php endif; ?>
                         </td>
-                        <td style="color:var(--color-text-muted);font-size:12.5px"><?= $key['last_used_at'] ? htmlspecialchars(date('d M Y', strtotime($key['last_used_at'])), ENT_QUOTES, 'UTF-8') : '-' ?></td>
-                        <td style="color:var(--color-text-muted);font-size:12.5px"><?= htmlspecialchars(date('d M Y', strtotime($key['created_at'])), ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="col-date-muted"><?= $key['last_used_at'] ? htmlspecialchars(date('d M Y', strtotime($key['last_used_at'])), ENT_QUOTES, 'UTF-8') : '-' ?></td>
+                        <td class="col-date-muted"><?= htmlspecialchars(date('d M Y', strtotime($key['created_at'])), ENT_QUOTES, 'UTF-8') ?></td>
                         <td>
                             <?php
                             $fullScopes = ['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'];
@@ -107,25 +106,25 @@ function copyCredential(elementId, button, originalLabel) {
                             ?>
                             <div class="action-links">
                                 <?php if ($needsSync): ?>
-                                <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/sync-scopes'), ENT_QUOTES, 'UTF-8') ?>" style="display:inline">
+                                <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/sync-scopes'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= (int) $key['id'] ?>">
-                                    <button class="action-edit" type="submit" style="color:#d97706;background:none;border:0;padding:0;cursor:pointer"
+                                    <button class="action-edit api-btn-sync" type="submit"
                                             onclick="return confirm('Grant this integration all current scopes?')">Sync scopes</button>
                                 </form>
                                 <?php endif; ?>
                                 <?php if ((int) $key['is_active'] === 1): ?>
-                                <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/revoke'), ENT_QUOTES, 'UTF-8') ?>" style="display:inline">
+                                <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/revoke'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= (int) $key['id'] ?>">
-                                    <button class="action-edit" type="submit" style="background:none;border:0;padding:0;cursor:pointer"
+                                    <button class="action-edit api-btn-action" type="submit"
                                             onclick="return confirm('Revoke these credentials? The integration will stop working.')">Revoke</button>
                                 </form>
                                 <?php endif; ?>
-                                <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/delete'), ENT_QUOTES, 'UTF-8') ?>" style="display:inline">
+                                <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/delete'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= (int) $key['id'] ?>">
-                                    <button class="action-delete" type="submit" style="background:none;border:0;padding:0;cursor:pointer"
+                                    <button class="action-delete api-btn-action" type="submit"
                                             onclick="return confirm('Permanently delete these API credentials?')">Delete</button>
                                 </form>
                             </div>
@@ -137,7 +136,7 @@ function copyCredential(elementId, button, originalLabel) {
         </div>
     </div>
     <?php else: ?>
-    <div style="padding:24px 22px;color:var(--color-text-muted);font-size:13.5px">
+    <div class="api-empty-state">
         No API integrations yet. Create credentials above to start using the API.
     </div>
     <?php endif; ?>

@@ -19,7 +19,7 @@ foreach ($roles as $role) {
 </div>
 
 <?php if (!empty($error)): ?>
-    <div class="alert alert-error" style="margin-bottom:16px"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
 <?php endif; ?>
 
 <form method="post" action="<?= htmlspecialchars(Auth::url('/users/store'), ENT_QUOTES, 'UTF-8') ?>">
@@ -28,19 +28,19 @@ foreach ($roles as $role) {
         <div class="settings-form-body">
             <div class="settings-form-grid">
                 <div class="field">
-                    <label for="name">Name <span style="color:var(--color-danger)">*</span></label>
+                    <label for="name">Name <span class="required-star">*</span></label>
                     <input id="name" type="text" name="name"
                            value="<?= htmlspecialchars($user['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                            required autofocus>
                 </div>
                 <div class="field">
-                    <label for="email">Email <span style="color:var(--color-danger)">*</span></label>
+                    <label for="email">Email <span class="required-star">*</span></label>
                     <input id="email" type="email" name="email"
                            value="<?= htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                            required>
                 </div>
                 <div class="field">
-                    <label for="password">Password <span style="color:var(--color-danger)">*</span></label>
+                    <label for="password">Password <span class="required-star">*</span></label>
                     <input id="password" type="password" name="password" required>
                 </div>
                 <div class="field">

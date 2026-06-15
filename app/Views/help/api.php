@@ -43,21 +43,21 @@ function helpApiCodeBlock(string $label, string $id, string $code): void { ?>
 ?>
 
 <!-- Back button + title -->
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px">
+<div class="help-api-back-row">
     <a href="<?= htmlspecialchars(Auth::url('/help?lang=' . $locale), ENT_QUOTES, 'UTF-8') ?>" class="help-topic-back">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
         </svg>
         <?= $locale === 'es' ? 'Centro de ayuda' : 'Help Center' ?>
     </a>
-    <span style="font-size:13px;color:var(--color-text-muted)">
+    <span class="help-api-base-url">
         Base URL:
-        <code style="background:var(--color-neutral-100);padding:2px 7px;border-radius:4px;font-size:12px"><?= htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8') ?></code>
+        <code class="help-api-inline-code"><?= htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8') ?></code>
     </span>
 </div>
 
 <!-- Two-column layout: TOC + content -->
-<div class="help-layout" style="margin-top:20px">
+<div class="help-layout help-layout-mt">
 
     <!-- Sticky TOC -->
     <aside class="help-toc">
@@ -85,23 +85,23 @@ function helpApiCodeBlock(string $label, string $id, string $code): void { ?>
             </div>
 
             <div class="help-card-body">
-                <p style="font-size:13.5px;color:var(--color-text);line-height:1.65;margin:0 0 16px">
+                <p class="api-desc-text">
                     Every request uses HTTP Basic Authentication with an active Client ID and Secret.
                     The Secret is shown only once at creation time, and only its SHA-256 hash is stored in the database.
                     Send requests exclusively over HTTPS. Manage integrations at
-                    <a href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>" style="color:var(--color-primary)">Settings - API Credentials</a>.
+                    <a href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>" class="api-link-primary">Settings - API Credentials</a>.
                 </p>
 
                 <p class="api-label">Request header</p>
                 <?php helpApiCodeBlock('HTTP', 'ex-auth', '<span class="ch">Authorization</span>: <span class="cs">Basic base64(client_id:secret)</span>'); ?>
 
-                <p class="api-label" style="margin-top:20px">Formidable Forms</p>
-                <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 10px">
+                <p class="api-label api-label-mt">Formidable Forms</p>
+                <p class="help-api-body-text-muted">
                     Enter the raw value below in the Basic Auth field. Formidable builds the Authorization header automatically.
                 </p>
                 <?php helpApiCodeBlock('Basic Auth value', 'ex-formidable-auth', '<span class="cs">crm_your_client_id:your_secret</span>'); ?>
 
-                <p class="api-label" style="margin-top:20px">PowerShell example</p>
+                <p class="api-label api-label-mt">PowerShell example</p>
                 <?php helpApiCodeBlock('PowerShell', 'ex-ps', <<<"CODE"
 <span class="ck">$clientId</span> = <span class="cs">"crm_your_client_id"</span>
 <span class="ck">$secret</span> = <span class="cs">"your_secret"</span>
@@ -119,8 +119,8 @@ Invoke-RestMethod -Method Post `
     -Body <span class="cs">'[{"first_name":"Ivan","email":"ivan@example.com","tag":"VIP","client":"Acme Corp"}]'</span>
 CODE); ?>
 
-                <p class="api-label" style="margin-top:20px">Response envelope</p>
-                <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 10px">All responses return JSON with a consistent envelope.</p>
+                <p class="api-label api-label-mt">Response envelope</p>
+                <p class="help-api-body-text-muted">All responses return JSON with a consistent envelope.</p>
                 <div class="api-resp-shape">
                     <?php helpApiCodeBlock('Success', 'ex-resp-ok', <<<"CODE"
 {
@@ -139,11 +139,11 @@ CODE); ?>
 CODE); ?>
                 </div>
 
-                <p class="api-label" style="margin-top:20px">Scopes</p>
-                <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 10px">
-                    Each integration carries a set of scopes. <strong style="color:var(--color-text)">write</strong> implies <strong style="color:var(--color-text)">read</strong> for the same resource.
+                <p class="api-label api-label-mt">Scopes</p>
+                <p class="help-api-body-text-muted">
+                    Each integration carries a set of scopes. <strong class="help-api-strong">write</strong> implies <strong class="help-api-strong">read</strong> for the same resource.
                 </p>
-                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <div class="api-scopes-row">
                     <?php foreach (['contacts:read','contacts:write','clients:read','clients:write','sectors:read','sectors:write','tags:read','tags:write'] as $s): ?>
                     <span class="api-scope"><?= $s ?></span>
                     <?php endforeach; ?>
@@ -159,10 +159,10 @@ CODE); ?>
             </div>
 
             <div class="help-card-body">
-                <p style="font-size:13.5px;line-height:1.65;margin:0 0 16px;color:var(--color-text-muted)">
+                <p class="api-desc-text">
                     Contacts represent individual people. Only the first name is required.
                     When an email is provided it must be valid and unique. Optional tags and clients are
-                    <strong style="color:var(--color-text)">created automatically</strong> when they don't exist.
+                    <strong class="help-api-strong">created automatically</strong> when they don't exist.
                     Custom fields are saved silently — unknown field slugs are ignored.
                 </p>
 
@@ -216,23 +216,23 @@ CODE); ?>
                         <tr><td><code>custom_fields</code></td><td><span class="api-type">object</span></td><td><span class="api-badge-opt">optional</span></td><td>Key/value pairs by field slug. Unknown slugs are ignored.</td></tr>
                     </tbody>
                 </table>
-                <p style="font-size:12px;color:var(--color-text-muted);margin:6px 0 0">
+                <p class="api-patch-note">
                     PATCH: all fields are optional — only keys present in the body are updated. Pass
-                    <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:11.5px">"email": null</code>
+                    <code class="help-api-inline-code">"email": null</code>
                     or an empty string to clear the email.
-                    <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:11.5px">tags</code> and
-                    <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:11.5px">clients</code> accept an array of name strings and replace the current list.
+                    <code class="help-api-inline-code">tags</code> and
+                    <code class="help-api-inline-code">clients</code> accept an array of name strings and replace the current list.
                 </p>
 
-                <p class="api-label" style="margin-top:20px">GET filters</p>
-                <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 10px">All parameters are optional and combine with AND logic.</p>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px">
+                <p class="api-label api-label-mt">GET filters</p>
+                <p class="help-api-body-text-muted">All parameters are optional and combine with AND logic.</p>
+                <div class="api-filter-params api-filter-params-mb">
                     <?php foreach (['page','per_page (max 100)','first_name','last_name','email','phone','is_company','client_id','tag_id','created_from (YYYY-MM-DD)','created_to (YYYY-MM-DD)'] as $p): ?>
-                    <code style="background:var(--color-neutral-100);padding:2px 7px;border-radius:4px;font-size:12px"><?= htmlspecialchars($p, ENT_QUOTES, 'UTF-8') ?></code>
+                    <code class="help-api-inline-code"><?= htmlspecialchars($p, ENT_QUOTES, 'UTF-8') ?></code>
                     <?php endforeach; ?>
                 </div>
 
-                <p class="api-label" style="margin-top:20px">Example — batch create</p>
+                <p class="api-label api-label-mt">Example — batch create</p>
                 <?php helpApiCodeBlock('POST /api/v1/contacts', 'ex-contacts-post', <<<"CODE"
 [
   {
@@ -247,7 +247,7 @@ CODE); ?>
 ]
 CODE); ?>
 
-                <p class="api-label" style="margin-top:16px">Example — response (207)</p>
+                <p class="api-label api-label-mt">Example — response (207)</p>
                 <?php helpApiCodeBlock('Response', 'ex-contacts-207', <<<"CODE"
 {
   <span class="ck">"success"</span>: <span class="cn">true</span>,
@@ -260,7 +260,7 @@ CODE); ?>
 }
 CODE); ?>
 
-                <p class="api-label" style="margin-top:16px">Example — PATCH</p>
+                <p class="api-label api-label-mt">Example — PATCH</p>
                 <?php helpApiCodeBlock('PATCH /api/v1/contacts/42', 'ex-contacts-patch', <<<"CODE"
 {
   <span class="ck">"first_name"</span>: <span class="cs">"John"</span>,
@@ -280,9 +280,9 @@ CODE); ?>
             </div>
 
             <div class="help-card-body">
-                <p style="font-size:13.5px;line-height:1.65;margin:0 0 16px;color:var(--color-text-muted)">
-                    Clients are organisations or companies. Only <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:12px">commercial_name</code> is required.
-                    The <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:12px">sector</code> field is resolved by name — the sector must already exist in the system.
+                <p class="help-api-clients-desc">
+                    Clients are organisations or companies. Only <code class="help-api-inline-code">commercial_name</code> is required.
+                    The <code class="help-api-inline-code">sector</code> field is resolved by name — the sector must already exist in the system.
                     Tags are find-or-created just like for contacts.
                 </p>
 
@@ -342,10 +342,10 @@ CODE); ?>
                     </tbody>
                 </table>
 
-                <p class="api-label" style="margin-top:20px">GET filters</p>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+                <p class="api-label api-label-mt">GET filters</p>
+                <div class="api-filter-params api-filter-params-mb">
                     <?php foreach (['page','per_page (max 100)','commercial_name','legal_name','city','country','sector_id','tag_id','created_from','created_to'] as $p): ?>
-                    <code style="background:var(--color-neutral-100);padding:2px 7px;border-radius:4px;font-size:12px"><?= htmlspecialchars($p, ENT_QUOTES, 'UTF-8') ?></code>
+                    <code class="help-api-inline-code"><?= htmlspecialchars($p, ENT_QUOTES, 'UTF-8') ?></code>
                     <?php endforeach; ?>
                 </div>
 
@@ -364,7 +364,7 @@ CODE); ?>
 ]
 CODE); ?>
 
-                <p class="api-label" style="margin-top:16px">Example — GET single client</p>
+                <p class="api-label api-label-mt">Example — GET single client</p>
                 <?php helpApiCodeBlock('Response', 'ex-clients-get', <<<"CODE"
 {
   <span class="ck">"success"</span>: <span class="cn">true</span>,
@@ -390,10 +390,10 @@ CODE); ?>
             </div>
 
             <div class="help-card-body">
-                <p style="font-size:13.5px;line-height:1.65;margin:0 0 16px;color:var(--color-text-muted)">
-                    Sectors are a curated reference list used to classify clients. They are <strong style="color:var(--color-text)">not created automatically</strong> —
+                <p class="api-desc-text">
+                    Sectors are a curated reference list used to classify clients. They are <strong class="help-api-strong">not created automatically</strong> —
                     use the API (or the web UI) to manage them explicitly.
-                    Deleting a sector that still has clients will <strong style="color:var(--color-text)">deactivate</strong> it instead of deleting it,
+                    Deleting a sector that still has clients will <strong class="help-api-strong">deactivate</strong> it instead of deleting it,
                     and the response will indicate which action was taken.
                 </p>
 
@@ -442,10 +442,10 @@ CODE); ?>
                     </tbody>
                 </table>
 
-                <p class="api-label" style="margin-top:20px">GET filters</p>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+                <p class="api-label api-label-mt">GET filters</p>
+                <div class="api-filter-params api-filter-params-mb">
                     <?php foreach (['name (partial match)','is_active (0 or 1)'] as $p): ?>
-                    <code style="background:var(--color-neutral-100);padding:2px 7px;border-radius:4px;font-size:12px"><?= htmlspecialchars($p, ENT_QUOTES, 'UTF-8') ?></code>
+                    <code class="help-api-inline-code"><?= htmlspecialchars($p, ENT_QUOTES, 'UTF-8') ?></code>
                     <?php endforeach; ?>
                 </div>
 
@@ -454,7 +454,7 @@ CODE); ?>
 [{ <span class="ck">"name"</span>: <span class="cs">"Technology"</span> }, { <span class="ck">"name"</span>: <span class="cs">"Healthcare"</span> }]
 CODE); ?>
 
-                <p style="font-size:12.5px;color:var(--color-text-muted);margin:12px 0 8px">DELETE response — the <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:11.5px">action</code> field tells you what happened:</p>
+                <p class="api-sectors-delete-note">DELETE response — the <code class="help-api-inline-code">action</code> field tells you what happened:</p>
                 <?php helpApiCodeBlock('Response', 'ex-sectors-del', <<<"CODE"
 { <span class="ck">"success"</span>: <span class="cn">true</span>, <span class="ck">"data"</span>: { <span class="ck">"id"</span>: <span class="cn">3</span>, <span class="ck">"action"</span>: <span class="cs">"deactivated"</span> } }
 <span class="cc">// or: "action": "deleted"  — when no clients were linked</span>
@@ -470,8 +470,8 @@ CODE); ?>
             </div>
 
             <div class="help-card-body">
-                <p style="font-size:13.5px;line-height:1.65;margin:0 0 16px;color:var(--color-text-muted)">
-                    Tags can be applied to both contacts and clients. They are <strong style="color:var(--color-text)">created automatically</strong>
+                <p class="api-desc-text">
+                    Tags can be applied to both contacts and clients. They are <strong class="help-api-strong">created automatically</strong>
                     when referenced by name during contact or client creation, but you can also manage them directly here.
                     Deleting a tag removes it from all linked contacts and clients (ON DELETE CASCADE).
                 </p>
@@ -521,9 +521,9 @@ CODE); ?>
                     </tbody>
                 </table>
 
-                <p class="api-label" style="margin-top:20px">GET filters</p>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-                    <code style="background:var(--color-neutral-100);padding:2px 7px;border-radius:4px;font-size:12px">name (partial match)</code>
+                <p class="api-label api-label-mt">GET filters</p>
+                <div class="api-filter-params api-filter-params-mb">
+                    <code class="help-api-inline-code">name (partial match)</code>
                 </div>
 
                 <p class="api-label">Example — create with color &amp; PATCH</p>

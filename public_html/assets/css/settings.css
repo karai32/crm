@@ -490,3 +490,52 @@
     margin-top: 4px;
     display: block;
 }
+
+/* === Migrated from inline styles === */
+
+/* Tag color hint text */
+.color-hint {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+    display: block;
+}
+
+/* Settings table: muted last-login / date cells */
+.settings-table td.col-last-login {
+    color: var(--color-neutral);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* Settings table: sort order column */
+.settings-table td.col-sort-order {
+    color: var(--color-neutral);
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Settings table: inline No badge alternative */
+.badge-no {
+    color: var(--color-neutral);
+    font-size: 13px;
+}
+
+/* Custom-fields label for select options hint */
+.label-options-hint {
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+/* Tag color cell display */
+.tag-color-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-neutral);
+}
+
+.tag-color-code {
+    font-size: 12px;
+}

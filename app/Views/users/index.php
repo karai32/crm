@@ -34,7 +34,7 @@ function userPermissionIcon(string $permission): string
     </div>
     <div class="page-actions">
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/users/create'), ENT_QUOTES, 'UTF-8') ?>">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon-sm">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
             Create user
@@ -44,7 +44,7 @@ function userPermissionIcon(string $permission): string
 
 <div class="settings-table-card">
     <?php if (empty($users)): ?>
-        <p style="padding:24px 16px;color:var(--color-text-muted);font-size:14px;">No users found.</p>
+        <p class="table-empty-state">No users found.</p>
     <?php else: ?>
     <table class="settings-table">
         <thead>
@@ -113,7 +113,7 @@ function userPermissionIcon(string $permission): string
                             <span class="badge-inactive">Inactive</span>
                         <?php endif; ?>
                     </td>
-                    <td style="color:var(--color-neutral);font-size:13px;white-space:nowrap">
+                    <td class="col-last-login">
                         <?= htmlspecialchars($user['last_login_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
                     </td>
                     <td>

@@ -307,3 +307,8 @@
 @media (max-width: 600px) {
     .stat-cards { grid-template-columns: 1fr; }
 }
+
+/* === Migrated from inline styles === */
+
+/* Sector distribution bar fill — width is set dynamically via inline style (CSS custom property approach not needed as width is the only dynamic value) */
+/* Note: .sector-row-bar-fill width is dynamic (PHP value), kept as inline style */

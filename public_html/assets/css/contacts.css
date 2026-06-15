@@ -500,3 +500,35 @@
 @media (max-width: 480px) {
     .filter-panel .filter-grid { grid-template-columns: 1fr; }
 }
+
+/* === Migrated from inline styles === */
+
+/* Contacts table: empty state with padding */
+.contacts-table-card.is-empty {
+    padding: 28px 20px;
+    color: var(--color-neutral);
+    font-size: 14px;
+}
+
+/* Contact show: tags container */
+.card-tags-body {
+    padding: 12px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Contact sidebar: client icon */
+.contact-sidebar-item svg {
+    width: 14px;
+    height: 14px;
+    color: var(--color-neutral);
+    flex-shrink: 0;
+}
+
+.contact-sidebar-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--color-neutral);
+    flex-shrink: 0;
+}

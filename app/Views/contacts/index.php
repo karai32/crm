@@ -382,7 +382,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 
 <!-- Table -->
 <?php if (empty($contacts)): ?>
-    <div class="contacts-table-card" style="padding:28px 20px; color:var(--color-neutral); font-size:14px;">
+    <div class="contacts-table-card is-empty">
         No contacts found.
     </div>
 <?php else: ?>

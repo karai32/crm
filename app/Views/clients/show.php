@@ -4,7 +4,7 @@
 <div class="client-hero">
     <div class="client-hero-left">
         <div class="client-hero-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" style="width:22px;height:22px">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="btn-icon-md">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
             </svg>
         </div>
@@ -54,7 +54,7 @@
 <div class="client-detail-layout">
 
     <!-- Main info -->
-    <div class="card" style="padding:0;overflow:hidden;">
+    <div class="card card-flush">
         <table class="detail-table">
             <tbody>
                 <tr>
@@ -97,8 +97,7 @@
                     <th class="detail-th">Website</th>
                     <td class="detail-td">
                         <?php if (!empty($client['website'])): ?>
-                            <a href="<?= htmlspecialchars($client['website'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener"
-                               style="color:var(--color-tertiary)">
+                            <a class="client-website-link" href="<?= htmlspecialchars($client['website'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">
                                 <?= htmlspecialchars($client['website'], ENT_QUOTES, 'UTF-8') ?>
                             </a>
                         <?php else: ?>-<?php endif; ?>
@@ -116,9 +115,9 @@
 
     <!-- Sidebar: custom fields -->
     <?php if (!empty($customFields)): ?>
-    <div class="card" style="padding:0;overflow:hidden;">
-        <div style="padding:12px 16px 8px;border-bottom:1px solid var(--color-neutral-200)">
-            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--color-neutral)">Custom fields</span>
+    <div class="card card-flush">
+        <div class="card-section-header">
+            <span class="card-section-label">Custom fields</span>
         </div>
         <table class="detail-table">
             <tbody>
@@ -138,14 +137,14 @@
     <?php endif; ?>
 
     <!-- Sidebar: tags -->
-    <div class="card" style="padding:0;overflow:hidden;">
-        <div style="padding:12px 16px 8px;border-bottom:1px solid var(--color-neutral-200)">
-            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--color-neutral)">Tags</span>
+    <div class="card card-flush">
+        <div class="card-section-header">
+            <span class="card-section-label">Tags</span>
         </div>
         <?php if (empty($tags)): ?>
             <div class="sidebar-empty">No tags assigned.</div>
         <?php else: ?>
-            <div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:6px;">
+            <div class="card-tags-body">
                 <?php foreach ($tags as $tag): ?>
                     <?php $c = htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
                     <span class="tag-badge" <?= $c ? 'style="background:' . $c . '22;border-color:' . $c . '44;color:' . $c . '"' : '' ?>>
@@ -162,14 +161,14 @@
 </div>
 
 <!-- Related contacts -->
-<div class="card" style="padding:0;overflow:hidden;margin-bottom:20px;">
-    <div style="padding:14px 16px 10px;border-bottom:1px solid var(--color-neutral-200);display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:13px;font-weight:600;color:var(--color-text)">Related contacts</span>
-        <span style="font-size:12px;color:var(--color-text-muted)"><?= count($contacts) ?> total</span>
+<div class="card card-related-contacts">
+    <div class="card-related-contacts-header">
+        <span class="card-related-contacts-title">Related contacts</span>
+        <span class="card-related-contacts-count"><?= count($contacts) ?> total</span>
     </div>
 
     <?php if (empty($contacts)): ?>
-        <p style="padding:16px;font-size:13px;color:var(--color-text-muted);">No contacts linked to this client.</p>
+        <p class="card-no-contacts">No contacts linked to this client.</p>
     <?php else: ?>
         <table class="related-contacts-table">
             <thead>
@@ -183,11 +182,11 @@
             <tbody>
                 <?php foreach ($contacts as $contact): ?>
                     <tr>
-                        <td style="font-weight:500">
+                        <td class="col-contact-name">
                             <?= htmlspecialchars(trim($contact['first_name'] . ' ' . ($contact['last_name'] ?? '')), ENT_QUOTES, 'UTF-8') ?>
                         </td>
-                        <td style="color:var(--color-neutral);font-size:13px"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                        <td style="color:var(--color-neutral);font-size:13px"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="col-contact-muted"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="col-contact-muted"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                         <td>
                             <a class="action-view" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">View</a>
                         </td>

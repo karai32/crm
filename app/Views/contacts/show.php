@@ -105,7 +105,7 @@ $canEditContacts = Auth::can('contacts.edit');
             <?php if (empty($tags)): ?>
                 <div class="sidebar-empty">No tags assigned.</div>
             <?php else: ?>
-                <div style="padding:12px 16px; display:flex; flex-wrap:wrap; gap:6px;">
+                <div class="card-tags-body">
                     <?php foreach ($tags as $tag): ?>
                         <span class="tag-badge" style="<?= !empty($tag['color']) ? 'background:' . htmlspecialchars($tag['color'], ENT_QUOTES, 'UTF-8') . '22; border-color:' . htmlspecialchars($tag['color'], ENT_QUOTES, 'UTF-8') . '44; color:' . htmlspecialchars($tag['color'], ENT_QUOTES, 'UTF-8') : '' ?>">
                             <?php if (!empty($tag['color'])): ?>
@@ -127,7 +127,7 @@ $canEditContacts = Auth::can('contacts.edit');
                 <div class="contact-sidebar-list">
                     <?php foreach ($clients as $client): ?>
                         <div class="contact-sidebar-item">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" style="width:14px;height:14px;color:var(--color-neutral);flex-shrink:0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="contact-sidebar-icon">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12"/>
                             </svg>
                             <a href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">

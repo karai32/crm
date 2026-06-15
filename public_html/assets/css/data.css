@@ -386,3 +386,58 @@
     .export-layout { grid-template-columns: 1fr; }
     .export-sidebar { position: static; }
 }
+
+/* === Migrated from inline styles === */
+
+/* Export history: no exports yet */
+.export-no-history {
+    padding: 20px 16px;
+    color: var(--color-text-muted);
+    font-size: 13.5px;
+}
+
+/* Export history table: rows header right-aligned */
+.export-history-table th.col-rows-header {
+    text-align: right;
+}
+
+/* Export history table: ID column muted */
+.export-history-table td.col-export-id {
+    color: var(--color-neutral);
+    font-size: 12.5px;
+}
+
+/* Export history table: filename column */
+.export-history-table td.col-export-file {
+    font-size: 12.5px;
+    color: var(--color-neutral);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Export history table: by/date muted columns */
+.export-history-table td.col-export-muted {
+    font-size: 12.5px;
+    color: var(--color-neutral);
+}
+
+/* Export history table: date column (no wrap) */
+.export-history-table td.col-export-date {
+    font-size: 12.5px;
+    color: var(--color-neutral);
+    white-space: nowrap;
+}
+
+/* Export form: XLSX N/A badge */
+.format-option-na {
+    font-size: 10px;
+    color: var(--color-danger);
+}
+
+/* Export: section title toggles flex row */
+.export-section-title-actions {
+    display: flex;
+    gap: 8px;
+}

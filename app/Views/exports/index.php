@@ -62,7 +62,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
             <div class="export-section">
                 <div class="export-section-title">
                     <?= htmlspecialchars($groupName, ENT_QUOTES, 'UTF-8') ?>
-                    <div style="display:flex;gap:8px">
+                    <div class="export-section-title-actions">
                         <button type="button" onclick="toggleGroup(this, true)">All</button>
                         <button type="button" onclick="toggleGroup(this, false)">None</button>
                     </div>
@@ -104,7 +104,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                             </svg>
                             XLSX
                             <?php if (!$xlsxAvailable): ?>
-                            <span style="font-size:10px;color:var(--color-danger)">N/A</span>
+                            <span class="format-option-na">N/A</span>
                             <?php endif; ?>
                         </label>
                     </div>
@@ -166,7 +166,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
 
     <div class="export-history-card">
         <?php if (empty($recentExports)): ?>
-            <p style="padding:20px 16px;color:var(--color-text-muted);font-size:13.5px;">No exports yet.</p>
+            <p class="export-no-history">No exports yet.</p>
         <?php else: ?>
         <table class="export-history-table">
             <thead>
@@ -175,7 +175,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                     <th>Entity</th>
                     <th>File</th>
                     <th>Format</th>
-                    <th style="text-align:right">Rows</th>
+                    <th class="col-num-header">Rows</th>
                     <th>By</th>
                     <th>Date</th>
                 </tr>
@@ -189,13 +189,13 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                     $entityBadgeLabel = ucfirst($entityKey);
                 ?>
                 <tr>
-                    <td style="color:var(--color-neutral);font-size:12.5px"><?= (int) $export['id'] ?></td>
+                    <td class="col-export-id"><?= (int) $export['id'] ?></td>
                     <td>
                         <span class="export-entity-badge <?= $entityBadgeClass ?>">
                             <?= $entityBadgeLabel ?>
                         </span>
                     </td>
-                    <td style="font-size:12.5px;color:var(--color-neutral);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                    <td class="col-export-file">
                         <?= htmlspecialchars($filename, ENT_QUOTES, 'UTF-8') ?>
                     </td>
                     <td>
@@ -204,10 +204,10 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                         </span>
                     </td>
                     <td class="col-num"><?= number_format((int) ($export['total_rows'] ?? 0)) ?></td>
-                    <td style="font-size:12.5px;color:var(--color-neutral)">
+                    <td class="col-export-muted">
                         <?= htmlspecialchars($export['user_name'] ?? '—', ENT_QUOTES, 'UTF-8') ?>
                     </td>
-                    <td style="font-size:12.5px;color:var(--color-neutral);white-space:nowrap">
+                    <td class="col-export-date">
                         <?= htmlspecialchars(substr($export['finished_at'] ?? $export['created_at'] ?? '', 0, 16), ENT_QUOTES, 'UTF-8') ?>
                     </td>
                 </tr>

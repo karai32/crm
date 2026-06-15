@@ -10,7 +10,7 @@
 </div>
 
 <?php if (!empty($error)): ?>
-    <div class="alert alert-error" style="margin-bottom:16px"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
 <?php endif; ?>
 
 <form method="post" action="<?= htmlspecialchars(Auth::url('/custom-fields/update'), ENT_QUOTES, 'UTF-8') ?>">
@@ -37,12 +37,12 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="name">Name <span style="color:var(--color-danger)">*</span></label>
+                    <label for="name">Name <span class="required-star">*</span></label>
                     <input id="name" type="text" name="name"
                            value="<?= htmlspecialchars($field['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
                 </div>
                 <div class="field">
-                    <label for="slug">Slug <span style="color:var(--color-danger)">*</span></label>
+                    <label for="slug">Slug <span class="required-star">*</span></label>
                     <input id="slug" type="text" name="slug"
                            value="<?= htmlspecialchars($field['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
@@ -64,7 +64,7 @@
                     </label>
                 </div>
                 <div class="field field-full" id="options-field">
-                    <label for="options">Select options <span style="color:var(--color-text-muted);font-weight:400">(one per line)</span></label>
+                    <label for="options">Select options <span class="label-options-hint">(one per line)</span></label>
                     <textarea id="options" name="options" rows="5"
                               placeholder="Option 1&#10;Option 2&#10;Option 3"><?= htmlspecialchars($optionsText ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                 </div>
@@ -73,7 +73,7 @@
         <div class="settings-form-actions">
             <button class="btn btn-primary" type="submit">Update field</button>
             <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/custom-fields'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
-            <a class="btn btn-danger btn-sm" style="margin-left:auto"
+            <a class="btn btn-danger btn-sm"
                href="<?= htmlspecialchars(Auth::url('/custom-fields/delete?id=' . (int) $field['id']), ENT_QUOTES, 'UTF-8') ?>"
                onclick="return confirm('Delete this custom field? Values will also be deleted.')">Delete</a>
         </div>

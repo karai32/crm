@@ -11,7 +11,7 @@
 
 <div class="imports-table-card">
     <?php if (empty($errors)): ?>
-        <p style="padding:24px 16px;color:var(--color-text-muted);font-size:14px;">No issues found for this import.</p>
+        <p class="table-empty-state">No issues found for this import.</p>
     <?php else: ?>
     <table class="import-errors-table">
         <thead>
@@ -28,7 +28,7 @@
                     <td class="col-row"><?= (int) ($error['row_number'] ?? 0) ?></td>
                     <td class="col-error"><?= htmlspecialchars($error['error_message'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="col-raw"><?= htmlspecialchars($error['raw_data'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                    <td style="color:var(--color-neutral);font-size:12.5px;white-space:nowrap"><?= htmlspecialchars($error['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td class="col-time"><?= htmlspecialchars($error['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

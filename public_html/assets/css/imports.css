@@ -346,3 +346,68 @@
     .import-result-grid { grid-template-columns: 1fr 1fr; }
     .import-upload-card { max-width: 100%; }
 }
+
+/* === Migrated from inline styles === */
+
+/* Imports index: ID column muted */
+.imports-table td.col-id-muted {
+    color: var(--color-neutral);
+    font-size: 12.5px;
+}
+
+/* Imports index: file cell flex wrapper */
+.import-file-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Imports index: file icon */
+.import-file-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--color-neutral);
+    flex-shrink: 0;
+}
+
+/* Imports index: imported rows (secondary color) */
+.imports-table td.col-imported {
+    color: var(--color-secondary);
+}
+
+/* Imports index: error rows (danger color when > 0) */
+.imports-table td.col-errors-danger {
+    color: var(--color-danger);
+}
+
+/* Import errors table: time cell */
+.import-errors-table td.col-time {
+    color: var(--color-neutral);
+    font-size: 12.5px;
+    white-space: nowrap;
+}
+
+/* Import upload: template hint bar */
+.import-template-hint {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-neutral-200);
+}
+
+/* Import upload: hint text */
+.import-template-hint-text {
+    font-size: 12.5px;
+    color: var(--color-neutral);
+}
+
+/* Import upload: template download link */
+.import-template-link {
+    font-size: 12.5px;
+    color: var(--color-tertiary);
+    margin-left: 6px;
+}
+
+/* Import history table: th right-align for numeric columns */
+.imports-table th.col-num-header {
+    text-align: right;
+}

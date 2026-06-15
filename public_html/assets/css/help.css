@@ -407,3 +407,185 @@
     .help-card-icon { width: 36px; height: 36px; }
     .help-card-icon svg { width: 18px; height: 18px; }
 }
+
+/* === Migrated from inline styles === */
+
+/* Help show/api: back button row */
+.help-back-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+/* Help api: back+URL row */
+.help-api-back-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+/* Help api: base URL label */
+.help-api-base-url {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+/* Help api: inline code in base URL */
+.help-api-base-url code {
+    background: var(--color-neutral-100);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Help api: layout top margin */
+.help-layout {
+    margin-top: 20px;
+}
+
+/* Help api: two-column layout with top margin */
+.help-layout-mt {
+    margin-top: 20px;
+}
+
+/* Help api: link in primary color */
+.api-link-primary {
+    color: var(--color-primary);
+}
+
+/* Help api: section header card with top margin */
+.help-card-mt {
+    margin-top: 16px;
+}
+
+/* Help index: hero inner flex row */
+.help-hub-hero-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Help api: card body paragraph */
+.help-card-body p.api-body-text {
+    font-size: 13.5px;
+    color: var(--color-text);
+    line-height: 1.65;
+    margin: 0 0 16px;
+}
+
+/* Help api: settings link */
+.help-card-body a.help-api-link {
+    color: var(--color-primary);
+}
+
+/* Help api: api-label margin-top spacer */
+.api-label-mt {
+    margin-top: 20px;
+}
+
+/* Help api: muted description text under api-label */
+.api-desc-text {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--color-text-muted);
+    margin: 0 0 16px;
+}
+
+/* Help api: scopes flex wrap */
+.api-scopes-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Help api: contacts/clients body text */
+.help-api-body-text-muted {
+    font-size: 13.5px;
+    line-height: 1.65;
+    margin: 0 0 16px;
+    color: var(--color-text-muted);
+}
+
+/* Help api: inline code in body text */
+.help-api-inline-code {
+    background: var(--color-neutral-100);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11.5px;
+}
+
+/* Help api: filter params row */
+.api-filter-params {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+/* Help api: filter param code chip */
+.api-filter-params code,
+.api-scopes-row-clients code {
+    background: var(--color-neutral-100);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Help api: filter params with bottom margin */
+.api-filter-params-mb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+/* Help api: sectors delete response note */
+.api-sectors-delete-note {
+    font-size: 12.5px;
+    color: var(--color-text-muted);
+    margin: 12px 0 8px;
+}
+
+/* Help api: sectors delete note inline code */
+.api-sectors-delete-note code {
+    background: var(--color-neutral-100);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11.5px;
+}
+
+/* Help api: strong emphasis (dark text) */
+.help-api-strong {
+    color: var(--color-text);
+}
+
+/* Help api: PATCH note small text */
+.api-patch-note {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin: 6px 0 0;
+}
+
+/* Help api: PATCH note inline code */
+.api-patch-note code {
+    background: var(--color-neutral-100);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11.5px;
+}
+
+/* Help api: clients description inline code */
+.help-api-clients-desc code {
+    background: var(--color-neutral-100);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+}

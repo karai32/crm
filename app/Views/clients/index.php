@@ -99,7 +99,7 @@ $hasExtended = (bool) array_filter(
     <div class="page-actions">
         <?php if ($canCreateClients): ?>
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/clients/create'), ENT_QUOTES, 'UTF-8') ?>">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon-sm">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
             Create client
@@ -315,7 +315,7 @@ $hasExtended = (bool) array_filter(
 <div class="clients-table-card">
 
     <?php if (empty($clients)): ?>
-        <p style="padding:24px 16px;color:var(--color-text-muted);font-size:14px;">No clients found.</p>
+        <p class="table-empty-state">No clients found.</p>
     <?php else: ?>
 
     <table class="clients-table">
@@ -347,8 +347,7 @@ $hasExtended = (bool) array_filter(
                     </td>
                     <td class="col-id"><?= (int) $client['id'] ?></td>
                     <td class="col-name">
-                        <a href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>"
-                           style="color:inherit;text-decoration:none;">
+                        <a class="client-name-link" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">
                             <?= htmlspecialchars($client['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
                         </a>
                     </td>

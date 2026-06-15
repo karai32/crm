@@ -140,7 +140,7 @@
 .api-code {
     background: #1a202c;
     color: #e2e8f0;
-    border-radius: var(--radius-sm);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     padding: 14px 16px;
     font-size: 12px;
     font-family: var(--font-mono, 'Fira Code', 'Cascadia Code', monospace);
@@ -265,4 +265,238 @@
 
 @media (max-width: 480px) {
     .api-endpoint-path { font-size: 11.5px; }
+}
+
+/* === Migrated from inline styles === */
+
+/* API page: page header bottom margin */
+.settings-header.api-header {
+    margin-bottom: 20px;
+}
+
+/* API page: back link (API Reference) */
+.api-back-link {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* API page: new credentials banner */
+.api-new-credentials {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.api-new-credentials-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.api-new-credentials-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #166534;
+    margin-bottom: 3px;
+}
+
+.api-new-credentials-subtitle {
+    font-size: 12.5px;
+    color: #15803d;
+    margin-bottom: 12px;
+}
+
+.api-new-credentials-grid {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.api-new-credentials-label {
+    font-size: 12px;
+    color: #166534;
+}
+
+.api-new-credentials-code {
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: #14532d;
+    word-break: break-all;
+}
+
+.api-new-credentials-copy {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #86efac;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* API page: main card wrapper */
+.api-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+/* API page: create form section */
+.api-card-create {
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--color-neutral-100);
+}
+
+/* API page: section heading label */
+.api-section-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--color-neutral);
+    margin-bottom: 14px;
+}
+
+/* API page: create form row */
+.api-create-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+/* API page: name field wrapper */
+.api-name-field {
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+}
+
+/* API page: name field label */
+.api-name-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* API page: name input no margin */
+.api-name-input {
+    margin: 0;
+}
+
+/* API page: submit button no shrink */
+.api-submit-btn {
+    flex-shrink: 0;
+}
+
+/* API page: scopes row */
+.api-scopes-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+
+/* API page: scopes note */
+.api-scopes-note {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin: 5px 0 0;
+}
+
+/* API page: existing integrations section */
+.api-card-list {
+    padding: 16px 22px 20px;
+}
+
+/* API page: existing integrations label */
+.api-card-list .api-section-label {
+    margin-bottom: 12px;
+}
+
+/* API page: table scroll wrapper */
+.api-table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-sm);
+}
+
+/* API keys table: name cell */
+.api-keys-table td.col-key-name {
+    font-weight: 500;
+}
+
+/* API keys table: client_id code */
+.api-keys-table td .api-key-code {
+    background: var(--color-neutral-100);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11.5px;
+}
+
+/* API keys table: active badge */
+.tag-badge.api-badge-active {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+
+/* API keys table: revoked badge */
+.tag-badge.api-badge-revoked {
+    background: var(--color-neutral-100);
+    border-color: var(--color-neutral-300);
+    color: var(--color-neutral);
+}
+
+/* API keys table: muted date cells */
+.api-keys-table td.col-date-muted {
+    color: var(--color-text-muted);
+    font-size: 12.5px;
+}
+
+/* API action forms (inline) */
+.api-action-form {
+    display: inline;
+}
+
+/* API sync-scopes button */
+.api-btn-sync {
+    color: #d97706;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* API revoke/delete action buttons */
+.api-btn-action {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* API page: empty state */
+.api-empty-state {
+    padding: 24px 22px;
+    color: var(--color-text-muted);
+    font-size: 13.5px;
 }

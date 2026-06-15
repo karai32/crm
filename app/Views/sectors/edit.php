@@ -10,7 +10,7 @@
 </div>
 
 <?php if (!empty($error)): ?>
-    <div class="alert alert-error" style="margin-bottom:16px"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
 <?php endif; ?>
 
 <form method="post" action="<?= htmlspecialchars(Auth::url('/sectors/update'), ENT_QUOTES, 'UTF-8') ?>">
@@ -19,7 +19,7 @@
     <div class="settings-form-card">
         <div class="settings-form-body">
             <div class="field">
-                <label for="name">Name <span style="color:var(--color-danger)">*</span></label>
+                <label for="name">Name <span class="required-star">*</span></label>
                 <input id="name" type="text" name="name"
                        value="<?= htmlspecialchars($sector['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
             </div>
@@ -34,7 +34,7 @@
         <div class="settings-form-actions">
             <button class="btn btn-primary" type="submit">Update sector</button>
             <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
-            <a class="btn btn-danger btn-sm" style="margin-left:auto"
+            <a class="btn btn-danger btn-sm"
                href="<?= htmlspecialchars(Auth::url('/sectors/delete?id=' . (int) $sector['id']), ENT_QUOTES, 'UTF-8') ?>"
                onclick="return confirm('Delete this sector? If it is used by clients, it will be deactivated.')">Delete</a>
         </div>

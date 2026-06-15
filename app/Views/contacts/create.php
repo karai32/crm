@@ -10,7 +10,7 @@
 </div>
 
 <?php if (!empty($error)): ?>
-    <div class="alert alert-error" style="margin-bottom:16px"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
 <?php endif; ?>
 
 <form method="post" action="<?= htmlspecialchars(Auth::url('/contacts/store'), ENT_QUOTES, 'UTF-8') ?>">
@@ -23,7 +23,7 @@
             <div class="form-section-title">Basic Information</div>
             <div class="form-grid">
                 <div class="field">
-                    <label for="first_name">First name <span style="color:var(--color-danger)">*</span></label>
+                    <label for="first_name">First name <span class="required-star">*</span></label>
                     <input id="first_name" type="text" name="first_name"
                            value="<?= htmlspecialchars($contact['first_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
                 </div>
@@ -43,7 +43,7 @@
                            value="<?= htmlspecialchars($contact['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field checkbox-field">
-                    <label style="padding-top:22px">
+                    <label class="label-checkbox-top">
                         <input type="checkbox" name="is_company" value="1"
                                <?= ((int) ($contact['is_company'] ?? 0) === 1) ? 'checked' : '' ?>>
                         Is company
@@ -103,7 +103,7 @@
                 <div class="field <?= $isCheck ? 'checkbox-field' : '' ?>">
                     <?php if ($field['field_type'] === 'textarea'): ?>
                         <label for="cf_<?= $fieldId ?>"><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></label>
-                        <textarea id="cf_<?= $fieldId ?>" name="custom_fields[<?= $fieldId ?>]" style="min-height:70px"><?= htmlspecialchars((string) $rawValue, ENT_QUOTES, 'UTF-8') ?></textarea>
+                        <textarea id="cf_<?= $fieldId ?>" name="custom_fields[<?= $fieldId ?>]" class="textarea-cf"><?= htmlspecialchars((string) $rawValue, ENT_QUOTES, 'UTF-8') ?></textarea>
                     <?php elseif ($field['field_type'] === 'select'): ?>
                         <label for="cf_<?= $fieldId ?>"><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></label>
                         <select id="cf_<?= $fieldId ?>" name="custom_fields[<?= $fieldId ?>]">
@@ -116,7 +116,7 @@
                             <?php endforeach; ?>
                         </select>
                     <?php elseif ($isCheck): ?>
-                        <label style="padding-top:22px">
+                        <label class="label-checkbox-top">
                             <input id="cf_<?= $fieldId ?>" type="checkbox" name="custom_fields[<?= $fieldId ?>]" value="1"
                                    <?= $rawValue ? 'checked' : '' ?>>
                             <?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?>

@@ -18,7 +18,7 @@ $accent   = htmlspecialchars($section['accent'], ENT_QUOTES, 'UTF-8');
 ?>
 
 <!-- Back button + lang switch -->
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+<div class="help-back-row">
     <a href="<?= $backUrl ?>" class="help-topic-back">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
@@ -39,7 +39,7 @@ $accent   = htmlspecialchars($section['accent'], ENT_QUOTES, 'UTF-8');
 </div>
 
 <!-- Section card -->
-<div class="help-card" style="margin-top:16px">
+<div class="help-card help-layout">
     <div class="help-card-head">
         <div class="help-card-icon help-card-icon--<?= $accent ?>">
             <?php if ($iconPath): ?>

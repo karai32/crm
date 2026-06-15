@@ -1524,3 +1524,61 @@ tbody tr:hover td { background: var(--color-neutral-50); }
 
     .topbar { justify-content: space-between; }
 }
+
+/* === Migrated from inline styles === */
+
+/* Inline SVG icon in buttons (15x15) */
+.btn-icon-sm {
+    width: 15px;
+    height: 15px;
+}
+
+/* Inline SVG icon in buttons (22x22) */
+.btn-icon-md {
+    width: 22px;
+    height: 22px;
+}
+
+/* Required field asterisk */
+.required-star {
+    color: var(--color-danger);
+}
+
+/* Alert error top-level spacing */
+.alert-error {
+    margin-bottom: 16px;
+}
+
+/* Delete/danger action pushed to the right in form action rows */
+.settings-form-actions .btn-danger.btn-sm,
+.form-actions .btn-danger.btn-sm {
+    margin-left: auto;
+}
+
+/* Muted secondary text (color + size) */
+.text-muted-sm {
+    color: var(--color-neutral);
+    font-size: 13px;
+}
+
+/* Empty state paragraph inside table cards */
+.table-empty-state {
+    padding: 24px 16px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+/* Checkbox label top-padding alignment */
+.label-checkbox-top {
+    padding-top: 22px;
+}
+
+/* Textarea minimum height for notes */
+.textarea-notes {
+    min-height: 80px;
+}
+
+/* Textarea minimum height for custom fields */
+.textarea-cf {
+    min-height: 70px;
+}

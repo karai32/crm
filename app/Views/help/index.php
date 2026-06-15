@@ -15,7 +15,7 @@ $icons = [
 ?>
 
 <div class="help-hub-hero">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div class="help-hub-hero-row">
         <div>
             <h1><?= htmlspecialchars($content['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></h1>
             <p><?= htmlspecialchars($content['intro'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
