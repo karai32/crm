@@ -2,9 +2,38 @@
 
 class ExportService
 {
+    public function fieldDefinitions(string $entity, array $customFields): array
+    {
+        return $entity === 'clients'
+            ? $this->clientsFieldDefs($customFields)
+            : $this->contactsFieldDefs($customFields);
+    }
+
+    public function query(string $entity, array $filters, array $fields, array $fieldDefs): array
+    {
+        [$sql, $params, $headers] = $entity === 'clients'
+            ? $this->buildClientsSql($filters, $fields, $fieldDefs)
+            : $this->buildContactsSql($filters, $fields, $fieldDefs);
+
+        return ['sql' => $sql, 'params' => $params, 'headers' => $headers];
+    }
+
+    public function template(string $entity): string
+    {
+        $columns = $entity === 'clients'
+            ? ['commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes', 'sector', 'tags']
+            : ['first_name', 'last_name', 'email', 'phone', 'is_company', 'tags', 'client', 'sector'];
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $columns);
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+        return $csv;
+    }
+
     // ── Field definitions ──────────────────────────────────────────────────
 
-    public function contactsFieldDefs(array $customFields): array
+    private function contactsFieldDefs(array $customFields): array
     {
         $fields = [
             'id'           => ['label' => 'ID',          'group' => 'Basic info'],
@@ -29,7 +58,7 @@ class ExportService
         return $fields;
     }
 
-    public function clientsFieldDefs(array $customFields = []): array
+    private function clientsFieldDefs(array $customFields = []): array
     {
         $fields = [
             'id'              => ['label' => 'ID',              'group' => 'Basic info'],
@@ -71,81 +100,11 @@ class ExportService
     // ── Row count ─────────────────────────────────────────────────────────
     // Use own filter builders so the count matches what we actually export.
 
-    public function countContacts(array $filters): int
-    {
-        $pdo = Database::connect();
-        [$whereSql, $params] = $this->buildContactsFilterSql($filters);
-        $stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM contacts $whereSql");
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
-        return (int) ($stmt->fetch()['total'] ?? 0);
-    }
-
-    public function countClients(array $filters): int
-    {
-        $pdo = Database::connect();
-        [$whereSql, $params] = $this->buildClientsFilterSql($filters);
-        $stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM clients $whereSql");
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
-        return (int) ($stmt->fetch()['total'] ?? 0);
-    }
-
     // ── CSV streaming ──────────────────────────────────────────────────────
-
-    public function streamContactsCsv(array $filters, array $fields, array $fieldDefs, $output): int
-    {
-        [$sql, $params, $headers] = $this->buildContactsSql($filters, $fields, $fieldDefs);
-        return $this->streamSql($sql, $params, $headers, $output);
-    }
-
-    public function streamClientsCsv(array $filters, array $fields, array $fieldDefs, $output): int
-    {
-        [$sql, $params, $headers] = $this->buildClientsSql($filters, $fields, $fieldDefs);
-        return $this->streamSql($sql, $params, $headers, $output);
-    }
 
     // ── XLSX building ──────────────────────────────────────────────────────
 
-    public function buildContactsXlsx(array $filters, array $fields, array $fieldDefs): \PhpOffice\PhpSpreadsheet\Spreadsheet
-    {
-        [$sql, $params, $headers] = $this->buildContactsSql($filters, $fields, $fieldDefs);
-        return $this->buildXlsx($sql, $params, $headers, 'Contacts');
-    }
-
-    public function buildClientsXlsx(array $filters, array $fields, array $fieldDefs): \PhpOffice\PhpSpreadsheet\Spreadsheet
-    {
-        [$sql, $params, $headers] = $this->buildClientsSql($filters, $fields, $fieldDefs);
-        return $this->buildXlsx($sql, $params, $headers, 'Clients');
-    }
-
     // ── Template CSV ───────────────────────────────────────────────────────
-
-    public function contactTemplateCsv(): string
-    {
-        $columns = ['first_name', 'last_name', 'email', 'phone', 'is_company', 'tags', 'client'];
-        $handle  = fopen('php://temp', 'r+');
-        fputcsv($handle, $columns);
-        rewind($handle);
-        $csv = stream_get_contents($handle);
-        fclose($handle);
-        return $csv;
-    }
-
-    public function clientTemplateCsv(): string
-    {
-        $columns = ['commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes', 'sector', 'tags'];
-        $handle  = fopen('php://temp', 'r+');
-        fputcsv($handle, $columns);
-        rewind($handle);
-        $csv = stream_get_contents($handle);
-        fclose($handle);
-        return $csv;
-    }
 
     // ── Internal SQL builders ──────────────────────────────────────────────
 
@@ -205,7 +164,7 @@ class ExportService
         if ($needCfv && !empty($cfIds)) {
             $cfCases = [];
             foreach ($cfIds as $cfId) {
-                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR)) END) AS cf_" . $cfId;
+                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) END) AS cf_" . $cfId;
             }
             $subqueryJoins[] = "LEFT JOIN (
                 SELECT entity_id, " . implode(', ', $cfCases) . "
@@ -290,7 +249,7 @@ class ExportService
         if ($needCfv && !empty($cfIds)) {
             $cfCases = [];
             foreach ($cfIds as $cfId) {
-                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR)) END) AS cf_" . $cfId;
+                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) END) AS cf_" . $cfId;
             }
             $subqueryJoins[] = "LEFT JOIN (
                 SELECT entity_id, " . implode(', ', $cfCases) . "
@@ -394,53 +353,4 @@ class ExportService
 
     // ── Common streaming/building helpers ─────────────────────────────────
 
-    private function streamSql(string $sql, array $params, array $headers, $output): int
-    {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
-
-        fputcsv($output, $headers);
-        $count = 0;
-
-        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            fputcsv($output, $row);
-            $count++;
-        }
-
-        return $count;
-    }
-
-    private function buildXlsx(string $sql, array $params, array $headers, string $sheetTitle): \PhpOffice\PhpSpreadsheet\Spreadsheet
-    {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet       = $spreadsheet->getActiveSheet();
-        $sheet->setTitle($sheetTitle);
-
-        foreach ($headers as $colIndex => $header) {
-            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1) . '1';
-            $sheet->setCellValue($cell, $header);
-        }
-
-        $rowIndex = 2;
-        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            foreach ($row as $colIndex => $value) {
-                $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1) . $rowIndex;
-                $sheet->setCellValue($cell, $value ?? '');
-            }
-            $rowIndex++;
-        }
-
-        return $spreadsheet;
-    }
 }

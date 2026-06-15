@@ -226,6 +226,7 @@ CREATE TABLE import_batches (
     original_filename VARCHAR(255) NOT NULL,
     stored_filename VARCHAR(255) NULL,
     file_type ENUM('xlsx', 'csv') NOT NULL,
+    entity_type ENUM('contacts', 'clients') NOT NULL DEFAULT 'contacts',
     status ENUM('uploaded', 'previewed', 'processing', 'completed', 'partial', 'failed') NOT NULL DEFAULT 'uploaded',
     total_rows INT UNSIGNED NOT NULL DEFAULT 0,
     imported_rows INT UNSIGNED NOT NULL DEFAULT 0,
@@ -238,7 +239,8 @@ CREATE TABLE import_batches (
     CONSTRAINT fk_import_batches_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_import_batches_user_id (user_id),
     INDEX idx_import_batches_status (status),
-    INDEX idx_import_batches_created_at (created_at)
+    INDEX idx_import_batches_created_at (created_at),
+    INDEX idx_import_batches_entity_status (entity_type, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE import_rows (
@@ -255,7 +257,8 @@ CREATE TABLE import_rows (
     CONSTRAINT fk_import_rows_contact FOREIGN KEY (related_contact_id) REFERENCES contacts(id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_import_rows_client FOREIGN KEY (related_client_id) REFERENCES clients(id) ON DELETE SET NULL ON UPDATE CASCADE,
     UNIQUE KEY uq_import_rows_batch_row (import_batch_id, `row_number`),
-    INDEX idx_import_rows_status (status)
+    INDEX idx_import_rows_status (status),
+    INDEX idx_import_rows_batch_status (import_batch_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE import_errors (
@@ -275,6 +278,7 @@ CREATE TABLE export_batches (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NULL,
     file_type ENUM('xlsx', 'csv') NOT NULL,
+    entity_type ENUM('contacts', 'clients') NOT NULL DEFAULT 'contacts',
     stored_filename VARCHAR(255) NULL,
     filters JSON NULL,
     selected_fields JSON NULL,
@@ -285,7 +289,8 @@ CREATE TABLE export_batches (
     CONSTRAINT fk_export_batches_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_export_batches_user_id (user_id),
     INDEX idx_export_batches_status (status),
-    INDEX idx_export_batches_created_at (created_at)
+    INDEX idx_export_batches_created_at (created_at),
+    INDEX idx_export_batches_entity_created (entity_type, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE audit_logs (

@@ -1,7 +1,7 @@
 <!-- Header -->
 <div class="page-header imports-header">
     <div>
-        <h1>Upload contacts file</h1>
+        <h1>Upload import file</h1>
     </div>
     <div class="page-actions">
         <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
@@ -17,17 +17,25 @@
     <div class="import-upload-card">
         <div class="import-upload-body">
             <div class="field">
+                <label for="entity_type">Data type</label>
+                <select id="entity_type" name="entity_type">
+                    <option value="contacts">Contacts</option>
+                    <option value="clients">Clients</option>
+                </select>
+            </div>
+            <div class="field">
                 <label for="csv_file">Select file</label>
                 <input id="csv_file" type="file" name="csv_file"
                        accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                        required>
-                <span class="import-upload-hint">Supported formats: CSV and XLSX. XLSX requires PhpSpreadsheet.</span>
+                <span class="import-upload-hint">Supported formats: CSV and XLSX, maximum size 20 MB.</span>
             </div>
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--color-neutral-200)">
                 <span style="font-size:12.5px;color:var(--color-neutral)">Not sure about the format?</span>
                 <a href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>"
+                   id="import-template-link"
                    style="font-size:12.5px;color:var(--color-tertiary);margin-left:6px">
-                    Download contacts template
+                    Download template
                 </a>
             </div>
         </div>
@@ -42,3 +50,10 @@
         </div>
     </div>
 </form>
+<script>
+document.getElementById('entity_type').addEventListener('change', function () {
+    var entity = this.value === 'clients' ? 'clients' : 'contacts';
+    document.getElementById('import-template-link').href =
+        <?= json_encode(Auth::url('/exports/template/'), JSON_UNESCAPED_SLASHES) ?> + entity;
+});
+</script>

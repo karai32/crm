@@ -18,13 +18,19 @@ class ImportRepository
         return $statement->fetchAll();
     }
 
-    public function createBatch(?int $userId, string $originalFilename, string $storedFilename, string $fileType): int
+    public function createBatch(
+        ?int $userId,
+        string $originalFilename,
+        string $storedFilename,
+        string $fileType,
+        string $entityType
+    ): int
     {
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('
-            INSERT INTO import_batches (user_id, original_filename, stored_filename, file_type, status)
-            VALUES (:user_id, :original_filename, :stored_filename, :file_type, :status)
+            INSERT INTO import_batches (user_id, original_filename, stored_filename, file_type, entity_type, status)
+            VALUES (:user_id, :original_filename, :stored_filename, :file_type, :entity_type, :status)
         ');
 
         $statement->execute([
@@ -32,6 +38,7 @@ class ImportRepository
             'original_filename' => $originalFilename,
             'stored_filename' => $storedFilename,
             'file_type' => $fileType,
+            'entity_type' => $entityType,
             'status' => 'uploaded',
         ]);
 
@@ -176,58 +183,27 @@ class ImportRepository
         ]);
     }
 
-    public function createRow(int $batchId, int $rowNumber, array $rawData, string $status, ?int $contactId, ?string $message, ?int $clientId = null): int
+    public function recordIssue(
+        int $batchId,
+        int $rowNumber,
+        array $rawData,
+        string $status,
+        string $message
+    ): void
     {
         $pdo = Database::connect();
-
-        if ($this->hasImportRowsClientColumn($pdo)) {
-            $statement = $pdo->prepare('
-                INSERT INTO import_rows (import_batch_id, `row_number`, raw_data, status, related_contact_id, related_client_id, message)
-                VALUES (:import_batch_id, :row_number, :raw_data, :status, :related_contact_id, :related_client_id, :message)
-            ');
-
-            $statement->execute([
-                'import_batch_id' => $batchId,
-                'row_number' => $rowNumber,
-                'raw_data' => json_encode($rawData),
-                'status' => $status,
-                'related_contact_id' => $contactId,
-                'related_client_id' => $clientId,
-                'message' => $message,
-            ]);
-
-            return (int) $pdo->lastInsertId();
-        }
-
         $statement = $pdo->prepare('
-            INSERT INTO import_rows (import_batch_id, `row_number`, raw_data, status, related_contact_id, message)
-            VALUES (:import_batch_id, :row_number, :raw_data, :status, :related_contact_id, :message)
+            INSERT INTO import_rows (import_batch_id, `row_number`, raw_data, status, message)
+            VALUES (:import_batch_id, :row_number, :raw_data, :status, :message)
         ');
-
         $statement->execute([
             'import_batch_id' => $batchId,
             'row_number' => $rowNumber,
-            'raw_data' => json_encode($rawData),
+            'raw_data' => json_encode($rawData, JSON_UNESCAPED_UNICODE),
             'status' => $status,
-            'related_contact_id' => $contactId,
             'message' => $message,
         ]);
-
-        return (int) $pdo->lastInsertId();
-    }
-
-    private function hasImportRowsClientColumn(PDO $pdo): bool
-    {
-        static $hasColumn = null;
-
-        if ($hasColumn !== null) {
-            return $hasColumn;
-        }
-
-        $statement = $pdo->query("SHOW COLUMNS FROM import_rows LIKE 'related_client_id'");
-        $hasColumn = (bool) $statement->fetch();
-
-        return $hasColumn;
+        $this->createError($batchId, (int) $pdo->lastInsertId(), $rowNumber, $message);
     }
 
     public function createError(int $batchId, ?int $rowId, ?int $rowNumber, string $message): void

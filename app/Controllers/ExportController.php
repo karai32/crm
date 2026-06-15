@@ -2,15 +2,11 @@
 
 class ExportController
 {
-    private ExportService $service;
-    private ExportRepository $exports;
-    private CustomFieldRepository $customFields;
+    private ExportManager $manager;
 
     public function __construct()
     {
-        $this->service      = new ExportService();
-        $this->exports      = new ExportRepository();
-        $this->customFields = new CustomFieldRepository();
+        $this->manager = new ExportManager();
     }
 
     // ── Hub page ───────────────────────────────────────────────────────────
@@ -23,24 +19,15 @@ class ExportController
             ? $_GET['entity']
             : 'contacts';
 
-        $cfEntityType = $entity === 'contacts' ? 'contact' : 'client';
-        $customFields = $this->customFields->fieldsForEntity($cfEntityType);
-
-        $fieldDefs = $entity === 'contacts'
-            ? $this->service->contactsFieldDefs($customFields)
-            : $this->service->clientsFieldDefs($customFields);
-
-        $defaultFields = $entity === 'contacts'
-            ? ['id', 'first_name', 'last_name', 'email', 'phone', 'created_at']
-            : ['id', 'commercial_name', 'legal_name', 'city', 'country', 'created_at'];
+        $page = $this->manager->page($entity);
 
         View::render('exports/index', [
             'title'         => 'Export data',
             'styles'        => ['data.css'],
-            'entity'        => $entity,
-            'fieldDefs'     => $fieldDefs,
-            'defaultFields' => $defaultFields,
-            'recentExports' => $this->exports->recentExports(12),
+            'entity'        => $page['entity'],
+            'fieldDefs'     => $page['fieldDefs'],
+            'defaultFields' => $page['defaultFields'],
+            'recentExports' => $page['recentExports'],
         ]);
     }
 
@@ -58,39 +45,16 @@ class ExportController
             ? $_POST['format']
             : 'csv';
 
-        $cfEntityType = $entity === 'contacts' ? 'contact' : 'client';
-        $customFields = $this->customFields->fieldsForEntity($cfEntityType);
-
-        $fieldDefs = $entity === 'contacts'
-            ? $this->service->contactsFieldDefs($customFields)
-            : $this->service->clientsFieldDefs($customFields);
-
-        $selectedFields = $this->service->sanitizeFields(
-            (array) ($_POST['fields'] ?? []),
-            $fieldDefs
-        );
-
         $filters   = $entity === 'contacts' ? $this->contactFiltersFromPost() : $this->clientFiltersFromPost();
-        $totalRows = $entity === 'contacts'
-            ? $this->service->countContacts($filters)
-            : $this->service->countClients($filters);
-
-        $fileName = $entity . '-' . date('Y-m-d-H-i-s') . '.' . $format;
+        $selectedFields = (array) ($_POST['fields'] ?? []);
+        $fileName = $this->manager->filename($entity, $format);
         $user     = Auth::user();
-
-        $this->exports->createCompletedExport($user['id'] ?? null, $format, $filters, $selectedFields, $totalRows, $fileName);
 
         if ($format === 'csv') {
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="' . $fileName . '"');
             $output = fopen('php://output', 'w');
-
-            if ($entity === 'contacts') {
-                $this->service->streamContactsCsv($filters, $selectedFields, $fieldDefs, $output);
-            } else {
-                $this->service->streamClientsCsv($filters, $selectedFields, $fieldDefs, $output);
-            }
-
+            $this->manager->writeCsv($entity, $filters, $selectedFields, $user['id'] ?? null, $fileName, $output);
             fclose($output);
             exit;
         }
@@ -100,16 +64,16 @@ class ExportController
             Auth::redirect('/exports?entity=' . $entity . '&error=phpspreadsheet');
         }
 
-        $spreadsheet = $entity === 'contacts'
-            ? $this->service->buildContactsXlsx($filters, $selectedFields, $fieldDefs)
-            : $this->service->buildClientsXlsx($filters, $selectedFields, $fieldDefs);
-
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
-
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->save('php://output');
+        $this->manager->writeXlsx(
+            $entity,
+            $filters,
+            $selectedFields,
+            $user['id'] ?? null,
+            $fileName
+        );
         exit;
     }
 
@@ -121,7 +85,7 @@ class ExportController
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="contacts-import-template.csv"');
-        echo $this->service->contactTemplateCsv();
+        echo $this->manager->template('contacts');
         exit;
     }
 
@@ -131,7 +95,7 @@ class ExportController
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="clients-import-template.csv"');
-        echo $this->service->clientTemplateCsv();
+        echo $this->manager->template('clients');
         exit;
     }
 

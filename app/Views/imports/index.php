@@ -52,6 +52,7 @@ function importDisplayStatus(array $batch): string
             <tr>
                 <th>#</th>
                 <th>File</th>
+                <th>Type</th>
                 <th>Status</th>
                 <th style="text-align:right">Total</th>
                 <th style="text-align:right">Imported</th>
@@ -74,6 +75,7 @@ function importDisplayStatus(array $batch): string
                             <?= htmlspecialchars($batch['original_filename'], ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </td>
+                    <td><?= htmlspecialchars(ucfirst($batch['entity_type'] ?? 'contacts'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td><span class="import-status <?= importStatusClass($displayStatus) ?>"><?= htmlspecialchars(ucfirst($displayStatus), ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td class="col-num"><?= (int) $batch['total_rows'] ?></td>
                     <td class="col-num" style="color:var(--color-secondary)"><?= (int) $batch['imported_rows'] ?></td>
@@ -83,8 +85,8 @@ function importDisplayStatus(array $batch): string
                     </td>
                     <td class="col-date"><?= htmlspecialchars($batch['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
-                        <?php if ((int) $batch['error_rows'] > 0): ?>
-                            <a class="action-view" href="<?= htmlspecialchars(Auth::url('/imports/errors?id=' . $batch['id']), ENT_QUOTES, 'UTF-8') ?>">View errors</a>
+                        <?php if ((int) $batch['error_rows'] > 0 || (int) $batch['skipped_rows'] > 0): ?>
+                            <a class="action-view" href="<?= htmlspecialchars(Auth::url('/imports/errors?id=' . $batch['id']), ENT_QUOTES, 'UTF-8') ?>">View issues</a>
                         <?php endif; ?>
                     </td>
                 </tr>

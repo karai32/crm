@@ -4,6 +4,7 @@
         <h1>Import preview</h1>
         <span class="count-label">
             <?= htmlspecialchars($preview['batch']['original_filename'], ENT_QUOTES, 'UTF-8') ?>
+            &nbsp;-&nbsp; <?= htmlspecialchars(ucfirst($preview['batch']['entity_type'] ?? 'contacts'), ENT_QUOTES, 'UTF-8') ?>
             &nbsp;-&nbsp; <?= (int) $preview['total_rows'] ?> rows found
         </span>
     </div>
@@ -82,10 +83,6 @@
                             </select>
                         </td>
                         <td id="custom-settings-<?= md5($header) ?>" class="custom-field-settings">
-                            <select name="custom_fields[<?= htmlspecialchars($header, ENT_QUOTES, 'UTF-8') ?>][entity_type]">
-                                <option value="contact">Contact</option>
-                                <option value="client">Client</option>
-                            </select>
                             <select name="custom_fields[<?= htmlspecialchars($header, ENT_QUOTES, 'UTF-8') ?>][field_type]">
                                 <?php foreach (['text', 'textarea', 'number', 'date', 'email', 'url', 'select', 'checkbox'] as $type): ?>
                                     <option value="<?= $type ?>"><?= $type ?></option>

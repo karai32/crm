@@ -3,12 +3,12 @@
 class ImportController
 {
     private ImportRepository $imports;
-    private ImportService $importService;
+    private ImportManager $manager;
 
     public function __construct()
     {
         $this->imports = new ImportRepository();
-        $this->importService = new ImportService();
+        $this->manager = new ImportManager();
     }
 
     public function index(): void
@@ -38,7 +38,11 @@ class ImportController
         Auth::requirePermission('imports.manage');
 
         $user = Auth::user();
-        $result = $this->importService->uploadFile($_FILES['csv_file'] ?? [], $user['id'] ?? null);
+        $result = $this->manager->upload(
+            $_FILES['csv_file'] ?? [],
+            $user['id'] ?? null,
+            (string) ($_POST['entity_type'] ?? 'contacts')
+        );
 
         if (!$result['success']) {
             View::render('imports/upload', [
@@ -56,7 +60,7 @@ class ImportController
     {
         Auth::requirePermission('imports.manage');
 
-        $preview = $this->importService->preview((int) ($_GET['id'] ?? 0));
+        $preview = $this->manager->preview((int) ($_GET['id'] ?? 0));
 
         if ($preview === null) {
             http_response_code(404);
@@ -96,7 +100,7 @@ class ImportController
     {
         Auth::requirePermission('imports.manage');
 
-        $result = $this->importService->process(
+        $result = $this->manager->process(
             (int) ($_POST['id'] ?? 0),
             $_POST['mapping'] ?? [],
             $_POST['custom_fields'] ?? []

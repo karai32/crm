@@ -2,27 +2,56 @@
 
 class ExportRepository
 {
-    public function createCompletedExport(?int $userId, string $fileType, array $filters, array $fields, int $totalRows, string $fileName): void
+    public function start(
+        ?int $userId,
+        string $entityType,
+        string $fileType,
+        array $filters,
+        array $fields,
+        string $fileName
+    ): int
     {
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('
             INSERT INTO export_batches (
-                user_id, file_type, stored_filename, filters, selected_fields, total_rows, status, finished_at
+                user_id, entity_type, file_type, stored_filename, filters, selected_fields, status
             ) VALUES (
-                :user_id, :file_type, :stored_filename, :filters, :selected_fields, :total_rows, :status, NOW()
+                :user_id, :entity_type, :file_type, :stored_filename, :filters, :selected_fields, :status
             )
         ');
 
         $statement->execute([
             'user_id'         => $userId,
+            'entity_type'     => $entityType,
             'file_type'       => $fileType,
             'stored_filename' => $fileName,
             'filters'         => json_encode($filters),
             'selected_fields' => json_encode($fields),
-            'total_rows'      => $totalRows,
-            'status'          => 'completed',
+            'status'          => 'processing',
         ]);
+
+        return (int) $pdo->lastInsertId();
+    }
+
+    public function complete(int $id, int $totalRows): void
+    {
+        $statement = Database::connect()->prepare('
+            UPDATE export_batches
+            SET status = :status, total_rows = :total_rows, finished_at = NOW()
+            WHERE id = :id
+        ');
+        $statement->execute(['id' => $id, 'status' => 'completed', 'total_rows' => $totalRows]);
+    }
+
+    public function fail(int $id): void
+    {
+        $statement = Database::connect()->prepare('
+            UPDATE export_batches
+            SET status = :status, finished_at = NOW()
+            WHERE id = :id
+        ');
+        $statement->execute(['id' => $id, 'status' => 'failed']);
     }
 
     public function recentExports(int $limit = 15): array

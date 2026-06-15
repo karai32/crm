@@ -184,7 +184,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                 <?php foreach ($recentExports as $export): ?>
                 <?php
                     $filename  = $export['stored_filename'] ?? '';
-                    $entityKey = str_starts_with($filename, 'clients-') ? 'clients' : 'contacts';
+                    $entityKey = ($export['entity_type'] ?? 'contacts') === 'clients' ? 'clients' : 'contacts';
                     $entityBadgeClass = 'export-entity-' . $entityKey;
                     $entityBadgeLabel = ucfirst($entityKey);
                 ?>
