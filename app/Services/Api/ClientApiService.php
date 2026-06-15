@@ -167,12 +167,10 @@ class ClientApiService extends AbstractApiService
             $this->clients->syncTags($clientId, $tagIds);
         }
 
-        if (!empty($item['custom_fields'])) {
-            if (!is_array($item['custom_fields'])) {
-                throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
-            }
-            $this->saveCustomFields('client', $clientId, $item['custom_fields']);
+        if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
+            throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
         }
+        $this->saveCustomFields('client', $clientId, is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [], true);
 
         return ['client_id' => $clientId, 'tag_created' => $tagCreated];
     }

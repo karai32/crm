@@ -43,8 +43,8 @@ class CustomFieldRepository
     {
         $pdo = Database::connect();
         $statement = $pdo->prepare('
-            INSERT INTO custom_fields (entity_type, name, slug, field_type, is_required, is_filterable, sort_order)
-            VALUES (:entity_type, :name, :slug, :field_type, :is_required, :is_filterable, :sort_order)
+            INSERT INTO custom_fields (entity_type, name, slug, field_type, is_required, is_filterable, sort_order, default_value)
+            VALUES (:entity_type, :name, :slug, :field_type, :is_required, :is_filterable, :sort_order, :default_value)
         ');
         $statement->execute($data);
 
@@ -64,7 +64,8 @@ class CustomFieldRepository
                 field_type = :field_type,
                 is_required = :is_required,
                 is_filterable = :is_filterable,
-                sort_order = :sort_order
+                sort_order = :sort_order,
+                default_value = :default_value
             WHERE id = :id
         ');
         $statement->execute($data);
@@ -158,7 +159,7 @@ class CustomFieldRepository
         return $values;
     }
 
-    public function saveValues(string $entityType, int $entityId, array $fields, array $inputValues): void
+    public function saveValues(string $entityType, int $entityId, array $fields, array $inputValues, bool $applyDefaults = false): void
     {
         $pdo = Database::connect();
 
@@ -180,6 +181,15 @@ class CustomFieldRepository
         foreach ($fields as $field) {
             $fieldId = (int) $field['id'];
             $rawValue = $inputValues[$fieldId] ?? null;
+
+            // On creation, fill empty values with the field's default
+            if ($applyDefaults && ($rawValue === null || trim((string) $rawValue) === '')) {
+                $default = $field['default_value'] ?? null;
+                if ($default !== null && trim((string) $default) !== '') {
+                    $rawValue = $default;
+                }
+            }
+
             $valueText = null;
             $valueNumber = null;
             $valueDate = null;

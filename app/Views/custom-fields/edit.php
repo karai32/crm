@@ -51,6 +51,12 @@
                     <input id="sort_order" type="number" name="sort_order"
                            value="<?= (int) ($field['sort_order'] ?? 0) ?>" min="0">
                 </div>
+                <div class="field field-full" id="default-value-field">
+                    <label for="default_value">Default value</label>
+                    <input id="default_value" type="text" name="default_value"
+                           value="<?= htmlspecialchars($field['default_value'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                           placeholder="Applied automatically when no value is set">
+                </div>
                 <div class="checkbox-row">
                     <label>
                         <input type="checkbox" name="is_required" value="1"

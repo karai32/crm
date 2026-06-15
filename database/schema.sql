@@ -178,6 +178,7 @@ CREATE TABLE custom_fields (
     field_type ENUM('text', 'textarea', 'number', 'date', 'email', 'url', 'select', 'checkbox') NOT NULL,
     is_required TINYINT(1) NOT NULL DEFAULT 0,
     is_filterable TINYINT(1) NOT NULL DEFAULT 1,
+    default_value TEXT NULL,
     sort_order INT UNSIGNED NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

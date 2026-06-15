@@ -89,7 +89,7 @@ class ClientController
 
         $id = $this->clients->create($data);
         $this->clients->syncTags($id, $tagIds);
-        $this->customFields->saveValues('client', $id, $customFields, $customValues);
+        $this->customFields->saveValues('client', $id, $customFields, $customValues, true);
         Auth::redirect('/clients/show?id=' . $id);
     }
 

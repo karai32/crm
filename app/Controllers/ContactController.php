@@ -94,7 +94,7 @@ class ContactController
         $id = $this->contacts->create($data);
         $this->contacts->syncTags($id, $tagIds);
         $this->contacts->syncClients($id, $clientIds);
-        $this->customFields->saveValues('contact', $id, $customFields, $customValues);
+        $this->customFields->saveValues('contact', $id, $customFields, $customValues, true);
         Auth::redirect('/contacts/show?id=' . $id);
     }
 

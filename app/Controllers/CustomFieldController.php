@@ -130,6 +130,7 @@ class CustomFieldController
     {
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
+        $defaultValue = trim($_POST['default_value'] ?? '');
 
         return [
             'entity_type' => in_array($_POST['entity_type'] ?? '', ['contact', 'client'], true) ? $_POST['entity_type'] : 'contact',
@@ -139,6 +140,7 @@ class CustomFieldController
             'is_required' => isset($_POST['is_required']) ? 1 : 0,
             'is_filterable' => isset($_POST['is_filterable']) ? 1 : 0,
             'sort_order' => max(0, (int) ($_POST['sort_order'] ?? 0)),
+            'default_value' => $defaultValue !== '' ? $defaultValue : null,
         ];
     }
 

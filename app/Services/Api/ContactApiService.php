@@ -210,9 +210,10 @@ class ContactApiService extends AbstractApiService
         if ($clientId !== null) {
             $this->contacts->syncClients($contactId, [$clientId]);
         }
-        if (!empty($item['custom_fields']) && is_array($item['custom_fields'])) {
-            $this->saveCustomFields('contact', $contactId, $item['custom_fields']);
+        if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
+            throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
         }
+        $this->saveCustomFields('contact', $contactId, is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [], true);
 
         return [
             'contact_id' => $contactId,

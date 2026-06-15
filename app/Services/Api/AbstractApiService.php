@@ -62,19 +62,35 @@ abstract class AbstractApiService
         ], count($results));
     }
 
-    protected function saveCustomFields(string $entityType, int $entityId, array $input): void
+    protected function saveCustomFields(string $entityType, int $entityId, array $input, bool $applyDefaults = false): void
     {
         $fields = [];
         $values = [];
+        $processedSlugs = [];
 
         foreach ($input as $slug => $value) {
             $field = $this->customFields->findByEntityAndSlug($entityType, (string) $slug);
             if ($field === null) {
                 continue;
             }
-
             $fields[] = $field;
             $values[(int) $field['id']] = $value;
+            $processedSlugs[] = $field['slug'];
+        }
+
+        // For creation: also apply defaults for fields not present in the input at all
+        if ($applyDefaults) {
+            foreach ($this->customFields->fieldsForEntity($entityType) as $field) {
+                if (in_array($field['slug'], $processedSlugs, true)) {
+                    continue;
+                }
+                $default = $field['default_value'] ?? null;
+                if ($default === null || trim((string) $default) === '') {
+                    continue;
+                }
+                $fields[] = $field;
+                $values[(int) $field['id']] = $default;
+            }
         }
 
         if ($fields !== []) {
