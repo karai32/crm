@@ -9,6 +9,8 @@ USE crm;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS api_logs;
+DROP TABLE IF EXISTS api_keys;
 DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS export_batches;
 DROP TABLE IF EXISTS import_errors;
@@ -307,13 +309,16 @@ CREATE TABLE audit_logs (
 CREATE TABLE api_keys (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
-    key_prefix VARCHAR(12) NOT NULL,
-    key_hash VARCHAR(255) NOT NULL UNIQUE,
-    scopes JSON NULL,
+    client_id VARCHAR(64) NOT NULL UNIQUE,
+    secret_hash CHAR(64) NOT NULL,
+    scopes JSON NOT NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     last_used_at DATETIME NULL,
+    revoked_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_api_keys_is_active (is_active)
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_api_keys_is_active (is_active),
+    INDEX idx_api_keys_last_used_at (last_used_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE api_logs (

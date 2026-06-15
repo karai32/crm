@@ -6,7 +6,7 @@ class ApiKeyRepository
     {
         $pdo = Database::connect();
         $statement = $pdo->prepare('
-            SELECT id, name, key_prefix, scopes, is_active, last_used_at, created_at
+            SELECT id, name, client_id, scopes, is_active, last_used_at, created_at
             FROM api_keys
             ORDER BY created_at DESC
         ');
@@ -19,7 +19,7 @@ class ApiKeyRepository
     {
         $pdo = Database::connect();
         $statement = $pdo->prepare('
-            SELECT id, name, key_prefix, scopes, is_active, last_used_at, created_at
+            SELECT id, name, client_id, scopes, is_active, last_used_at, created_at
             FROM api_keys
             WHERE id = :id
             LIMIT 1
@@ -29,32 +29,32 @@ class ApiKeyRepository
         return $statement->fetch() ?: null;
     }
 
-    public function findByKeyHash(string $hash): ?array
+    public function findActiveByClientId(string $clientId): ?array
     {
         $pdo = Database::connect();
         $statement = $pdo->prepare('
             SELECT *
             FROM api_keys
-            WHERE key_hash = :hash AND is_active = 1
+            WHERE client_id = :client_id AND is_active = 1
             LIMIT 1
         ');
-        $statement->execute(['hash' => $hash]);
+        $statement->execute(['client_id' => $clientId]);
 
         return $statement->fetch() ?: null;
     }
 
-    public function create(string $name, string $keyPrefix, string $keyHash, array $scopes): int
+    public function create(string $name, string $clientId, string $secretHash, array $scopes): int
     {
         $pdo = Database::connect();
         $statement = $pdo->prepare('
-            INSERT INTO api_keys (name, key_prefix, key_hash, scopes)
-            VALUES (:name, :key_prefix, :key_hash, :scopes)
+            INSERT INTO api_keys (name, client_id, secret_hash, scopes)
+            VALUES (:name, :client_id, :secret_hash, :scopes)
         ');
         $statement->execute([
-            'name'       => $name,
-            'key_prefix' => $keyPrefix,
-            'key_hash'   => $keyHash,
-            'scopes'     => json_encode($scopes),
+            'name'        => $name,
+            'client_id'   => $clientId,
+            'secret_hash' => $secretHash,
+            'scopes'      => json_encode($scopes),
         ]);
 
         return (int) $pdo->lastInsertId();
@@ -77,7 +77,11 @@ class ApiKeyRepository
     public function revoke(int $id): void
     {
         $pdo = Database::connect();
-        $statement = $pdo->prepare('UPDATE api_keys SET is_active = 0 WHERE id = :id');
+        $statement = $pdo->prepare('
+            UPDATE api_keys
+            SET is_active = 0, revoked_at = NOW()
+            WHERE id = :id
+        ');
         $statement->execute(['id' => $id]);
     }
 

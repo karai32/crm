@@ -86,17 +86,27 @@ function helpApiCodeBlock(string $label, string $id, string $code): void { ?>
 
             <div class="help-card-body">
                 <p style="font-size:13.5px;color:var(--color-text);line-height:1.65;margin:0 0 16px">
-                    Every request must carry the <code style="background:var(--color-neutral-100);padding:1px 5px;border-radius:3px;font-size:12.5px">X-API-KEY</code> header with a valid, active API key.
-                    The key is shown only once at creation time — store it securely. Only the SHA-256 hash is kept in the database.
-                    Manage your keys at <a href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>" style="color:var(--color-primary)">Settings → API Keys</a>.
+                    Every request uses HTTP Basic Authentication with an active Client ID and Secret.
+                    The Secret is shown only once at creation time, and only its SHA-256 hash is stored in the database.
+                    Send requests exclusively over HTTPS. Manage integrations at
+                    <a href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>" style="color:var(--color-primary)">Settings - API Credentials</a>.
                 </p>
 
                 <p class="api-label">Request header</p>
-                <?php helpApiCodeBlock('HTTP', 'ex-auth', '<span class="ch">X-API-KEY</span>: <span class="cs">crm_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>'); ?>
+                <?php helpApiCodeBlock('HTTP', 'ex-auth', '<span class="ch">Authorization</span>: <span class="cs">Basic base64(client_id:secret)</span>'); ?>
+
+                <p class="api-label" style="margin-top:20px">Formidable Forms</p>
+                <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 10px">
+                    Enter the raw value below in the Basic Auth field. Formidable builds the Authorization header automatically.
+                </p>
+                <?php helpApiCodeBlock('Basic Auth value', 'ex-formidable-auth', '<span class="cs">crm_your_client_id:your_secret</span>'); ?>
 
                 <p class="api-label" style="margin-top:20px">PowerShell example</p>
                 <?php helpApiCodeBlock('PowerShell', 'ex-ps', <<<"CODE"
-<span class="ck">$headers</span> = @{ <span class="cs">"X-API-KEY"</span> = <span class="cs">"crm_your_key_here"</span> }
+<span class="ck">$clientId</span> = <span class="cs">"crm_your_client_id"</span>
+<span class="ck">$secret</span> = <span class="cs">"your_secret"</span>
+<span class="ck">$token</span> = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(<span class="cs">"$clientId`:$secret"</span>))
+<span class="ck">$headers</span> = @{ <span class="cs">"Authorization"</span> = <span class="cs">"Basic $token"</span> }
 
 <span class="cc"># GET request</span>
 Invoke-RestMethod -Uri <span class="cs">"<?= htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8') ?>/api/v1/contacts"</span> -Headers <span class="ck">$headers</span>
@@ -131,7 +141,7 @@ CODE); ?>
 
                 <p class="api-label" style="margin-top:20px">Scopes</p>
                 <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 10px">
-                    Each key carries a set of scopes. <strong style="color:var(--color-text)">write</strong> implies <strong style="color:var(--color-text)">read</strong> for the same resource.
+                    Each integration carries a set of scopes. <strong style="color:var(--color-text)">write</strong> implies <strong style="color:var(--color-text)">read</strong> for the same resource.
                 </p>
                 <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <?php foreach (['contacts:read','contacts:write','clients:read','clients:write','sectors:read','sectors:write','tags:read','tags:write'] as $s): ?>

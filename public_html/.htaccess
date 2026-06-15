@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# Preserve the Authorization header for PHP when Apache uses CGI/FastCGI.
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # Send all non-existing files and folders to the front controller.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

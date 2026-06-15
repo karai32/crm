@@ -13,14 +13,14 @@ class ApiKeyController
     {
         Auth::requireAdmin();
 
-        $newKey = $_SESSION['new_api_key'] ?? null;
-        unset($_SESSION['new_api_key']);
+        $newCredentials = $_SESSION['new_api_credentials'] ?? null;
+        unset($_SESSION['new_api_credentials']);
 
         View::render('api/index', [
-            'title'   => 'API Keys',
-            'styles'  => ['api.css'],
-            'apiKeys' => $this->apiKeys->all(),
-            'newKey'  => $newKey,
+            'title'          => 'API Credentials',
+            'styles'         => ['api.css'],
+            'apiKeys'        => $this->apiKeys->all(),
+            'newCredentials' => $newCredentials,
         ]);
     }
 
@@ -34,14 +34,17 @@ class ApiKeyController
             Auth::redirect('/api-keys');
         }
 
-        $rawKey  = 'crm_' . bin2hex(random_bytes(32));
-        $prefix  = substr($rawKey, 0, 12);
-        $hash    = hash('sha256', $rawKey);
-        $scopes  = ['contacts:write', 'contacts:read', 'clients:write', 'clients:read', 'sectors:write', 'sectors:read', 'tags:write', 'tags:read'];
+        $clientId   = 'crm_' . bin2hex(random_bytes(16));
+        $secret     = bin2hex(random_bytes(32));
+        $secretHash = hash('sha256', $secret);
+        $scopes     = ['contacts:write', 'contacts:read', 'clients:write', 'clients:read', 'sectors:write', 'sectors:read', 'tags:write', 'tags:read'];
 
-        $this->apiKeys->create($name, $prefix, $hash, $scopes);
+        $this->apiKeys->create($name, $clientId, $secretHash, $scopes);
 
-        $_SESSION['new_api_key'] = $rawKey;
+        $_SESSION['new_api_credentials'] = [
+            'client_id' => $clientId,
+            'secret'    => $secret,
+        ];
         Auth::redirect('/api-keys');
     }
 
@@ -49,7 +52,7 @@ class ApiKeyController
     {
         Auth::requireAdmin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->revoke($id);
         }
@@ -61,7 +64,7 @@ class ApiKeyController
     {
         Auth::requireAdmin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->updateScopes($id, [
                 'contacts:write', 'contacts:read',
@@ -78,7 +81,7 @@ class ApiKeyController
     {
         Auth::requireAdmin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->delete($id);
         }

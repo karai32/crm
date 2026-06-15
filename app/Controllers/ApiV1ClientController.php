@@ -3,6 +3,7 @@
 class ApiV1ClientController
 {
     private ApiKeyRepository      $apiKeys;
+    private ApiAuthenticator      $authenticator;
     private ClientRepository      $clients;
     private TagRepository         $tags;
     private SectorRepository      $sectors;
@@ -11,6 +12,7 @@ class ApiV1ClientController
     public function __construct()
     {
         $this->apiKeys      = new ApiKeyRepository();
+        $this->authenticator = new ApiAuthenticator($this->apiKeys);
         $this->clients      = new ClientRepository();
         $this->tags         = new TagRepository();
         $this->sectors      = new SectorRepository();
@@ -523,17 +525,15 @@ class ApiV1ClientController
 
     private function authenticate(): ?array
     {
-        $key = $_SERVER['HTTP_X_API_KEY'] ?? '';
-        if ($key === '') {
-            return null;
-        }
-
-        return $this->apiKeys->findByKeyHash(hash('sha256', $key));
+        return $this->authenticator->authenticate();
     }
 
     private function respond(int $status, array $data): void
     {
         http_response_code($status);
+        if ($status === 401) {
+            header('WWW-Authenticate: Basic realm="CRM API", charset="UTF-8"');
+        }
         header('Content-Type: application/json; charset=UTF-8');
         header('X-Content-Type-Options: nosniff');
         echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

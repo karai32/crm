@@ -16,7 +16,7 @@ class Auth
             'sectors.manage' => 'Manage sectors',
             'tags.manage' => 'Manage tags',
             'custom_fields.manage' => 'Manage custom fields',
-            'api_keys.manage' => 'Manage API keys',
+            'api_keys.manage' => 'Manage API credentials',
         ];
     }
 
