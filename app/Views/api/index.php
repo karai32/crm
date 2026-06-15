@@ -103,7 +103,17 @@
                             <?= htmlspecialchars(date('d M Y', strtotime($key['created_at'])), ENT_QUOTES, 'UTF-8') ?>
                         </td>
                         <td>
+                            <?php
+                            $fullScopes = ['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'];
+                            $keyScopes  = json_decode($key['scopes'] ?? '[]', true) ?: [];
+                            $needsSync  = (int) $key['is_active'] === 1 && count(array_diff($fullScopes, $keyScopes)) > 0;
+                            ?>
                             <div class="action-links">
+                                <?php if ($needsSync): ?>
+                                <a class="action-edit" style="color:#d97706"
+                                   href="<?= htmlspecialchars(Auth::url('/api-keys/sync-scopes?id=' . $key['id']), ENT_QUOTES, 'UTF-8') ?>"
+                                   onclick="return confirm('Grant this key all current scopes (contacts, clients, sectors, tags)?')">Sync scopes</a>
+                                <?php endif; ?>
                                 <?php if ((int) $key['is_active'] === 1): ?>
                                 <a class="action-edit"
                                    href="<?= htmlspecialchars(Auth::url('/api-keys/revoke?id=' . $key['id']), ENT_QUOTES, 'UTF-8') ?>"

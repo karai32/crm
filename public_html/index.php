@@ -153,6 +153,7 @@ $router->get('/help/{topic}', [$helpController, 'show']);
 $router->get('/api-keys', [$apiKeyController, 'index']);
 $router->post('/api-keys/store', [$apiKeyController, 'store']);
 $router->get('/api-keys/revoke', [$apiKeyController, 'revoke']);
+$router->get('/api-keys/sync-scopes', [$apiKeyController, 'syncScopes']);
 $router->get('/api-keys/delete', [$apiKeyController, 'delete']);
 $router->post('/api/v1/contacts', [$apiV1Controller, 'contacts']);
 $router->get('/api/v1/contacts', [$apiV1Controller, 'contactsList']);

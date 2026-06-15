@@ -57,6 +57,23 @@ class ApiKeyController
         Auth::redirect('/api-keys');
     }
 
+    public function syncScopes(): void
+    {
+        Auth::requireAdmin();
+
+        $id = (int) ($_GET['id'] ?? 0);
+        if ($id > 0) {
+            $this->apiKeys->updateScopes($id, [
+                'contacts:write', 'contacts:read',
+                'clients:write',  'clients:read',
+                'sectors:write',  'sectors:read',
+                'tags:write',     'tags:read',
+            ]);
+        }
+
+        Auth::redirect('/api-keys');
+    }
+
     public function delete(): void
     {
         Auth::requireAdmin();

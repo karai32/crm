@@ -60,6 +60,13 @@ class ApiKeyRepository
         return (int) $pdo->lastInsertId();
     }
 
+    public function updateScopes(int $id, array $scopes): void
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('UPDATE api_keys SET scopes = :scopes WHERE id = :id');
+        $statement->execute(['scopes' => json_encode($scopes), 'id' => $id]);
+    }
+
     public function updateLastUsed(int $id): void
     {
         $pdo = Database::connect();
