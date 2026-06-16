@@ -3,14 +3,12 @@
 class ClientApiService extends AbstractApiService
 {
     private ClientRepository $clients;
-    private TagRepository $tags;
     private SectorRepository $sectors;
 
     public function __construct()
     {
         parent::__construct();
         $this->clients = new ClientRepository();
-        $this->tags = new TagRepository();
         $this->sectors = new SectorRepository();
     }
 
@@ -73,6 +71,7 @@ class ClientApiService extends AbstractApiService
     public function update(int $id, array $body): ApiResult
     {
         $client = $this->requireRecord($this->clients->find($id), 'client');
+        $body = $this->expandCustomFieldKeys($body);
         if (array_key_exists('commercial_name', $body) && trim((string) ($body['commercial_name'] ?? '')) === '') {
             throw new ApiException(422, 'validation_error', 'commercial_name cannot be empty');
         }
@@ -108,10 +107,8 @@ class ClientApiService extends AbstractApiService
         try {
             $this->clients->update($id, $updated);
             if (array_key_exists('tags', $body)) {
-                if (!is_array($body['tags'])) {
-                    throw new ApiException(422, 'validation_error', 'tags must be an array');
-                }
-                $this->clients->syncTags($id, $this->resolveTagIds($body['tags']));
+                [$tagIds] = $this->resolveTagIds($this->splitNames($body['tags']));
+                $this->clients->syncTags($id, $tagIds);
             }
             if (array_key_exists('custom_fields', $body)) {
                 if (!is_array($body['custom_fields'])) {
@@ -139,6 +136,8 @@ class ClientApiService extends AbstractApiService
 
     private function createOne(array $item): array
     {
+        $item = $this->expandCustomFieldKeys($item);
+
         $commercialName = trim((string) ($item['commercial_name'] ?? ''));
         if ($commercialName === '') {
             throw new ApiException(422, 'validation_error', 'Client validation failed', ['commercial_name is required']);
@@ -158,12 +157,8 @@ class ClientApiService extends AbstractApiService
             'notes' => $this->nullableString($item['notes'] ?? null),
         ]);
 
-        $tagCreated = false;
-        if (!empty($item['tags'])) {
-            if (!is_array($item['tags'])) {
-                throw new ApiException(422, 'validation_error', 'tags must be an array');
-            }
-            [$tagIds, $tagCreated] = $this->resolveTagIdsWithCreated($item['tags']);
+        [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
+        if ($tagIds !== []) {
             $this->clients->syncTags($clientId, $tagIds);
         }
 
@@ -219,38 +214,5 @@ class ClientApiService extends AbstractApiService
             throw new ApiException(422, 'validation_error', "Sector '{$name}' not found");
         }
         return (int) $sector['id'];
-    }
-
-    private function resolveTagIds(array $names): array
-    {
-        return $this->resolveTagIdsWithCreated($names)[0];
-    }
-
-    private function resolveTagIdsWithCreated(array $names): array
-    {
-        $ids = [];
-        $created = false;
-        foreach ($names as $name) {
-            $name = trim((string) $name);
-            if ($name === '') {
-                continue;
-            }
-            $tag = $this->tags->findByName($name);
-            if ($tag === null) {
-                $ids[] = $this->tags->create($name, null);
-                $created = true;
-            } else {
-                $ids[] = (int) $tag['id'];
-            }
-        }
-        return [array_values(array_unique($ids)), $created];
-    }
-
-    private function formatTags(array $tags): array
-    {
-        return array_map(fn (array $tag): array => [
-            'id' => (int) $tag['id'],
-            'name' => $tag['name'],
-        ], $tags);
     }
 }

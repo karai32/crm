@@ -116,7 +116,7 @@ Invoke-RestMethod -Method Post `
     -Uri <span class="cs">"<?= htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8') ?>/api/v1/contacts"</span> `
     -Headers <span class="ck">$headers</span> `
     -ContentType <span class="cs">"application/json"</span> `
-    -Body <span class="cs">'[{"first_name":"Ivan","email":"ivan@example.com","tag":"VIP","client":"Acme Corp"}]'</span>
+    -Body <span class="cs">'[{"first_name":"Ivan","email":"ivan@example.com","tags":"VIP","clients":"Acme Corp"}]'</span>
 CODE); ?>
 
                 <p class="api-label api-label-mt">Response envelope</p>
@@ -165,6 +165,12 @@ CODE); ?>
                     <strong class="help-api-strong">created automatically</strong> when they don't exist.
                     Custom fields are saved silently — unknown field slugs are ignored.
                 </p>
+                <p class="api-desc-text">
+                    <code class="help-api-inline-code">tags</code> and
+                    <code class="help-api-inline-code">clients</code> each accept a single name, a comma-separated
+                    string of names (<code class="help-api-inline-code">"VIP, Enterprise"</code>), or a JSON array —
+                    the same field works for one or many.
+                </p>
 
                 <p class="api-label">Endpoints</p>
                 <div class="api-endpoint-list">
@@ -208,12 +214,12 @@ CODE); ?>
                     <tbody>
                         <tr><td><code>first_name</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-req">required</span></td><td>First name</td></tr>
                         <tr><td><code>email</code></td><td><span class="api-type">string|null</span></td><td><span class="api-badge-opt">optional</span></td><td>Unique email address when provided</td></tr>
-                        <tr><td><code>tag</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Tag name — created if it doesn't exist</td></tr>
-                        <tr><td><code>client</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Client commercial name — created if it doesn't exist</td></tr>
+                        <tr><td><code>tags</code></td><td><span class="api-type">string|string[]</span></td><td><span class="api-badge-opt">optional</span></td><td>One or more tag names — single name, comma-separated string, or array. Created if missing.</td></tr>
+                        <tr><td><code>clients</code></td><td><span class="api-type">string|string[]</span></td><td><span class="api-badge-opt">optional</span></td><td>One or more client commercial names — single name, comma-separated string, or array. Created if missing.</td></tr>
                         <tr><td><code>last_name</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Last name</td></tr>
                         <tr><td><code>phone</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Phone number</td></tr>
                         <tr><td><code>is_company</code></td><td><span class="api-type">boolean</span></td><td><span class="api-badge-opt">optional</span></td><td>Whether this contact represents a company</td></tr>
-                        <tr><td><code>custom_fields</code></td><td><span class="api-type">object</span></td><td><span class="api-badge-opt">optional</span></td><td>Key/value pairs by field slug. Unknown slugs are ignored.</td></tr>
+                        <tr><td><code>custom_fields</code></td><td><span class="api-type">object</span></td><td><span class="api-badge-opt">optional</span></td><td>Key/value pairs by field slug. Unknown slugs are ignored. Flat <code class="help-api-inline-code">"custom_fields.&lt;slug&gt;"</code> keys work the same way, on both POST and PATCH.</td></tr>
                     </tbody>
                 </table>
                 <p class="api-patch-note">
@@ -221,7 +227,8 @@ CODE); ?>
                     <code class="help-api-inline-code">"email": null</code>
                     or an empty string to clear the email.
                     <code class="help-api-inline-code">tags</code> and
-                    <code class="help-api-inline-code">clients</code> accept an array of name strings and replace the current list.
+                    <code class="help-api-inline-code">clients</code> accept a single name, a comma-separated string,
+                    or an array, and <strong class="help-api-strong">replace</strong> the current list.
                 </p>
 
                 <p class="api-label api-label-mt">GET filters</p>
@@ -240,8 +247,8 @@ CODE); ?>
     <span class="ck">"last_name"</span>:  <span class="cs">"Petrov"</span>,
     <span class="ck">"email"</span>:      <span class="cs">"ivan@example.com"</span>,
     <span class="ck">"phone"</span>:      <span class="cs">"+7999000001"</span>,
-    <span class="ck">"tag"</span>:        <span class="cs">"VIP"</span>,
-    <span class="ck">"client"</span>:     <span class="cs">"Acme Corp"</span>,
+    <span class="ck">"tags"</span>:       <span class="cs">"VIP"</span>,
+    <span class="ck">"clients"</span>:    <span class="cs">"Acme Corp"</span>,
     <span class="ck">"custom_fields"</span>: { <span class="ck">"birthday"</span>: <span class="cs">"1990-01-01"</span> }
   }
 ]
@@ -268,6 +275,12 @@ CODE); ?>
   <span class="ck">"clients"</span>:    [<span class="cs">"Acme Corp"</span>],
   <span class="ck">"custom_fields"</span>: { <span class="ck">"birthday"</span>: <span class="cs">"1985-03-15"</span> }
 }
+CODE); ?>
+
+                <p class="api-label api-label-mt">Example — multiple tags as a comma-separated string</p>
+                <?php helpApiCodeBlock('POST /api/v1/contacts', 'ex-contacts-tags-string', <<<"CODE"
+{ <span class="ck">"first_name"</span>: <span class="cs">"Ivan"</span>, <span class="ck">"tags"</span>: <span class="cs">"VIP, Enterprise, Priority"</span> }
+<span class="cc">// equivalent to "tags": ["VIP", "Enterprise", "Priority"]</span>
 CODE); ?>
             </div>
         </section>
@@ -337,8 +350,8 @@ CODE); ?>
                         <tr><td><code>country</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Country</td></tr>
                         <tr><td><code>website</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Website URL</td></tr>
                         <tr><td><code>notes</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Free-text notes</td></tr>
-                        <tr><td><code>tags</code></td><td><span class="api-type">string[]</span></td><td><span class="api-badge-opt">optional</span></td><td>Tag names — created if they don't exist</td></tr>
-                        <tr><td><code>custom_fields</code></td><td><span class="api-type">object</span></td><td><span class="api-badge-opt">optional</span></td><td>Key/value pairs by field slug</td></tr>
+                        <tr><td><code>tags</code></td><td><span class="api-type">string|string[]</span></td><td><span class="api-badge-opt">optional</span></td><td>One or more tag names — single name, comma-separated string, or array. Created if missing.</td></tr>
+                        <tr><td><code>custom_fields</code></td><td><span class="api-type">object</span></td><td><span class="api-badge-opt">optional</span></td><td>Key/value pairs by field slug. Flat <code class="help-api-inline-code">"custom_fields.&lt;slug&gt;"</code> keys work the same way, on both POST and PATCH.</td></tr>
                     </tbody>
                 </table>
 

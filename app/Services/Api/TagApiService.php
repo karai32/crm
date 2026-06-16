@@ -2,14 +2,6 @@
 
 class TagApiService extends AbstractApiService
 {
-    private TagRepository $tags;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->tags = new TagRepository();
-    }
-
     public function createBatch(array $items): ApiResult
     {
         return $this->batch($items, function (array $item): array {

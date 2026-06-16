@@ -3,10 +3,12 @@
 abstract class AbstractApiService
 {
     protected CustomFieldRepository $customFields;
+    protected TagRepository $tags;
 
     public function __construct()
     {
         $this->customFields = new CustomFieldRepository();
+        $this->tags = new TagRepository();
     }
 
     protected function batch(array $items, callable $processor): ApiResult
@@ -130,6 +132,78 @@ abstract class AbstractApiService
     {
         $value = trim((string) ($value ?? ''));
         return $value === '' ? null : $value;
+    }
+
+    // Accepts a single name, a comma-separated string of names, or a JSON array of names.
+    // Non-scalar array elements are skipped instead of triggering an array-to-string cast.
+    protected function splitNames(mixed $value): array
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        $items = is_array($value) ? $value : explode(',', (string) $value);
+
+        $names = [];
+        foreach ($items as $item) {
+            if (!is_scalar($item)) {
+                continue;
+            }
+            $name = trim((string) $item);
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        return $names;
+    }
+
+    // Resolves tag names to ids, auto-creating any that don't exist yet (with no color).
+    // Returns [int[] $ids, bool $anyCreated].
+    protected function resolveTagIds(array $names): array
+    {
+        $ids = [];
+        $created = false;
+
+        foreach ($names as $name) {
+            $tag = $this->tags->findByName($name);
+            if ($tag === null) {
+                $ids[] = $this->tags->create($name, null);
+                $created = true;
+            } else {
+                $ids[] = (int) $tag['id'];
+            }
+        }
+
+        return [array_values(array_unique($ids)), $created];
+    }
+
+    protected function formatTags(array $tags): array
+    {
+        return array_map(fn (array $tag): array => [
+            'id' => (int) $tag['id'],
+            'name' => $tag['name'],
+        ], $tags);
+    }
+
+    // Folds top-level "custom_fields.<slug>" keys into a nested custom_fields array, so flat
+    // dot-notation works the same on every create/update endpoint that accepts custom fields.
+    protected function expandCustomFieldKeys(array $item): array
+    {
+        foreach ($item as $key => $value) {
+            if (!is_string($key) || !str_starts_with($key, 'custom_fields.')) {
+                continue;
+            }
+
+            $slug = substr($key, 14);
+            if (!isset($item['custom_fields']) || !is_array($item['custom_fields'])) {
+                $item['custom_fields'] = [];
+            }
+            $item['custom_fields'][$slug] = $value;
+            unset($item[$key]);
+        }
+
+        return $item;
     }
 
     private function batchError(int $index, string $code, array $details): array

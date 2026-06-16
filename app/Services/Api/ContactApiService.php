@@ -4,14 +4,12 @@ class ContactApiService extends AbstractApiService
 {
     private ContactRepository $contacts;
     private ClientRepository $clients;
-    private TagRepository $tags;
 
     public function __construct()
     {
         parent::__construct();
         $this->contacts = new ContactRepository();
         $this->clients = new ClientRepository();
-        $this->tags = new TagRepository();
     }
 
     public function createBatch(array $items): ApiResult
@@ -78,6 +76,7 @@ class ContactApiService extends AbstractApiService
     public function update(int $id, array $body): ApiResult
     {
         $contact = $this->requireRecord($this->contacts->find($id), 'contact');
+        $body = $this->expandCustomFieldKeys($body);
         $errors = [];
 
         if (array_key_exists('first_name', $body) && trim((string) ($body['first_name'] ?? '')) === '') {
@@ -121,17 +120,13 @@ class ContactApiService extends AbstractApiService
             $this->contacts->update($id, $updated);
 
             if (array_key_exists('tags', $body)) {
-                if (!is_array($body['tags'])) {
-                    throw new ApiException(422, 'validation_error', 'tags must be an array');
-                }
-                $this->contacts->syncTags($id, $this->resolveTagIds($body['tags']));
+                [$tagIds] = $this->resolveTagIds($this->splitNames($body['tags']));
+                $this->contacts->syncTags($id, $tagIds);
             }
 
             if (array_key_exists('clients', $body)) {
-                if (!is_array($body['clients'])) {
-                    throw new ApiException(422, 'validation_error', 'clients must be an array');
-                }
-                $this->contacts->syncClients($id, $this->resolveClientIds($body['clients']));
+                [$clientIds] = $this->resolveClientIds($this->splitNames($body['clients']));
+                $this->contacts->syncClients($id, $clientIds);
             }
 
             if (array_key_exists('custom_fields', $body)) {
@@ -162,17 +157,7 @@ class ContactApiService extends AbstractApiService
 
     private function createOne(array $item): array
     {
-        // Support dot-notation keys: "custom_fields.notes" → custom_fields["notes"]
-        foreach ($item as $key => $value) {
-            if (str_starts_with($key, 'custom_fields.')) {
-                $slug = substr($key, 14);
-                if (!isset($item['custom_fields']) || !is_array($item['custom_fields'])) {
-                    $item['custom_fields'] = [];
-                }
-                $item['custom_fields'][$slug] = $value;
-                unset($item[$key]);
-            }
-        }
+        $item = $this->expandCustomFieldKeys($item);
 
         $firstName = trim((string) ($item['first_name'] ?? ''));
         $email = trim((string) ($item['email'] ?? ''));
@@ -191,10 +176,9 @@ class ContactApiService extends AbstractApiService
             throw new ApiException(409, 'duplicate_contact', 'Contact with this email already exists');
         }
 
-        $tagName = trim((string) ($item['tag'] ?? ''));
-        $clientName = trim((string) ($item['client'] ?? ''));
-        [$tagId, $tagCreated] = $this->resolveSingleTag($tagName);
-        [$clientId, $clientCreated] = $this->resolveSingleClient($clientName);
+        // "tags"/"clients" accept a single name, a comma-separated string, or a JSON array.
+        [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
+        [$clientIds, $clientCreated] = $this->resolveClientIds($this->splitNames($item['clients'] ?? null));
 
         $contactId = $this->contacts->create([
             'first_name' => $firstName,
@@ -204,11 +188,11 @@ class ContactApiService extends AbstractApiService
             'is_company' => empty($item['is_company']) ? 0 : 1,
         ]);
 
-        if ($tagId !== null) {
-            $this->contacts->syncTags($contactId, [$tagId]);
+        if ($tagIds !== []) {
+            $this->contacts->syncTags($contactId, $tagIds);
         }
-        if ($clientId !== null) {
-            $this->contacts->syncClients($contactId, [$clientId]);
+        if ($clientIds !== []) {
+            $this->contacts->syncClients($contactId, $clientIds);
         }
         if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
             throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
@@ -241,52 +225,29 @@ class ContactApiService extends AbstractApiService
         ];
     }
 
-    private function resolveTagIds(array $names): array
-    {
-        $ids = [];
-        foreach ($names as $name) {
-            [$id] = $this->resolveSingleTag(trim((string) $name));
-            if ($id !== null) {
-                $ids[] = $id;
-            }
-        }
-        return array_values(array_unique($ids));
-    }
-
+    // Resolves client commercial names to ids, auto-creating any that don't exist yet.
+    // Returns [int[] $ids, bool $anyCreated].
     private function resolveClientIds(array $names): array
     {
         $ids = [];
+        $created = false;
+
         foreach ($names as $name) {
-            [$id] = $this->resolveSingleClient(trim((string) $name));
-            if ($id !== null) {
-                $ids[] = $id;
+            $client = $this->clients->findByCommercialName($name);
+            if ($client === null) {
+                $ids[] = $this->createBlankClient($name);
+                $created = true;
+            } else {
+                $ids[] = (int) $client['id'];
             }
         }
-        return array_values(array_unique($ids));
+
+        return [array_values(array_unique($ids)), $created];
     }
 
-    private function resolveSingleTag(string $name): array
+    private function createBlankClient(string $name): int
     {
-        if ($name === '') {
-            return [null, false];
-        }
-        $tag = $this->tags->findByName($name);
-        return $tag === null
-            ? [$this->tags->create($name, null), true]
-            : [(int) $tag['id'], false];
-    }
-
-    private function resolveSingleClient(string $name): array
-    {
-        if ($name === '') {
-            return [null, false];
-        }
-        $client = $this->clients->findByCommercialName($name);
-        if ($client !== null) {
-            return [(int) $client['id'], false];
-        }
-
-        $id = $this->clients->create([
+        return $this->clients->create([
             'commercial_name' => $name,
             'legal_name' => null,
             'cif' => null,
@@ -299,15 +260,6 @@ class ContactApiService extends AbstractApiService
             'website' => null,
             'notes' => null,
         ]);
-        return [$id, true];
-    }
-
-    private function formatTags(array $tags): array
-    {
-        return array_map(fn (array $tag): array => [
-            'id' => (int) $tag['id'],
-            'name' => $tag['name'],
-        ], $tags);
     }
 
     private function formatClients(array $clients): array
