@@ -4,15 +4,18 @@ abstract class AbstractImportProcessor
 {
     protected TagRepository $tags;
     protected SectorRepository $sectors;
+    protected ContactRepository $contacts;
     protected CustomFieldRepository $customFields;
     private array $tagCache = [];
     private array $sectorCache = [];
+    private array $contactCache = [];
     private array $customFieldCache = [];
 
     public function __construct()
     {
         $this->tags = new TagRepository();
         $this->sectors = new SectorRepository();
+        $this->contacts = new ContactRepository();
         $this->customFields = new CustomFieldRepository();
     }
 
@@ -33,6 +36,30 @@ abstract class AbstractImportProcessor
                 $this->tagCache[$key] = $tag ? (int) $tag['id'] : $this->tags->create($name, null);
             }
             $ids[] = $this->tagCache[$key];
+        }
+        return array_values(array_unique($ids));
+    }
+
+    // Strict lookup: unlike tags/sectors, contacts are never auto-created from a bare name --
+    // the whole row fails if a referenced contact doesn't already exist.
+    protected function contactIds(string $value): array
+    {
+        $ids = [];
+        foreach (preg_split('/[,;|]/', $value) ?: [] as $name) {
+            $name = trim($name);
+            if ($name === '') {
+                continue;
+            }
+
+            $key = $this->lower($name);
+            if (!isset($this->contactCache[$key])) {
+                $contact = $this->contacts->findByName($name);
+                if ($contact === null) {
+                    throw new ImportRowException("Contact '{$name}' not found.");
+                }
+                $this->contactCache[$key] = (int) $contact['id'];
+            }
+            $ids[] = $this->contactCache[$key];
         }
         return array_values(array_unique($ids));
     }

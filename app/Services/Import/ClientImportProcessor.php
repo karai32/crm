@@ -41,6 +41,12 @@ class ClientImportProcessor extends AbstractImportProcessor
         if ($tagIds !== []) {
             $this->clients->syncTags($clientId, $tagIds);
         }
+
+        $contactIds = $this->contactIds((string) ($mapped['contact'] ?? ''));
+        if ($contactIds !== []) {
+            $this->clients->addContacts($clientId, $contactIds);
+        }
+
         $this->saveCustomFields('client', $clientId, $raw, $mapping, $customFieldTypes);
         $this->clientCache[$key] = $clientId;
 

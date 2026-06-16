@@ -2,7 +2,6 @@
 
 class ContactImportProcessor extends AbstractImportProcessor
 {
-    private ContactRepository $contacts;
     private ClientRepository $clients;
     private array $clientCache = [];
     private array $emailCache = [];
@@ -10,7 +9,6 @@ class ContactImportProcessor extends AbstractImportProcessor
     public function __construct()
     {
         parent::__construct();
-        $this->contacts = new ContactRepository();
         $this->clients = new ClientRepository();
     }
 

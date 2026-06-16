@@ -53,6 +53,21 @@ class ContactRepository
         return $contact ?: null;
     }
 
+    public function findByName(string $name): ?array
+    {
+        $pdo = Database::connect();
+
+        $statement = $pdo->prepare("
+            SELECT * FROM contacts
+            WHERE TRIM(CONCAT(first_name, ' ', COALESCE(last_name, ''))) = :name
+            LIMIT 1
+        ");
+        $statement->execute(['name' => trim($name)]);
+        $contact = $statement->fetch();
+
+        return $contact ?: null;
+    }
+
     public function emailExists(string $email): bool
     {
         $pdo = Database::connect();

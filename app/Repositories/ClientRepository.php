@@ -281,6 +281,26 @@ class ClientRepository
         }
     }
 
+    public function addContacts(int $clientId, array $contactIds): void
+    {
+        if (empty($contactIds)) {
+            return;
+        }
+
+        $pdo = Database::connect();
+        $insert = $pdo->prepare('
+            INSERT IGNORE INTO client_contacts (client_id, contact_id)
+            VALUES (:client_id, :contact_id)
+        ');
+
+        foreach ($contactIds as $contactId) {
+            $insert->execute([
+                'client_id' => $clientId,
+                'contact_id' => $contactId,
+            ]);
+        }
+    }
+
     public function addTagsToClients(array $clientIds, array $tagIds): void
     {
         $clientIds = array_values(array_unique(array_filter(array_map('intval', $clientIds), fn ($id) => $id > 0)));

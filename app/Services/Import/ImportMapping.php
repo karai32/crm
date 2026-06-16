@@ -20,6 +20,7 @@ class ImportMapping
                 'notes' => 'notes',
                 'sector' => 'sector',
                 'tags' => 'tags',
+                'contact' => 'contact',
             ]
             : [
                 'first_name' => 'first_name',
@@ -45,6 +46,7 @@ class ImportMapping
                 'city' => 'city', 'province' => 'province', 'country' => 'country',
                 'website' => 'website', 'notes' => 'notes', 'sector' => 'sector',
                 'sector_name' => 'sector', 'tags' => 'tags', 'tag' => 'tags',
+                'contact' => 'contact', 'contact name' => 'contact', 'contact_name' => 'contact',
             ]
             : [
                 'name' => 'first_name', 'first name' => 'first_name', 'first_name' => 'first_name',
