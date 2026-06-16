@@ -137,6 +137,7 @@ abstract class AbstractImportProcessor
                 'is_required' => 0,
                 'is_filterable' => 1,
                 'sort_order' => 0,
+                'default_value' => null,
             ]);
             $field = $this->customFields->find($id);
         }
