@@ -1,4 +1,4 @@
-name: Deploy to TimeWeb
+name: Deploy
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-timeweb:
     name: Upload files to TimeWeb
     runs-on: ubuntu-latest
 
@@ -40,3 +40,46 @@ jobs:
             storage/exports/**
             storage/imports/**
             storage/*.log
+
+  deploy-unanimetech:
+    name: Upload files to UnanimeTech
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get latest code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SFTP to UnanimeTech
+        env:
+          SFTP_HOST: ${{ secrets.UNANIME_SFTP_HOST }}
+          SFTP_USER: ${{ secrets.UNANIME_SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.UNANIME_SFTP_PASSWORD }}
+          SFTP_PORT: ${{ secrets.UNANIME_SFTP_PORT }}
+          SFTP_TARGET: ${{ secrets.UNANIME_SFTP_TARGET }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+          lftp -u "$SFTP_USER","$SFTP_PASSWORD" -p "${SFTP_PORT:-22}" "sftp://$SFTP_HOST" <<EOF
+          set sftp:auto-confirm yes
+          set ssl:verify-certificate no
+          mkdir -p "$SFTP_TARGET"
+          mirror --reverse --delete --verbose \
+            --exclude-glob .git/ \
+            --exclude-glob .git*/ \
+            --exclude-glob .github/ \
+            --exclude-glob .vscode/ \
+            --exclude-glob .claude/ \
+            --exclude-glob tests/ \
+            --exclude-glob database/ \
+            --exclude-glob node_modules/ \
+            --exclude-glob vendor/ \
+            --exclude-glob config/database.php \
+            --exclude-glob config/mail.php \
+            --exclude-glob storage/logs/ \
+            --exclude-glob storage/exports/ \
+            --exclude-glob storage/imports/ \
+            --exclude-glob storage/*.log \
+            ./ "$SFTP_TARGET/"
+          bye
+          EOF
