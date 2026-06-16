@@ -154,7 +154,13 @@ class ImportManager
                     $processor = $this->processor($entityType);
                     $errors++;
                     error_log("Import row {$rowNumber} failed: " . $exception->getMessage());
-                    $this->imports->recordIssue($batchId, $rowNumber, $row, 'error', 'Unable to import this row.');
+                    $this->imports->recordIssue(
+                        $batchId,
+                        $rowNumber,
+                        $row,
+                        'error',
+                        'Unable to import this row: [' . get_class($exception) . '] ' . $exception->getMessage()
+                    );
                 }
             }
 
