@@ -165,6 +165,7 @@ $router->post('/api-keys/store', [$apiKeyController, 'store']);
 $router->post('/api-keys/revoke', [$apiKeyController, 'revoke']);
 $router->post('/api-keys/sync-scopes', [$apiKeyController, 'syncScopes']);
 $router->post('/api-keys/delete', [$apiKeyController, 'delete']);
+$router->get('/api-logs', [$apiKeyController, 'logs']);
 $router->post('/api/v1/contacts', [$contactApiController, 'create']);
 $router->get('/api/v1/contacts', [$contactApiController, 'index']);
 $router->get('/api/v1/contacts/{id}', [$contactApiController, 'show']);

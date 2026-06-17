@@ -88,4 +88,38 @@ class ApiKeyController
 
         Auth::redirect('/api-keys');
     }
+
+    public function logs(): void
+    {
+        Auth::requireAdmin();
+
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = 50;
+        $filters = [
+            'key_id'    => (int) ($_GET['key_id'] ?? 0),
+            'method'    => trim($_GET['method'] ?? ''),
+            'status'    => trim($_GET['status'] ?? ''),
+            'path'      => trim($_GET['path'] ?? ''),
+            'date_from' => trim($_GET['date_from'] ?? ''),
+            'date_to'   => trim($_GET['date_to'] ?? ''),
+        ];
+
+        $total      = $this->apiKeys->countLogs($filters);
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        View::render('api/logs', [
+            'title'      => 'API Logs',
+            'styles'     => ['api.css'],
+            'logs'       => $this->apiKeys->pageLogs($page, $perPage, $filters),
+            'apiKeys'    => $this->apiKeys->all(),
+            'filters'    => $filters,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
+            'totalPages' => $totalPages,
+        ]);
+    }
 }

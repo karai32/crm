@@ -83,6 +83,96 @@ class ApiKeyRepository
         $statement->execute(['id' => $id]);
     }
 
+    public function pageLogs(int $page, int $perPage, array $filters = []): array
+    {
+        $pdo = Database::connect();
+        $offset = ($page - 1) * $perPage;
+        [$where, $params] = $this->buildLogsFilter($filters);
+
+        $sql = "
+            SELECT l.*, k.name AS key_name, k.client_id AS key_client_id
+            FROM api_logs l
+            LEFT JOIN api_keys k ON k.id = l.api_key_id
+            {$where}
+            ORDER BY l.id DESC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->bindValue('limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function countLogs(array $filters = []): int
+    {
+        $pdo = Database::connect();
+        [$where, $params] = $this->buildLogsFilter($filters);
+
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) AS total
+            FROM api_logs l
+            LEFT JOIN api_keys k ON k.id = l.api_key_id
+            {$where}
+        ");
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->execute();
+        $row = $stmt->fetch();
+
+        return (int) ($row['total'] ?? 0);
+    }
+
+    private function buildLogsFilter(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['key_id'])) {
+            $where[] = 'l.api_key_id = :key_id';
+            $params['key_id'] = (int) $filters['key_id'];
+        }
+
+        if (!empty($filters['method'])) {
+            $where[] = 'l.method = :method';
+            $params['method'] = strtoupper($filters['method']);
+        }
+
+        if (!empty($filters['status'])) {
+            if ($filters['status'] === 'success') {
+                $where[] = '(l.response_status >= 200 AND l.response_status < 300)';
+            } elseif ($filters['status'] === 'error') {
+                $where[] = 'l.response_status >= 400';
+            }
+        }
+
+        if (!empty($filters['path'])) {
+            $where[] = 'l.path LIKE :path';
+            $params['path'] = '%' . $filters['path'] . '%';
+        }
+
+        if (!empty($filters['date_from'])) {
+            $where[] = 'l.created_at >= :date_from';
+            $params['date_from'] = $filters['date_from'] . ' 00:00:00';
+        }
+
+        if (!empty($filters['date_to'])) {
+            $where[] = 'l.created_at <= :date_to';
+            $params['date_to'] = $filters['date_to'] . ' 23:59:59';
+        }
+
+        return [
+            empty($where) ? '' : 'WHERE ' . implode(' AND ', $where),
+            $params,
+        ];
+    }
+
     public function log(
         ?int $apiKeyId,
         string $requestId,

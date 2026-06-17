@@ -4,9 +4,14 @@
         <h1>API Credentials</h1>
         <span class="count-label"><?= count($apiKeys) ?> integration<?= count($apiKeys) !== 1 ? 's' : '' ?></span>
     </div>
-    <a href="<?= htmlspecialchars(Auth::url('/help/api'), ENT_QUOTES, 'UTF-8') ?>" class="api-back-link">
-        API Reference
-    </a>
+    <div style="display:flex;gap:12px;align-items:center">
+        <a href="<?= htmlspecialchars(Auth::url('/api-logs'), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-outlined btn-sm">
+            View logs
+        </a>
+        <a href="<?= htmlspecialchars(Auth::url('/help/api'), ENT_QUOTES, 'UTF-8') ?>" class="api-back-link">
+            API Reference
+        </a>
+    </div>
 </div>
 
 <?php if (!empty($newCredentials)): ?>

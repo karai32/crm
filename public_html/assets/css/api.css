@@ -500,3 +500,176 @@
     color: var(--color-text-muted);
     font-size: 13.5px;
 }
+
+/* ── API Logs page ─────────────────────────────────────────────────────── */
+
+.api-logs-header { margin-bottom: 20px; }
+.api-logs-header h1 { font-size: 26px; font-weight: 700; margin: 0 0 2px; }
+
+/* Filter card */
+.api-logs-filter-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.api-logs-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.api-logs-field {
+    flex: 1;
+    min-width: 160px;
+    margin: 0;
+}
+
+.api-logs-field--sm {
+    flex: 0 0 130px;
+    min-width: 110px;
+}
+
+.api-logs-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.api-logs-filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+/* Table card */
+.api-logs-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.api-logs-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.api-logs-table {
+    width: 100%;
+    min-width: 960px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.api-logs-table th {
+    padding: 9px 12px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--color-neutral);
+    background: var(--color-neutral-50);
+    border-bottom: 1px solid var(--color-neutral-200);
+    white-space: nowrap;
+    text-align: left;
+}
+
+.api-logs-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--color-neutral-100);
+    vertical-align: middle;
+}
+
+.api-logs-table tbody tr:last-child td { border-bottom: none; }
+
+.api-logs-table tbody tr:hover td { background: var(--color-neutral-50); }
+
+.api-log-row--error td { background: #fff8f8; }
+.api-log-row--error:hover td { background: #fff0f0; }
+
+/* Cells */
+.col-log-time { white-space: nowrap; color: var(--color-text-muted); font-size: 12px; }
+.col-log-muted { color: var(--color-text-muted); font-size: 12.5px; }
+.col-log-ip { font-family: var(--font-mono, monospace); font-size: 12px; white-space: nowrap; }
+.col-log-path { max-width: 260px; }
+.col-log-error { max-width: 150px; }
+.col-log-rid { max-width: 160px; }
+.col-num { text-align: right; white-space: nowrap; }
+
+.api-log-key-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--color-text);
+}
+
+.api-log-path {
+    font-family: var(--font-mono, monospace);
+    font-size: 11.5px;
+    color: var(--color-text);
+    background: none;
+    padding: 0;
+    word-break: break-all;
+}
+
+.api-log-error-code {
+    font-family: var(--font-mono, monospace);
+    font-size: 11.5px;
+    color: #b91c1c;
+    background: #fee2e2;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.api-log-rid {
+    font-family: var(--font-mono, monospace);
+    font-size: 11px;
+    color: var(--color-neutral);
+    background: none;
+    padding: 0;
+    word-break: break-all;
+}
+
+/* HTTP status badge */
+.api-status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-mono, monospace);
+    white-space: nowrap;
+}
+
+.api-status--ok   { background: #dcfce7; color: #15803d; }
+.api-status--warn { background: #fef3c7; color: #b45309; }
+.api-status--err  { background: #fee2e2; color: #b91c1c; }
+
+/* Pagination */
+.api-logs-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-neutral-200);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Empty state */
+.api-logs-empty {
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 13.5px;
+}
