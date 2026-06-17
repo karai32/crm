@@ -18,6 +18,8 @@ class ContactController
         $page = max(1, (int) ($_GET['page'] ?? 1));
         $perPage = 20;
         $filters = $this->filtersFromRequest();
+        $sort    = $this->sortParam(['id', 'full_name', 'email', 'created_at'], 'id');
+        $dir     = $this->dirParam();
         $total = $this->contacts->countAll($filters);
         $totalPages = max(1, (int) ceil($total / $perPage));
 
@@ -25,7 +27,7 @@ class ContactController
             $page = $totalPages;
         }
 
-        $contacts = $this->contacts->paginate($page, $perPage, $filters);
+        $contacts = $this->contacts->paginate($page, $perPage, $filters, $sort, $dir);
         $contactIds = array_map('intval', array_column($contacts, 'id'));
         $selectedFilterTags = $this->selectedTagsForIds($filters['tag_ids'] ?? []);
 
@@ -40,6 +42,8 @@ class ContactController
             'totalPages'         => $totalPages,
             'total'              => $total,
             'filters'            => $filters,
+            'sort'               => $sort,
+            'dir'                => $dir,
             'filterClients'      => $this->contacts->firstClients(),
             'filterSectors'      => $this->contacts->allSectors(),
             'filterTags'         => $this->mergeSelectedRows($this->contacts->firstTags(), $selectedFilterTags),
@@ -308,6 +312,17 @@ class ContactController
         $ids = array_filter($ids, fn ($id) => $id > 0);
 
         return array_values(array_unique($ids));
+    }
+
+    private function sortParam(array $allowed, string $default): string
+    {
+        $v = trim($_GET['sort'] ?? '');
+        return in_array($v, $allowed, true) ? $v : $default;
+    }
+
+    private function dirParam(): string
+    {
+        return ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
     }
 
     private function filtersFromRequest(): array

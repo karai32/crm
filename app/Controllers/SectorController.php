@@ -13,10 +13,15 @@ class SectorController
     {
         Auth::requirePermission('sectors.manage');
 
+        $sort = in_array($_GET['sort'] ?? '', ['name', 'slug', 'is_active'], true) ? $_GET['sort'] : 'name';
+        $dir  = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+
         View::render('sectors/index', [
             'title'   => 'Sectors',
             'styles'  => ['settings.css'],
-            'sectors' => $this->sectors->all(),
+            'sectors' => $this->sectors->all($sort, $dir),
+            'sort'    => $sort,
+            'dir'     => $dir,
         ]);
     }
 

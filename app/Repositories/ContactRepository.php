@@ -2,17 +2,21 @@
 
 class ContactRepository
 {
-    public function paginate(int $page, int $perPage, array $filters = []): array
+    public function paginate(int $page, int $perPage, array $filters = [], string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
         $offset = ($page - 1) * $perPage;
         [$whereSql, $params] = $this->buildFilterSql($filters);
 
+        $allowed  = ['id' => 'id', 'full_name' => 'full_name', 'email' => 'email', 'created_at' => 'created_at'];
+        $orderCol = $allowed[$sort] ?? 'id';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+
         $sql = "
             SELECT id, full_name, email, phone, created_at
             FROM contacts
             {$whereSql}
-            ORDER BY id DESC
+            ORDER BY {$orderCol} {$orderDir}
             LIMIT :limit OFFSET :offset
         ";
 

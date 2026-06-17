@@ -13,10 +13,15 @@ class TagController
     {
         Auth::requirePermission('tags.manage');
 
+        $sort = in_array($_GET['sort'] ?? '', ['name', 'slug'], true) ? $_GET['sort'] : 'name';
+        $dir  = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+
         View::render('tags/index', [
             'title'  => 'Tags',
             'styles' => ['settings.css'],
-            'tags'   => $this->tags->all(),
+            'tags'   => $this->tags->all($sort, $dir),
+            'sort'   => $sort,
+            'dir'    => $dir,
         ]);
     }
 

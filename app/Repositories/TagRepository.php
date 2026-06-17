@@ -2,11 +2,15 @@
 
 class TagRepository
 {
-    public function all(): array
+    public function all(string $sort = 'name', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
 
-        $statement = $pdo->prepare('SELECT * FROM tags ORDER BY name ASC');
+        $allowed  = ['name' => 'name', 'slug' => 'slug'];
+        $orderCol = $allowed[$sort] ?? 'name';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+
+        $statement = $pdo->prepare("SELECT * FROM tags ORDER BY {$orderCol} {$orderDir}");
         $statement->execute();
 
         return $statement->fetchAll();

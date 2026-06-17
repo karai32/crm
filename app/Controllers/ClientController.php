@@ -20,6 +20,8 @@ class ClientController
         $page = max(1, (int) ($_GET['page'] ?? 1));
         $perPage = 20;
         $filters = $this->filtersFromRequest();
+        $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at'], 'id');
+        $dir     = $this->dirParam();
         $total = $this->clients->countAll($filters);
         $totalPages = max(1, (int) ceil($total / $perPage));
 
@@ -27,7 +29,7 @@ class ClientController
             $page = $totalPages;
         }
 
-        $clients = $this->clients->paginate($page, $perPage, $filters);
+        $clients = $this->clients->paginate($page, $perPage, $filters, $sort, $dir);
         $clientIds = array_map('intval', array_column($clients, 'id'));
         $selectedFilterTags = $this->selectedTagsForIds($filters['tag_ids'] ?? []);
 
@@ -41,6 +43,8 @@ class ClientController
             'totalPages' => $totalPages,
             'total'      => $total,
             'filters'    => $filters,
+            'sort'       => $sort,
+            'dir'        => $dir,
             'filterSectors' => $this->sectors->all(),
             'filterTags' => $this->mergeSelectedRows($this->clients->firstTags(), $selectedFilterTags),
         ]);
@@ -243,6 +247,17 @@ class ClientController
         $value = trim($value);
 
         return $value === '' ? null : $value;
+    }
+
+    private function sortParam(array $allowed, string $default): string
+    {
+        $v = trim($_GET['sort'] ?? '');
+        return in_array($v, $allowed, true) ? $v : $default;
+    }
+
+    private function dirParam(): string
+    {
+        return ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
     }
 
     private function filtersFromRequest(): array

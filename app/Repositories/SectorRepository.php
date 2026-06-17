@@ -2,11 +2,18 @@
 
 class SectorRepository
 {
-    public function all(): array
+    public function all(string $sort = 'name', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
 
-        $statement = $pdo->prepare('SELECT * FROM sectors ORDER BY is_active DESC, name ASC');
+        $allowed  = ['name' => 'name', 'slug' => 'slug', 'is_active' => 'is_active'];
+        $orderCol = $allowed[$sort] ?? 'name';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $orderSql = $sort === 'is_active'
+            ? "is_active {$orderDir}, name ASC"
+            : "{$orderCol} {$orderDir}";
+
+        $statement = $pdo->prepare("SELECT * FROM sectors ORDER BY {$orderSql}");
         $statement->execute();
 
         return $statement->fetchAll();

@@ -1,3 +1,18 @@
+<?php
+$sortUrl = function (string $col) use ($sort, $dir): string {
+    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
+    return Auth::url('/tags?' . http_build_query(['sort' => $col, 'dir' => $nd]));
+};
+$thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): string {
+    $active = $sort === $col;
+    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
+    $cls    = 'th-sort' . ($active ? ' th-sort--' . $dir : '');
+    $href   = htmlspecialchars($sortUrl($col), ENT_QUOTES, 'UTF-8');
+    return '<th class="' . $cls . '"><a href="' . $href . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
+};
+?>
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
@@ -33,8 +48,8 @@
     <table class="settings-table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Slug</th>
+                <?= $thSort('name', 'Name') ?>
+                <?= $thSort('slug', 'Slug') ?>
                 <th>Color</th>
                 <th>Actions</th>
             </tr>

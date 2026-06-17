@@ -3,6 +3,21 @@ $activeFilters = array_filter($filters, function ($value) {
     return is_array($value) ? !empty($value) : ($value !== '' && $value !== 0 && $value !== null);
 });
 
+$paginateParams = array_merge($activeFilters, ['sort' => $sort, 'dir' => $dir]);
+$sortUrl = function (string $col) use ($sort, $dir, $activeFilters): string {
+    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
+    return Auth::url('/contacts?' . http_build_query(array_merge($activeFilters, ['sort' => $col, 'dir' => $nd, 'page' => 1])));
+};
+$thSort = function (string $col, string $label, string $xClass = '') use ($sort, $dir, $sortUrl): string {
+    $active = $sort === $col;
+    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
+    $cls    = trim('th-sort' . ($active ? ' th-sort--' . $dir : '') . ($xClass !== '' ? ' ' . $xClass : ''));
+    $href   = htmlspecialchars($sortUrl($col), ENT_QUOTES, 'UTF-8');
+    return '<th class="' . $cls . '"><a href="' . $href . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
+};
+
 $canCreateContacts  = Auth::can('contacts.create');
 $canEditContacts    = Auth::can('contacts.edit');
 $canDeleteContacts  = Auth::can('contacts.delete');
@@ -179,6 +194,8 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 <!-- Collapsible filter panel -->
 <div class="filter-panel" id="filterPanel">
     <form method="get" action="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="sort" value="<?= htmlspecialchars($sort, ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="dir"  value="<?= htmlspecialchars($dir, ENT_QUOTES, 'UTF-8') ?>">
 
         <div class="filter-grid">
             <div class="field">
@@ -390,9 +407,9 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                     <input type="checkbox" id="contactsSelectAll" aria-label="Select all">
                     <?php endif; ?>
                 </th>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
+                <?= $thSort('id', 'ID', 'col-id') ?>
+                <?= $thSort('full_name', 'Name') ?>
+                <?= $thSort('email', 'Email') ?>
                 <th>Clients</th>
                 <th>Tags</th>
                 <th>Actions</th>
@@ -463,7 +480,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
         <div class="pagination-pages">
             <?php if ($page > 1): ?>
                 <a class="page-btn"
-                   href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($activeFilters, ['page' => $page - 1]))), ENT_QUOTES, 'UTF-8') ?>">
+                   href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($paginateParams, ['page' => $page - 1]))), ENT_QUOTES, 'UTF-8') ?>">
                     Prev
                 </a>
             <?php else: ?>
@@ -477,7 +494,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                     <span class="page-btn active"><?= $p ?></span>
                 <?php else: ?>
                     <a class="page-btn"
-                       href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($activeFilters, ['page' => $p]))), ENT_QUOTES, 'UTF-8') ?>">
+                       href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($paginateParams, ['page' => $p]))), ENT_QUOTES, 'UTF-8') ?>">
                         <?= $p ?>
                     </a>
                 <?php endif; ?>
@@ -485,7 +502,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 
             <?php if ($page < $totalPages): ?>
                 <a class="page-btn"
-                   href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($activeFilters, ['page' => $page + 1]))), ENT_QUOTES, 'UTF-8') ?>">
+                   href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($paginateParams, ['page' => $page + 1]))), ENT_QUOTES, 'UTF-8') ?>">
                     Next
                 </a>
             <?php else: ?>

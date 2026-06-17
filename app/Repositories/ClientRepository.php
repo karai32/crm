@@ -2,11 +2,23 @@
 
 class ClientRepository
 {
-    public function paginate(int $page, int $perPage, array $filters = []): array
+    public function paginate(int $page, int $perPage, array $filters = [], string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
         $offset = ($page - 1) * $perPage;
         [$whereSql, $params] = $this->buildFilterSql($filters);
+
+        $allowed  = [
+            'id'              => 'clients.id',
+            'commercial_name' => 'clients.commercial_name',
+            'legal_name'      => 'clients.legal_name',
+            'sector_name'     => 'sectors.name',
+            'city'            => 'clients.city',
+            'country'         => 'clients.country',
+            'created_at'      => 'clients.created_at',
+        ];
+        $orderCol = $allowed[$sort] ?? 'clients.id';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
 
         $sql = "
             SELECT clients.id, clients.commercial_name, clients.legal_name, clients.city,
@@ -15,7 +27,7 @@ class ClientRepository
             FROM clients
             LEFT JOIN sectors ON sectors.id = clients.sector_id
             {$whereSql}
-            ORDER BY clients.id DESC
+            ORDER BY {$orderCol} {$orderDir}
             LIMIT :limit OFFSET :offset
         ";
 
