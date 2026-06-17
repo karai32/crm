@@ -121,6 +121,7 @@
 .col-clients-more:hover {
     background: var(--color-secondary-light, #e8f0fe);
     border-color: var(--color-secondary);
+    text-decoration: none;
 }
 
 /* Status badge */
