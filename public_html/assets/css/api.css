@@ -709,16 +709,18 @@
 
 /* Detail row */
 .api-log-detail-row td { padding: 0; border-bottom: 1px solid var(--color-neutral-200); }
+.api-logs-table tbody tr.api-log-detail-row:hover td { background: #1a202c; }
 
-.api-log-detail-cell { background: #1a202c; }
+.api-log-detail-cell { background: #1a202c; padding: 0; }
 
 .api-log-detail-grid {
+    background: #1a202c;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0;
 }
 
-.api-log-detail-pane { padding: 12px 16px; }
+.api-log-detail-pane { padding: 12px 16px; background: #1a202c; }
 .api-log-detail-pane + .api-log-detail-pane { border-left: 1px solid rgba(255,255,255,.07); }
 
 .api-log-detail-label {
