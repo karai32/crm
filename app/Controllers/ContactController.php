@@ -75,7 +75,7 @@ class ContactController
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
-        if ($data['first_name'] === '') {
+        if ($data['full_name'] === '') {
             View::render('contacts/create', [
                 'title'            => 'Create contact',
                 'styles'           => ['contacts.css'],
@@ -86,7 +86,7 @@ class ContactController
                 'selectedClientIds'=> $clientIds,
                 'customFields'     => $customFields,
                 'customValues'     => $customValues,
-                'error'            => 'First name is required.',
+                'error'            => 'Full name is required.',
             ]);
             return;
         }
@@ -164,7 +164,7 @@ class ContactController
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
-        if ($data['first_name'] === '') {
+        if ($data['full_name'] === '') {
             $data['id'] = $id;
 
             View::render('contacts/edit', [
@@ -177,7 +177,7 @@ class ContactController
                 'selectedClientIds'=> $clientIds,
                 'customFields'     => $customFields,
                 'customValues'     => $customValues,
-                'error'            => 'First name is required.',
+                'error'            => 'Full name is required.',
             ]);
             return;
         }
@@ -240,11 +240,10 @@ class ContactController
     private function contactDataFromRequest(): array
     {
         return [
-            'first_name' => trim($_POST['first_name'] ?? ''),
-            'last_name'  => $this->emptyToNull($_POST['last_name'] ?? ''),
+            'full_name'  => trim($_POST['full_name'] ?? ''),
             'email'      => $this->emptyToNull($_POST['email'] ?? ''),
             'phone'      => $this->emptyToNull($_POST['phone'] ?? ''),
-            'is_company' => isset($_POST['is_company']) ? 1 : 0,
+            'company' => trim($_POST['company'] ?? ''),
         ];
     }
 
@@ -314,11 +313,10 @@ class ContactController
     private function filtersFromRequest(): array
     {
         return [
-            'first_name' => trim($_GET['first_name'] ?? ''),
-            'last_name' => trim($_GET['last_name'] ?? ''),
+            'full_name' => trim($_GET['full_name'] ?? ''),
             'email' => trim($_GET['email'] ?? ''),
             'phone' => trim($_GET['phone'] ?? ''),
-            'is_company' => trim($_GET['is_company'] ?? ''),
+            'company' => trim($_GET['company'] ?? ''),
             'client_id' => (int) ($_GET['client_id'] ?? 0),
             'sector_id' => (int) ($_GET['sector_id'] ?? 0),
             'tag_id' => (int) ($_GET['tag_id'] ?? 0),

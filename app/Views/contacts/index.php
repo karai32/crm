@@ -58,8 +58,7 @@ $chips = [];
 $base  = Auth::url('/contacts');
 
 $textCols = [
-    'first_name'   => 'First name',
-    'last_name'    => 'Last name',
+    'full_name'    => 'Name',
     'email'        => 'Email',
     'phone'        => 'Phone',
     'country'      => 'Country',
@@ -77,9 +76,9 @@ foreach ($textCols as $key => $label) {
     }
 }
 
-if (isset($filters['is_company']) && $filters['is_company'] !== '') {
-    $typeLabel = $filters['is_company'] === '1' ? 'Company' : 'Person';
-    $f = $filters; unset($f['is_company'], $f['page']);
+if (!empty($filters['company'])) {
+    $typeLabel = $filters['company'] === 'company' ? 'Company' : 'Person';
+    $f = $filters; unset($f['company'], $f['page']);
     $chips[] = ['text' => 'Type: ' . $typeLabel, 'href' => $base . '?' . http_build_query($f)];
 }
 
@@ -183,14 +182,9 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 
         <div class="filter-grid">
             <div class="field">
-                <label for="first_name">First name</label>
-                <input id="first_name" type="text" name="first_name"
-                       value="<?= htmlspecialchars($filters['first_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="last_name">Last name</label>
-                <input id="last_name" type="text" name="last_name"
-                       value="<?= htmlspecialchars($filters['last_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label for="full_name">Name</label>
+                <input id="full_name" type="text" name="full_name"
+                       value="<?= htmlspecialchars($filters['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
                 <label for="email">Email</label>
@@ -203,11 +197,11 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                        value="<?= htmlspecialchars($filters['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
-                <label for="is_company">Type</label>
-                <select id="is_company" name="is_company">
+                <label for="company">Type</label>
+                <select id="company" name="company">
                     <option value="">All</option>
-                    <option value="1" <?= (($filters['is_company'] ?? '') === '1') ? 'selected' : '' ?>>Company</option>
-                    <option value="0" <?= (($filters['is_company'] ?? '') === '0') ? 'selected' : '' ?>>Person</option>
+                    <option value="company" <?= (($filters['company'] ?? '') === 'company') ? 'selected' : '' ?>>Company</option>
+                    <option value="person"  <?= (($filters['company'] ?? '') === 'person')  ? 'selected' : '' ?>>Person</option>
                 </select>
             </div>
             <div class="field">
@@ -397,8 +391,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                     <?php endif; ?>
                 </th>
                 <th>ID</th>
-                <th>First name</th>
-                <th>Last name</th>
+                <th>Name</th>
                 <th>Email</th>
                 <th>Tags</th>
                 <th>Clients</th>
@@ -415,8 +408,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                     <?php endif; ?>
                 </td>
                 <td class="col-id"><?= (int) $contact['id'] ?></td>
-                <td class="col-name"><?= htmlspecialchars($contact['first_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                <td class="col-name"><?= htmlspecialchars($contact['last_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                <td class="col-name"><?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
                 <td class="col-email"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 <td class="col-tags">
                     <?php foreach ($contactTags[(int) $contact['id']] ?? [] as $tag): ?>
@@ -439,8 +431,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                             <?= htmlspecialchars($cList[0]['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
                         </a>
                         <?php if ($cCount > 1):
-                            $contactFullName = trim($contact['first_name'] . ' ' . ($contact['last_name'] ?? ''));
-                            $moreUrl = Auth::url('/clients?' . http_build_query(['contact_name' => $contactFullName]));
+                            $moreUrl = Auth::url('/clients?' . http_build_query(['contact_name' => $contact['full_name']]));
                         ?>
                         <a class="col-clients-more" href="<?= htmlspecialchars($moreUrl, ENT_QUOTES, 'UTF-8') ?>">+<?= $cCount - 1 ?></a>
                         <?php endif; ?>

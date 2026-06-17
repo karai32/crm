@@ -27,7 +27,7 @@ class DashboardRepository
         $pdo = Database::connect();
 
         $sql = "
-            SELECT id, first_name, last_name, email, phone, is_company, created_at
+            SELECT id, full_name, email, phone, company, created_at
             FROM contacts
             ORDER BY created_at DESC, id DESC
             LIMIT :limit

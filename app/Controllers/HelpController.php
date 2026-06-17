@@ -185,7 +185,7 @@ class HelpController
                             'El <strong>historial de importaciones</strong> muestra el resultado de cada carga: filas importadas, omitidas y con error.',
                             'Descarga la plantilla CSV desde <em>Exports → Import templates</em> para usar el formato correcto desde el inicio.',
                         ],
-                        'tip' => 'La columna "first_name" es obligatoria. Si el archivo tiene emails duplicados respecto a contactos existentes, esas filas se omiten automaticamente.',
+                        'tip' => 'La columna "full_name" es obligatoria. Si el archivo tiene emails duplicados respecto a contactos existentes, esas filas se omiten automaticamente.',
                     ],
                     [
                         'id'      => 'exports',
@@ -346,7 +346,7 @@ class HelpController
                             'The <strong>import history</strong> shows the result of each upload: rows imported, skipped, and with errors.',
                             'Download the CSV template from <em>Exports → Import templates</em> to use the correct format from the start.',
                         ],
-                        'tip' => 'The "first_name" column is required. If the file contains emails that already exist in the system, those rows are automatically skipped.',
+                        'tip' => 'The "full_name" column is required. If the file contains emails that already exist in the system, those rows are automatically skipped.',
                     ],
                     [
                         'id'      => 'exports',

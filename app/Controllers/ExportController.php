@@ -106,11 +106,10 @@ class ExportController
     private function contactFiltersFromPost(): array
     {
         return [
-            'first_name' => trim($_POST['first_name'] ?? ''),
-            'last_name'  => trim($_POST['last_name'] ?? ''),
+            'full_name'  => trim($_POST['full_name'] ?? ''),
             'email'      => trim($_POST['email'] ?? ''),
             'phone'      => trim($_POST['phone'] ?? ''),
-            'is_company' => trim($_POST['is_company'] ?? ''),
+            'company' => trim($_POST['company'] ?? ''),
             'client_id'  => (int) ($_POST['client_id'] ?? 0),
             'tag_ids'    => array_values(array_filter(array_map('intval', (array) ($_POST['tag_ids'] ?? [])), fn ($id) => $id > 0)),
         ];

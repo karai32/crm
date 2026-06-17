@@ -15,10 +15,9 @@ if (!function_exists('contactStatusClass')) {
     }
 }
 
-$firstName    = $contact['first_name'] ?? '';
-$lastName     = $contact['last_name']  ?? '';
-$fullName     = trim($firstName . ' ' . $lastName);
-$heroInitials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
+$fullName     = $contact['full_name'] ?? '';
+$nameParts    = explode(' ', $fullName, 2);
+$heroInitials = strtoupper(substr($nameParts[0] ?? '', 0, 1) . substr($nameParts[1] ?? '', 0, 1));
 $canEditContacts = Auth::can('contacts.edit');
 ?>
 
@@ -72,12 +71,8 @@ $canEditContacts = Auth::can('contacts.edit');
                         <td class="detail-td"><?= (int) $contact['id'] ?></td>
                     </tr>
                     <tr>
-                        <td class="detail-th">First name</td>
-                        <td class="detail-td"><?= htmlspecialchars($contact['first_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                    </tr>
-                    <tr>
-                        <td class="detail-th">Last name</td>
-                        <td class="detail-td"><?= htmlspecialchars($contact['last_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="detail-th">Full name</td>
+                        <td class="detail-td"><?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                     <tr>
                         <td class="detail-th">Email</td>
@@ -88,8 +83,8 @@ $canEditContacts = Auth::can('contacts.edit');
                         <td class="detail-td"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                     <tr>
-                        <td class="detail-th">Is company</td>
-                        <td class="detail-td"><?= ((int) $contact['is_company'] === 1) ? 'Yes' : 'No' ?></td>
+                        <td class="detail-th">Company</td>
+                        <td class="detail-td"><?= htmlspecialchars($contact['company'] !== '' ? $contact['company'] : '—', ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                     <tr>
                         <td class="detail-th">Created</td>

@@ -9,7 +9,7 @@ class ContactRepository
         [$whereSql, $params] = $this->buildFilterSql($filters);
 
         $sql = "
-            SELECT id, first_name, last_name, email, phone, created_at
+            SELECT id, full_name, email, phone, created_at
             FROM contacts
             {$whereSql}
             ORDER BY id DESC
@@ -59,7 +59,7 @@ class ContactRepository
 
         $statement = $pdo->prepare("
             SELECT * FROM contacts
-            WHERE TRIM(CONCAT(first_name, ' ', COALESCE(last_name, ''))) = :name
+            WHERE full_name = :name
             LIMIT 1
         ");
         $statement->execute(['name' => trim($name)]);
@@ -93,13 +93,12 @@ class ContactRepository
         $pdo = Database::connect();
 
         $sql = "
-            SELECT id, first_name, last_name, email, phone
+            SELECT id, full_name, email, phone
             FROM contacts
-            WHERE first_name LIKE :query
-               OR last_name LIKE :query
+            WHERE full_name LIKE :query
                OR email LIKE :query
                OR phone LIKE :query
-            ORDER BY first_name ASC, last_name ASC
+            ORDER BY full_name ASC
             LIMIT :limit
         ";
 
@@ -116,8 +115,8 @@ class ContactRepository
         $pdo = Database::connect();
 
         $sql = "
-            INSERT INTO contacts (first_name, last_name, email, phone, is_company)
-            VALUES (:first_name, :last_name, :email, :phone, :is_company)
+            INSERT INTO contacts (full_name, email, phone, company)
+            VALUES (:full_name, :email, :phone, :company)
         ";
 
         $statement = $pdo->prepare($sql);
@@ -132,11 +131,10 @@ class ContactRepository
 
         $sql = "
             UPDATE contacts
-            SET first_name = :first_name,
-                last_name  = :last_name,
+            SET full_name  = :full_name,
                 email      = :email,
                 phone      = :phone,
-                is_company = :is_company
+                company = :company
             WHERE id = :id
         ";
 
@@ -413,16 +411,19 @@ class ContactRepository
         $where = [];
         $params = [];
 
-        foreach (['first_name', 'last_name', 'email', 'phone'] as $field) {
+        foreach (['full_name', 'email', 'phone'] as $field) {
             if (!empty($filters[$field])) {
                 $where[] = "contacts.{$field} LIKE :{$field}";
                 $params[$field] = '%' . $filters[$field] . '%';
             }
         }
 
-        if ($filters['is_company'] !== '' && $filters['is_company'] !== null) {
-            $where[] = 'contacts.is_company = :is_company';
-            $params['is_company'] = (int) $filters['is_company'];
+        if (!empty($filters['company'])) {
+            if ($filters['company'] === 'company') {
+                $where[] = "contacts.company != ''";
+            } elseif ($filters['company'] === 'person') {
+                $where[] = "contacts.company = ''";
+            }
         }
 
         if (!empty($filters['client_id'])) {

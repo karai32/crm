@@ -116,7 +116,7 @@ Invoke-RestMethod -Method Post `
     -Uri <span class="cs">"<?= htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8') ?>/api/v1/contacts"</span> `
     -Headers <span class="ck">$headers</span> `
     -ContentType <span class="cs">"application/json"</span> `
-    -Body <span class="cs">'[{"first_name":"Ivan","email":"ivan@example.com","tags":"VIP","clients":"Acme Corp"}]'</span>
+    -Body <span class="cs">'[{"full_name":"Ivan Petrov","email":"ivan@example.com","tags":"VIP","clients":"Acme Corp"}]'</span>
 CODE); ?>
 
                 <p class="api-label api-label-mt">Response envelope</p>
@@ -160,7 +160,7 @@ CODE); ?>
 
             <div class="help-card-body">
                 <p class="api-desc-text">
-                    Contacts represent individual people. Only the first name is required.
+                    Contacts represent individual people. Only the full name is required.
                     When an email is provided it must be valid and unique. Optional tags and clients are
                     <strong class="help-api-strong">created automatically</strong> when they don't exist.
                     Custom fields are saved silently — unknown field slugs are ignored.
@@ -212,13 +212,12 @@ CODE); ?>
                         <tr><th>Field</th><th>Type</th><th>POST</th><th>Description</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><code>first_name</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-req">required</span></td><td>First name</td></tr>
+                        <tr><td><code>full_name</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-req">required</span></td><td>Full name</td></tr>
                         <tr><td><code>email</code></td><td><span class="api-type">string|null</span></td><td><span class="api-badge-opt">optional</span></td><td>Unique email address when provided</td></tr>
                         <tr><td><code>tags</code></td><td><span class="api-type">string|string[]</span></td><td><span class="api-badge-opt">optional</span></td><td>One or more tag names — single name, comma-separated string, or array. Created if missing.</td></tr>
                         <tr><td><code>clients</code></td><td><span class="api-type">string|string[]</span></td><td><span class="api-badge-opt">optional</span></td><td>One or more client commercial names — single name, comma-separated string, or array. Created if missing.</td></tr>
-                        <tr><td><code>last_name</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Last name</td></tr>
                         <tr><td><code>phone</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Phone number</td></tr>
-                        <tr><td><code>is_company</code></td><td><span class="api-type">boolean</span></td><td><span class="api-badge-opt">optional</span></td><td>Whether this contact represents a company</td></tr>
+                        <tr><td><code>company</code></td><td><span class="api-type">string</span></td><td><span class="api-badge-opt">optional</span></td><td>Company name, or empty string if not a company</td></tr>
                         <tr><td><code>custom_fields</code></td><td><span class="api-type">object</span></td><td><span class="api-badge-opt">optional</span></td><td>Key/value pairs by field slug. Unknown slugs are ignored. Flat <code class="help-api-inline-code">"custom_fields.&lt;slug&gt;"</code> keys work the same way, on both POST and PATCH.</td></tr>
                     </tbody>
                 </table>
@@ -234,7 +233,7 @@ CODE); ?>
                 <p class="api-label api-label-mt">GET filters</p>
                 <p class="help-api-body-text-muted">All parameters are optional and combine with AND logic.</p>
                 <div class="api-filter-params api-filter-params-mb">
-                    <?php foreach (['page','per_page (max 100)','first_name','last_name','email','phone','is_company','client_id','tag_id','created_from (YYYY-MM-DD)','created_to (YYYY-MM-DD)'] as $p): ?>
+                    <?php foreach (['page','per_page (max 100)','full_name','email','phone','company','client_id','tag_id','created_from (YYYY-MM-DD)','created_to (YYYY-MM-DD)'] as $p): ?>
                     <code class="help-api-inline-code"><?= htmlspecialchars($p, ENT_QUOTES, 'UTF-8') ?></code>
                     <?php endforeach; ?>
                 </div>
@@ -243,12 +242,11 @@ CODE); ?>
                 <?php helpApiCodeBlock('POST /api/v1/contacts', 'ex-contacts-post', <<<"CODE"
 [
   {
-    <span class="ck">"first_name"</span>: <span class="cs">"Ivan"</span>,
-    <span class="ck">"last_name"</span>:  <span class="cs">"Petrov"</span>,
-    <span class="ck">"email"</span>:      <span class="cs">"ivan@example.com"</span>,
-    <span class="ck">"phone"</span>:      <span class="cs">"+7999000001"</span>,
-    <span class="ck">"tags"</span>:       <span class="cs">"VIP"</span>,
-    <span class="ck">"clients"</span>:    <span class="cs">"Acme Corp"</span>,
+    <span class="ck">"full_name"</span>: <span class="cs">"Ivan Petrov"</span>,
+    <span class="ck">"email"</span>:     <span class="cs">"ivan@example.com"</span>,
+    <span class="ck">"phone"</span>:     <span class="cs">"+7999000001"</span>,
+    <span class="ck">"tags"</span>:      <span class="cs">"VIP"</span>,
+    <span class="ck">"clients"</span>:   <span class="cs">"Acme Corp"</span>,
     <span class="ck">"custom_fields"</span>: { <span class="ck">"birthday"</span>: <span class="cs">"1990-01-01"</span> }
   }
 ]
@@ -270,8 +268,8 @@ CODE); ?>
                 <p class="api-label api-label-mt">Example — PATCH</p>
                 <?php helpApiCodeBlock('PATCH /api/v1/contacts/42', 'ex-contacts-patch', <<<"CODE"
 {
-  <span class="ck">"first_name"</span>: <span class="cs">"John"</span>,
-  <span class="ck">"tags"</span>:       [<span class="cs">"VIP"</span>, <span class="cs">"Priority"</span>],
+  <span class="ck">"full_name"</span>: <span class="cs">"John Smith"</span>,
+  <span class="ck">"tags"</span>:      [<span class="cs">"VIP"</span>, <span class="cs">"Priority"</span>],
   <span class="ck">"clients"</span>:    [<span class="cs">"Acme Corp"</span>],
   <span class="ck">"custom_fields"</span>: { <span class="ck">"birthday"</span>: <span class="cs">"1985-03-15"</span> }
 }
@@ -279,7 +277,7 @@ CODE); ?>
 
                 <p class="api-label api-label-mt">Example — multiple tags as a comma-separated string</p>
                 <?php helpApiCodeBlock('POST /api/v1/contacts', 'ex-contacts-tags-string', <<<"CODE"
-{ <span class="ck">"first_name"</span>: <span class="cs">"Ivan"</span>, <span class="ck">"tags"</span>: <span class="cs">"VIP, Enterprise, Priority"</span> }
+{ <span class="ck">"full_name"</span>: <span class="cs">"Ivan Petrov"</span>, <span class="ck">"tags"</span>: <span class="cs">"VIP, Enterprise, Priority"</span> }
 <span class="cc">// equivalent to "tags": ["VIP", "Enterprise", "Priority"]</span>
 CODE); ?>
             </div>
@@ -387,7 +385,7 @@ CODE); ?>
     <span class="ck">"sector"</span>:          <span class="cs">"Technology"</span>,
     <span class="ck">"city"</span>:            <span class="cs">"Madrid"</span>,
     <span class="ck">"tags"</span>:            [{ <span class="ck">"id"</span>: <span class="cn">1</span>, <span class="ck">"name"</span>: <span class="cs">"Enterprise"</span> }],
-    <span class="ck">"contacts"</span>:        [{ <span class="ck">"id"</span>: <span class="cn">42</span>, <span class="ck">"first_name"</span>: <span class="cs">"Ivan"</span>, <span class="ck">"email"</span>: <span class="cs">"ivan@example.com"</span> }],
+    <span class="ck">"contacts"</span>:        [{ <span class="ck">"id"</span>: <span class="cn">42</span>, <span class="ck">"full_name"</span>: <span class="cs">"Ivan Petrov"</span>, <span class="ck">"email"</span>: <span class="cs">"ivan@example.com"</span> }],
     <span class="ck">"custom_fields"</span>:   { <span class="ck">"contract_number"</span>: <span class="cs">"A-001"</span> }
   }
 }

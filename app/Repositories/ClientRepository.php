@@ -199,7 +199,7 @@ class ClientRepository
             FROM contacts
             INNER JOIN client_contacts ON client_contacts.contact_id = contacts.id
             WHERE client_contacts.client_id = :client_id
-            ORDER BY contacts.first_name ASC, contacts.last_name ASC
+            ORDER BY contacts.full_name ASC
         ";
 
         $statement = $pdo->prepare($sql);
@@ -366,9 +366,7 @@ class ClientRepository
                     INNER JOIN contacts con ON con.id = cc.contact_id
                     WHERE cc.client_id = clients.id
                     AND (
-                        con.first_name LIKE :contact_name
-                        OR con.last_name LIKE :contact_name
-                        OR CONCAT(con.first_name, ' ', COALESCE(con.last_name, '')) LIKE :contact_name
+                        con.full_name LIKE :contact_name
                     )
                 )
             ";

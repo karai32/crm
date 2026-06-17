@@ -106,14 +106,14 @@ function fmtDate(string $date): string {
                     <td>
                         <a class="contact-name-link"
                            href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
-                            <?= htmlspecialchars(trim($contact['first_name'] . ' ' . ($contact['last_name'] ?? '')), ENT_QUOTES, 'UTF-8') ?>
+                            <?= htmlspecialchars($contact['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                         </a>
                     </td>
                     <td><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
                         <span class="company-indicator">
-                            <span class="company-indicator-dot <?= !empty($contact['is_company']) ? 'yes' : 'no' ?>"></span>
-                            <?= !empty($contact['is_company']) ? 'Yes' : 'No' ?>
+                            <span class="company-indicator-dot <?= ($contact['company'] ?? '') !== '' ? 'yes' : 'no' ?>"></span>
+                            <?= ($contact['company'] ?? '') !== '' ? htmlspecialchars($contact['company'], ENT_QUOTES, 'UTF-8') : 'No' ?>
                         </span>
                     </td>
                     <td>

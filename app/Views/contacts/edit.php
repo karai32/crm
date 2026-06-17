@@ -2,7 +2,7 @@
 <div class="page-header contacts-header">
     <div>
         <h1>Edit contact</h1>
-        <span class="count-label"><?= htmlspecialchars(trim(($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '')), ENT_QUOTES, 'UTF-8') ?></span>
+        <span class="count-label"><?= htmlspecialchars($contact['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
         <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . (int) $contact['id']), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
@@ -24,14 +24,9 @@
             <div class="form-section-title">Basic Information</div>
             <div class="form-grid">
                 <div class="field">
-                    <label for="first_name">First name <span class="required-star">*</span></label>
-                    <input id="first_name" type="text" name="first_name"
-                           value="<?= htmlspecialchars($contact['first_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
-                </div>
-                <div class="field">
-                    <label for="last_name">Last name</label>
-                    <input id="last_name" type="text" name="last_name"
-                           value="<?= htmlspecialchars($contact['last_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <label for="full_name">Full name <span class="required-star">*</span></label>
+                    <input id="full_name" type="text" name="full_name"
+                           value="<?= htmlspecialchars($contact['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
                 </div>
                 <div class="field">
                     <label for="email">Email</label>
@@ -43,12 +38,10 @@
                     <input id="phone" type="text" name="phone"
                            value="<?= htmlspecialchars($contact['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
-                <div class="field checkbox-field">
-                    <label class="label-checkbox-top">
-                        <input type="checkbox" name="is_company" value="1"
-                               <?= ((int) ($contact['is_company'] ?? 0) === 1) ? 'checked' : '' ?>>
-                        Is company
-                    </label>
+                <div class="field">
+                    <label for="company">Company name</label>
+                    <input id="company" type="text" name="company" placeholder="Leave empty if not a company"
+                           value="<?= htmlspecialchars($contact['company'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
         </div>

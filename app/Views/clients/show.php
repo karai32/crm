@@ -183,7 +183,7 @@
                 <?php foreach ($contacts as $contact): ?>
                     <tr>
                         <td class="col-contact-name">
-                            <?= htmlspecialchars(trim($contact['first_name'] . ' ' . ($contact['last_name'] ?? '')), ENT_QUOTES, 'UTF-8') ?>
+                            <?= htmlspecialchars($contact['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                         </td>
                         <td class="col-contact-muted"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="col-contact-muted"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>

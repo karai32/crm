@@ -116,25 +116,23 @@ CREATE TABLE clients (
 
 CREATE TABLE contacts (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(150) NOT NULL,
-    last_name VARCHAR(150) NULL,
+    full_name VARCHAR(255) NOT NULL DEFAULT '',
     email VARCHAR(190) NULL,
     phone VARCHAR(60) NULL,
-    is_company TINYINT(1) NOT NULL DEFAULT 0,
+    company VARCHAR(255) NOT NULL DEFAULT '',
     created_by INT UNSIGNED NULL,
     updated_by INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_contacts_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_contacts_updated_by FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
-    INDEX idx_contacts_first_name (first_name),
-    INDEX idx_contacts_last_name (last_name),
+    INDEX idx_contacts_full_name (full_name),
     INDEX idx_contacts_email (email),
     INDEX idx_contacts_phone (phone),
-    INDEX idx_contacts_is_company (is_company),
+    INDEX idx_contacts_company (company),
     INDEX idx_contacts_created_at (created_at),
     INDEX idx_contacts_updated_at (updated_at),
-    FULLTEXT INDEX ft_contacts_search (first_name, last_name, email, phone)
+    FULLTEXT INDEX ft_contacts_search (full_name, email, phone)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE contact_tags (
@@ -338,6 +336,9 @@ CREATE TABLE api_logs (
     items_count INT UNSIGNED NULL,
     ip_address VARCHAR(45) NULL,
     duration_ms INT UNSIGNED NULL,
+    request_body TEXT NULL,
+    response_body TEXT NULL,
+    origin VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_api_logs_key FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE SET NULL ON UPDATE CASCADE,
     UNIQUE KEY uq_api_logs_request_id (request_id),

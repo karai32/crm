@@ -22,11 +22,10 @@ class ContactApiService extends AbstractApiService
         $page = max(1, (int) ($query['page'] ?? 1));
         $perPage = min(100, max(1, (int) ($query['per_page'] ?? 25)));
         $filters = [
-            'first_name' => $query['first_name'] ?? '',
-            'last_name' => $query['last_name'] ?? '',
+            'full_name' => $query['full_name'] ?? '',
             'email' => $query['email'] ?? '',
             'phone' => $query['phone'] ?? '',
-            'is_company' => $query['is_company'] ?? '',
+            'company' => $query['company'] ?? '',
             'client_id' => $query['client_id'] ?? '',
             'tag_ids' => isset($query['tag_id']) ? [(int) $query['tag_id']] : [],
             'created_from' => $query['created_from'] ?? '',
@@ -43,8 +42,7 @@ class ContactApiService extends AbstractApiService
             $id = (int) $contact['id'];
             return [
                 'id' => $id,
-                'first_name' => $contact['first_name'],
-                'last_name' => $contact['last_name'],
+                'full_name' => $contact['full_name'],
                 'email' => $contact['email'],
                 'phone' => $contact['phone'],
                 'created_at' => $contact['created_at'],
@@ -79,8 +77,8 @@ class ContactApiService extends AbstractApiService
         $body = $this->expandCustomFieldKeys($body);
         $errors = [];
 
-        if (array_key_exists('first_name', $body) && trim((string) ($body['first_name'] ?? '')) === '') {
-            $errors[] = 'first_name cannot be empty';
+        if (array_key_exists('full_name', $body) && trim((string) ($body['full_name'] ?? '')) === '') {
+            $errors[] = 'full_name cannot be empty';
         }
 
         if (array_key_exists('email', $body)) {
@@ -97,22 +95,23 @@ class ContactApiService extends AbstractApiService
         }
 
         $updated = [
-            'first_name' => $contact['first_name'],
-            'last_name' => $contact['last_name'],
+            'full_name' => $contact['full_name'],
             'email' => $contact['email'],
             'phone' => $contact['phone'],
-            'is_company' => $contact['is_company'],
+            'company' => $contact['company'],
         ];
 
-        foreach (['first_name', 'last_name', 'email', 'phone', 'is_company'] as $field) {
+        foreach (['full_name', 'email', 'phone', 'company'] as $field) {
             if (!array_key_exists($field, $body)) {
                 continue;
             }
-            $updated[$field] = $field === 'is_company'
-                ? (empty($body[$field]) ? 0 : 1)
-                : $this->nullableString($body[$field]);
+            $updated[$field] = $field === 'full_name'
+                ? trim((string) ($body[$field] ?? ''))
+                : ($field === 'company'
+                    ? trim((string) ($body[$field] ?? ''))
+                    : $this->nullableString($body[$field]));
         }
-        $updated['first_name'] ??= $contact['first_name'];
+        $updated['full_name'] = $updated['full_name'] ?: $contact['full_name'];
 
         $pdo = Database::connect();
         $pdo->beginTransaction();
@@ -159,12 +158,12 @@ class ContactApiService extends AbstractApiService
     {
         $item = $this->expandCustomFieldKeys($item);
 
-        $firstName = trim((string) ($item['first_name'] ?? ''));
+        $fullName = trim((string) ($item['full_name'] ?? ''));
         $email = trim((string) ($item['email'] ?? ''));
         $errors = [];
 
-        if ($firstName === '') {
-            $errors[] = 'first_name is required';
+        if ($fullName === '') {
+            $errors[] = 'full_name is required';
         }
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'email is invalid';
@@ -181,11 +180,10 @@ class ContactApiService extends AbstractApiService
         [$clientIds, $clientCreated] = $this->resolveClientIds($this->splitNames($item['clients'] ?? null));
 
         $contactId = $this->contacts->create([
-            'first_name' => $firstName,
-            'last_name' => $this->nullableString($item['last_name'] ?? null),
+            'full_name' => $fullName,
             'email' => $email === '' ? null : $email,
             'phone' => $this->nullableString($item['phone'] ?? null),
-            'is_company' => empty($item['is_company']) ? 0 : 1,
+            'company' => trim((string) ($item['company'] ?? '')),
         ]);
 
         if ($tagIds !== []) {
@@ -212,11 +210,10 @@ class ContactApiService extends AbstractApiService
 
         return [
             'id' => (int) $contact['id'],
-            'first_name' => $contact['first_name'],
-            'last_name' => $contact['last_name'],
+            'full_name' => $contact['full_name'],
             'email' => $contact['email'],
             'phone' => $contact['phone'],
-            'is_company' => (bool) $contact['is_company'],
+            'company' => $contact['company'],
             'created_at' => $contact['created_at'],
             'updated_at' => $contact['updated_at'] ?? null,
             'tags' => $this->formatTags($this->contacts->tagsForContact($id)),

@@ -106,7 +106,7 @@ class ImportManager
         $entityType = $batch['entity_type'] ?? 'contacts';
         $mapping = $this->mapping->clean($mapping, $entityType);
         $customFields = $this->mapping->cleanCustomFields($customFields);
-        $required = $entityType === 'clients' ? 'commercial_name' : 'first_name';
+        $required = $entityType === 'clients' ? 'commercial_name' : 'full_name';
         if (!in_array($required, $mapping, true)) {
             return $this->result($batch, true, "Map a column to {$required} before importing.");
         }

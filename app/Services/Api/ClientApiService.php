@@ -175,8 +175,7 @@ class ClientApiService extends AbstractApiService
         $client = $this->requireRecord($this->clients->find($id), 'client');
         $contacts = array_map(fn (array $contact): array => [
             'id' => (int) $contact['id'],
-            'first_name' => $contact['first_name'],
-            'last_name' => $contact['last_name'],
+            'full_name' => $contact['full_name'],
             'email' => $contact['email'],
             'phone' => $contact['phone'],
         ], $this->clients->contactsForClient($id));

@@ -23,11 +23,10 @@ class ImportMapping
                 'contact' => 'contact',
             ]
             : [
-                'first_name' => 'first_name',
-                'last_name' => 'last_name',
+                'full_name' => 'full_name',
                 'email' => 'email',
                 'phone' => 'phone',
-                'is_company' => 'is_company',
+                'company' => 'company',
                 'client' => 'client',
                 'sector' => 'sector',
                 'tags' => 'tags',
@@ -49,10 +48,10 @@ class ImportMapping
                 'contact' => 'contact', 'contact name' => 'contact', 'contact_name' => 'contact',
             ]
             : [
-                'name' => 'first_name', 'first name' => 'first_name', 'first_name' => 'first_name',
-                'last name' => 'last_name', 'last_name' => 'last_name',
+                'name' => 'full_name', 'full name' => 'full_name', 'full_name' => 'full_name',
+                'first name' => 'full_name', 'first_name' => 'full_name',
                 'email' => 'email', 'e-mail' => 'email', 'phone' => 'phone',
-                'is_company' => 'is_company', 'company indicator' => 'is_company',
+                'is_company' => 'company', 'company indicator' => 'company', 'company name' => 'company',
                 'company' => 'client', 'client' => 'client', 'client_name' => 'client',
                 'client name' => 'client', 'sector' => 'sector', 'sector_name' => 'sector',
                 'tags' => 'tags', 'tag' => 'tags',

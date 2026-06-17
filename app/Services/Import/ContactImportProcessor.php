@@ -14,11 +14,11 @@ class ContactImportProcessor extends AbstractImportProcessor
 
     public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): void
     {
-        $firstName = trim((string) ($mapped['first_name'] ?? ''));
+        $fullName = trim((string) ($mapped['full_name'] ?? ''));
         $email = trim((string) ($mapped['email'] ?? ''));
 
-        if ($firstName === '') {
-            throw new ImportRowException('First name is required.');
+        if ($fullName === '') {
+            throw new ImportRowException('Full name is required.');
         }
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new ImportRowException('Invalid email: ' . $email);
@@ -28,11 +28,10 @@ class ContactImportProcessor extends AbstractImportProcessor
         }
 
         $contactId = $this->contacts->create([
-            'first_name' => $firstName,
-            'last_name' => $this->nullable($mapped['last_name'] ?? null),
+            'full_name' => $fullName,
             'email' => $this->nullable($email),
             'phone' => $this->nullable($mapped['phone'] ?? null),
-            'is_company' => $this->boolValue((string) ($mapped['is_company'] ?? '')),
+            'company' => trim((string) ($mapped['company'] ?? '')),
         ]);
 
         $clientId = $this->clientId(

@@ -22,7 +22,7 @@ class ExportService
     {
         $columns = $entity === 'clients'
             ? ['commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes', 'sector', 'tags']
-            : ['first_name', 'last_name', 'email', 'phone', 'is_company', 'tags', 'client', 'sector'];
+            : ['full_name', 'email', 'phone', 'company', 'tags', 'client', 'sector'];
         $handle = fopen('php://temp', 'r+');
         fputcsv($handle, $columns);
         rewind($handle);
@@ -36,12 +36,11 @@ class ExportService
     private function contactsFieldDefs(array $customFields): array
     {
         $fields = [
-            'id'           => ['label' => 'ID',          'group' => 'Basic info'],
-            'first_name'   => ['label' => 'First name',  'group' => 'Basic info'],
-            'last_name'    => ['label' => 'Last name',   'group' => 'Basic info'],
-            'email'        => ['label' => 'Email',       'group' => 'Basic info'],
-            'phone'        => ['label' => 'Phone',       'group' => 'Basic info'],
-            'is_company'   => ['label' => 'Is company',  'group' => 'Basic info'],
+            'id'           => ['label' => 'ID',           'group' => 'Basic info'],
+            'full_name'    => ['label' => 'Full name',    'group' => 'Basic info'],
+            'email'        => ['label' => 'Email',        'group' => 'Basic info'],
+            'phone'        => ['label' => 'Phone',        'group' => 'Basic info'],
+            'company'   => ['label' => 'Company name', 'group' => 'Basic info'],
             'created_at'   => ['label' => 'Created',     'group' => 'Basic info'],
             'updated_at'   => ['label' => 'Updated',     'group' => 'Basic info'],
             'tags'         => ['label' => 'Tags',        'group' => 'Related data'],
@@ -107,7 +106,7 @@ class ExportService
         $needClients    = false;
         $needCfv        = false;
         $cfIds          = [];
-        $baseColumns    = ['id', 'first_name', 'last_name', 'email', 'phone', 'is_company', 'created_at', 'updated_at'];
+        $baseColumns    = ['id', 'full_name', 'email', 'phone', 'company', 'created_at', 'updated_at'];
         $headers        = [];
 
         foreach ($fields as $field) {
@@ -270,16 +269,19 @@ class ExportService
         $where  = [];
         $params = [];
 
-        foreach (['first_name', 'last_name', 'email', 'phone'] as $field) {
+        foreach (['full_name', 'email', 'phone'] as $field) {
             if (!empty($filters[$field])) {
                 $where[]         = "contacts.{$field} LIKE :{$field}";
                 $params[$field]  = '%' . $filters[$field] . '%';
             }
         }
 
-        if (isset($filters['is_company']) && $filters['is_company'] !== '' && $filters['is_company'] !== null) {
-            $where[]             = 'contacts.is_company = :is_company';
-            $params['is_company'] = (int) $filters['is_company'];
+        if (!empty($filters['company'])) {
+            if ($filters['company'] === 'company') {
+                $where[] = "contacts.company != ''";
+            } elseif ($filters['company'] === 'person') {
+                $where[] = "contacts.company = ''";
+            }
         }
 
         if (!empty($filters['client_id'])) {

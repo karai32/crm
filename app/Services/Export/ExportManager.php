@@ -24,7 +24,7 @@ class ExportManager
             'entity' => $entity,
             'fieldDefs' => $fields,
             'defaultFields' => $entity === 'contacts'
-                ? ['id', 'first_name', 'last_name', 'email', 'phone', 'created_at']
+                ? ['id', 'full_name', 'email', 'phone', 'created_at']
                 : ['id', 'commercial_name', 'legal_name', 'city', 'country', 'created_at'],
             'recentExports' => $this->exports->recentExports(12),
         ];

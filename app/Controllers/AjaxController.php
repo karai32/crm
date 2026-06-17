@@ -30,7 +30,7 @@ class AjaxController
         }
 
         $contacts = array_map(function (array $contact): array {
-            $name = trim(($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? ''));
+            $name = $contact['full_name'] ?? '';
             $meta = $contact['email'] ?: ($contact['phone'] ?? '');
 
             return [
