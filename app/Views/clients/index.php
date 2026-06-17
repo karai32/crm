@@ -47,6 +47,7 @@ $textCols = [
     'commercial_name' => 'Name',
     'legal_name'      => 'Legal name',
     'cif'             => 'CIF',
+    'contact_name'    => 'Contact',
     'city'            => 'City',
     'province'        => 'Province',
     'country'         => 'Country',
@@ -161,6 +162,11 @@ $hasExtended = (bool) array_filter(
                 <label for="cif">CIF</label>
                 <input id="cif" type="text" name="cif"
                        value="<?= htmlspecialchars($filters['cif'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+            <div class="field">
+                <label for="contact_name">Contact name</label>
+                <input id="contact_name" type="text" name="contact_name"
+                       value="<?= htmlspecialchars($filters['contact_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
                 <label for="sector_id">Sector</label>

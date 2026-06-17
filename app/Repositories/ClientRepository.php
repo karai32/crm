@@ -358,6 +358,23 @@ class ClientRepository
             }
         }
 
+        if (!empty($filters['contact_name'])) {
+            $where[] = "
+                EXISTS (
+                    SELECT 1
+                    FROM client_contacts cc
+                    INNER JOIN contacts con ON con.id = cc.contact_id
+                    WHERE cc.client_id = clients.id
+                    AND (
+                        con.first_name LIKE :contact_name
+                        OR con.last_name LIKE :contact_name
+                        OR CONCAT(con.first_name, ' ', COALESCE(con.last_name, '')) LIKE :contact_name
+                    )
+                )
+            ";
+            $params['contact_name'] = '%' . $filters['contact_name'] . '%';
+        }
+
         if (!empty($filters['sector_id'])) {
             $where[] = 'clients.sector_id = :sector_id';
             $params['sector_id'] = (int) $filters['sector_id'];

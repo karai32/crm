@@ -251,6 +251,7 @@ class ClientController
             'commercial_name' => trim($_GET['commercial_name'] ?? ''),
             'legal_name' => trim($_GET['legal_name'] ?? ''),
             'cif' => trim($_GET['cif'] ?? ''),
+            'contact_name' => trim($_GET['contact_name'] ?? ''),
             'sector_id' => (int) ($_GET['sector_id'] ?? 0),
             'tag_ids' => $this->tagIdsFromGet(),
             'city' => trim($_GET['city'] ?? ''),

@@ -430,12 +430,21 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                     <?php endforeach; ?>
                 </td>
                 <td class="col-clients">
-                    <?php foreach ($contactClients[(int) $contact['id']] ?? [] as $i => $client): ?>
-                        <?php if ($i > 0): ?><span class="col-clients-sep">,</span><?php endif; ?>
-                        <a class="col-client-link" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $client['id']), ENT_QUOTES, 'UTF-8') ?>">
-                            <?= htmlspecialchars($client['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
+                    <?php
+                        $cList  = $contactClients[(int) $contact['id']] ?? [];
+                        $cCount = count($cList);
+                    ?>
+                    <?php if ($cCount > 0): ?>
+                        <a class="col-client-link" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $cList[0]['id']), ENT_QUOTES, 'UTF-8') ?>">
+                            <?= htmlspecialchars($cList[0]['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
                         </a>
-                    <?php endforeach; ?>
+                        <?php if ($cCount > 1):
+                            $contactFullName = trim($contact['first_name'] . ' ' . ($contact['last_name'] ?? ''));
+                            $moreUrl = Auth::url('/clients?' . http_build_query(['contact_name' => $contactFullName]));
+                        ?>
+                        <a class="col-clients-more" href="<?= htmlspecialchars($moreUrl, ENT_QUOTES, 'UTF-8') ?>">+<?= $cCount - 1 ?></a>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </td>
                 <td>
                     <div class="action-links">

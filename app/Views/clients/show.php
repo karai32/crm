@@ -113,6 +113,28 @@
         </table>
     </div>
 
+    <!-- Sidebar: tags -->
+    <div class="card card-flush">
+        <div class="card-section-header">
+            <span class="card-section-label">Tags</span>
+        </div>
+        <?php if (empty($tags)): ?>
+            <div class="sidebar-empty">No tags assigned.</div>
+        <?php else: ?>
+            <div class="card-tags-body">
+                <?php foreach ($tags as $tag): ?>
+                    <?php $c = htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                    <span class="tag-badge" <?= $c ? 'style="background:' . $c . '22;border-color:' . $c . '44;color:' . $c . '"' : '' ?>>
+                        <?php if ($c): ?>
+                            <span class="tag-color-dot" style="background:<?= $c ?>"></span>
+                        <?php endif; ?>
+                        <?= htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8') ?>
+                    </span>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
     <!-- Sidebar: custom fields -->
     <?php if (!empty($customFields)): ?>
     <div class="card card-flush">
@@ -135,28 +157,6 @@
         </table>
     </div>
     <?php endif; ?>
-
-    <!-- Sidebar: tags -->
-    <div class="card card-flush">
-        <div class="card-section-header">
-            <span class="card-section-label">Tags</span>
-        </div>
-        <?php if (empty($tags)): ?>
-            <div class="sidebar-empty">No tags assigned.</div>
-        <?php else: ?>
-            <div class="card-tags-body">
-                <?php foreach ($tags as $tag): ?>
-                    <?php $c = htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-                    <span class="tag-badge" <?= $c ? 'style="background:' . $c . '22;border-color:' . $c . '44;color:' . $c . '"' : '' ?>>
-                        <?php if ($c): ?>
-                            <span class="tag-color-dot" style="background:<?= $c ?>"></span>
-                        <?php endif; ?>
-                        <?= htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8') ?>
-                    </span>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
 
 </div>
 
