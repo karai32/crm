@@ -113,8 +113,10 @@ function apiMethodClass(string $m): string
         <table class="api-logs-table">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Time</th>
                     <th>Integration</th>
+                    <th>Origin</th>
                     <th>IP</th>
                     <th>Method</th>
                     <th>Path</th>
@@ -122,12 +124,22 @@ function apiMethodClass(string $m): string
                     <th>Error</th>
                     <th class="col-num">Items</th>
                     <th class="col-num">ms</th>
-                    <th>Request ID</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($logs as $log): ?>
-                <tr class="<?= (int) $log['response_status'] >= 400 ? 'api-log-row--error' : '' ?>">
+                <?php foreach ($logs as $i => $log):
+                    $hasBody  = !empty($log['request_body']) || !empty($log['response_body']);
+                    $detailId = 'log-detail-' . $i;
+                    $isError  = (int) $log['response_status'] >= 400;
+                ?>
+                <tr class="api-log-main-row <?= $isError ? 'api-log-row--error' : '' ?>" <?= $hasBody ? 'data-detail="' . $detailId . '"' : '' ?>>
+                    <td class="col-log-expand">
+                        <?php if ($hasBody): ?>
+                        <button class="api-log-expand-btn" aria-expanded="false" aria-controls="<?= $detailId ?>">
+                            <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <?php endif; ?>
+                    </td>
                     <td class="col-log-time" title="<?= htmlspecialchars($log['created_at'], ENT_QUOTES, 'UTF-8') ?>">
                         <?= htmlspecialchars(date('d M H:i:s', strtotime($log['created_at'])), ENT_QUOTES, 'UTF-8') ?>
                     </td>
@@ -137,6 +149,9 @@ function apiMethodClass(string $m): string
                         <?php else: ?>
                             <span class="col-log-muted">—</span>
                         <?php endif; ?>
+                    </td>
+                    <td class="col-log-origin col-log-muted" title="<?= htmlspecialchars($log['origin'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <?= htmlspecialchars($log['origin'] ?? '—', ENT_QUOTES, 'UTF-8') ?>
                     </td>
                     <td class="col-log-ip col-log-muted">
                         <?= htmlspecialchars($log['ip_address'] ?? '—', ENT_QUOTES, 'UTF-8') ?>
@@ -167,10 +182,23 @@ function apiMethodClass(string $m): string
                     <td class="col-num col-log-muted">
                         <?= $log['duration_ms'] !== null ? (int) $log['duration_ms'] : '—' ?>
                     </td>
-                    <td class="col-log-rid">
-                        <code class="api-log-rid"><?= htmlspecialchars($log['request_id'], ENT_QUOTES, 'UTF-8') ?></code>
+                </tr>
+                <?php if ($hasBody): ?>
+                <tr class="api-log-detail-row" id="<?= $detailId ?>" hidden>
+                    <td colspan="11" class="api-log-detail-cell">
+                        <div class="api-log-detail-grid">
+                            <div class="api-log-detail-pane">
+                                <div class="api-log-detail-label">Request body</div>
+                                <pre class="api-log-detail-pre"><?= !empty($log['request_body']) ? htmlspecialchars($log['request_body'], ENT_QUOTES, 'UTF-8') : '<span class="col-log-muted">empty</span>' ?></pre>
+                            </div>
+                            <div class="api-log-detail-pane">
+                                <div class="api-log-detail-label">Response body</div>
+                                <pre class="api-log-detail-pre"><?= !empty($log['response_body']) ? htmlspecialchars($log['response_body'], ENT_QUOTES, 'UTF-8') : '<span class="col-log-muted">empty</span>' ?></pre>
+                            </div>
+                        </div>
                     </td>
                 </tr>
+                <?php endif; ?>
                 <?php endforeach; ?>
             </tbody>
         </table>
@@ -207,3 +235,18 @@ function apiMethodClass(string $m): string
 
     <?php endif; ?>
 </div>
+
+<script>
+(function () {
+    document.querySelectorAll('.api-log-expand-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var detailId  = btn.closest('tr').dataset.detail;
+            var detailRow = document.getElementById(detailId);
+            var open      = detailRow.hidden;
+            detailRow.hidden = !open;
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            btn.classList.toggle('is-open', open);
+        });
+    });
+})();
+</script>

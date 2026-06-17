@@ -182,17 +182,22 @@ class ApiKeyRepository
         ?string $errorCode,
         ?int $itemsCount,
         ?string $ip,
-        int $durationMs
+        int $durationMs,
+        ?string $requestBody = null,
+        ?string $responseBody = null,
+        ?string $origin = null
     ): void {
         $pdo = Database::connect();
         $statement = $pdo->prepare('
             INSERT INTO api_logs (
                 api_key_id, request_id, method, path, response_status,
-                error_code, items_count, ip_address, duration_ms
+                error_code, items_count, ip_address, duration_ms,
+                request_body, response_body, origin
             )
             VALUES (
                 :api_key_id, :request_id, :method, :path, :response_status,
-                :error_code, :items_count, :ip_address, :duration_ms
+                :error_code, :items_count, :ip_address, :duration_ms,
+                :request_body, :response_body, :origin
             )
         ');
         $statement->execute([
@@ -205,6 +210,9 @@ class ApiKeyRepository
             'items_count'     => $itemsCount,
             'ip_address'      => $ip,
             'duration_ms'     => $durationMs,
+            'request_body'    => $requestBody,
+            'response_body'   => $responseBody,
+            'origin'          => $origin,
         ]);
     }
 

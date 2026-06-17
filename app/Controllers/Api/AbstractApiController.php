@@ -4,6 +4,7 @@ abstract class AbstractApiController
 {
     private ApiKeyRepository $apiKeys;
     private ApiAuthenticator $authenticator;
+    private string $rawInput = '';
 
     public function __construct()
     {
@@ -14,6 +15,7 @@ abstract class AbstractApiController
     protected function handle(string $scope, string $path, callable $action): void
     {
         $startedAt = microtime(true);
+        $this->rawInput = trim((string) file_get_contents('php://input'));
         $apiKey = $this->authenticator->authenticate();
         $requestId = bin2hex(random_bytes(12));
 
@@ -83,7 +85,7 @@ abstract class AbstractApiController
 
     protected function jsonBatch(int $limit = 100): array
     {
-        $rawBody = trim((string) file_get_contents('php://input'));
+        $rawBody = $this->rawInput;
 
         if ($rawBody === '' || ($rawBody[0] !== '[' && $rawBody[0] !== '{')) {
             throw new ApiException(422, 'validation_error', 'Request body must be a JSON array or object');
@@ -125,7 +127,7 @@ abstract class AbstractApiController
 
     private function decodeJson(string $openingCharacter): array
     {
-        $rawBody = trim((string) file_get_contents('php://input'));
+        $rawBody = $this->rawInput;
         if ($rawBody === '' || $rawBody[0] !== $openingCharacter) {
             $expected = $openingCharacter === '[' ? 'array' : 'object';
             throw new ApiException(422, 'validation_error', "Request body must be a JSON {$expected}");
@@ -169,9 +171,13 @@ abstract class AbstractApiController
         float $startedAt,
         ApiResult $result
     ): void {
-        $this->respond($result->status, $result->data);
+        $responseJson = $this->respond($result->status, $result->data);
 
         $errorCode = $result->data['error']['code'] ?? null;
+        $origin    = substr($_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? '', 0, 255) ?: null;
+        $reqBody   = $this->rawInput !== '' ? $this->truncate($this->rawInput) : null;
+        $respBody  = $this->truncate($responseJson);
+
         try {
             $this->apiKeys->log(
                 $apiKeyId,
@@ -182,14 +188,17 @@ abstract class AbstractApiController
                 is_string($errorCode) ? $errorCode : null,
                 $result->itemsCount,
                 $_SERVER['REMOTE_ADDR'] ?? null,
-                (int) round((microtime(true) - $startedAt) * 1000)
+                (int) round((microtime(true) - $startedAt) * 1000),
+                $reqBody,
+                $respBody,
+                $origin
             );
         } catch (Throwable $exception) {
             error_log('API logging failed [' . $requestId . ']: ' . $exception->getMessage());
         }
     }
 
-    private function respond(int $status, array $data): void
+    private function respond(int $status, array $data): string
     {
         http_response_code($status);
         if ($status === 401) {
@@ -197,7 +206,14 @@ abstract class AbstractApiController
         }
         header('Content-Type: application/json; charset=UTF-8');
         header('X-Content-Type-Options: nosniff');
-        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        echo $json;
+        return $json;
+    }
+
+    private function truncate(string $s, int $limit = 64000): string
+    {
+        return mb_strlen($s) > $limit ? mb_substr($s, 0, $limit) . '…' : $s;
     }
 
     private function error(string $code, string $message, array $details = []): array
