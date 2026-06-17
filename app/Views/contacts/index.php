@@ -393,8 +393,8 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                 <th>ID</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Tags</th>
                 <th>Clients</th>
+                <th>Tags</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -410,17 +410,6 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                 <td class="col-id"><?= (int) $contact['id'] ?></td>
                 <td class="col-name"><?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
                 <td class="col-email"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                <td class="col-tags">
-                    <?php foreach ($contactTags[(int) $contact['id']] ?? [] as $tag): ?>
-                        <?php $c = htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-                        <span class="tag-badge" <?= $c ? 'style="background:' . $c . '22;border-color:' . $c . '44;color:' . $c . '"' : '' ?>>
-                            <?php if ($c): ?>
-                                <span class="tag-color-dot" style="background:<?= $c ?>"></span>
-                            <?php endif; ?>
-                            <?= htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8') ?>
-                        </span>
-                    <?php endforeach; ?>
-                </td>
                 <td class="col-clients">
                     <?php
                         $cList  = $contactClients[(int) $contact['id']] ?? [];
@@ -436,6 +425,17 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                         <a class="col-clients-more" href="<?= htmlspecialchars($moreUrl, ENT_QUOTES, 'UTF-8') ?>">+<?= $cCount - 1 ?></a>
                         <?php endif; ?>
                     <?php endif; ?>
+                </td>
+                <td class="col-tags">
+                    <?php foreach ($contactTags[(int) $contact['id']] ?? [] as $tag): ?>
+                        <?php $c = htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                        <span class="tag-badge" <?= $c ? 'style="background:' . $c . '22;border-color:' . $c . '44;color:' . $c . '"' : '' ?>>
+                            <?php if ($c): ?>
+                                <span class="tag-color-dot" style="background:<?= $c ?>"></span>
+                            <?php endif; ?>
+                            <?= htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8') ?>
+                        </span>
+                    <?php endforeach; ?>
                 </td>
                 <td>
                     <div class="action-links">

@@ -97,6 +97,7 @@ function fmtDate(string $date): string {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Company</th>
+                    <th>Clients</th>
                     <th>Created</th>
                 </tr>
             </thead>
@@ -115,6 +116,22 @@ function fmtDate(string $date): string {
                             <span class="company-indicator-dot <?= ($contact['company'] ?? '') !== '' ? 'yes' : 'no' ?>"></span>
                             <?= ($contact['company'] ?? '') !== '' ? htmlspecialchars($contact['company'], ENT_QUOTES, 'UTF-8') : 'No' ?>
                         </span>
+                    </td>
+                    <td class="col-clients">
+                        <?php
+                            $cList  = $latestContactClients[(int) $contact['id']] ?? [];
+                            $cCount = count($cList);
+                        ?>
+                        <?php if ($cCount > 0): ?>
+                            <a class="col-client-link" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $cList[0]['id']), ENT_QUOTES, 'UTF-8') ?>">
+                                <?= htmlspecialchars($cList[0]['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
+                            </a>
+                            <?php if ($cCount > 1):
+                                $moreUrl = Auth::url('/clients?' . http_build_query(['contact_name' => $contact['full_name']]));
+                            ?>
+                            <a class="col-clients-more" href="<?= htmlspecialchars($moreUrl, ENT_QUOTES, 'UTF-8') ?>">+<?= $cCount - 1 ?></a>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </td>
                     <td>
                         <span class="created-date">
