@@ -689,6 +689,7 @@
     cursor: pointer;
     color: var(--color-text);
     flex-shrink: 0;
+    padding: 5px;
 }
 
 .api-log-expand-btn svg { width: 11px; height: 11px; transition: transform .15s; }
