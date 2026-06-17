@@ -281,6 +281,12 @@
     margin-bottom: 20px;
 }
 
+.contact-detail-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .contact-detail-sidebar {
     display: flex;
     flex-direction: column;

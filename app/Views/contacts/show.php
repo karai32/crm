@@ -59,41 +59,67 @@ $canEditContacts = Auth::can('contacts.edit');
 <!-- Two-column detail -->
 <div class="contact-detail-layout">
 
-    <!-- Main info card -->
-    <div class="card">
-        <div class="card-header"><h2>Contact Information</h2></div>
-        <table class="detail-table">
-            <tbody>
-                <tr>
-                    <td class="detail-th">ID</td>
-                    <td class="detail-td"><?= (int) $contact['id'] ?></td>
-                </tr>
-                <tr>
-                    <td class="detail-th">First name</td>
-                    <td class="detail-td"><?= htmlspecialchars($contact['first_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                </tr>
-                <tr>
-                    <td class="detail-th">Last name</td>
-                    <td class="detail-td"><?= htmlspecialchars($contact['last_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                </tr>
-                <tr>
-                    <td class="detail-th">Email</td>
-                    <td class="detail-td"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                </tr>
-                <tr>
-                    <td class="detail-th">Phone</td>
-                    <td class="detail-td"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                </tr>
-                <tr>
-                    <td class="detail-th">Is company</td>
-                    <td class="detail-td"><?= ((int) $contact['is_company'] === 1) ? 'Yes' : 'No' ?></td>
-                </tr>
-                <tr>
-                    <td class="detail-th">Created</td>
-                    <td class="detail-td"><?= htmlspecialchars($contact['created_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Left column: main info + custom fields -->
+    <div class="contact-detail-main">
+
+        <!-- Main info card -->
+        <div class="card">
+            <div class="card-header"><h2>Contact Information</h2></div>
+            <table class="detail-table">
+                <tbody>
+                    <tr>
+                        <td class="detail-th">ID</td>
+                        <td class="detail-td"><?= (int) $contact['id'] ?></td>
+                    </tr>
+                    <tr>
+                        <td class="detail-th">First name</td>
+                        <td class="detail-td"><?= htmlspecialchars($contact['first_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                    </tr>
+                    <tr>
+                        <td class="detail-th">Last name</td>
+                        <td class="detail-td"><?= htmlspecialchars($contact['last_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                    </tr>
+                    <tr>
+                        <td class="detail-th">Email</td>
+                        <td class="detail-td"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                    </tr>
+                    <tr>
+                        <td class="detail-th">Phone</td>
+                        <td class="detail-td"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                    </tr>
+                    <tr>
+                        <td class="detail-th">Is company</td>
+                        <td class="detail-td"><?= ((int) $contact['is_company'] === 1) ? 'Yes' : 'No' ?></td>
+                    </tr>
+                    <tr>
+                        <td class="detail-th">Created</td>
+                        <td class="detail-td"><?= htmlspecialchars($contact['created_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Custom Fields -->
+        <?php if (!empty($customFields)): ?>
+        <div class="card">
+            <div class="card-header"><h2>Custom Fields</h2></div>
+            <table class="detail-table">
+                <tbody>
+                    <?php foreach ($customFields as $field): ?>
+                    <?php
+                        $fieldId = (int) $field['id'];
+                        $value   = $customFieldRepository->displayValue($field, $customValues[$fieldId] ?? null);
+                    ?>
+                    <tr>
+                        <td class="detail-th"><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="detail-td"><?= htmlspecialchars($value !== '' ? $value : '-', ENT_QUOTES, 'UTF-8') ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+
     </div>
 
     <!-- Sidebar -->
@@ -141,24 +167,3 @@ $canEditContacts = Auth::can('contacts.edit');
 
     </div>
 </div>
-
-<!-- Custom Fields -->
-<?php if (!empty($customFields)): ?>
-<div class="card">
-    <div class="card-header"><h2>Custom Fields</h2></div>
-    <table class="detail-table">
-        <tbody>
-            <?php foreach ($customFields as $field): ?>
-            <?php
-                $fieldId = (int) $field['id'];
-                $value   = $customFieldRepository->displayValue($field, $customValues[$fieldId] ?? null);
-            ?>
-            <tr>
-                <td class="detail-th"><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></td>
-                <td class="detail-td"><?= htmlspecialchars($value !== '' ? $value : '-', ENT_QUOTES, 'UTF-8') ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
-<?php endif; ?>
