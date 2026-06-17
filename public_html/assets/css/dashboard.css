@@ -150,6 +150,16 @@
     font-size: 12.5px;
 }
 
+/* Client links in the contacts table */
+.col-client-link {
+    font-size: 13px;
+    color: var(--color-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.col-client-link:hover { text-decoration: underline; }
+
 /* --- Sector Distribution ------------------------------ */
 .sector-rows {
     padding: 8px 0;
