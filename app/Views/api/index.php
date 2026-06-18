@@ -98,9 +98,8 @@ $basicAuth = $clientId . ':' . $secret;
                                 <?= $keyName ?>
                                 <button type="button" class="api-key-rename-btn" aria-label="Rename"
                                         onclick="apiKeyRenameStart(<?= $keyId ?>, <?= $keyNameJs ?>)">
-                                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                                        <path fill="none" d="M2 11.5 L4.5 9 L11.5 2 L14 4.5 L7 11.5 L2 13.5 Z"/>
-                                        <line x1="9" y1="4" x2="12" y2="7"/>
+                                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path d="M13.586 3.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                                     </svg>
                                 </button>
                             </span>
