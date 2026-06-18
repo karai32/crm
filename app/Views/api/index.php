@@ -48,6 +48,21 @@ function copyCredential(elementId, button, originalLabel) {
         setTimeout(function () { button.textContent = originalLabel; }, 2000);
     });
 }
+
+function apiKeyRenameStart(id, currentName) {
+    document.getElementById('nameDisplay' + id).style.display = 'none';
+    var form  = document.getElementById('renameForm' + id);
+    var input = form.querySelector('input[name="name"]');
+    input.value = currentName;
+    form.style.display = 'flex';
+    input.focus();
+    input.select();
+}
+
+function apiKeyRenameCancel(id) {
+    document.getElementById('renameForm' + id).style.display = 'none';
+    document.getElementById('nameDisplay' + id).style.display = '';
+}
 </script>
 <?php endif; ?>
 
@@ -91,44 +106,74 @@ function copyCredential(elementId, button, originalLabel) {
                 </thead>
                 <tbody>
                     <?php foreach ($apiKeys as $key): ?>
+                    <?php
+                    $keyId     = (int) $key['id'];
+                    $isActive  = (int) $key['is_active'] === 1;
+                    $keyName   = htmlspecialchars($key['name'], ENT_QUOTES, 'UTF-8');
+                    $keyNameJs = htmlspecialchars(json_encode($key['name']), ENT_QUOTES, 'UTF-8');
+                    $fullScopes = ['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'];
+                    $keyScopes  = json_decode($key['scopes'] ?? '[]', true) ?: [];
+                    $needsSync  = $isActive && count(array_diff($fullScopes, $keyScopes)) > 0;
+                    ?>
                     <tr>
-                        <td class="col-key-name"><?= htmlspecialchars($key['name'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="col-key-name">
+                            <span class="api-key-name-display" id="nameDisplay<?= $keyId ?>">
+                                <?= $keyName ?>
+                                <button type="button" class="api-key-rename-btn" aria-label="Rename"
+                                        onclick="apiKeyRenameStart(<?= $keyId ?>, <?= $keyNameJs ?>)">
+                                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13.25 2 14l.75-3 8.75-8.5z"/>
+                                    </svg>
+                                </button>
+                            </span>
+                            <form class="api-key-inline-form" id="renameForm<?= $keyId ?>"
+                                  method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/rename'), ENT_QUOTES, 'UTF-8') ?>"
+                                  style="display:none">
+                                <?= Csrf::field() ?>
+                                <input type="hidden" name="id" value="<?= $keyId ?>">
+                                <input type="text" name="name" class="api-key-inline-input" required>
+                                <button type="submit" class="api-key-inline-save">Save</button>
+                                <button type="button" class="api-key-inline-cancel"
+                                        onclick="apiKeyRenameCancel(<?= $keyId ?>)">Cancel</button>
+                            </form>
+                        </td>
                         <td><code class="api-key-code"><?= htmlspecialchars($key['client_id'], ENT_QUOTES, 'UTF-8') ?></code></td>
                         <td>
-                            <?php if ((int) $key['is_active'] === 1): ?>
+                            <?php if ($isActive): ?>
                                 <span class="tag-badge api-badge-active">Active</span>
                             <?php else: ?>
-                                <span class="tag-badge api-badge-revoked">Revoked</span>
+                                <span class="tag-badge api-badge-revoked">Disabled</span>
                             <?php endif; ?>
                         </td>
                         <td class="col-date-muted"><?= $key['last_used_at'] ? htmlspecialchars(date('d M Y', strtotime($key['last_used_at'])), ENT_QUOTES, 'UTF-8') : '-' ?></td>
                         <td class="col-date-muted"><?= htmlspecialchars(date('d M Y', strtotime($key['created_at'])), ENT_QUOTES, 'UTF-8') ?></td>
                         <td>
-                            <?php
-                            $fullScopes = ['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'];
-                            $keyScopes = json_decode($key['scopes'] ?? '[]', true) ?: [];
-                            $needsSync = (int) $key['is_active'] === 1 && count(array_diff($fullScopes, $keyScopes)) > 0;
-                            ?>
                             <div class="action-links">
                                 <?php if ($needsSync): ?>
                                 <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/sync-scopes'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
-                                    <input type="hidden" name="id" value="<?= (int) $key['id'] ?>">
+                                    <input type="hidden" name="id" value="<?= $keyId ?>">
                                     <button class="action-edit api-btn-sync" type="submit"
                                             onclick="return confirm('Grant this integration all current scopes?')">Sync scopes</button>
                                 </form>
                                 <?php endif; ?>
-                                <?php if ((int) $key['is_active'] === 1): ?>
+                                <?php if ($isActive): ?>
                                 <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/revoke'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
-                                    <input type="hidden" name="id" value="<?= (int) $key['id'] ?>">
+                                    <input type="hidden" name="id" value="<?= $keyId ?>">
                                     <button class="action-edit api-btn-action" type="submit"
-                                            onclick="return confirm('Revoke these credentials? The integration will stop working.')">Revoke</button>
+                                            onclick="return confirm('Disable this integration? It can be re-enabled later.')">Disable</button>
+                                </form>
+                                <?php else: ?>
+                                <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/enable'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
+                                    <?= Csrf::field() ?>
+                                    <input type="hidden" name="id" value="<?= $keyId ?>">
+                                    <button class="action-edit api-btn-action api-btn-enable" type="submit">Enable</button>
                                 </form>
                                 <?php endif; ?>
                                 <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/delete'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
-                                    <input type="hidden" name="id" value="<?= (int) $key['id'] ?>">
+                                    <input type="hidden" name="id" value="<?= $keyId ?>">
                                     <button class="action-delete api-btn-action" type="submit"
                                             onclick="return confirm('Permanently delete these API credentials?')">Delete</button>
                                 </form>

@@ -76,6 +76,24 @@ class ApiKeyRepository
         $statement->execute(['id' => $id]);
     }
 
+    public function updateName(int $id, string $name): void
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('UPDATE api_keys SET name = :name WHERE id = :id');
+        $statement->execute(['name' => $name, 'id' => $id]);
+    }
+
+    public function enable(int $id): void
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('
+            UPDATE api_keys
+            SET is_active = 1, revoked_at = NULL
+            WHERE id = :id
+        ');
+        $statement->execute(['id' => $id]);
+    }
+
     public function delete(int $id): void
     {
         $pdo = Database::connect();

@@ -48,6 +48,20 @@ class ApiKeyController
         Auth::redirect('/api-keys');
     }
 
+    public function rename(): void
+    {
+        Auth::requireAdmin();
+
+        $id   = (int) ($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+
+        if ($id > 0 && $name !== '') {
+            $this->apiKeys->updateName($id, $name);
+        }
+
+        Auth::redirect('/api-keys');
+    }
+
     public function revoke(): void
     {
         Auth::requireAdmin();
@@ -55,6 +69,18 @@ class ApiKeyController
         $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->revoke($id);
+        }
+
+        Auth::redirect('/api-keys');
+    }
+
+    public function enable(): void
+    {
+        Auth::requireAdmin();
+
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id > 0) {
+            $this->apiKeys->enable($id);
         }
 
         Auth::redirect('/api-keys');
