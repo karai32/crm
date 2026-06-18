@@ -41,29 +41,6 @@ $basicAuth = $clientId . ':' . $secret;
         </div>
     </div>
 </div>
-<script>
-function copyCredential(elementId, button, originalLabel) {
-    navigator.clipboard.writeText(document.getElementById(elementId).textContent).then(function () {
-        button.textContent = 'Copied!';
-        setTimeout(function () { button.textContent = originalLabel; }, 2000);
-    });
-}
-
-function apiKeyRenameStart(id, currentName) {
-    document.getElementById('nameDisplay' + id).style.display = 'none';
-    var form  = document.getElementById('renameForm' + id);
-    var input = form.querySelector('input[name="name"]');
-    input.value = currentName;
-    form.style.display = 'flex';
-    input.focus();
-    input.select();
-}
-
-function apiKeyRenameCancel(id) {
-    document.getElementById('renameForm' + id).style.display = 'none';
-    document.getElementById('nameDisplay' + id).style.display = '';
-}
-</script>
 <?php endif; ?>
 
 <div class="api-card">
@@ -121,8 +98,9 @@ function apiKeyRenameCancel(id) {
                                 <?= $keyName ?>
                                 <button type="button" class="api-key-rename-btn" aria-label="Rename"
                                         onclick="apiKeyRenameStart(<?= $keyId ?>, <?= $keyNameJs ?>)">
-                                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13.25 2 14l.75-3 8.75-8.5z"/>
+                                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                                        <path fill="none" d="M2 11.5 L4.5 9 L11.5 2 L14 4.5 L7 11.5 L2 13.5 Z"/>
+                                        <line x1="9" y1="4" x2="12" y2="7"/>
                                     </svg>
                                 </button>
                             </span>
@@ -191,3 +169,26 @@ function apiKeyRenameCancel(id) {
     </div>
     <?php endif; ?>
 </div>
+<script>
+function copyCredential(elementId, button, originalLabel) {
+    navigator.clipboard.writeText(document.getElementById(elementId).textContent).then(function () {
+        button.textContent = 'Copied!';
+        setTimeout(function () { button.textContent = originalLabel; }, 2000);
+    });
+}
+
+function apiKeyRenameStart(id, currentName) {
+    document.getElementById('nameDisplay' + id).style.display = 'none';
+    var form  = document.getElementById('renameForm' + id);
+    var input = form.querySelector('input[name="name"]');
+    input.value = currentName;
+    form.style.display = 'flex';
+    input.focus();
+    input.select();
+}
+
+function apiKeyRenameCancel(id) {
+    document.getElementById('renameForm' + id).style.display = 'none';
+    document.getElementById('nameDisplay' + id).style.display = '';
+}
+</script>
