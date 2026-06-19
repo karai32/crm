@@ -37,55 +37,42 @@
     border-color: #d6d6d6;
 }
 
-.stat-card-top {
+.stat-card-header {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.stat-card-label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--color-neutral);
-    margin-bottom: 8px;
-}
-
-.stat-card-number {
-    font-size: 34px;
-    font-weight: 700;
-    color: var(--color-text);
-    line-height: 1;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
 .stat-card-icon {
-    width: 42px; height: 42px;
-    border-radius: var(--radius-md);
+    width: 20px; height: 20px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    color: #707070;
 }
 
-.stat-card-icon svg { width: 21px; height: 21px; }
+.stat-card-icon svg { width: 20px; height: 20px; }
 
-.stat-card-icon.contacts { background: #EDEEF8; color: #6366F1; }
-.stat-card-icon.clients  { background: #E8EFED; color: #78938A; }
-.stat-card-icon.sectors  { background: #FEF3C7; color: #C49A2D; }
-.stat-card-icon.tags     { background: #F9EEF1; color: #C37B89; }
+.stat-card-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #5c5c5c;
+}
 
-.stat-card-trend {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    margin-top: 10px;
+.stat-card-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+    margin: 10px 0 8px;
+}
+
+.stat-card-caption {
     font-size: 12px;
-    font-weight: 600;
-    color: var(--color-secondary);
+    font-weight: 400;
+    color: #707070;
+    line-height: 1.4;
 }
-
-.stat-card-trend svg { width: 12px; height: 12px; }
 
 /* --- Dashboard Grid ----------------------------------- */
 .dashboard-grid {
