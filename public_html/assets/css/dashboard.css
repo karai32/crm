@@ -95,6 +95,12 @@
 }
 
 /* --- Recent Contacts Table ---------------------------- */
+.recent-table-wrap {
+    padding: 0 24px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .recent-table {
     width: 100%;
     border-collapse: collapse;

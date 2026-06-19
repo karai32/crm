@@ -81,12 +81,13 @@ function fmtDate(string $date): string {
     <div class="card">
         <div class="card-header">
             <h2>Recent Contacts</h2>
-            <a href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">View All</a>
+            <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">View All</a>
         </div>
 
         <?php if (empty($latestContacts)): ?>
             <div class="empty-state">No contacts yet.</div>
         <?php else: ?>
+        <div class="recent-table-wrap">
         <table class="recent-table">
             <thead>
                 <tr>
@@ -138,6 +139,7 @@ function fmtDate(string $date): string {
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
         <?php endif; ?>
     </div>
 
@@ -207,7 +209,7 @@ function fmtDate(string $date): string {
                 <?php endforeach; ?>
 
                 <div class="card-footer">
-                    <a href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">View Client Directory</a>
+                    <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">View Client Directory</a>
                 </div>
             <?php endif; ?>
         </div>

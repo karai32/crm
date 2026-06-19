@@ -63,8 +63,8 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                 <div class="export-section-title">
                     <?= htmlspecialchars($groupName, ENT_QUOTES, 'UTF-8') ?>
                     <div class="export-section-title-actions">
-                        <button type="button" onclick="toggleGroup(this, true)">All</button>
-                        <button type="button" onclick="toggleGroup(this, false)">None</button>
+                        <button type="button" class="btn btn-outlined btn-xs" onclick="toggleGroup(this, true)">All</button>
+                        <button type="button" class="btn btn-outlined btn-xs" onclick="toggleGroup(this, false)">None</button>
                     </div>
                 </div>
                 <div class="export-fields-grid">

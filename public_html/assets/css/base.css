@@ -585,7 +585,7 @@ body.sidebar-open .sidebar-overlay { display: block; }
     color: var(--color-text);
 }
 
-.card-header a {
+.card-header a:not(.btn) {
     font-size: 13px;
     color: var(--color-secondary);
     font-weight: 500;
@@ -626,6 +626,7 @@ body.sidebar-open .sidebar-overlay { display: block; }
 .btn-danger:hover { background: #dc2626; }
 
 .btn-sm { padding: 6px 12px; font-size: 12.5px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
 
 .btn-icon {
     width: 32px; height: 32px;
@@ -674,6 +675,9 @@ body.sidebar-open .sidebar-overlay { display: block; }
 
 .action-edit   { background: #E8EFED; color: #78938A; }
 .action-edit:hover { background: #d5e3df; }
+
+.action-warn   { background: #FEF3C7; color: #C49A2D; }
+.action-warn:hover { background: #fde9a0; }
 
 .action-delete { background: #F9EEF1; color: #C37B89; }
 .action-delete:hover { background: #f2d9df; }

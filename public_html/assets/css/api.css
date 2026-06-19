@@ -477,22 +477,9 @@
     display: inline;
 }
 
-/* API sync-scopes button */
-.api-btn-sync {
-    color: #d97706;
-    background: none;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-}
-
-/* API revoke/delete action buttons */
-.api-btn-action {
-    background: none;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-}
+/* API sync-scopes button (legacy class — kept for JS references only) */
+.api-btn-sync  { display: contents; }
+.api-btn-action { display: contents; }
 
 /* API page: empty state */
 .api-empty-state {
@@ -591,21 +578,6 @@
     color: var(--color-text-muted);
 }
 
-/* Override admin.css global button:hover for all api action buttons */
-.api-btn-action:hover,
-.api-btn-sync:hover {
-    background: transparent;
-}
-
-/* Action button colors (settings.css not loaded on this page) */
-.api-keys-table .action-edit   { color: var(--color-secondary); font-size: 13px; font-weight: 500; }
-.api-keys-table .action-delete { color: var(--color-danger);    font-size: 13px; font-weight: 500; }
-
-.api-keys-table .action-edit:hover,
-.api-keys-table .action-delete:hover {
-    text-decoration: underline;
-    background: transparent;
-}
 
 /* ── API Logs page ─────────────────────────────────────────────────────── */
 
