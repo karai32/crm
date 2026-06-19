@@ -642,6 +642,43 @@ body.sidebar-open .sidebar-overlay { display: block; }
 .btn-icon:hover { opacity: .85; text-decoration: none; }
 .btn-icon svg   { width: 15px; height: 15px; }
 
+/* --- Action icon buttons (table rows) ----------------- */
+.action-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    transition: background .14s;
+    text-decoration: none;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1;
+}
+
+.action-btn svg { width: 15px; height: 15px; }
+.action-btn:hover { text-decoration: none; }
+
+.action-view   { background: #EDEEF8; color: #6366F1; }
+.action-view:hover { background: #dde0f5; }
+
+.action-edit   { background: #E8EFED; color: #78938A; }
+.action-edit:hover { background: #d5e3df; }
+
+.action-delete { background: #F9EEF1; color: #C37B89; }
+.action-delete:hover { background: #f2d9df; }
+
 .btn-icon-edit   { background: var(--color-tertiary); color: #fff; }
 .btn-icon-delete { background: var(--color-danger);   color: #fff; }
 
