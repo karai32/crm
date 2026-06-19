@@ -55,6 +55,7 @@
 .settings-table-card {
     background: var(--color-white);
     border-radius: var(--radius-lg);
+    padding: 24px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -67,20 +68,28 @@
 }
 
 .settings-table th {
-    padding: 12px 24px;
+    padding: 12px 10px;
     font-size: 12px;
     font-weight: 500;
     color: var(--color-neutral);
+    border: 0;
     border-bottom: 1px solid #F0F0F0;
     white-space: nowrap;
 }
 
+.settings-table th:first-child { padding-left: 0; }
+.settings-table th:last-child  { padding-right: 0; }
+
 .settings-table td {
-    padding: 13px 24px;
+    padding: 13px 10px;
+    border: 0;
     border-bottom: 1px solid #F0F0F0;
     vertical-align: middle;
     font-size: 13.5px;
 }
+
+.settings-table td:first-child { padding-left: 0; }
+.settings-table td:last-child  { padding-right: 0; }
 
 .settings-table tr:last-child td { border-bottom: none; }
 .settings-table tbody tr:hover td { background: var(--color-neutral-50); }

@@ -102,22 +102,28 @@
 
 .recent-table th {
     background: transparent;
-    padding: 10px 20px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 500;
     color: var(--color-neutral);
+    border: 0;
     border-bottom: 1px solid #F0F0F0;
-    border-top: none;
+    white-space: nowrap;
 }
 
+.recent-table th:first-child { padding-left: 0; }
+.recent-table th:last-child  { padding-right: 0; }
+
 .recent-table td {
-    padding: 13px 20px;
+    padding: 13px 12px;
+    border: 0;
     border-bottom: 1px solid #F0F0F0;
     vertical-align: middle;
     font-size: 13.5px;
 }
+
+.recent-table td:first-child { padding-left: 0; }
+.recent-table td:last-child  { padding-right: 0; }
 
 .recent-table tr:last-child td { border-bottom: none; }
 .recent-table tbody tr:hover td { background: var(--color-neutral-50); }
