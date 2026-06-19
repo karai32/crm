@@ -425,7 +425,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                     <?php endif; ?>
                 </td>
                 <td class="col-id"><?= (int) $contact['id'] ?></td>
-                <td class="col-name"><?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                <td class="col-name"><a class="col-row-link" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?></a></td>
                 <td class="col-email"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 <td class="col-clients">
                     <?php

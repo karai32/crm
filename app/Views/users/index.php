@@ -65,12 +65,12 @@ function userPermissionIcon(string $permission): string
                         <div class="user-cell">
                             <div class="user-avatar-sm"><?= userInitials($user['name']) ?></div>
                             <div class="user-cell-body">
-                                <span class="user-cell-name">
+                                <a class="user-cell-name col-row-link" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>">
                                     <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>
                                     <?php if ($isCurrentUser): ?>
                                         <span class="user-current-label">(you)</span>
                                     <?php endif; ?>
-                                </span>
+                                </a>
                                 <span class="user-cell-email"><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></span>
                             </div>
                         </div>

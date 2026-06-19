@@ -72,6 +72,9 @@
     font-size: 12px;
     font-weight: 500;
     color: var(--color-neutral);
+    background: transparent;
+    text-transform: none;
+    letter-spacing: 0;
     border: 0;
     border-bottom: 1px solid #F0F0F0;
     white-space: nowrap;

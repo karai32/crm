@@ -57,7 +57,7 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
         <tbody id="sectorsSearchResults">
             <?php foreach ($sectors as $sector): ?>
                 <tr>
-                    <td class="col-name"><?= htmlspecialchars($sector['name'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td class="col-name"><a class="col-row-link" href="<?= htmlspecialchars(Auth::url('/sectors/edit?id=' . $sector['id']), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($sector['name'], ENT_QUOTES, 'UTF-8') ?></a></td>
                     <td class="col-slug"><?= htmlspecialchars($sector['slug'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
                         <?php if ((int) $sector['is_active'] === 1): ?>

@@ -1196,6 +1196,13 @@ th {
 tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: var(--color-neutral-50); }
 
+.col-row-link {
+    color: inherit;
+    font-weight: inherit;
+    text-decoration: none;
+}
+.col-row-link:hover { text-decoration: underline; }
+
 /* --- Pagination --------------------------------------- */
 .pagination {
     display: flex;

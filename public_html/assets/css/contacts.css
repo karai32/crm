@@ -95,8 +95,8 @@
 /* Client links in the contacts table */
 .col-client-link {
     font-size: 13px;
-    color: var(--color-secondary);
-    font-weight: 500;
+    color: var(--color-text);
+    font-weight: 600;
     white-space: nowrap;
 }
 

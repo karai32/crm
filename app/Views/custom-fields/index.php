@@ -39,7 +39,7 @@
                             <?= htmlspecialchars(ucfirst($field['entity_type']), ENT_QUOTES, 'UTF-8') ?>
                         </span>
                     </td>
-                    <td class="col-name"><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td class="col-name"><a class="col-row-link" href="<?= htmlspecialchars(Auth::url('/custom-fields/edit?id=' . $field['id']), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></a></td>
                     <td class="col-slug"><?= htmlspecialchars($field['slug'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><span class="badge-type"><?= htmlspecialchars($field['field_type'], ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td>

@@ -58,6 +58,7 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
             <?php foreach ($tags as $tag): ?>
                 <tr>
                     <td class="col-name">
+                        <a class="col-row-link" href="<?= htmlspecialchars(Auth::url('/tags/edit?id=' . $tag['id']), ENT_QUOTES, 'UTF-8') ?>">
                         <?php if (!empty($tag['color'])): ?>
                             <span class="tag-badge" style="background:<?= htmlspecialchars($tag['color'], ENT_QUOTES, 'UTF-8') ?>22;border-color:<?= htmlspecialchars($tag['color'], ENT_QUOTES, 'UTF-8') ?>44;color:<?= htmlspecialchars($tag['color'], ENT_QUOTES, 'UTF-8') ?>">
                                 <?= htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8') ?>
@@ -65,6 +66,7 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
                         <?php else: ?>
                             <?= htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8') ?>
                         <?php endif; ?>
+                        </a>
                     </td>
                     <td class="col-slug"><?= htmlspecialchars($tag['slug'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
