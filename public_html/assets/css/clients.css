@@ -19,7 +19,6 @@
 
 .clients-table-card {
     background: var(--color-white);
-    border: 1px solid #F0F0F0;
     border-radius: var(--radius-lg);
     overflow-x: auto;
     overflow-y: hidden;
@@ -33,7 +32,7 @@
 }
 
 .clients-table th {
-    padding: 11px 14px;
+    padding: 12px 24px;
     font-size: 12px;
     font-weight: 500;
     color: var(--color-neutral);
@@ -43,7 +42,7 @@
 }
 
 .clients-table td {
-    padding: 12px 14px;
+    padding: 13px 24px;
     border-bottom: 1px solid #F0F0F0;
     vertical-align: middle;
     font-size: 13.5px;
@@ -77,8 +76,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 16px;
-    border-top: 1px solid #F0F0F0;
+    padding: 14px 4px;
+    margin-top: 12px;
     font-size: 13px;
     color: var(--color-text-muted);
     flex-wrap: wrap;

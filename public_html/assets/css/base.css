@@ -567,7 +567,6 @@ body.sidebar-open .sidebar-overlay { display: block; }
 .card {
     background: var(--color-white);
     border-radius: var(--radius-lg);
-    border: 1px solid #F0F0F0;
     overflow: hidden;
 }
 
