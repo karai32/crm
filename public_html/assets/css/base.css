@@ -1233,9 +1233,6 @@ tbody tr:hover td { background: var(--color-neutral-50); }
     font-size: 13.5px;
 }
 
-.data-table td:first-child { padding-left: 0; }
-.data-table td:last-child  { padding-right: 0; }
-
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tbody tr:hover td { background: var(--color-neutral-50); }
 
