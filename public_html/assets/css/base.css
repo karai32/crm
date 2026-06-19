@@ -1222,9 +1222,6 @@ tbody tr:hover td { background: var(--color-neutral-50); }
     white-space: nowrap;
 }
 
-.data-table th:first-child { padding-left: 0; }
-.data-table th:last-child  { padding-right: 0; }
-
 .data-table td {
     padding: 13px 10px;
     border: 0;
