@@ -24,9 +24,17 @@
 .stat-card {
     background: var(--color-white);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--color-neutral-200);
-    box-shadow: var(--shadow-sm);
-    padding: 20px;
+    border: 1px solid #F0F0F0;
+    padding: 18px 20px;
+    min-height: 90px;
+    transition: all .2s ease;
+    cursor: default;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.10);
+    border-color: #d6d6d6;
 }
 
 .stat-card-top {
@@ -62,10 +70,10 @@
 
 .stat-card-icon svg { width: 21px; height: 21px; }
 
-.stat-card-icon.contacts { background: #EEF2FF; color: var(--color-tertiary); }
-.stat-card-icon.clients  { background: #D1FAE5; color: var(--color-secondary); }
-.stat-card-icon.sectors  { background: #FEF3C7; color: #D97706; }
-.stat-card-icon.tags     { background: #FCE7F3; color: #DB2777; }
+.stat-card-icon.contacts { background: #EDEEF8; color: #6366F1; }
+.stat-card-icon.clients  { background: #E8EFED; color: #78938A; }
+.stat-card-icon.sectors  { background: #FEF3C7; color: #C49A2D; }
+.stat-card-icon.tags     { background: #F9EEF1; color: #C37B89; }
 
 .stat-card-trend {
     display: inline-flex;
@@ -107,13 +115,13 @@
     letter-spacing: .06em;
     text-transform: uppercase;
     color: var(--color-neutral);
-    border-bottom: 1px solid var(--color-neutral-200);
+    border-bottom: 1px solid #F0F0F0;
     border-top: none;
 }
 
 .recent-table td {
     padding: 13px 20px;
-    border-bottom: 1px solid var(--color-neutral-200);
+    border-bottom: 1px solid #F0F0F0;
     vertical-align: middle;
     font-size: 13.5px;
 }
@@ -170,7 +178,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 9px 20px;
-    border-bottom: 1px solid var(--color-neutral-200);
+    border-bottom: 1px solid #F0F0F0;
     font-size: 13px;
 }
 
@@ -223,7 +231,7 @@
     align-items: center;
     gap: 12px;
     padding: 11px 20px;
-    border-bottom: 1px solid var(--color-neutral-200);
+    border-bottom: 1px solid #F0F0F0;
     transition: background .12s;
     text-decoration: none;
     color: inherit;
@@ -290,7 +298,7 @@
 
 .card-footer {
     padding: 12px 20px;
-    border-top: 1px solid var(--color-neutral-200);
+    border-top: 1px solid #F0F0F0;
     text-align: center;
 }
 
