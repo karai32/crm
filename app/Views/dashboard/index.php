@@ -20,7 +20,7 @@ function fmtDate(string $date): string {
 <!-- -- Stat Cards --------------------------------------- -->
 <div class="stat-cards">
 
-    <div class="stat-card">
+    <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
@@ -31,9 +31,9 @@ function fmtDate(string $date): string {
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['contacts']) ?></div>
         <div class="stat-card-caption">Registered in the system</div>
-    </div>
+    </a>
 
-    <div class="stat-card">
+    <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
@@ -44,9 +44,9 @@ function fmtDate(string $date): string {
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['clients']) ?></div>
         <div class="stat-card-caption">Active in the CRM</div>
-    </div>
+    </a>
 
-    <div class="stat-card">
+    <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
@@ -57,9 +57,9 @@ function fmtDate(string $date): string {
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['sectors']) ?></div>
         <div class="stat-card-caption">Available categories</div>
-    </div>
+    </a>
 
-    <div class="stat-card">
+    <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/tags'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
@@ -70,7 +70,7 @@ function fmtDate(string $date): string {
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['tags']) ?></div>
         <div class="stat-card-caption">Available labels</div>
-    </div>
+    </a>
 
 </div>
 
@@ -81,7 +81,7 @@ function fmtDate(string $date): string {
     <div class="card">
         <div class="card-header">
             <h2>Recent Contacts</h2>
-            <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">View All</a>
+            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">View All</a>
         </div>
 
         <?php if (empty($latestContacts)): ?>
@@ -209,7 +209,7 @@ function fmtDate(string $date): string {
                 <?php endforeach; ?>
 
                 <div class="card-footer">
-                    <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">View Client Directory</a>
+                    <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">View Client Directory</a>
                 </div>
             <?php endif; ?>
         </div>

@@ -22,13 +22,16 @@
 }
 
 .stat-card {
+    display: block;
     background: var(--color-white);
     border-radius: var(--radius-lg);
     border: 1px solid #F0F0F0;
     padding: 18px 20px;
     min-height: 90px;
     transition: all .2s ease;
-    cursor: default;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .stat-card:hover {
@@ -135,8 +138,8 @@
 .recent-table tbody tr:hover td { background: var(--color-neutral-50); }
 
 .contact-name-link {
-    font-weight: 500;
-    color: var(--color-tertiary);
+    font-weight: 600;
+    color: var(--color-text);
 }
 
 .contact-name-link:hover { text-decoration: underline; }
@@ -166,8 +169,8 @@
 /* Client links in the contacts table */
 .col-client-link {
     font-size: 13px;
-    color: var(--color-secondary);
-    font-weight: 500;
+    color: var(--color-text);
+    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -259,14 +262,10 @@
     letter-spacing: .02em;
 }
 
-.avatar-c1 { background: #6366F1; }
-.avatar-c2 { background: #10B981; }
-.avatar-c3 { background: #F59E0B; }
-.avatar-c4 { background: #EF4444; }
-.avatar-c5 { background: #8B5CF6; }
-.avatar-c6 { background: #06B6D4; }
-.avatar-c7 { background: #EC4899; }
-.avatar-c8 { background: #14B8A6; }
+.avatar-c1, .avatar-c2, .avatar-c3, .avatar-c4,
+.avatar-c5, .avatar-c6, .avatar-c7, .avatar-c8 {
+    background: var(--color-primary);
+}
 
 .client-meta { flex: 1; min-width: 0; }
 

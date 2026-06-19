@@ -151,7 +151,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
     </div>
     <div class="page-actions">
         <?php if ($canCreateContacts): ?>
-        <a class="btn btn-green" href="<?= htmlspecialchars(Auth::url('/contacts/create'), ENT_QUOTES, 'UTF-8') ?>">Create contact</a>
+        <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/contacts/create'), ENT_QUOTES, 'UTF-8') ?>">Create contact</a>
         <?php endif; ?>
     </div>
 </div>

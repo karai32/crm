@@ -50,7 +50,7 @@ $canEditContacts = Auth::can('contacts.edit');
     <div class="contact-hero-actions">
         <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">Back</a>
         <?php if ($canEditContacts): ?>
-        <a class="btn btn-green btn-sm"    href="<?= htmlspecialchars(Auth::url('/contacts/edit?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
+        <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts/edit?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
         <?php endif; ?>
     </div>
 </div>
