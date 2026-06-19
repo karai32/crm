@@ -412,7 +412,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                 <?= $thSort('email', 'Email') ?>
                 <th>Clients</th>
                 <th>Tags</th>
-                <th>Actions</th>
+                <th class="col-actions">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -454,7 +454,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                         </span>
                     <?php endforeach; ?>
                 </td>
-                <td>
+                <td class="col-actions">
                     <div class="action-links">
                         <a class="action-btn action-view" title="View"
                            href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">

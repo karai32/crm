@@ -203,38 +203,38 @@ function apiMethodClass(string $m): string
             </tbody>
         </table>
     </div>
-
-    <!-- Pagination -->
-    <div class="api-logs-pagination">
-        <span>Showing <?= $from ?>–<?= $to ?> of <?= number_format($total) ?></span>
-        <div class="pagination-pages">
-            <?php if ($page > 1): ?>
-                <a class="page-btn" href="<?= htmlspecialchars($base . '?' . http_build_query(array_merge($activeFilters, ['page' => $page - 1])), ENT_QUOTES, 'UTF-8') ?>">&#8249;</a>
-            <?php else: ?>
-                <span class="page-btn disabled">&#8249;</span>
-            <?php endif; ?>
-
-            <?php foreach (apiLogsPaginationRange($page, $totalPages) as $p): ?>
-                <?php if ($p === '...'): ?>
-                    <span class="page-ellipsis">...</span>
-                <?php else: ?>
-                    <a class="page-btn <?= $p === $page ? 'active' : '' ?>"
-                       href="<?= htmlspecialchars($base . '?' . http_build_query(array_merge($activeFilters, ['page' => $p])), ENT_QUOTES, 'UTF-8') ?>">
-                        <?= $p ?>
-                    </a>
-                <?php endif; ?>
-            <?php endforeach; ?>
-
-            <?php if ($page < $totalPages): ?>
-                <a class="page-btn" href="<?= htmlspecialchars($base . '?' . http_build_query(array_merge($activeFilters, ['page' => $page + 1])), ENT_QUOTES, 'UTF-8') ?>">&#8250;</a>
-            <?php else: ?>
-                <span class="page-btn disabled">&#8250;</span>
-            <?php endif; ?>
-        </div>
-    </div>
-
     <?php endif; ?>
 </div>
+
+<?php if (!empty($logs)): ?>
+<div class="list-pagination">
+    <span>Showing <?= $from ?>–<?= $to ?> of <?= number_format($total) ?></span>
+    <div class="pagination-pages">
+        <?php if ($page > 1): ?>
+            <a class="page-btn" href="<?= htmlspecialchars($base . '?' . http_build_query(array_merge($activeFilters, ['page' => $page - 1])), ENT_QUOTES, 'UTF-8') ?>">&#8249;</a>
+        <?php else: ?>
+            <span class="page-btn disabled">&#8249;</span>
+        <?php endif; ?>
+
+        <?php foreach (apiLogsPaginationRange($page, $totalPages) as $p): ?>
+            <?php if ($p === '...'): ?>
+                <span class="page-ellipsis">...</span>
+            <?php else: ?>
+                <a class="page-btn <?= $p === $page ? 'active' : '' ?>"
+                   href="<?= htmlspecialchars($base . '?' . http_build_query(array_merge($activeFilters, ['page' => $p])), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $p ?>
+                </a>
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a class="page-btn" href="<?= htmlspecialchars($base . '?' . http_build_query(array_merge($activeFilters, ['page' => $page + 1])), ENT_QUOTES, 'UTF-8') ?>">&#8250;</a>
+        <?php else: ?>
+            <span class="page-btn disabled">&#8250;</span>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
 
 <script>
 (function () {

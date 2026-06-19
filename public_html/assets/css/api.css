@@ -611,6 +611,7 @@
 .api-logs-card {
     background: var(--color-white);
     border-radius: var(--radius-lg);
+    padding: 24px 24px 0;
     overflow: hidden;
 }
 
@@ -691,17 +692,7 @@
 .api-status--err  { background: #fee2e2; color: #b91c1c; }
 
 /* Pagination */
-.api-logs-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-top: 1px solid var(--color-neutral-200);
-    font-size: 13px;
-    color: var(--color-text-muted);
-    flex-wrap: wrap;
-    gap: 10px;
-}
+/* api-logs-pagination → .list-pagination in base.css */
 
 /* Empty state */
 .api-logs-empty {

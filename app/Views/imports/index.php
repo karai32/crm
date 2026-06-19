@@ -59,7 +59,7 @@ function importDisplayStatus(array $batch): string
                 <th class="col-num-header">Skipped</th>
                 <th class="col-num-header">Errors</th>
                 <th>Created</th>
-                <th></th>
+                <th class="col-actions">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -84,7 +84,7 @@ function importDisplayStatus(array $batch): string
                         <?= (int) $batch['error_rows'] ?>
                     </td>
                     <td class="col-date"><?= htmlspecialchars($batch['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td>
+                    <td class="col-actions">
                         <?php if ((int) $batch['error_rows'] > 0 || (int) $batch['skipped_rows'] > 0): ?>
                             <div class="action-links">
                                 <a class="action-btn action-view" title="View issues" href="<?= htmlspecialchars(Auth::url('/imports/errors?id=' . $batch['id']), ENT_QUOTES, 'UTF-8') ?>">
