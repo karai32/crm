@@ -342,7 +342,7 @@ $hasExtended = (bool) array_filter(
         <p class="table-empty-state">No clients found.</p>
     <?php else: ?>
 
-    <table class="clients-table">
+    <table class="data-table clients-table">
         <thead>
             <tr>
                 <th class="col-select">

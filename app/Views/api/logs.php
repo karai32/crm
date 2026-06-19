@@ -110,7 +110,7 @@ function apiMethodClass(string $m): string
         <div class="api-logs-empty">No log entries found.</div>
     <?php else: ?>
     <div class="api-logs-table-wrap">
-        <table class="api-logs-table">
+        <table class="data-table api-logs-table">
             <thead>
                 <tr>
                     <th></th>

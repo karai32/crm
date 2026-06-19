@@ -170,7 +170,7 @@
     <?php if (empty($contacts)): ?>
         <p class="card-no-contacts">No contacts linked to this client.</p>
     <?php else: ?>
-        <table class="related-contacts-table">
+        <table class="data-table related-contacts-table">
             <thead>
                 <tr>
                     <th>Name</th>

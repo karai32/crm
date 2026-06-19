@@ -168,7 +168,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
         <?php if (empty($recentExports)): ?>
             <p class="export-no-history">No exports yet.</p>
         <?php else: ?>
-        <table class="export-history-table">
+        <table class="data-table export-history-table">
             <thead>
                 <tr>
                     <th>#</th>

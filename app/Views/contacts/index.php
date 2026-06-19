@@ -399,7 +399,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 <?php else: ?>
 <div class="contacts-table-card">
 
-    <table class="contacts-table">
+    <table class="data-table contacts-table">
         <thead>
             <tr>
                 <th class="col-select">

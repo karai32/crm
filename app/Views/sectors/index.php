@@ -45,7 +45,7 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
     <?php if (empty($sectors)): ?>
         <p class="table-empty-state">No sectors found.</p>
     <?php else: ?>
-    <table class="settings-table">
+    <table class="data-table settings-table">
         <thead>
             <tr>
                 <?= $thSort('name', 'Name') ?>

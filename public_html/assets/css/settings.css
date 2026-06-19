@@ -67,35 +67,7 @@
     border-collapse: collapse;
 }
 
-.settings-table th {
-    padding: 12px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--color-neutral);
-    background: transparent;
-    text-transform: none;
-    letter-spacing: 0;
-    border: 0;
-    border-bottom: 1px solid #F0F0F0;
-    white-space: nowrap;
-}
-
-.settings-table th:first-child { padding-left: 0; }
-.settings-table th:last-child  { padding-right: 0; }
-
-.settings-table td {
-    padding: 13px 10px;
-    border: 0;
-    border-bottom: 1px solid #F0F0F0;
-    vertical-align: middle;
-    font-size: 13.5px;
-}
-
-.settings-table td:first-child { padding-left: 0; }
-.settings-table td:last-child  { padding-right: 0; }
-
-.settings-table tr:last-child td { border-bottom: none; }
-.settings-table tbody tr:hover td { background: var(--color-neutral-50); }
+/* th/td → .data-table in base.css */
 
 .settings-table .col-name { font-weight: 600; color: var(--color-text); }
 .settings-table .col-slug { color: var(--color-neutral); font-size: 13px; font-family: monospace; }

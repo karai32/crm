@@ -70,7 +70,7 @@ $basicAuth = $clientId . ':' . $secret;
     <div class="api-card-list">
         <div class="api-section-label">Existing integrations</div>
         <div class="api-table-scroll">
-            <table class="api-keys-table">
+            <table class="data-table api-keys-table">
                 <thead>
                     <tr>
                         <th>Name</th>

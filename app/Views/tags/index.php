@@ -45,7 +45,7 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
     <?php if (empty($tags)): ?>
         <p class="table-empty-state">No tags found.</p>
     <?php else: ?>
-    <table class="settings-table">
+    <table class="data-table settings-table">
         <thead>
             <tr>
                 <?= $thSort('name', 'Name') ?>

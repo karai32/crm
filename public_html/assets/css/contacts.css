@@ -40,33 +40,7 @@
     border-collapse: collapse;
 }
 
-.contacts-table th {
-    padding: 12px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--color-neutral);
-    background: transparent;
-    border: 0;
-    border-bottom: 1px solid #F0F0F0;
-    white-space: nowrap;
-}
-
-.contacts-table th:first-child { padding-left: 0; }
-.contacts-table th:last-child  { padding-right: 0; }
-
-.contacts-table td {
-    padding: 13px 10px;
-    border: 0;
-    border-bottom: 1px solid #F0F0F0;
-    vertical-align: middle;
-    font-size: 13.5px;
-}
-
-.contacts-table td:first-child { padding-left: 0; }
-.contacts-table td:last-child  { padding-right: 0; }
-
-.contacts-table tr:last-child td { border-bottom: none; }
-.contacts-table tbody tr:hover td { background: var(--color-neutral-50); }
+/* th/td → .data-table in base.css */
 
 .contacts-table .col-id {
     color: var(--color-neutral);

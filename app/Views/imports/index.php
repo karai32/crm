@@ -47,7 +47,7 @@ function importDisplayStatus(array $batch): string
     <?php if (empty($batches)): ?>
         <p class="table-empty-state">No imports yet.</p>
     <?php else: ?>
-    <table class="imports-table">
+    <table class="data-table imports-table">
         <thead>
             <tr>
                 <th>#</th>

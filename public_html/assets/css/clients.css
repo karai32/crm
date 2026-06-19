@@ -32,33 +32,7 @@
     border-collapse: collapse;
 }
 
-.clients-table th {
-    padding: 12px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--color-neutral);
-    background: transparent;
-    border: 0;
-    border-bottom: 1px solid #F0F0F0;
-    white-space: nowrap;
-}
-
-.clients-table th:first-child { padding-left: 0; }
-.clients-table th:last-child  { padding-right: 0; }
-
-.clients-table td {
-    padding: 13px 10px;
-    border: 0;
-    border-bottom: 1px solid #F0F0F0;
-    vertical-align: middle;
-    font-size: 13.5px;
-}
-
-.clients-table td:first-child { padding-left: 0; }
-.clients-table td:last-child  { padding-right: 0; }
-
-.clients-table tr:last-child td { border-bottom: none; }
-.clients-table tbody tr:hover td { background: var(--color-neutral-50); }
+/* th/td → .data-table in base.css */
 
 .clients-table .col-id {
     color: var(--color-neutral);

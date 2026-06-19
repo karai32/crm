@@ -26,9 +26,8 @@
 /* --- History table ---------------------------------------- */
 .imports-table-card {
     background: var(--color-white);
-    border: 1px solid var(--color-neutral-200);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    padding: 24px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -40,26 +39,7 @@
     border-collapse: collapse;
 }
 
-.imports-table th {
-    padding: 10px 14px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--color-neutral);
-    border-bottom: 1px solid var(--color-neutral-200);
-    white-space: nowrap;
-}
-
-.imports-table td {
-    padding: 11px 14px;
-    border-bottom: 1px solid var(--color-neutral-200);
-    vertical-align: middle;
-    font-size: 13.5px;
-}
-
-.imports-table tr:last-child td { border-bottom: none; }
-.imports-table tbody tr:hover td { background: var(--color-neutral-50); }
+/* th/td → .data-table in base.css */
 
 .imports-table .col-file { font-weight: 500; color: var(--color-text); }
 .imports-table .col-num  { color: var(--color-neutral); font-size: 13px; text-align: right; }

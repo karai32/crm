@@ -18,7 +18,7 @@
     <?php if (empty($fields)): ?>
         <p class="table-empty-state">No custom fields found.</p>
     <?php else: ?>
-    <table class="settings-table">
+    <table class="data-table settings-table">
         <thead>
             <tr>
                 <th>Entity</th>

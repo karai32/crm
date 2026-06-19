@@ -46,7 +46,7 @@ function userPermissionIcon(string $permission): string
     <?php if (empty($users)): ?>
         <p class="table-empty-state">No users found.</p>
     <?php else: ?>
-    <table class="settings-table">
+    <table class="data-table settings-table">
         <thead>
             <tr>
                 <th>User</th>

@@ -88,7 +88,7 @@ function fmtDate(string $date): string {
             <div class="empty-state">No contacts yet.</div>
         <?php else: ?>
         <div class="recent-table-wrap">
-        <table class="recent-table">
+        <table class="data-table recent-table">
             <thead>
                 <tr>
                     <th>Name</th>
