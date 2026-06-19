@@ -51,6 +51,26 @@ class AuthController
         // Auth::redirect('/login/verify');
 
         $this->authService->completeLogin($user);
+
+        if (!empty($_POST['remember_me'])) {
+            $lifetime = 30 * 24 * 3600;
+            setcookie('remember_me', '1', [
+                'expires'  => time() + $lifetime,
+                'path'     => '/',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+            $params = session_get_cookie_params();
+            setcookie(session_name(), session_id(), [
+                'expires'  => time() + $lifetime,
+                'path'     => $params['path'],
+                'domain'   => $params['domain'],
+                'secure'   => $params['secure'],
+                'httponly' => $params['httponly'],
+                'samesite' => 'Lax',
+            ]);
+        }
+
         Auth::redirect('/dashboard');
     }
 
@@ -118,6 +138,7 @@ class AuthController
     {
         $this->twoFactorService->clear();
         Auth::logout();
+        setcookie('remember_me', '', time() - 3600, '/');
         Auth::redirect('/login');
     }
 

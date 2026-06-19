@@ -44,6 +44,13 @@
         </div>
     </div>
 
+    <div class="field checkbox-field">
+        <label>
+            <input type="checkbox" name="remember_me" value="1">
+            Remember me
+        </label>
+    </div>
+
     <button class="btn btn-primary auth-submit" type="submit">Sign in</button>
 </form>
 

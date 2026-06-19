@@ -1,5 +1,10 @@
 <?php
 
+if (!empty($_COOKIE['remember_me'])) {
+    $rememberLifetime = 30 * 24 * 3600;
+    ini_set('session.gc_maxlifetime', $rememberLifetime);
+    session_set_cookie_params(['lifetime' => $rememberLifetime]);
+}
 session_start();
 
 function logApplicationError(string $message): void

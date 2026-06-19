@@ -171,7 +171,7 @@ class ContactApiService extends AbstractApiService
         if ($errors !== []) {
             throw new ApiException(422, 'validation_error', 'Contact validation failed', $errors);
         }
-        if ($email !== '' && str_ends_with(strtolower($email), '@unanimecreativos.com')) {
+        if ($email !== '' && str_contains(strtolower($email), 'unanime')) {
             throw new ApiException(422, 'internal_email', 'Internal company emails cannot be added as contacts');
         }
         if ($email !== '' && $this->contacts->emailExists($email)) {
