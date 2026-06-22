@@ -634,39 +634,19 @@
     });
 })();
 
-// Sidebar user flyup menu
+// Sidebar user actions toggle
 (function () {
-    var btn  = document.getElementById('sidebarUserBtn');
-    var menu = document.getElementById('sidebarUserMenu');
+    var btn     = document.getElementById('sidebarUserBtn');
+    var actions = document.getElementById('sidebarUserActions');
 
-    if (!btn || !menu) { return; }
+    if (!btn || !actions) { return; }
 
-    function position() {
-        var r = btn.getBoundingClientRect();
-        menu.style.left   = r.left + 'px';
-        menu.style.width  = Math.max(r.width, 180) + 'px';
-        menu.style.bottom = (window.innerHeight - r.top + 6) + 'px';
-        menu.style.top    = '';
-    }
-
-    btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-        } else {
-            position();
-            menu.classList.add('open');
-        }
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!menu.contains(e.target) && e.target !== btn) {
-            menu.classList.remove('open');
-        }
+    btn.addEventListener('click', function () {
+        actions.classList.toggle('open');
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') { menu.classList.remove('open'); }
+        if (e.key === 'Escape') { actions.classList.remove('open'); }
     });
 })();
 

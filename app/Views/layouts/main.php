@@ -181,32 +181,34 @@ if ($authUser) {
         </nav>
 
         <div class="sidebar-footer">
-            <div class="sidebar-user-wrap">
-                <div class="sidebar-user-menu" id="sidebarUserMenu">
-                    <?php if (Auth::isAdmin()): ?>
-                    <a class="sidebar-user-menu-item" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . ($authUser['id'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">
+            <div class="sidebar-user-actions" id="sidebarUserActions">
+                <?php if (Auth::isAdmin()): ?>
+                <a class="sidebar-user-action" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . ($authUser['id'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
                         </svg>
-                        View Profile
-                    </a>
-                    <?php endif; ?>
-                    <a class="sidebar-user-menu-item sidebar-user-menu-item--danger"
-                       href="<?= htmlspecialchars(Auth::url('/logout'), ENT_QUOTES, 'UTF-8') ?>">
+                    </span>
+                    <span class="nav-label">View Profile</span>
+                </a>
+                <?php endif; ?>
+                <a class="sidebar-user-action sidebar-user-action--danger"
+                   href="<?= htmlspecialchars(Auth::url('/logout'), ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
                         </svg>
-                        Logout
-                    </a>
-                </div>
-                <button class="sidebar-user" id="sidebarUserBtn" type="button">
-                    <div class="sidebar-user-avatar"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></div>
-                    <div class="sidebar-user-info">
-                        <span class="sidebar-user-name"><?= htmlspecialchars($authUser['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
-                        <span class="sidebar-user-role"><?= htmlspecialchars(ucfirst($authUser['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
-                    </div>
-                </button>
+                    </span>
+                    <span class="nav-label">Logout</span>
+                </a>
             </div>
+            <button class="sidebar-user" id="sidebarUserBtn" type="button">
+                <div class="sidebar-user-avatar"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name"><?= htmlspecialchars($authUser['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="sidebar-user-role"><?= htmlspecialchars(ucfirst($authUser['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                </div>
+            </button>
         </div>
 
     </aside>
