@@ -318,6 +318,7 @@ button:hover,
 }
 
 @media (max-width: 700px) {
+
     .page-header,
     .brand-row {
         align-items: flex-start;

@@ -305,9 +305,9 @@
 .user-avatar-sm {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    background: var(--color-tertiary-bg);
-    color: var(--color-tertiary);
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: var(--color-white);
     font-size: 12px;
     font-weight: 700;
     display: flex;

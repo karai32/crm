@@ -1,9 +1,20 @@
 /* --- Imports pages ---------------------------------------- */
 
 /* Header */
-.imports-header { margin-bottom: 20px; }
-.imports-header h1 { font-size: 26px; font-weight: 700; margin: 0 0 2px; }
-.imports-header .count-label { font-size: 13px; color: var(--color-text-muted); }
+.imports-header {
+    margin-bottom: 20px;
+}
+
+.imports-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 2px;
+}
+
+.imports-header .count-label {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
 
 /* --- Import status badges --------------------------------- */
 .import-status {
@@ -17,11 +28,30 @@
     white-space: nowrap;
 }
 
-.import-status-completed  { background: #D1FAE5; color: #065F46; }
-.import-status-partial    { background: #FEF9C3; color: #854D0E; }
-.import-status-pending    { background: #F3F4F6; color: #374151; }
-.import-status-processing { background: #DBEAFE; color: #1E40AF; }
-.import-status-failed     { background: #FEE2E2; color: #991B1B; }
+.import-status-completed {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.import-status-partial {
+    background: #FEF9C3;
+    color: #854D0E;
+}
+
+.import-status-pending {
+    background: #F3F4F6;
+    color: #374151;
+}
+
+.import-status-processing {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.import-status-failed {
+    background: #FEE2E2;
+    color: #991B1B;
+}
 
 /* --- History table ---------------------------------------- */
 .imports-table-card {
@@ -41,9 +71,22 @@
 
 /* th/td → .data-table in base.css */
 
-.imports-table .col-file { font-weight: 500; color: var(--color-text); }
-.imports-table .col-num  { color: var(--color-neutral); font-size: 13px; text-align: right; }
-.imports-table .col-date { color: var(--color-neutral); font-size: 13px; white-space: nowrap; }
+.imports-table .col-file {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.imports-table .col-num {
+    color: var(--color-neutral);
+    font-size: 13px;
+    text-align: right;
+}
+
+.imports-table .col-date {
+    color: var(--color-neutral);
+    font-size: 13px;
+    white-space: nowrap;
+}
 
 /* --- Upload card ------------------------------------------ */
 .import-upload-card {
@@ -55,11 +98,18 @@
     max-width: 520px;
 }
 
-.import-upload-body { padding: 24px; }
+.import-upload-body {
+    padding: 24px;
+}
 
-.import-upload-body .field { margin-bottom: 0; }
+.import-upload-body .field {
+    margin-bottom: 0;
+}
 
-.import-upload-body label { font-size: 13px; margin-bottom: 5px; }
+.import-upload-body label {
+    font-size: 13px;
+    margin-bottom: 5px;
+}
 
 .import-upload-body input[type="file"] {
     width: 100%;
@@ -115,7 +165,9 @@
     color: var(--color-text-muted);
 }
 
-.import-data-scroll { overflow-x: auto; }
+.import-data-scroll {
+    overflow-x: auto;
+}
 
 .import-data-table {
     width: 100%;
@@ -144,7 +196,9 @@
     text-overflow: ellipsis;
 }
 
-.import-data-table tr:last-child td { border-bottom: none; }
+.import-data-table tr:last-child td {
+    border-bottom: none;
+}
 
 /* --- Mapping table ---------------------------------------- */
 .import-mapping-table {
@@ -171,8 +225,13 @@
     font-size: 13.5px;
 }
 
-.import-mapping-table tr:last-child td { border-bottom: none; }
-.import-mapping-table tbody tr:hover td { background: var(--color-neutral-50); }
+.import-mapping-table tr:last-child td {
+    border-bottom: none;
+}
+
+.import-mapping-table tbody tr:hover td {
+    background: var(--color-neutral-50);
+}
 
 .import-mapping-table .col-csv {
     font-weight: 600;
@@ -197,7 +256,7 @@
 .import-mapping-table select:focus {
     outline: none;
     border-color: var(--color-tertiary);
-    box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .1);
 }
 
 /* Custom field settings cell */
@@ -248,9 +307,17 @@
     margin-bottom: 6px;
 }
 
-.import-stat-value--green  { color: var(--color-secondary); }
-.import-stat-value--amber  { color: #D97706; }
-.import-stat-value--red    { color: var(--color-danger); }
+.import-stat-value--green {
+    color: var(--color-secondary);
+}
+
+.import-stat-value--amber {
+    color: #D97706;
+}
+
+.import-stat-value--red {
+    color: var(--color-danger);
+}
 
 .import-stat-label {
     font-size: 12.5px;
@@ -290,8 +357,13 @@
     vertical-align: top;
 }
 
-.import-errors-table tr:last-child td { border-bottom: none; }
-.import-errors-table tbody tr:hover td { background: #FFF5F5; }
+.import-errors-table tr:last-child td {
+    border-bottom: none;
+}
+
+.import-errors-table tbody tr:hover td {
+    background: #FFF5F5;
+}
 
 .import-errors-table .col-row {
     color: var(--color-neutral);
@@ -300,7 +372,9 @@
     text-align: center;
 }
 
-.import-errors-table .col-error { color: var(--color-danger); }
+.import-errors-table .col-error {
+    color: var(--color-danger);
+}
 
 .import-errors-table .col-raw {
     font-family: monospace;
@@ -312,19 +386,37 @@
 
 /* --- Responsive ------------------------------------------- */
 @media (max-width: 1024px) {
-    .import-result-grid { grid-template-columns: repeat(2, 1fr); }
+    .import-result-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
-    .imports-table { min-width: 860px; }
-    .import-result-grid { grid-template-columns: repeat(2, 1fr); }
-    .import-data-scroll { overflow-x: auto; }
-    .import-errors-table { min-width: 780px; }
+    .imports-table {
+        min-width: 860px;
+    }
+
+    .import-result-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .import-data-scroll {
+        overflow-x: auto;
+    }
+
+    .import-errors-table {
+        min-width: 780px;
+    }
 }
 
 @media (max-width: 480px) {
-    .import-result-grid { grid-template-columns: 1fr 1fr; }
-    .import-upload-card { max-width: 100%; }
+    .import-result-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .import-upload-card {
+        max-width: 100%;
+    }
 }
 
 /* === Migrated from inline styles === */

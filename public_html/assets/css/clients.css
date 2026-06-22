@@ -1,7 +1,9 @@
 /* --- Clients pages --------------------------------------- */
 
 /* Header */
-.clients-header { margin-bottom: 20px; }
+.clients-header {
+    margin-bottom: 20px;
+}
 
 .clients-header h1 {
     font-size: 26px;
@@ -91,13 +93,16 @@
 }
 
 .client-hero-avatar {
-    width: 50px; height: 50px;
+    width: 50px;
+    height: 50px;
     border-radius: 10px;
     background: var(--color-secondary-bg, #D1FAE5);
     color: var(--color-secondary);
     font-size: 17px;
     font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
 }
 
@@ -123,11 +128,23 @@
     color: var(--color-neutral);
 }
 
-.client-hero-meta-item svg { width: 13px; height: 13px; }
-.client-hero-meta-item a { color: var(--color-tertiary); }
-.client-hero-meta-item a:hover { text-decoration: underline; }
+.client-hero-meta-item svg {
+    width: 13px;
+    height: 13px;
+}
 
-.client-hero-actions { display: flex; gap: 8px; }
+.client-hero-meta-item a {
+    color: var(--color-tertiary);
+}
+
+.client-hero-meta-item a:hover {
+    text-decoration: underline;
+}
+
+.client-hero-actions {
+    display: flex;
+    gap: 8px;
+}
 
 /* --- Detail two-col layout -------------------------------- */
 .client-detail-layout {
@@ -145,7 +162,9 @@
 }
 
 .detail-table tr:hover .detail-th,
-.detail-table tr:hover .detail-td { background: var(--color-neutral-50); }
+.detail-table tr:hover .detail-td {
+    background: var(--color-neutral-50);
+}
 
 .detail-th {
     width: 150px;
@@ -168,7 +187,9 @@
 }
 
 .detail-table tr:last-child .detail-th,
-.detail-table tr:last-child .detail-td { border-bottom: none; }
+.detail-table tr:last-child .detail-td {
+    border-bottom: none;
+}
 
 /* --- Related contacts mini-table -------------------------- */
 .related-contacts-table {
@@ -194,8 +215,13 @@
     vertical-align: middle;
 }
 
-.related-contacts-table tr:last-child td { border-bottom: none; }
-.related-contacts-table tbody tr:hover td { background: var(--color-neutral-50); }
+.related-contacts-table tr:last-child td {
+    border-bottom: none;
+}
+
+.related-contacts-table tbody tr:hover td {
+    background: var(--color-neutral-50);
+}
 
 .contact-sidebar-list {
     padding: 6px 0;
@@ -210,7 +236,9 @@
     font-size: 13px;
 }
 
-.contact-sidebar-item:last-child { border-bottom: none; }
+.contact-sidebar-item:last-child {
+    border-bottom: none;
+}
 
 .sidebar-empty {
     padding: 14px 16px;
@@ -229,15 +257,50 @@
     white-space: nowrap;
 }
 
-.status-lead      { background: #FEF9C3; color: #854D0E; }
-.status-client    { background: #D1FAE5; color: #065F46; }
-.status-partner   { background: #EDE9FE; color: #5B21B6; }
-.status-prospect  { background: #DBEAFE; color: #1E40AF; }
-.status-supplier  { background: #FEE2E2; color: #991B1B; }
-.status-pending   { background: #F3F4F6; color: #374151; }
-.status-hot       { background: #FFEDD5; color: #9A3412; }
-.status-cold      { background: #E0F2FE; color: #075985; }
-.status-default   { background: var(--color-neutral-100); color: var(--color-neutral); }
+.status-lead {
+    background: #FEF9C3;
+    color: #854D0E;
+}
+
+.status-client {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.status-partner {
+    background: #EDE9FE;
+    color: #5B21B6;
+}
+
+.status-prospect {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.status-supplier {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.status-pending {
+    background: #F3F4F6;
+    color: #374151;
+}
+
+.status-hot {
+    background: #FFEDD5;
+    color: #9A3412;
+}
+
+.status-cold {
+    background: #E0F2FE;
+    color: #075985;
+}
+
+.status-default {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral);
+}
 
 /* --- Form card (create / edit) ---------------------------- */
 .client-form-card {
@@ -268,8 +331,13 @@
     gap: 14px 20px;
 }
 
-.form-grid .field { margin-bottom: 0; }
-.form-grid .field-full { grid-column: 1 / -1; }
+.form-grid .field {
+    margin-bottom: 0;
+}
+
+.form-grid .field-full {
+    grid-column: 1 / -1;
+}
 
 .form-grid input,
 .form-grid select,
@@ -311,19 +379,39 @@
 
 /* --- Responsive ------------------------------------------- */
 @media (max-width: 1024px) {
-    .client-detail-layout { grid-template-columns: 1fr; }
+    .client-detail-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
-    .clients-table { min-width: 940px; }
-    .clients-pagination { flex-direction: column; align-items: flex-start; }
-    .client-hero { flex-direction: column; align-items: flex-start; }
-    .form-grid { grid-template-columns: 1fr; }
-    .form-grid .field-full { grid-column: 1; }
+    .clients-table {
+        min-width: 940px;
+    }
+
+    .clients-pagination {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .client-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid .field-full {
+        grid-column: 1;
+    }
 }
 
 @media (max-width: 480px) {
-    .filter-panel .filter-grid { grid-template-columns: 1fr; }
+    .filter-panel .filter-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* === Migrated from inline styles === */

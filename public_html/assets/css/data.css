@@ -1,7 +1,9 @@
 /* ── Export / Import hub pages ─────────────────────────────────────── */
 
 /* Header */
-.exports-header { margin-bottom: 20px; }
+.exports-header {
+    margin-bottom: 20px;
+}
 
 .exports-header h1 {
     font-size: 26px;
@@ -38,14 +40,20 @@
     transition: color .12s, border-color .12s;
 }
 
-.data-tab:hover { color: var(--color-text); text-decoration: none; }
+.data-tab:hover {
+    color: var(--color-text);
+    text-decoration: none;
+}
 
 .data-tab.active {
     color: var(--color-tertiary);
     border-bottom-color: var(--color-tertiary);
 }
 
-.data-tab svg { width: 15px; height: 15px; }
+.data-tab svg {
+    width: 15px;
+    height: 15px;
+}
 
 /* Export layout */
 .export-layout {
@@ -69,7 +77,9 @@
     border-bottom: 1px solid var(--color-neutral-200);
 }
 
-.export-section:last-child { border-bottom: none; }
+.export-section:last-child {
+    border-bottom: none;
+}
 
 .export-section-title {
     font-size: 11px;
@@ -109,7 +119,9 @@
     user-select: none;
 }
 
-.export-field-label:hover { background: var(--color-neutral-100); }
+.export-field-label:hover {
+    background: var(--color-neutral-100);
+}
 
 .export-field-label input[type="checkbox"] {
     width: 14px;
@@ -176,9 +188,14 @@
     user-select: none;
 }
 
-.format-option:hover { border-color: var(--color-tertiary); color: var(--color-text); }
+.format-option:hover {
+    border-color: var(--color-tertiary);
+    color: var(--color-text);
+}
 
-.format-option input[type="radio"] { display: none; }
+.format-option input[type="radio"] {
+    display: none;
+}
 
 .format-option.selected {
     border-color: var(--color-tertiary);
@@ -192,7 +209,10 @@
     pointer-events: none;
 }
 
-.format-option svg { width: 14px; height: 14px; }
+.format-option svg {
+    width: 14px;
+    height: 14px;
+}
 
 .export-options-footer {
     padding: 14px 18px;
@@ -203,7 +223,10 @@
     justify-content: center;
 }
 
-.btn-download svg { width: 15px; height: 15px; }
+.btn-download svg {
+    width: 15px;
+    height: 15px;
+}
 
 /* Summary card */
 .export-summary-card {
@@ -231,7 +254,9 @@
     color: var(--color-text);
 }
 
-.export-summary-row span:first-child { color: var(--color-neutral); }
+.export-summary-row span:first-child {
+    color: var(--color-neutral);
+}
 
 /* Template downloads */
 .export-templates-card {
@@ -263,11 +288,21 @@
     text-decoration: none;
 }
 
-.export-template-link:hover { background: var(--color-neutral-50); text-decoration: none; }
-.export-template-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+.export-template-link:hover {
+    background: var(--color-neutral-50);
+    text-decoration: none;
+}
+
+.export-template-link svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
 
 /* History section */
-.export-history-section { margin-top: 28px; }
+.export-history-section {
+    margin-top: 28px;
+}
 
 .export-history-header {
     margin-bottom: 12px;
@@ -307,8 +342,15 @@
     white-space: nowrap;
 }
 
-.export-entity-contacts { background: #dbeafe; color: #1e40af; }
-.export-entity-clients  { background: #d1fae5; color: #065f46; }
+.export-entity-contacts {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.export-entity-clients {
+    background: #d1fae5;
+    color: #065f46;
+}
 
 .export-format-badge {
     display: inline-block;
@@ -336,12 +378,22 @@
     margin-bottom: 16px;
 }
 
-.export-notice svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+.export-notice svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
 
 /* Responsive */
 @media (max-width: 900px) {
-    .export-layout { grid-template-columns: 1fr; }
-    .export-sidebar { position: static; }
+    .export-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .export-sidebar {
+        position: static;
+    }
 }
 
 /* === Migrated from inline styles === */

@@ -435,14 +435,14 @@
 
     function TokenPicker(el) {
         var self = this;
-        self.el        = el;
-        self.endpoint  = el.dataset.endpoint;
+        self.el = el;
+        self.endpoint = el.dataset.endpoint;
         self.inputName = el.dataset.name;
         self.withColor = el.dataset.withColor === '1';
         self.placeholder = el.dataset.placeholder || 'Search...';
-        self.selected  = [];
+        self.selected = [];
 
-        try { var p = JSON.parse(el.dataset.selected || '[]'); if (Array.isArray(p)) self.selected = p; } catch (e) {}
+        try { var p = JSON.parse(el.dataset.selected || '[]'); if (Array.isArray(p)) self.selected = p; } catch (e) { }
 
         // Build DOM: [field box] [dropdown] [tokens below]
         el.innerHTML = '';
@@ -546,8 +546,8 @@
                 var lbl = document.createElement('span');
                 lbl.textContent = item.name;
                 opt.appendChild(lbl);
-                opt.dataset.id    = item.id;
-                opt.dataset.name  = item.name;
+                opt.dataset.id = item.id;
+                opt.dataset.name = item.name;
                 opt.dataset.color = item.color || '';
                 self.dropEl.appendChild(opt);
             });
@@ -617,7 +617,7 @@
 
 // Profile dropdown
 (function () {
-    var btn      = document.getElementById('profileBtn');
+    var btn = document.getElementById('profileBtn');
     var dropdown = document.getElementById('profileDropdown');
 
     if (!btn || !dropdown) { return; }
@@ -636,7 +636,7 @@
 
 // Sidebar user actions toggle
 (function () {
-    var btn     = document.getElementById('sidebarUserBtn');
+    var btn = document.getElementById('sidebarUserBtn');
     var actions = document.getElementById('sidebarUserActions');
 
     if (!btn || !actions) { return; }
@@ -652,7 +652,7 @@
 
 // Burger / mobile sidebar
 (function () {
-    var burger  = document.getElementById('burgerBtn');
+    var burger = document.getElementById('burgerBtn');
     var overlay = document.getElementById('sidebarOverlay');
 
     if (!burger) { return; }
