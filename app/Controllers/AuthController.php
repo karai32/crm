@@ -54,19 +54,22 @@ class AuthController
 
         if (!empty($_POST['remember_me'])) {
             $lifetime = 30 * 24 * 3600;
+
+            // Mark browser to extend session on subsequent requests (read in index.php)
             setcookie('remember_me', '1', [
                 'expires'  => time() + $lifetime,
                 'path'     => '/',
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
-            $params = session_get_cookie_params();
+
+            // Extend the session cookie lifetime for this first response too.
+            // The session file lifetime is already guaranteed by the custom
+            // session_save_path + gc_maxlifetime set in index.php.
             setcookie(session_name(), session_id(), [
                 'expires'  => time() + $lifetime,
-                'path'     => $params['path'],
-                'domain'   => $params['domain'],
-                'secure'   => $params['secure'],
-                'httponly' => $params['httponly'],
+                'path'     => '/',
+                'httponly' => true,
                 'samesite' => 'Lax',
             ]);
         }

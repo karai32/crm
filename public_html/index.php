@@ -1,11 +1,23 @@
 <?php
 
+// Store sessions in a project-specific directory so the system GC on shared
+// hosting (which runs with its own short gc_maxlifetime) cannot delete them.
+$_sessionPath = dirname(__DIR__) . '/storage/sessions';
+if (is_dir($_sessionPath) || @mkdir($_sessionPath, 0700, true)) {
+    session_save_path($_sessionPath);
+}
+ini_set('session.gc_maxlifetime', 30 * 24 * 3600);
+
 if (!empty($_COOKIE['remember_me'])) {
-    $rememberLifetime = 30 * 24 * 3600;
-    ini_set('session.gc_maxlifetime', $rememberLifetime);
-    session_set_cookie_params(['lifetime' => $rememberLifetime]);
+    session_set_cookie_params([
+        'lifetime' => 30 * 24 * 3600,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
 }
 session_start();
+unset($_sessionPath);
 
 function logApplicationError(string $message): void
 {
