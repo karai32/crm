@@ -54,6 +54,8 @@ class HelpController
             'custom-fields'   => ['help/custom-fields',   ['help.css'],            'Campos personalizados'],
             'imports'         => ['help/imports',         ['help.css'],            'Importacion de datos'],
             'exports'         => ['help/exports',         ['help.css'],            'Exportacion de datos'],
+            'search-filters'  => ['help/search-filters',  ['help.css'],            'Busqueda y filtros'],
+            'users-roles'     => ['help/users-roles',     ['help.css'],            'Usuarios y permisos'],
         ];
 
         if (isset($dedicatedViews[$topic])) {
@@ -251,20 +253,6 @@ class HelpController
                         ],
                         'tip' => 'Crea un usuario con rol User y permisos de solo lectura para equipos externos que necesiten consultar datos sin modificarlos.',
                     ],
-                    [
-                        'id'      => 'two-factor',
-                        'accent'  => 'red',
-                        'icon'    => 'shield',
-                        'title'   => 'Verificacion en dos pasos',
-                        'summary' => 'La autenticacion de dos factores (2FA) anade una capa adicional de seguridad al inicio de sesion enviando un codigo temporal por email.',
-                        'items'   => [
-                            'Tras introducir el email y la contrasena, el CRM envia un <strong>codigo de un solo uso</strong> a la direccion de correo del usuario.',
-                            'El codigo debe introducirse en la <strong>pantalla de verificacion</strong> antes de acceder al sistema.',
-                            'Si el codigo caduca o no llega, usa el boton <strong>"Resend code"</strong> para solicitar uno nuevo.',
-                            'Cada codigo es de uso unico y expira tras unos minutos por razones de seguridad.',
-                            'Revisa la carpeta de <strong>spam o correo no deseado</strong> si el codigo no aparece en la bandeja de entrada.',
-                        ],
-                    ],
                 ],
             ],
 
@@ -415,20 +403,6 @@ class HelpController
                             'Deactivate a user to revoke access without deleting their activity history.',
                         ],
                         'tip' => 'Create a User with read-only permissions for external teams who need to browse data without making changes.',
-                    ],
-                    [
-                        'id'      => 'two-factor',
-                        'accent'  => 'red',
-                        'icon'    => 'shield',
-                        'title'   => 'Two-factor authentication',
-                        'summary' => 'Two-factor authentication (2FA) adds an extra security layer to sign-in by sending a temporary code to the user\'s email address.',
-                        'items'   => [
-                            'After entering email and password, the CRM sends a <strong>one-time code</strong> to the user\'s email address.',
-                            'The code must be entered on the <strong>verification screen</strong> before gaining access to the system.',
-                            'If the code expires or doesn\'t arrive, use the <strong>"Resend code"</strong> button to request a new one.',
-                            'Each code is single-use and expires within minutes for security reasons.',
-                            'Check your <strong>spam or junk mail folder</strong> if the code doesn\'t appear in your inbox.',
-                        ],
                     ],
                 ],
             ],
