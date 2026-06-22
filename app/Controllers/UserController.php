@@ -196,6 +196,26 @@ class UserController
         Auth::redirect('/users');
     }
 
+    public function purge(): void
+    {
+        Auth::requireAdmin();
+
+        $id = (int) ($_GET['id'] ?? 0);
+        $currentUser = Auth::user();
+
+        if ($id <= 0 || ($currentUser['id'] ?? null) == $id) {
+            Auth::redirect('/users');
+        }
+
+        $user = $this->users->find($id);
+
+        if ($user !== null && (int) $user['is_active'] === 0) {
+            $this->users->purge($id);
+        }
+
+        Auth::redirect('/users');
+    }
+
     private function userDataFromRequest(): array
     {
         return [

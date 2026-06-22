@@ -188,6 +188,14 @@ class UserRepository
         $statement->execute(['id' => $id]);
     }
 
+    public function purge(int $id): void
+    {
+        $pdo = Database::connect();
+
+        $pdo->prepare('DELETE FROM user_permissions WHERE user_id = :id')->execute(['id' => $id]);
+        $pdo->prepare('DELETE FROM users WHERE id = :id')->execute(['id' => $id]);
+    }
+
     public function updateLastLogin(int $id): void
     {
         $pdo = Database::connect();

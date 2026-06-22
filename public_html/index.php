@@ -176,6 +176,7 @@ $router->post('/users/store', [$userController, 'store']);
 $router->get('/users/edit', [$userController, 'edit']);
 $router->post('/users/update', [$userController, 'update']);
 $router->get('/users/delete', [$userController, 'delete']);
+$router->get('/users/purge', [$userController, 'purge']);
 $router->get('/help', [$helpController, 'index']);
 $router->get('/help/{topic}', [$helpController, 'show']);
 $router->get('/api-keys', [$apiKeyController, 'index']);
