@@ -55,6 +55,11 @@
     height: 15px;
 }
 
+.data-tab i {
+    font-size: 15px;
+    line-height: 1;
+}
+
 /* Export layout */
 .export-layout {
     display: grid;
