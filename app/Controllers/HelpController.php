@@ -48,6 +48,7 @@ class HelpController
         $dedicatedViews = [
             'api'             => ['help/api',             ['help.css', 'api.css'], 'API Reference'],
             'getting-started' => ['help/getting-started', ['help.css'],            'Primeros pasos'],
+            'contacts'        => ['help/contacts',        ['help.css'],            'Contactos'],
         ];
 
         if (isset($dedicatedViews[$topic])) {
