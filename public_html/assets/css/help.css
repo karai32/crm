@@ -265,6 +265,11 @@
     height: 22px;
 }
 
+.help-card-icon i {
+    font-size: 22px;
+    line-height: 1;
+}
+
 /* Icon colour variants */
 .help-card-icon--violet {
     background: #ede9fe;
@@ -657,6 +662,10 @@
     .help-card-icon svg {
         width: 18px;
         height: 18px;
+    }
+
+    .help-card-icon i {
+        font-size: 18px;
     }
 }
 
