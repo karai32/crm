@@ -16,7 +16,6 @@ class Auth
             'sectors.manage' => 'Manage sectors',
             'tags.manage' => 'Manage tags',
             'custom_fields.manage' => 'Manage custom fields',
-            'api_keys.manage' => 'Manage API credentials',
         ];
     }
 
@@ -69,7 +68,7 @@ class Auth
             return true;
         }
 
-        if ($permission === 'users.manage' || $permission === 'api_keys.manage') {
+        if ($permission === 'users.manage') {
             return false;
         }
 
