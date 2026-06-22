@@ -24,6 +24,20 @@ function userPermissionIcon(string $permission): string
         default => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5c5 0 8.5 4.5 9.5 7-1 2.5-4.5 7-9.5 7S3.5 14.5 2.5 12C3.5 9.5 7 5 12 5Z"/><circle cx="12" cy="12" r="3"/></svg>',
     };
 }
+
+$userSortUrl = function (string $col) use ($sort, $dir): string {
+    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
+    return Auth::url('/users?' . http_build_query(['sort' => $col, 'dir' => $nd]));
+};
+$userThSort = function (string $col, string $label) use ($sort, $dir, $userSortUrl): string {
+    $active = $sort === $col;
+    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
+    $cls    = 'th-sort' . ($active ? ' th-sort--' . $dir : '');
+    $href   = htmlspecialchars($userSortUrl($col), ENT_QUOTES, 'UTF-8');
+    return '<th class="' . $cls . '"><a href="' . $href . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
+};
 ?>
 
 <!-- Header -->
@@ -49,10 +63,10 @@ function userPermissionIcon(string $permission): string
     <table class="data-table settings-table">
         <thead>
             <tr>
-                <th>User</th>
-                <th>Role</th>
+                <?= $userThSort('name', 'User') ?>
+                <?= $userThSort('role', 'Role') ?>
                 <th>Permissions</th>
-                <th>Status</th>
+                <?= $userThSort('is_active', 'Status') ?>
                 <th>Last login</th>
                 <th class="col-actions">Actions</th>
             </tr>

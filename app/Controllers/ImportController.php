@@ -2,6 +2,8 @@
 
 class ImportController
 {
+    use SortableTrait;
+
     private ImportRepository $imports;
     private ImportManager $manager;
 
@@ -15,12 +17,19 @@ class ImportController
     {
         Auth::requirePermission('imports.manage');
 
+        $sort = $this->sortParam(['id', 'original_filename', 'entity_type', 'status'], 'id');
+        $dir  = $this->dirParam();
+
         View::render('imports/index', [
             'title'   => 'Imports',
             'styles'  => ['imports.css'],
-            'batches' => $this->imports->allBatches(),
+            'batches' => $this->imports->allBatches($sort, $dir),
+            'sort'    => $sort,
+            'dir'     => $dir,
         ]);
     }
+
+
 
     public function upload(): void
     {

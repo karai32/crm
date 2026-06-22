@@ -1,3 +1,19 @@
+<?php
+$apiSortUrl = function (string $col) use ($sort, $dir): string {
+    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
+    return Auth::url('/api-keys?' . http_build_query(['sort' => $col, 'dir' => $nd]));
+};
+$apiThSort = function (string $col, string $label) use ($sort, $dir, $apiSortUrl): string {
+    $active = $sort === $col;
+    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
+    $cls    = 'th-sort' . ($active ? ' th-sort--' . $dir : '');
+    $href   = htmlspecialchars($apiSortUrl($col), ENT_QUOTES, 'UTF-8');
+    return '<th class="' . $cls . '"><a href="' . $href . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
+};
+?>
+
 <!-- Page header -->
 <div class="page-header settings-header api-header">
     <div>
@@ -73,9 +89,9 @@ $basicAuth = $clientId . ':' . $secret;
             <table class="data-table api-keys-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <?= $apiThSort('name', 'Name') ?>
                         <th>Client ID</th>
-                        <th>Status</th>
+                        <?= $apiThSort('is_active', 'Status') ?>
                         <th>Last used</th>
                         <th>Created</th>
                         <th class="col-actions">Actions</th>

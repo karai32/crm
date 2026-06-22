@@ -410,7 +410,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                 <?= $thSort('id', 'ID', 'col-id') ?>
                 <?= $thSort('full_name', 'Name') ?>
                 <?= $thSort('email', 'Email') ?>
-                <th>Clients</th>
+                <?= $thSort('clients', 'Clients') ?>
                 <th>Tags</th>
                 <th class="col-actions">Actions</th>
             </tr>

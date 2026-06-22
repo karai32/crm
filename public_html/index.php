@@ -30,6 +30,7 @@ if (file_exists($autoloadPath) && PHP_VERSION_ID >= 80300) {
 }
 
 require_once __DIR__ . '/../app/Core/Router.php';
+require_once __DIR__ . '/../app/Core/SortableTrait.php';
 require_once __DIR__ . '/../app/Core/View.php';
 require_once __DIR__ . '/../app/Core/Database.php';
 require_once __DIR__ . '/../app/Core/Auth.php';

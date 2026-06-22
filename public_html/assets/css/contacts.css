@@ -107,61 +107,7 @@
     text-decoration: none;
 }
 
-/* Status badge */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.status-lead {
-    background: #FEF9C3;
-    color: #854D0E;
-}
-
-.status-client {
-    background: #D1FAE5;
-    color: #065F46;
-}
-
-.status-partner {
-    background: #EDE9FE;
-    color: #5B21B6;
-}
-
-.status-prospect {
-    background: #DBEAFE;
-    color: #1E40AF;
-}
-
-.status-supplier {
-    background: #FEE2E2;
-    color: #991B1B;
-}
-
-.status-pending {
-    background: #F3F4F6;
-    color: #374151;
-}
-
-.status-hot {
-    background: #FFEDD5;
-    color: #9A3412;
-}
-
-.status-cold {
-    background: #E0F2FE;
-    color: #075985;
-}
-
-.status-default {
-    background: var(--color-neutral-100);
-    color: var(--color-neutral);
-}
+/* Status badges → base.css */
 
 /* Pagination */
 .contacts-pagination {
@@ -266,60 +212,9 @@
     gap: 16px;
 }
 
-/* --- Detail table (key-value) ------------------------- */
-.detail-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+/* Detail table, sidebar list → base.css */
 
-.detail-table tr:hover .detail-th,
-.detail-table tr:hover .detail-td {
-    background: var(--color-neutral-50);
-}
-
-.detail-th {
-    width: 150px;
-    min-width: 140px;
-    font-weight: 500;
-    font-size: 12.5px;
-    color: var(--color-neutral);
-    padding: 10px 20px;
-    text-align: left;
-    vertical-align: top;
-    border-bottom: 1px solid #F0F0F0;
-    white-space: nowrap;
-}
-
-.detail-td {
-    padding: 10px 20px;
-    font-size: 13.5px;
-    color: var(--color-text);
-    border-bottom: 1px solid #F0F0F0;
-}
-
-.detail-table tr:last-child .detail-th,
-.detail-table tr:last-child .detail-td {
-    border-bottom: none;
-}
-
-/* sidebar small lists */
-.contact-sidebar-list {
-    padding: 6px 0;
-}
-
-.contact-sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-bottom: 1px solid #F0F0F0;
-    font-size: 13px;
-}
-
-.contact-sidebar-item:last-child {
-    border-bottom: none;
-}
-
+/* Contact sidebar links */
 .contact-sidebar-item a {
     color: var(--color-tertiary);
     font-weight: 500;
@@ -327,12 +222,6 @@
 
 .contact-sidebar-item a:hover {
     text-decoration: underline;
-}
-
-.sidebar-empty {
-    padding: 14px 16px;
-    color: var(--color-neutral);
-    font-size: 13px;
 }
 
 /* --- Form card (create / edit) ------------------------ */
@@ -344,70 +233,7 @@
     overflow: hidden;
 }
 
-.form-section {
-    padding: 20px 24px;
-    border-bottom: 1px solid #F0F0F0;
-}
-
-.form-section-title {
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--color-neutral);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin: 0 0 16px;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 20px;
-}
-
-.form-grid .field {
-    margin-bottom: 0;
-}
-
-.form-grid .field-full {
-    grid-column: 1 / -1;
-}
-
-.form-grid input,
-.form-grid select,
-.form-grid textarea {
-    max-width: 100%;
-    width: 100%;
-    font-size: 13.5px;
-    padding: 8px 11px;
-}
-
-.form-grid label {
-    font-size: 13px;
-    margin-bottom: 5px;
-}
-
-.form-grid .checkbox-field label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 400;
-    margin-bottom: 0;
-    padding-top: 22px;
-}
-
-.form-grid .checkbox-field input[type="checkbox"] {
-    width: auto;
-    max-width: none;
-    padding: 0;
-}
-
-.form-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 24px;
-    background: var(--color-neutral-50);
-}
+/* form-section, form-grid, form-actions → base.css */
 
 /* Tags / Clients checkbox picker */
 .checkbox-picker-search {
@@ -530,20 +356,10 @@
         align-items: flex-start;
     }
 
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-grid .field-full {
-        grid-column: 1;
-    }
+    /* form-grid responsive → base.css */
 }
 
-@media (max-width: 480px) {
-    .filter-panel .filter-grid {
-        grid-template-columns: 1fr;
-    }
-}
+/* filter-panel 480px responsive → base.css */
 
 /* === Migrated from inline styles === */
 
@@ -554,13 +370,7 @@
     font-size: 14px;
 }
 
-/* Contact show: tags container */
-.card-tags-body {
-    padding: 12px 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
+/* .card-tags-body → base.css */
 
 /* Contact sidebar: client icon */
 .contact-sidebar-item svg {

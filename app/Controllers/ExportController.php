@@ -2,11 +2,15 @@
 
 class ExportController
 {
+    use SortableTrait;
+
     private ExportManager $manager;
+    private ExportRepository $exports;
 
     public function __construct()
     {
         $this->manager = new ExportManager();
+        $this->exports = new ExportRepository();
     }
 
     // ── Hub page ───────────────────────────────────────────────────────────
@@ -19,6 +23,8 @@ class ExportController
             ? $_GET['entity']
             : 'contacts';
 
+        $sort = $this->sortParam(['id', 'entity_type', 'stored_filename'], 'id');
+        $dir  = $this->dirParam();
         $page = $this->manager->page($entity);
 
         View::render('exports/index', [
@@ -27,9 +33,13 @@ class ExportController
             'entity'        => $page['entity'],
             'fieldDefs'     => $page['fieldDefs'],
             'defaultFields' => $page['defaultFields'],
-            'recentExports' => $page['recentExports'],
+            'recentExports' => $this->exports->recentExports(12, $sort, $dir),
+            'sort'          => $sort,
+            'dir'           => $dir,
         ]);
     }
+
+
 
     // ── Unified download endpoint ─────────────────────────────────────────
 

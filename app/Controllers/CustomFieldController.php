@@ -2,6 +2,8 @@
 
 class CustomFieldController
 {
+    use SortableTrait;
+
     private CustomFieldRepository $customFields;
 
     public function __construct()
@@ -13,12 +15,19 @@ class CustomFieldController
     {
         Auth::requirePermission('custom_fields.manage');
 
+        $sort = $this->sortParam(['entity_type', 'name', 'slug', 'field_type'], 'entity_type');
+        $dir  = $this->dirParam();
+
         View::render('custom-fields/index', [
             'title'  => 'Custom fields',
             'styles' => ['settings.css'],
-            'fields' => $this->customFields->all(),
+            'fields' => $this->customFields->all($sort, $dir),
+            'sort'   => $sort,
+            'dir'    => $dir,
         ]);
     }
+
+
 
     public function create(): void
     {

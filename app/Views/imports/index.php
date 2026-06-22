@@ -11,6 +11,21 @@ function importStatusClass(string $status): string
     };
 }
 
+function importSortUrl(string $col, string $sort, string $dir): string {
+    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
+    return Auth::url('/imports?' . http_build_query(['sort' => $col, 'dir' => $nd]));
+}
+
+function importThSort(string $col, string $label, string $sort, string $dir): string {
+    $active = $sort === $col;
+    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
+    $cls    = 'th-sort' . ($active ? ' th-sort--' . $dir : '');
+    $href   = htmlspecialchars(importSortUrl($col, $sort, $dir), ENT_QUOTES, 'UTF-8');
+    return '<th class="' . $cls . '"><a href="' . $href . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
+}
+
 function importDisplayStatus(array $batch): string
 {
     $status = trim((string) ($batch['status'] ?? ''));
@@ -50,10 +65,10 @@ function importDisplayStatus(array $batch): string
     <table class="data-table imports-table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>File</th>
-                <th>Type</th>
-                <th>Status</th>
+                <?= importThSort('id', '#', $sort, $dir) ?>
+                <?= importThSort('original_filename', 'File', $sort, $dir) ?>
+                <?= importThSort('entity_type', 'Type', $sort, $dir) ?>
+                <?= importThSort('status', 'Status', $sort, $dir) ?>
                 <th class="col-num-header">Total</th>
                 <th class="col-num-header">Imported</th>
                 <th class="col-num-header">Skipped</th>

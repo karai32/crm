@@ -320,12 +320,6 @@ a.stat-card:hover {
     text-align: center;
 }
 
-.card-footer a:not(.btn) {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-secondary);
-}
-
 /* --- Empty states ------------------------------------- */
 .empty-state {
     padding: 28px 20px;

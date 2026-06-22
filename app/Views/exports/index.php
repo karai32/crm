@@ -11,6 +11,20 @@ $otherEntity      = $entity === 'contacts' ? 'clients' : 'contacts';
 $otherEntityLabel = $entity === 'contacts' ? 'Clients' : 'Contacts';
 
 $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
+
+$exportSortUrl = function (string $col) use ($sort, $dir, $entity): string {
+    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
+    return Auth::url('/exports?' . http_build_query(['entity' => $entity, 'sort' => $col, 'dir' => $nd]));
+};
+$exportThSort = function (string $col, string $label) use ($sort, $dir, $exportSortUrl): string {
+    $active = $sort === $col;
+    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
+    $cls    = 'th-sort' . ($active ? ' th-sort--' . $dir : '');
+    $href   = htmlspecialchars($exportSortUrl($col), ENT_QUOTES, 'UTF-8');
+    return '<th class="' . $cls . '"><a href="' . $href . '">'
+        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
+};
 ?>
 
 <!-- Header -->
@@ -171,9 +185,9 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
         <table class="data-table export-history-table">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Entity</th>
-                    <th>File</th>
+                    <?= $exportThSort('id', '#') ?>
+                    <?= $exportThSort('entity_type', 'Entity') ?>
+                    <?= $exportThSort('stored_filename', 'File') ?>
                     <th>Format</th>
                     <th class="col-num-header">Rows</th>
                     <th>By</th>

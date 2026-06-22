@@ -2,14 +2,21 @@
 
 class ApiKeyRepository
 {
-    public function all(): array
+    public function all(string $sort = 'created_at', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
-        $statement = $pdo->prepare('
+        $allowed = [
+            'name'       => 'name',
+            'is_active'  => 'is_active',
+            'created_at' => 'created_at',
+        ];
+        $orderCol = $allowed[$sort] ?? 'created_at';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $statement = $pdo->prepare("
             SELECT id, name, client_id, scopes, is_active, last_used_at, created_at
             FROM api_keys
-            ORDER BY created_at DESC
-        ');
+            ORDER BY {$orderCol} {$orderDir}
+        ");
         $statement->execute();
 
         return $statement->fetchAll();

@@ -8,8 +8,14 @@ class ContactRepository
         $offset = ($page - 1) * $perPage;
         [$whereSql, $params] = $this->buildFilterSql($filters);
 
-        $allowed  = ['id' => 'id', 'full_name' => 'full_name', 'email' => 'email', 'created_at' => 'created_at'];
-        $orderCol = $allowed[$sort] ?? 'id';
+        $allowed  = [
+            'id'         => 'contacts.id',
+            'full_name'  => 'contacts.full_name',
+            'email'      => 'contacts.email',
+            'created_at' => 'contacts.created_at',
+            'clients'    => '(SELECT MIN(cl.commercial_name) FROM client_contacts cc INNER JOIN clients cl ON cl.id = cc.client_id WHERE cc.contact_id = contacts.id)',
+        ];
+        $orderCol = $allowed[$sort] ?? 'contacts.id';
         $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
 
         $sql = "

@@ -2,17 +2,25 @@
 
 class ImportRepository
 {
-    public function allBatches(): array
+    public function allBatches(string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
+        $allowed = [
+            'id'                => 'import_batches.id',
+            'original_filename' => 'import_batches.original_filename',
+            'entity_type'       => 'import_batches.entity_type',
+            'status'            => 'import_batches.status',
+        ];
+        $orderCol = $allowed[$sort] ?? 'import_batches.id';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
 
-        $statement = $pdo->prepare('
+        $statement = $pdo->prepare("
             SELECT import_batches.*, users.name AS user_name
             FROM import_batches
             LEFT JOIN users ON users.id = import_batches.user_id
-            ORDER BY import_batches.id DESC
+            ORDER BY {$orderCol} {$orderDir}
             LIMIT 50
-        ');
+        ");
         $statement->execute();
 
         return $statement->fetchAll();

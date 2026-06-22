@@ -2,16 +2,24 @@
 
 class UserRepository
 {
-    public function all(): array
+    public function all(string $sort = 'id', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
+        $allowed = [
+            'id'        => 'users.id',
+            'name'      => 'users.name',
+            'role'      => 'roles.name',
+            'is_active' => 'users.is_active',
+        ];
+        $orderCol = $allowed[$sort] ?? 'users.id';
+        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
 
         $sql = "
             SELECT users.id, users.name, users.email, users.is_active, users.last_login_at,
                    users.created_at, roles.name AS role, roles.label AS role_label
             FROM users
             INNER JOIN roles ON roles.id = users.role_id
-            ORDER BY users.id ASC
+            ORDER BY {$orderCol} {$orderDir}
         ";
 
         $statement = $pdo->prepare($sql);

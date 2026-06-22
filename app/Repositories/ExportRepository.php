@@ -54,17 +54,24 @@ class ExportRepository
         $statement->execute(['id' => $id, 'status' => 'failed']);
     }
 
-    public function recentExports(int $limit = 15): array
+    public function recentExports(int $limit = 15, string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
+        $allowed = [
+            'id'              => 'eb.id',
+            'entity_type'     => 'eb.entity_type',
+            'stored_filename' => 'eb.stored_filename',
+        ];
+        $orderCol = $allowed[$sort] ?? 'eb.id';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
 
-        $statement = $pdo->prepare('
+        $statement = $pdo->prepare("
             SELECT eb.*, u.name AS user_name
             FROM export_batches eb
             LEFT JOIN users u ON u.id = eb.user_id
-            ORDER BY eb.id DESC
+            ORDER BY {$orderCol} {$orderDir}
             LIMIT :limit
-        ');
+        ");
         $statement->bindValue('limit', $limit, PDO::PARAM_INT);
         $statement->execute();
 

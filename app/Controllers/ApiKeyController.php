@@ -2,6 +2,8 @@
 
 class ApiKeyController
 {
+    use SortableTrait;
+
     private ApiKeyRepository $apiKeys;
 
     public function __construct()
@@ -16,13 +18,20 @@ class ApiKeyController
         $newCredentials = $_SESSION['new_api_credentials'] ?? null;
         unset($_SESSION['new_api_credentials']);
 
+        $sort = $this->sortParam(['name', 'is_active', 'created_at'], 'created_at');
+        $dir  = $this->dirParam();
+
         View::render('api/index', [
             'title'          => 'API Credentials',
             'styles'         => ['api.css'],
-            'apiKeys'        => $this->apiKeys->all(),
+            'apiKeys'        => $this->apiKeys->all($sort, $dir),
             'newCredentials' => $newCredentials,
+            'sort'           => $sort,
+            'dir'            => $dir,
         ]);
     }
+
+
 
     public function store(): void
     {

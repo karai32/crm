@@ -2,10 +2,18 @@
 
 class CustomFieldRepository
 {
-    public function all(): array
+    public function all(string $sort = 'entity_type', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
-        $statement = $pdo->prepare('SELECT * FROM custom_fields ORDER BY entity_type ASC, sort_order ASC, name ASC');
+        $allowed = [
+            'entity_type' => 'entity_type',
+            'name'        => 'name',
+            'slug'        => 'slug',
+            'field_type'  => 'field_type',
+        ];
+        $orderCol = $allowed[$sort] ?? 'entity_type';
+        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
+        $statement = $pdo->prepare("SELECT * FROM custom_fields ORDER BY {$orderCol} {$orderDir}");
         $statement->execute();
 
         return $statement->fetchAll();

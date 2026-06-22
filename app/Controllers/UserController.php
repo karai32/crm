@@ -2,6 +2,8 @@
 
 class UserController
 {
+    use SortableTrait;
+
     private UserRepository $users;
 
     public function __construct()
@@ -12,7 +14,10 @@ class UserController
     public function index(): void
     {
         Auth::requireAdmin();
-        $users = $this->users->all();
+
+        $sort  = $this->sortParam(['id', 'name', 'role', 'is_active'], 'id');
+        $dir   = $this->dirParam();
+        $users = $this->users->all($sort, $dir);
         $defaultPermissions = $this->defaultPermissions();
 
         foreach ($users as $index => $user) {
@@ -23,12 +28,16 @@ class UserController
         }
 
         View::render('users/index', [
-            'title' => 'Users',
-            'styles' => ['settings.css'],
-            'users' => $users,
+            'title'                 => 'Users',
+            'styles'                => ['settings.css'],
+            'users'                 => $users,
             'permissionDefinitions' => Auth::permissionDefinitions(),
+            'sort'                  => $sort,
+            'dir'                   => $dir,
         ]);
     }
+
+
 
     public function create(): void
     {
