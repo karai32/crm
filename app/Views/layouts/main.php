@@ -115,7 +115,7 @@ if ($authUser) {
             <?php if ($canUseExports): ?>
             <a href="<?= htmlspecialchars(Auth::url('/exports'), ENT_QUOTES, 'UTF-8') ?>"
                class="nav-item <?= $isActive('/exports') ?>" title="Exports">
-                <span class="nav-icon"><i class="ph ph-export"></i></span>
+                <span class="nav-icon"><i class="ph ph-upload-simple"></i></span>
                 <span class="nav-label">Exports</span>
             </a>
             <?php endif; ?>

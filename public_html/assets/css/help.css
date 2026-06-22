@@ -577,6 +577,11 @@
     height: 20px;
 }
 
+.help-hub-card-icon i {
+    font-size: 20px;
+    line-height: 1;
+}
+
 .help-hub-card-body {
     flex: 1;
     min-width: 0;
