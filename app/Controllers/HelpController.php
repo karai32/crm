@@ -51,6 +51,7 @@ class HelpController
             'contacts'        => ['help/contacts',        ['help.css'],            'Contactos'],
             'clients'         => ['help/clients',         ['help.css'],            'Clientes'],
             'tags-sectors'    => ['help/tags-sectors',    ['help.css'],            'Tags y sectores'],
+            'custom-fields'   => ['help/custom-fields',   ['help.css'],            'Campos personalizados'],
         ];
 
         if (isset($dedicatedViews[$topic])) {
