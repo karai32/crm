@@ -50,6 +50,7 @@ class HelpController
             'getting-started' => ['help/getting-started', ['help.css'],            'Primeros pasos'],
             'contacts'        => ['help/contacts',        ['help.css'],            'Contactos'],
             'clients'         => ['help/clients',         ['help.css'],            'Clientes'],
+            'tags-sectors'    => ['help/tags-sectors',    ['help.css'],            'Tags y sectores'],
         ];
 
         if (isset($dedicatedViews[$topic])) {
