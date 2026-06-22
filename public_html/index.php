@@ -7,15 +7,6 @@ if (is_dir($_sessionPath) || @mkdir($_sessionPath, 0700, true)) {
     session_save_path($_sessionPath);
 }
 ini_set('session.gc_maxlifetime', 30 * 24 * 3600);
-
-if (!empty($_COOKIE['remember_me'])) {
-    session_set_cookie_params([
-        'lifetime' => 30 * 24 * 3600,
-        'path'     => '/',
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
-}
 session_start();
 unset($_sessionPath);
 

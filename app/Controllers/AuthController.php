@@ -53,25 +53,7 @@ class AuthController
         $this->authService->completeLogin($user);
 
         if (!empty($_POST['remember_me'])) {
-            $lifetime = 30 * 24 * 3600;
-
-            // Mark browser to extend session on subsequent requests (read in index.php)
-            setcookie('remember_me', '1', [
-                'expires'  => time() + $lifetime,
-                'path'     => '/',
-                'httponly' => true,
-                'samesite' => 'Lax',
-            ]);
-
-            // Extend the session cookie lifetime for this first response too.
-            // The session file lifetime is already guaranteed by the custom
-            // session_save_path + gc_maxlifetime set in index.php.
-            setcookie(session_name(), session_id(), [
-                'expires'  => time() + $lifetime,
-                'path'     => '/',
-                'httponly' => true,
-                'samesite' => 'Lax',
-            ]);
+            Auth::issueRememberToken((int) $user['id']);
         }
 
         Auth::redirect('/dashboard');
@@ -140,8 +122,8 @@ class AuthController
     public function logout(): void
     {
         $this->twoFactorService->clear();
+        Auth::revokeRememberToken();
         Auth::logout();
-        setcookie('remember_me', '', time() - 3600, '/');
         Auth::redirect('/login');
     }
 

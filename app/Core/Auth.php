@@ -80,8 +80,40 @@ class Auth
     public static function requireLogin(): void
     {
         if (!self::check()) {
-            self::redirect('/login');
+            self::tryRememberLogin();
+            if (!self::check()) {
+                self::redirect('/login');
+            }
         }
+    }
+
+    public static function issueRememberToken(int $userId): void
+    {
+        $dir = self::tokenDir();
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0700, true);
+        }
+        $token    = bin2hex(random_bytes(32));
+        $lifetime = 30 * 24 * 3600;
+        @file_put_contents($dir . '/' . $token, json_encode([
+            'user_id' => $userId,
+            'expires' => time() + $lifetime,
+        ]));
+        setcookie('remember_token', $token, [
+            'expires'  => time() + $lifetime,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+
+    public static function revokeRememberToken(): void
+    {
+        $token = $_COOKIE['remember_token'] ?? '';
+        if ($token !== '' && preg_match('/^[0-9a-f]{64}$/', $token)) {
+            @unlink(self::tokenDir() . '/' . $token);
+        }
+        setcookie('remember_token', '', time() - 3600, '/');
     }
 
     public static function requireAdmin(): void
@@ -118,6 +150,57 @@ class Auth
         $path = '/' . ltrim($path, '/');
 
         return ($basePath === '/' ? '' : $basePath) . $path;
+    }
+
+    private static function tokenDir(): string
+    {
+        return dirname(__DIR__, 2) . '/storage/remember';
+    }
+
+    private static function tryRememberLogin(): void
+    {
+        $token = $_COOKIE['remember_token'] ?? '';
+        if ($token === '' || !preg_match('/^[0-9a-f]{64}$/', $token)) {
+            return;
+        }
+
+        $file = self::tokenDir() . '/' . $token;
+        if (!is_file($file)) {
+            return;
+        }
+
+        $data = json_decode((string) file_get_contents($file), true);
+        if (!is_array($data) || ($data['expires'] ?? 0) < time()) {
+            @unlink($file);
+            setcookie('remember_token', '', time() - 3600, '/');
+            return;
+        }
+
+        try {
+            $pdo  = Database::connect();
+            $stmt = $pdo->prepare('
+                SELECT users.*, roles.name AS role
+                FROM users
+                INNER JOIN roles ON roles.id = users.role_id
+                WHERE users.id = :id AND users.is_active = 1
+                LIMIT 1
+            ');
+            $stmt->execute(['id' => (int) $data['user_id']]);
+            $user = $stmt->fetch();
+        } catch (Throwable) {
+            return;
+        }
+
+        if (!$user) {
+            @unlink($file);
+            setcookie('remember_token', '', time() - 3600, '/');
+            return;
+        }
+
+        // Rotate: delete old token, issue a fresh one
+        @unlink($file);
+        self::issueRememberToken((int) $user['id']);
+        self::login($user);
     }
 
     private static function userPermissions(): array
