@@ -850,3 +850,127 @@
     border-radius: 3px;
     font-size: 12px;
 }
+
+/* ── Help topic pages — paragraph style ─────────────────────────── */
+
+.help-p {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--color-text);
+    margin: 0 0 14px;
+}
+
+.help-p:last-child {
+    margin-bottom: 0;
+}
+
+.help-p strong {
+    font-weight: 600;
+}
+
+.help-p code {
+    background: var(--color-neutral-100);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* Numbered steps */
+.help-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    counter-reset: help-step;
+}
+
+.help-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--color-text);
+    counter-increment: help-step;
+}
+
+.help-step::before {
+    content: counter(help-step);
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.help-step--violet::before { background: #ede9fe; color: #7c3aed; }
+.help-step--blue::before   { background: #dbeafe; color: #2563eb; }
+.help-step--green::before  { background: #dcfce7; color: #16a34a; }
+.help-step--amber::before  { background: #fef3c7; color: #d97706; }
+.help-step--teal::before   { background: #ccfbf1; color: #0d9488; }
+.help-step--indigo::before { background: #e0e7ff; color: #4f46e5; }
+.help-step--sky::before    { background: #e0f2fe; color: #0284c7; }
+.help-step--cyan::before   { background: #cffafe; color: #0891b2; }
+.help-step--slate::before  { background: #f1f5f9; color: #475569; }
+.help-step--red::before    { background: #fee2e2; color: #dc2626; }
+
+/* Callout box (tip / info) */
+.help-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.help-callout i {
+    font-size: 17px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.help-callout p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.help-callout strong {
+    font-weight: 600;
+}
+
+.help-callout--violet { background: #f5f3ff; color: #5b21b6; }
+.help-callout--blue   { background: #eff6ff; color: #1e40af; }
+.help-callout--green  { background: #f0fdf4; color: #166534; }
+.help-callout--amber  { background: #fffbeb; color: #92400e; }
+.help-callout--teal   { background: #f0fdfa; color: #134e4a; }
+.help-callout--indigo { background: #eef2ff; color: #3730a3; }
+.help-callout--sky    { background: #f0f9ff; color: #075985; }
+.help-callout--cyan   { background: #ecfeff; color: #164e63; }
+.help-callout--slate  { background: #f8fafc; color: #334155; }
+.help-callout--red    { background: #fef2f2; color: #991b1b; }
+
+/* Sub-label inside a card body (lighter than api-label) */
+.help-sub-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--color-neutral);
+    margin: 18px 0 8px;
+}
+
+.help-sub-label:first-child {
+    margin-top: 0;
+}

@@ -44,16 +44,24 @@ class HelpController
         $topic  = (string) ($_GET['topic'] ?? '');
         $locale = $this->localeFromRequest();
 
-        if ($topic === 'api') {
-            View::render('help/api', [
-                'title'            => 'API Reference',
-                'styles'           => ['help.css', 'api.css'],
+        // Topics that have their own dedicated view file
+        $dedicatedViews = [
+            'api'             => ['help/api',             ['help.css', 'api.css'], 'API Reference'],
+            'getting-started' => ['help/getting-started', ['help.css'],            'Primeros pasos'],
+        ];
+
+        if (isset($dedicatedViews[$topic])) {
+            [$view, $styles, $title] = $dedicatedViews[$topic];
+            View::render($view, [
+                'title'            => $title,
+                'styles'           => $styles,
                 'locale'           => $locale,
                 'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
             ]);
             return;
         }
 
+        // Generic checklist template for sections not yet migrated
         $content = $this->content()[$locale];
         $section = null;
 
