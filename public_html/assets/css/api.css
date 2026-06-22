@@ -585,6 +585,12 @@
     display: block;
 }
 
+.api-key-rename-btn i {
+    font-size: 12px;
+    line-height: 1;
+    display: block;
+}
+
 .api-key-rename-btn:hover {
     opacity: 1;
     color: var(--color-primary-hover);
@@ -875,6 +881,17 @@
 }
 
 .api-log-expand-btn.is-open svg {
+    transform: rotate(180deg);
+}
+
+.api-log-expand-btn i {
+    font-size: 11px;
+    line-height: 1;
+    transition: transform .15s;
+    display: inline-block;
+}
+
+.api-log-expand-btn.is-open i {
     transform: rotate(180deg);
 }
 

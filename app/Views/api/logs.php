@@ -136,7 +136,7 @@ function apiMethodClass(string $m): string
                     <td class="col-log-expand">
                         <?php if ($hasBody): ?>
                         <button class="api-log-expand-btn" aria-expanded="false" aria-controls="<?= $detailId ?>">
-                            <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <i class="ph ph-caret-down"></i>
                         </button>
                         <?php endif; ?>
                     </td>

@@ -121,6 +121,12 @@ h3 {
     color: #fff;
 }
 
+.sidebar-logo i {
+    font-size: 20px;
+    line-height: 1;
+    color: #fff;
+}
+
 .sidebar-brand-text {
     display: flex;
     flex-direction: column;
@@ -204,6 +210,13 @@ h3 {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
+    color: #6B7280;
+    transition: color .15s;
+}
+
+.nav-item i {
+    font-size: 20px;
+    line-height: 1;
     color: #6B7280;
     transition: color .15s;
 }
@@ -423,6 +436,13 @@ h3 {
 .topbar-search svg {
     width: 15px;
     height: 15px;
+    color: var(--color-neutral);
+    flex-shrink: 0;
+}
+
+.topbar-search i {
+    font-size: 15px;
+    line-height: 1;
     color: var(--color-neutral);
     flex-shrink: 0;
 }
@@ -690,6 +710,13 @@ h3 {
     color: var(--color-neutral);
 }
 
+.profile-dropdown-item i {
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+    color: var(--color-neutral);
+}
+
 .profile-dropdown-item:hover {
     background: var(--color-neutral-100);
     text-decoration: none;
@@ -886,6 +913,11 @@ body.sidebar-open .sidebar-overlay {
 .action-btn svg {
     width: 15px;
     height: 15px;
+}
+
+.action-btn i {
+    font-size: 15px;
+    line-height: 1;
 }
 
 .action-btn:hover {
@@ -1127,6 +1159,12 @@ textarea {
 .filter-bar-btn svg {
     width: 14px;
     height: 14px;
+    flex-shrink: 0;
+}
+
+.filter-bar-btn i {
+    font-size: 14px;
+    line-height: 1;
     flex-shrink: 0;
 }
 
@@ -1731,6 +1769,12 @@ tbody tr:hover td {
     height: 21px;
 }
 
+.auth-logo i {
+    font-size: 21px;
+    line-height: 1;
+    color: #fff;
+}
+
 .auth-brand-title,
 .auth-brand-subtitle {
     display: block;
@@ -1820,6 +1864,8 @@ tbody tr:hover td {
     display: block;
     width: 18px;
     height: 18px;
+    font-size: 18px;
+    line-height: 1;
 }
 
 .password-toggle-icon-hide {
@@ -2112,6 +2158,12 @@ tbody tr:hover td {
 .btn-icon-sm {
     width: 15px;
     height: 15px;
+}
+
+.btn.btn-primary i,
+.btn.btn-secondary i {
+    font-size: 14px;
+    line-height: 1;
 }
 
 /* Inline SVG icon in buttons (22x22) */

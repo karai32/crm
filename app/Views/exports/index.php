@@ -37,9 +37,7 @@ $exportThSort = function (string $col, string $label) use ($sort, $dir, $exportS
 
 <?php if (isset($_GET['error']) && $_GET['error'] === 'phpspreadsheet'): ?>
 <div class="export-notice">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
-    </svg>
+    <i class="ph ph-warning"></i>
     PhpSpreadsheet is not installed. XLSX export is unavailable. Run: <code>composer require phpoffice/phpspreadsheet</code>
 </div>
 <?php endif; ?>
@@ -125,9 +123,7 @@ $exportThSort = function (string $col, string $label) use ($sort, $dir, $exportS
                 </div>
                 <div class="export-options-footer">
                     <button type="submit" class="btn btn-primary btn-download" id="downloadBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
-                        </svg>
+                        <i class="ph ph-download-simple"></i>
                         Download <?= htmlspecialchars($entityLabel, ENT_QUOTES, 'UTF-8') ?>
                     </button>
                 </div>
@@ -155,16 +151,12 @@ $exportThSort = function (string $col, string $label) use ($sort, $dir, $exportS
                 <div class="export-templates-title">Import templates</div>
                 <a class="export-template-link"
                    href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
-                    </svg>
+                    <i class="ph ph-download-simple"></i>
                     Contacts CSV template
                 </a>
                 <a class="export-template-link"
                    href="<?= htmlspecialchars(Auth::url('/exports/template/clients'), ENT_QUOTES, 'UTF-8') ?>">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
-                    </svg>
+                    <i class="ph ph-download-simple"></i>
                     Clients CSV template
                 </a>
             </div>

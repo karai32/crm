@@ -67,6 +67,11 @@ a.stat-card:hover {
     height: 20px;
 }
 
+.stat-card-icon i {
+    font-size: 20px;
+    line-height: 1;
+}
+
 .stat-card-label {
     font-size: 14px;
     font-weight: 500;
