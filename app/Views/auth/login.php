@@ -36,9 +36,10 @@
     </div>
 
     <div class="field checkbox-field">
-        <label>
+        <label class="toggle-switch">
             <input type="checkbox" name="remember_me" value="1">
-            Remember me
+            <span class="toggle-track"></span>
+            <span class="toggle-label">Remember me</span>
         </label>
     </div>
 

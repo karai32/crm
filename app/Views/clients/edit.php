@@ -114,10 +114,11 @@
                            value="<?= htmlspecialchars($client['website'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field checkbox-field">
-                    <label class="label-checkbox-top">
-                        <input id="is_web_connected" type="checkbox" name="is_web_connected" value="1"
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="is_web_connected" value="1"
                                <?= !empty($client['is_web_connected']) ? 'checked' : '' ?>>
-                        Connected to Web / API
+                        <span class="toggle-track"></span>
+                        <span class="toggle-label">Connected to Web / API</span>
                     </label>
                 </div>
                 <div class="field field-full">
