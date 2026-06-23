@@ -100,8 +100,9 @@ function importDisplayStatus(array $batch): string
                     <td class="col-actions">
                         <?php if ((int) $batch['error_rows'] > 0 || (int) $batch['skipped_rows'] > 0): ?>
                             <div class="action-links">
-                                <a class="action-btn action-view" title="View issues" href="<?= htmlspecialchars(Auth::url('/imports/errors?id=' . $batch['id']), ENT_QUOTES, 'UTF-8') ?>">
+                                <a class="action-btn action-view" href="<?= htmlspecialchars(Auth::url('/imports/errors?id=' . $batch['id']), ENT_QUOTES, 'UTF-8') ?>">
                                     <i class="ph ph-eye"></i>
+                                    <span class="tooltip-text">View issues</span>
                                 </a>
                             </div>
                         <?php endif; ?>

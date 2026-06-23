@@ -130,14 +130,16 @@ $userThSort = function (string $col, string $label) use ($sort, $dir, $userSortU
                     </td>
                     <td class="col-actions">
                         <div class="action-links">
-                            <a class="action-btn action-edit" title="Edit" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>">
+                            <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-pencil"></i>
+                                <span class="tooltip-text">Edit</span>
                             </a>
                             <?php if ((int) $user['is_active'] === 0 && !$isCurrentUser): ?>
-                            <a class="action-btn action-delete" title="Delete permanently"
+                            <a class="action-btn action-delete"
                                href="<?= htmlspecialchars(Auth::url('/users/purge?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>"
                                onclick="return confirm('Permanently delete user <?= htmlspecialchars(addslashes($user['name']), ENT_QUOTES, 'UTF-8') ?>? This cannot be undone.')">
                                 <i class="ph ph-trash"></i>
+                                <span class="tooltip-text">Delete permanently</span>
                             </a>
                             <?php endif; ?>
                         </div>

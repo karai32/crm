@@ -144,9 +144,10 @@ $basicAuth = $clientId . ':' . $secret;
                                 <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/sync-scopes'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
-                                    <button class="action-btn action-view" type="submit" title="Sync scopes"
+                                    <button class="action-btn action-view" type="submit"
                                             onclick="return confirm('Grant this integration all current scopes?')">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                                        <span class="tooltip-text">Sync scopes</span>
                                     </button>
                                 </form>
                                 <?php endif; ?>
@@ -154,26 +155,29 @@ $basicAuth = $clientId . ':' . $secret;
                                 <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/revoke'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
-                                    <button class="action-btn action-warn" type="submit" title="Disable"
+                                    <button class="action-btn action-warn" type="submit"
                                             onclick="return confirm('Disable this integration? It can be re-enabled later.')">
                                         <i class="ph ph-cell-signal-slash"></i>
+                                        <span class="tooltip-text">Disable</span>
                                     </button>
                                 </form>
                                 <?php else: ?>
                                 <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/enable'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
-                                    <button class="action-btn action-edit" type="submit" title="Enable">
+                                    <button class="action-btn action-edit" type="submit">
                                         <i class="ph ph-cell-signal-full"></i>
+                                        <span class="tooltip-text">Enable</span>
                                     </button>
                                 </form>
                                 <?php endif; ?>
                                 <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/delete'), ENT_QUOTES, 'UTF-8') ?>" class="api-action-form">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
-                                    <button class="action-btn action-delete" type="submit" title="Delete"
+                                    <button class="action-btn action-delete" type="submit"
                                             onclick="return confirm('Permanently delete these API credentials?')">
                                         <i class="ph ph-trash"></i>
+                                        <span class="tooltip-text">Delete</span>
                                     </button>
                                 </form>
                             </div>

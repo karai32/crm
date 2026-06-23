@@ -386,19 +386,22 @@ $hasExtended = (bool) array_filter(
                     <td class="col-muted"><?= htmlspecialchars($client['country'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="col-actions">
                         <div class="action-links">
-                            <a class="action-btn action-view" title="View" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">
+                            <a class="action-btn action-view" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-eye"></i>
+                                <span class="tooltip-text">View</span>
                             </a>
                             <?php if ($canEditClients): ?>
-                            <a class="action-btn action-edit" title="Edit" href="<?= htmlspecialchars(Auth::url('/clients/edit?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">
+                            <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/clients/edit?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+                                <span class="tooltip-text">Edit</span>
                             </a>
                             <?php endif; ?>
                             <?php if ($canDeleteClients): ?>
-                            <a class="action-btn action-delete" title="Delete"
+                            <a class="action-btn action-delete"
                                href="<?= htmlspecialchars(Auth::url('/clients/delete?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>"
                                onclick="return confirm('Delete this client?')">
                                 <i class="ph ph-trash"></i>
+                                <span class="tooltip-text">Delete</span>
                             </a>
                             <?php endif; ?>
                         </div>

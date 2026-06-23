@@ -66,13 +66,15 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
                     </td>
                     <td class="col-actions">
                         <div class="action-links">
-                            <a class="action-btn action-edit" title="Edit" href="<?= htmlspecialchars(Auth::url('/sectors/edit?id=' . $sector['id']), ENT_QUOTES, 'UTF-8') ?>">
+                            <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/sectors/edit?id=' . $sector['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-pencil"></i>
+                                <span class="tooltip-text">Edit</span>
                             </a>
-                            <a class="action-btn action-delete" title="Delete"
+                            <a class="action-btn action-delete"
                                href="<?= htmlspecialchars(Auth::url('/sectors/delete?id=' . $sector['id']), ENT_QUOTES, 'UTF-8') ?>"
                                onclick="return confirm('Delete this sector? If it is used by clients, it will be deactivated.')">
                                 <i class="ph ph-trash"></i>
+                                <span class="tooltip-text">Delete</span>
                             </a>
                         </div>
                     </td>

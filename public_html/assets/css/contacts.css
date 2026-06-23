@@ -32,7 +32,6 @@
     border-radius: var(--radius-lg);
     padding: 24px;
     overflow-x: auto;
-    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
 }
 
