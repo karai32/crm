@@ -98,6 +98,7 @@ CREATE TABLE clients (
     country VARCHAR(150) NULL,
     website VARCHAR(255) NULL,
     notes TEXT NULL,
+    is_web_connected TINYINT(1) NOT NULL DEFAULT 0,
     created_by INT UNSIGNED NULL,
     updated_by INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

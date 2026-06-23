@@ -83,6 +83,12 @@ foreach ($textCols as $key => $label) {
     }
 }
 
+if ($filters['is_web_connected'] !== '') {
+    $f = $filters; unset($f['is_web_connected'], $f['page']);
+    $webLabel = $filters['is_web_connected'] === '1' ? 'Web: Connected' : 'Web: Not connected';
+    $chips[] = ['text' => $webLabel, 'href' => $base . '?' . http_build_query($f)];
+}
+
 if (!empty($filters['sector_id'])) {
     $sName = '';
     foreach ($filterSectors as $s) {
@@ -216,6 +222,14 @@ $hasExtended = (bool) array_filter(
                 <label for="country">Country</label>
                 <input id="country" type="text" name="country"
                        value="<?= htmlspecialchars($filters['country'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+            <div class="field">
+                <label for="is_web_connected">Web / API</label>
+                <select id="is_web_connected" name="is_web_connected">
+                    <option value="">All</option>
+                    <option value="1" <?= ($filters['is_web_connected'] ?? '') === '1' ? 'selected' : '' ?>>Connected</option>
+                    <option value="0" <?= ($filters['is_web_connected'] ?? '') === '0' ? 'selected' : '' ?>>Not connected</option>
+                </select>
             </div>
         </div>
 
@@ -351,6 +365,7 @@ $hasExtended = (bool) array_filter(
                 <th>Tags</th>
                 <?= $thSort('city', 'City') ?>
                 <?= $thSort('country', 'Country') ?>
+                <th>Web</th>
                 <th class="col-actions">Actions</th>
             </tr>
         </thead>
@@ -384,6 +399,13 @@ $hasExtended = (bool) array_filter(
                     </td>
                     <td class="col-muted"><?= htmlspecialchars($client['city'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="col-muted"><?= htmlspecialchars($client['country'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                    <td>
+                        <?php if ((int) $client['is_web_connected']): ?>
+                            <span class="badge-web-connected">Connected</span>
+                        <?php else: ?>
+                            <span class="col-muted">—</span>
+                        <?php endif; ?>
+                    </td>
                     <td class="col-actions">
                         <div class="action-links">
                             <a class="action-btn action-view" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">

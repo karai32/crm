@@ -113,6 +113,13 @@
                     <input id="website" type="url" name="website"
                            value="<?= htmlspecialchars($client['website'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
+                <div class="field checkbox-field">
+                    <label class="label-checkbox-top">
+                        <input id="is_web_connected" type="checkbox" name="is_web_connected" value="1"
+                               <?= !empty($client['is_web_connected']) ? 'checked' : '' ?>>
+                        Connected to Web / API
+                    </label>
+                </div>
                 <div class="field field-full">
                     <label for="notes">Notes</label>
                     <textarea id="notes" name="notes" class="textarea-notes"><?= htmlspecialchars($client['notes'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>

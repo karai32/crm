@@ -241,6 +241,7 @@ class ClientController
             'sector_id' => (int) ($_POST['sector_id'] ?? 0) ?: null,
             'website' => $this->emptyToNull($_POST['website'] ?? ''),
             'notes' => $this->emptyToNull($_POST['notes'] ?? ''),
+            'is_web_connected' => isset($_POST['is_web_connected']) ? 1 : 0,
         ];
     }
 
@@ -267,6 +268,7 @@ class ClientController
             'postal_code' => trim($_GET['postal_code'] ?? ''),
             'website' => trim($_GET['website'] ?? ''),
             'notes' => trim($_GET['notes'] ?? ''),
+            'is_web_connected' => $_GET['is_web_connected'] ?? '',
             'created_from' => trim($_GET['created_from'] ?? ''),
             'created_to' => trim($_GET['created_to'] ?? ''),
             'updated_from' => trim($_GET['updated_from'] ?? ''),

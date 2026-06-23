@@ -22,7 +22,8 @@ class ClientRepository
 
         $sql = "
             SELECT clients.id, clients.commercial_name, clients.legal_name, clients.city,
-                   clients.province, clients.country, clients.created_at, clients.updated_at,
+                   clients.province, clients.country, clients.is_web_connected,
+                   clients.created_at, clients.updated_at,
                    sectors.name AS sector_name
             FROM clients
             LEFT JOIN sectors ON sectors.id = clients.sector_id
@@ -141,10 +142,10 @@ class ClientRepository
         $sql = "
             INSERT INTO clients (
                 commercial_name, legal_name, cif, address, postal_code, city,
-                province, country, sector_id, website, notes
+                province, country, sector_id, website, notes, is_web_connected
             ) VALUES (
                 :commercial_name, :legal_name, :cif, :address, :postal_code, :city,
-                :province, :country, :sector_id, :website, :notes
+                :province, :country, :sector_id, :website, :notes, :is_web_connected
             )
         ";
 
@@ -170,7 +171,8 @@ class ClientRepository
                 country = :country,
                 sector_id = :sector_id,
                 website = :website,
-                notes = :notes
+                notes = :notes,
+                is_web_connected = :is_web_connected
             WHERE id = :id
         ";
 
@@ -362,6 +364,11 @@ class ClientRepository
     {
         $where = [];
         $params = [];
+
+        if (isset($filters['is_web_connected']) && $filters['is_web_connected'] !== '') {
+            $where[] = 'clients.is_web_connected = :is_web_connected';
+            $params['is_web_connected'] = (int) $filters['is_web_connected'];
+        }
 
         foreach (['commercial_name', 'legal_name', 'cif', 'city', 'province', 'country', 'address', 'postal_code', 'website', 'notes'] as $field) {
             if (!empty($filters[$field])) {

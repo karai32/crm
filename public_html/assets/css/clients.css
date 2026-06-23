@@ -314,3 +314,16 @@
     width: 22px;
     height: 22px;
 }
+
+/* Web/API connected badge in clients table */
+.badge-web-connected {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #D1FAE5;
+    color: #065F46;
+    white-space: nowrap;
+}
