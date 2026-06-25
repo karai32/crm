@@ -447,6 +447,8 @@
         self.hasMore = false;
         self.loadingMore = false;
         self.selected = [];
+        self.staticOptions = null;
+        try { var so = JSON.parse(el.dataset.options || 'null'); if (Array.isArray(so)) self.staticOptions = so; } catch (e) { }
 
         try { var p = JSON.parse(el.dataset.selected || '[]'); if (Array.isArray(p)) self.selected = p; } catch (e) { }
 
@@ -581,6 +583,23 @@
 
     TokenPicker.prototype.search = function (q) {
         var self = this;
+
+        // Static options mode — filter locally, no AJAX
+        if (self.staticOptions !== null) {
+            var lq = q.toLowerCase().trim();
+            var results = lq === ''
+                ? self.staticOptions.slice()
+                : self.staticOptions.filter(function (item) {
+                    return item.name.toLowerCase().indexOf(lq) !== -1;
+                });
+            self.currentQuery = q;
+            self.hasMore = false;
+            self.openDrop(results);
+            return;
+        }
+
+        if (!self.endpoint) { return; }
+
         self.currentQuery = q;
         self.currentPage = 1;
         self.hasMore = false;

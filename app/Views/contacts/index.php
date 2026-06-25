@@ -30,6 +30,31 @@ $preselectedFilterTagsJson = json_encode(array_values(array_map(function ($tag) 
     return in_array((int) $tag['id'], $selectedFilterTagIds ?? [], true);
 }))));
 
+$preselectedCompanyJson = '[]';
+if (!empty($filters['company'])) {
+    $preselectedCompanyJson = json_encode([['id' => $filters['company'], 'name' => $filters['company'] === 'company' ? 'Company' : 'Person']]);
+}
+
+$preselectedSectorJson = '[]';
+if (!empty($filters['sector_id'])) {
+    foreach ($filterSectors as $_s) {
+        if ((int) $_s['id'] === (int) $filters['sector_id']) {
+            $preselectedSectorJson = json_encode([['id' => (int) $_s['id'], 'name' => $_s['name']]]);
+            break;
+        }
+    }
+}
+
+$preselectedCountryJson = '[]';
+if (!empty($filters['country'])) {
+    $preselectedCountryJson = json_encode([['id' => $filters['country'], 'name' => $filters['country']]]);
+}
+
+$preselectedProvinceJson = '[]';
+if (!empty($filters['province'])) {
+    $preselectedProvinceJson = json_encode([['id' => $filters['province'], 'name' => $filters['province']]]);
+}
+
 $from = $total > 0 ? ($page - 1) * $perPage + 1 : 0;
 $to   = min($page * $perPage, $total);
 
@@ -205,12 +230,14 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                        value="<?= htmlspecialchars($filters['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
-                <label for="company">Type</label>
-                <select id="company" name="company">
-                    <option value="">All</option>
-                    <option value="company" <?= (($filters['company'] ?? '') === 'company') ? 'selected' : '' ?>>Company</option>
-                    <option value="person"  <?= (($filters['company'] ?? '') === 'person')  ? 'selected' : '' ?>>Person</option>
-                </select>
+                <label>Type</label>
+                <div class="token-picker token-picker--filter"
+                     data-name="company"
+                     data-max="1"
+                     data-placeholder="All"
+                     data-options='[{"id":"company","name":"Company"},{"id":"person","name":"Person"}]'
+                     data-selected="<?= htmlspecialchars($preselectedCompanyJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
                 <label>Tags</label>
@@ -238,38 +265,97 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                 </div>
             </div>
             <div class="field">
-                <label for="sector_id">Client sector</label>
-                <select id="sector_id" name="sector_id">
-                    <option value="">All sectors</option>
-                    <?php foreach ($filterSectors as $sector): ?>
-                        <option value="<?= (int) $sector['id'] ?>"
-                            <?= ((int) ($filters['sector_id'] ?? 0) === (int) $sector['id']) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($sector['name'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <label>Client sector</label>
+                <div class="token-picker token-picker--filter"
+                     data-name="sector_id"
+                     data-max="1"
+                     data-placeholder="All sectors"
+                     data-options="<?= htmlspecialchars(json_encode(array_map(fn ($s) => ['id' => (int) $s['id'], 'name' => $s['name']], $filterSectors)), ENT_QUOTES, 'UTF-8') ?>"
+                     data-selected="<?= htmlspecialchars($preselectedSectorJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
-                <label for="country">Client country</label>
-                <input id="country" type="text" name="country"
-                       value="<?= htmlspecialchars($filters['country'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>Client country</label>
+                <div class="token-picker token-picker--filter"
+                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/field?field=country'), ENT_QUOTES, 'UTF-8') ?>"
+                     data-name="country"
+                     data-max="1"
+                     data-paginate="1"
+                     data-placeholder="All countries"
+                     data-selected="<?= htmlspecialchars($preselectedCountryJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
-                <label for="province">Client province</label>
-                <input id="province" type="text" name="province"
-                       value="<?= htmlspecialchars($filters['province'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>Client province</label>
+                <div class="token-picker token-picker--filter"
+                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/field?field=province'), ENT_QUOTES, 'UTF-8') ?>"
+                     data-name="province"
+                     data-max="1"
+                     data-paginate="1"
+                     data-placeholder="All provinces"
+                     data-selected="<?= htmlspecialchars($preselectedProvinceJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <?php if (!empty($customFilterFields)): ?>
             <div class="filter-grid-sep"></div>
-            <?php foreach ($customFilterFields as $field): ?>
+            <?php foreach ($customFilterFields as $field):
+                $cfId  = (int) $field['id'];
+                $cfVal = $filters['custom_fields'][$cfId] ?? '';
+            ?>
             <div class="field">
-                <label for="custom_filter_<?= (int) $field['id'] ?>">
-                    <?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?>
-                </label>
-                <input id="custom_filter_<?= (int) $field['id'] ?>"
-                       type="text"
-                       name="custom_fields[<?= (int) $field['id'] ?>]"
-                       value="<?= htmlspecialchars($filters['custom_fields'][(int) $field['id']] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></label>
+                <?php if ($field['field_type'] === 'select'): ?>
+                    <?php
+                        $cfOptions = array_map(fn ($o) => ['id' => $o['value'], 'name' => $o['label']], $field['options']);
+                        $cfPreselected = '[]';
+                        if ($cfVal !== '') {
+                            $cfLabel = $cfVal;
+                            foreach ($field['options'] as $_o) {
+                                if ($_o['value'] === $cfVal) { $cfLabel = $_o['label']; break; }
+                            }
+                            $cfPreselected = json_encode([['id' => $cfVal, 'name' => $cfLabel]]);
+                        }
+                    ?>
+                    <div class="token-picker token-picker--filter"
+                         data-name="custom_fields[<?= $cfId ?>]"
+                         data-max="1"
+                         data-placeholder="Any"
+                         data-options="<?= htmlspecialchars(json_encode($cfOptions), ENT_QUOTES, 'UTF-8') ?>"
+                         data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                <?php elseif ($field['field_type'] === 'checkbox'): ?>
+                    <?php
+                        $cfPreselected = '[]';
+                        if ($cfVal !== '') {
+                            $cfPreselected = json_encode([['id' => $cfVal, 'name' => $cfVal === '1' ? 'Yes' : 'No']]);
+                        }
+                    ?>
+                    <div class="token-picker token-picker--filter"
+                         data-name="custom_fields[<?= $cfId ?>]"
+                         data-max="1"
+                         data-placeholder="Any"
+                         data-options='[{"id":"1","name":"Yes"},{"id":"0","name":"No"}]'
+                         data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                <?php elseif ($field['field_type'] === 'text'): ?>
+                    <?php
+                        $cfPreselected = $cfVal !== '' ? json_encode([['id' => $cfVal, 'name' => $cfVal]]) : '[]';
+                    ?>
+                    <div class="token-picker token-picker--filter"
+                         data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/custom-field/values?field_id=' . $cfId), ENT_QUOTES, 'UTF-8') ?>"
+                         data-name="custom_fields[<?= $cfId ?>]"
+                         data-max="1"
+                         data-paginate="1"
+                         data-placeholder="Any"
+                         data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                <?php elseif ($field['field_type'] === 'number'): ?>
+                    <input type="number" name="custom_fields[<?= $cfId ?>]"
+                           value="<?= htmlspecialchars($cfVal, ENT_QUOTES, 'UTF-8') ?>">
+                <?php elseif ($field['field_type'] === 'date'): ?>
+                    <input type="date" name="custom_fields[<?= $cfId ?>]"
+                           value="<?= htmlspecialchars($cfVal, ENT_QUOTES, 'UTF-8') ?>">
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
             <?php endif; ?>

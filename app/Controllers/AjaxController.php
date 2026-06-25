@@ -6,6 +6,7 @@ class AjaxController
     private ClientRepository $clients;
     private TagRepository $tags;
     private SectorRepository $sectors;
+    private CustomFieldRepository $customFields;
 
     public function __construct()
     {
@@ -13,6 +14,7 @@ class AjaxController
         $this->clients = new ClientRepository();
         $this->tags = new TagRepository();
         $this->sectors = new SectorRepository();
+        $this->customFields = new CustomFieldRepository();
     }
 
     public function globalSearch(): void
@@ -139,6 +141,49 @@ class AjaxController
         ], $sectors);
 
         $this->json(['items' => $items]);
+    }
+
+    public function clientFieldValues(): void
+    {
+        if (!Auth::check()) {
+            $this->json(['error' => 'Unauthenticated'], 401);
+            return;
+        }
+
+        $field = trim($_GET['field'] ?? '');
+        $q     = trim($_GET['q'] ?? '');
+        $page  = max(1, (int) ($_GET['page'] ?? 1));
+
+        [$items, $hasMore] = $this->paginatedItems(
+            $q, $page,
+            fn ($q, $limit, $offset) => $this->clients->distinctFieldValues($field, $q, $limit, $offset)
+        );
+
+        $this->json(['items' => $items, 'has_more' => $hasMore]);
+    }
+
+    public function customFieldValues(): void
+    {
+        if (!Auth::check()) {
+            $this->json(['error' => 'Unauthenticated'], 401);
+            return;
+        }
+
+        $fieldId = (int) ($_GET['field_id'] ?? 0);
+        if ($fieldId <= 0) {
+            $this->json(['items' => [], 'has_more' => false]);
+            return;
+        }
+
+        $q    = trim($_GET['q'] ?? '');
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+
+        [$items, $hasMore] = $this->paginatedItems(
+            $q, $page,
+            fn ($q, $limit, $offset) => $this->customFields->distinctTextValues($fieldId, $q, $limit, $offset)
+        );
+
+        $this->json(['items' => $items, 'has_more' => $hasMore]);
     }
 
     private function paginatedItems(string $q, int $page, callable $fetch, int $perPage = 20): array

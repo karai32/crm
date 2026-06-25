@@ -114,6 +114,37 @@ class ClientRepository
         return $client ?: null;
     }
 
+    public function distinctFieldValues(string $field, string $query = '', int $limit = 20, int $offset = 0): array
+    {
+        static $allowed = ['country', 'province', 'city'];
+        if (!in_array($field, $allowed, true)) {
+            return [];
+        }
+
+        $pdo = Database::connect();
+        $where = "{$field} IS NOT NULL AND {$field} != ''";
+        $params = [];
+
+        if ($query !== '') {
+            $where .= " AND {$field} LIKE :query";
+            $params[':query'] = '%' . $query . '%';
+        }
+
+        $sql = "SELECT DISTINCT {$field} AS val FROM clients WHERE {$where} ORDER BY {$field} ASC LIMIT :limit OFFSET :offset";
+        $statement = $pdo->prepare($sql);
+        foreach ($params as $k => $v) {
+            $statement->bindValue($k, $v);
+        }
+        $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $statement->execute();
+
+        return array_map(
+            fn ($row) => ['id' => $row['val'], 'name' => $row['val']],
+            $statement->fetchAll()
+        );
+    }
+
     public function search(string $query, int $limit = 20, int $offset = 0): array
     {
         $pdo = Database::connect();

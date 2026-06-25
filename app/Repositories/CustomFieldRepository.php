@@ -141,8 +141,41 @@ class CustomFieldRepository
             ORDER BY sort_order ASC, name ASC
         ');
         $statement->execute(['entity_type' => $entityType]);
+        $fields = $statement->fetchAll();
 
-        return $statement->fetchAll();
+        foreach ($fields as $index => $field) {
+            $fields[$index]['options'] = $field['field_type'] === 'select'
+                ? $this->optionsForField((int) $field['id'])
+                : [];
+        }
+
+        return $fields;
+    }
+
+    public function distinctTextValues(int $fieldId, string $query = '', int $limit = 20, int $offset = 0): array
+    {
+        $pdo = Database::connect();
+        $where = 'field_id = :field_id AND value_text IS NOT NULL AND value_text != \'\'';
+        $params = [':field_id' => $fieldId];
+
+        if ($query !== '') {
+            $where .= ' AND value_text LIKE :query';
+            $params[':query'] = '%' . $query . '%';
+        }
+
+        $sql = "SELECT DISTINCT value_text AS val FROM custom_field_values WHERE {$where} ORDER BY value_text ASC LIMIT :limit OFFSET :offset";
+        $statement = $pdo->prepare($sql);
+        foreach ($params as $k => $v) {
+            $statement->bindValue($k, $v);
+        }
+        $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $statement->execute();
+
+        return array_map(
+            fn ($row) => ['id' => $row['val'], 'name' => $row['val']],
+            $statement->fetchAll()
+        );
     }
 
     public function valuesForEntity(string $entityType, int $entityId): array

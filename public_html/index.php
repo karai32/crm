@@ -200,8 +200,10 @@ $router->patch('/api/v1/tags/{id}', [$tagApiController, 'update']);
 $router->delete('/api/v1/tags/{id}', [$tagApiController, 'destroy']);
 $router->get('/ajax/global-search', [$ajaxController, 'globalSearch']);
 $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch']);
+$router->get('/ajax/clients/field', [$ajaxController, 'clientFieldValues']);
 $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);
 $router->get('/ajax/sectors/search', [$ajaxController, 'sectorsSearch']);
+$router->get('/ajax/custom-field/values', [$ajaxController, 'customFieldValues']);
 
 try {
     $isApiRequest = str_contains($_SERVER['REQUEST_URI'] ?? '/', '/api/v1/');
