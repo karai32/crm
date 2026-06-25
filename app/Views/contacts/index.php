@@ -43,19 +43,6 @@ if (!empty($filters['sector_id'])) {
 $from = $total > 0 ? ($page - 1) * $perPage + 1 : 0;
 $to   = min($page * $perPage, $total);
 
-function contactStatusClass(string $s): string {
-    static $map = [
-        'lead'     => 'status-lead',
-        'client'   => 'status-client',
-        'partner'  => 'status-partner',
-        'prospect' => 'status-prospect',
-        'supplier' => 'status-supplier',
-        'pending'  => 'status-pending',
-        'hot'      => 'status-hot',
-        'cold'     => 'status-cold',
-    ];
-    return $map[strtolower(trim($s))] ?? 'status-default';
-}
 
 function paginationRange(int $current, int $last): array {
     $pages = [];

@@ -428,14 +428,6 @@ class ContactRepository
             }
         }
 
-        if (!empty($filters['company'])) {
-            if ($filters['company'] === 'company') {
-                $where[] = "contacts.company != ''";
-            } elseif ($filters['company'] === 'person') {
-                $where[] = "contacts.company = ''";
-            }
-        }
-
         if (!empty($filters['client_id'])) {
             $where[] = '
                 EXISTS (
@@ -469,22 +461,17 @@ class ContactRepository
             ';
         }
 
-        foreach (['sector_id', 'country', 'province'] as $field) {
-            if (!empty($filters[$field])) {
-                $operator = $field === 'sector_id' ? '= :sector_id' : "LIKE :{$field}";
-                $value = $field === 'sector_id' ? (int) $filters[$field] : '%' . $filters[$field] . '%';
-
-                $where[] = "
-                    EXISTS (
-                        SELECT 1
-                        FROM client_contacts
-                        INNER JOIN clients ON clients.id = client_contacts.client_id
-                        WHERE client_contacts.contact_id = contacts.id
-                        AND clients.{$field} {$operator}
-                    )
-                ";
-                $params[$field] = $value;
-            }
+        if (!empty($filters['sector_id'])) {
+            $where[] = '
+                EXISTS (
+                    SELECT 1
+                    FROM client_contacts
+                    INNER JOIN clients ON clients.id = client_contacts.client_id
+                    WHERE client_contacts.contact_id = contacts.id
+                    AND clients.sector_id = :sector_id
+                )
+            ';
+            $params['sector_id'] = (int) $filters['sector_id'];
         }
 
         if (!empty($filters['created_from'])) {

@@ -332,20 +332,16 @@ class ContactController
     private function filtersFromRequest(): array
     {
         return [
-            'full_name' => trim($_GET['full_name'] ?? ''),
-            'email' => trim($_GET['email'] ?? ''),
-            'phone' => trim($_GET['phone'] ?? ''),
-            'company' => trim($_GET['company'] ?? ''),
-            'client_id' => (int) ($_GET['client_id'] ?? 0),
-            'sector_id' => (int) ($_GET['sector_id'] ?? 0),
-            'tag_id' => (int) ($_GET['tag_id'] ?? 0),
-            'tag_ids' => $this->tagIdsFromGet(),
-            'country' => trim($_GET['country'] ?? ''),
-            'province' => trim($_GET['province'] ?? ''),
-            'created_from' => trim($_GET['created_from'] ?? ''),
-            'created_to' => trim($_GET['created_to'] ?? ''),
-            'updated_from' => trim($_GET['updated_from'] ?? ''),
-            'updated_to' => trim($_GET['updated_to'] ?? ''),
+            'full_name'     => trim($_GET['full_name'] ?? ''),
+            'email'         => trim($_GET['email'] ?? ''),
+            'phone'         => trim($_GET['phone'] ?? ''),
+            'client_id'     => (int) ($_GET['client_id'] ?? 0),
+            'sector_id'     => (int) ($_GET['sector_id'] ?? 0),
+            'tag_ids'       => $this->tagIdsFromGet(),
+            'created_from'  => trim($_GET['created_from'] ?? ''),
+            'created_to'    => trim($_GET['created_to'] ?? ''),
+            'updated_from'  => trim($_GET['updated_from'] ?? ''),
+            'updated_to'    => trim($_GET['updated_to'] ?? ''),
             'custom_fields' => $this->customFieldFiltersFromRequest(),
         ];
     }

@@ -402,26 +402,11 @@ class ClientRepository
             $params['is_web_connected'] = (int) $filters['is_web_connected'];
         }
 
-        foreach (['commercial_name', 'legal_name', 'cif', 'city', 'province', 'country', 'address', 'postal_code', 'website', 'notes'] as $field) {
+        foreach (['commercial_name', 'legal_name', 'city', 'province', 'country', 'address', 'website'] as $field) {
             if (!empty($filters[$field])) {
                 $where[] = "clients.{$field} LIKE :{$field}";
                 $params[$field] = '%' . $filters[$field] . '%';
             }
-        }
-
-        if (!empty($filters['contact_name'])) {
-            $where[] = "
-                EXISTS (
-                    SELECT 1
-                    FROM client_contacts cc
-                    INNER JOIN contacts con ON con.id = cc.contact_id
-                    WHERE cc.client_id = clients.id
-                    AND (
-                        con.full_name LIKE :contact_name
-                    )
-                )
-            ";
-            $params['contact_name'] = '%' . $filters['contact_name'] . '%';
         }
 
         if (!empty($filters['sector_id'])) {
