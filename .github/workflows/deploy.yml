@@ -1,4 +1,3 @@
-```yaml
 name: Deploy
 
 on:
@@ -6,14 +5,13 @@ on:
     branches:
       - main
 
-  # Ручной запуск через GitHub Actions
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Если во время деплоя произойдёт новый push,
-# старый запуск будет отменён
+
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -260,4 +258,3 @@ jobs:
 
           echo "UnanimeTech deploy failed after 3 attempts"
           exit 1
-```
