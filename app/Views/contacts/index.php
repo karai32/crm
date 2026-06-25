@@ -95,10 +95,20 @@ foreach ($textCols as $key => $label) {
     }
 }
 
-foreach (['created_from' => 'Created from', 'updated_from' => 'Updated from'] as $key => $label) {
-    if (!empty($filters[$key])) {
-        $f = $filters; unset($f[$key], $f['page']);
-        $chips[] = ['text' => $label . ': ' . $filters[$key], 'href' => $base . '?' . http_build_query($f)];
+foreach ([
+    ['from' => 'created_from', 'to' => 'created_to', 'label' => 'Created'],
+    ['from' => 'updated_from', 'to' => 'updated_to', 'label' => 'Updated'],
+] as $_dr) {
+    $hasFrom = !empty($filters[$_dr['from']]);
+    $hasTo   = !empty($filters[$_dr['to']]);
+    if ($hasFrom || $hasTo) {
+        $text = $_dr['label'] . ': ';
+        $text .= $hasFrom ? $filters[$_dr['from']] : '…';
+        $text .= ' — ';
+        $text .= $hasTo   ? $filters[$_dr['to']]   : '…';
+        $f = $filters;
+        unset($f[$_dr['from']], $f[$_dr['to']], $f['page']);
+        $chips[] = ['text' => $text, 'href' => $base . '?' . http_build_query($f)];
     }
 }
 
@@ -224,14 +234,24 @@ $hasExtended = !empty($filters['custom_fields']);
                 </div>
             </div>
             <div class="field">
-                <label for="created_from">Created date</label>
-                <input id="created_from" type="date" name="created_from"
-                       value="<?= htmlspecialchars($filters['created_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>Created date</label>
+                <div class="date-range-field">
+                    <input type="date" name="created_from"
+                           value="<?= htmlspecialchars($filters['created_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="date-range-sep">—</span>
+                    <input type="date" name="created_to"
+                           value="<?= htmlspecialchars($filters['created_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
-                <label for="updated_from">Updated date</label>
-                <input id="updated_from" type="date" name="updated_from"
-                       value="<?= htmlspecialchars($filters['updated_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>Updated date</label>
+                <div class="date-range-field">
+                    <input type="date" name="updated_from"
+                           value="<?= htmlspecialchars($filters['updated_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="date-range-sep">—</span>
+                    <input type="date" name="updated_to"
+                           value="<?= htmlspecialchars($filters['updated_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
                 <label>Linked client</label>
