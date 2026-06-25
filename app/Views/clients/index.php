@@ -428,8 +428,6 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                 <?= $thSort('legal_name', 'Legal name') ?>
                 <?= $thSort('sector_name', 'Sector') ?>
                 <th>Tags</th>
-                <?= $thSort('city', 'City') ?>
-                <?= $thSort('country', 'Country') ?>
                 <th>Web</th>
                 <th class="col-actions">Actions</th>
             </tr>
@@ -450,7 +448,18 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                         </a>
                     </td>
                     <td class="col-muted"><?= htmlspecialchars($client['legal_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($client['sector_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                    <td>
+                        <?php if (!empty($client['sector_name'])): ?>
+                            <span class="client-sector-cell">
+                                <span class="sector-list-icon">
+                                    <i class="ph ph-<?= htmlspecialchars($client['sector_icon'] ?: 'crosshair', ENT_QUOTES, 'UTF-8') ?>"></i>
+                                </span>
+                                <span><?= htmlspecialchars($client['sector_name'], ENT_QUOTES, 'UTF-8') ?></span>
+                            </span>
+                        <?php else: ?>
+                            <span class="col-muted">-</span>
+                        <?php endif; ?>
+                    </td>
                     <td class="col-tags">
                         <?php foreach ($clientTags[(int) $client['id']] ?? [] as $tag): ?>
                             <?php $c = htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
@@ -462,8 +471,6 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                             </span>
                         <?php endforeach; ?>
                     </td>
-                    <td class="col-muted"><?= htmlspecialchars($client['city'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                    <td class="col-muted"><?= htmlspecialchars($client['country'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
                         <?php if ((int) $client['is_web_connected']): ?>
                             <span class="badge-web-connected">Connected</span>

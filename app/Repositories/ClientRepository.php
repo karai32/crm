@@ -24,7 +24,8 @@ class ClientRepository
             SELECT clients.id, clients.commercial_name, clients.legal_name, clients.city,
                    clients.province, clients.country, clients.is_web_connected,
                    clients.created_at, clients.updated_at,
-                   sectors.name AS sector_name
+                   sectors.name AS sector_name,
+                   sectors.icon AS sector_icon
             FROM clients
             LEFT JOIN sectors ON sectors.id = clients.sector_id
             {$whereSql}

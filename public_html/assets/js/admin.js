@@ -424,14 +424,32 @@
 
     function renderSectorRow(item, input) {
         var tr = document.createElement('tr');
+        var nameTd = document.createElement('td');
+        var nameLink = document.createElement('a');
+        var iconWrap = document.createElement('span');
+        var icon = document.createElement('i');
+        var nameText = document.createElement('span');
         var statusTd = document.createElement('td');
         var badge = document.createElement('span');
+
+        nameTd.className = 'col-name';
+        nameLink.className = 'col-row-link sector-name-cell';
+        nameLink.href = input.dataset.editUrl + item.id;
+
+        iconWrap.className = 'sector-list-icon';
+        icon.className = 'ph ph-' + (item.icon || 'crosshair');
+        nameText.textContent = item.name || '-';
+
+        iconWrap.appendChild(icon);
+        nameLink.appendChild(iconWrap);
+        nameLink.appendChild(nameText);
+        nameTd.appendChild(nameLink);
 
         badge.className = Number(item.is_active) === 1 ? 'badge-active' : 'badge-inactive';
         badge.textContent = Number(item.is_active) === 1 ? 'Active' : 'Inactive';
         statusTd.appendChild(badge);
 
-        tr.appendChild(textCell(item.name, 'col-name'));
+        tr.appendChild(nameTd);
         tr.appendChild(textCell(item.slug, 'col-slug'));
         tr.appendChild(statusTd);
         tr.appendChild(actionCell(item, input, 'Delete this sector? If it is used by clients, it will be deactivated.'));

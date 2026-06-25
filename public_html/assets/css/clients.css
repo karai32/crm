@@ -51,6 +51,31 @@
     font-size: 13px;
 }
 
+.client-sector-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.client-sector-cell .sector-list-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--color-neutral-50);
+    border: 1px solid var(--color-neutral-200);
+    color: var(--color-neutral);
+}
+
+.client-sector-cell .sector-list-icon i {
+    font-size: 15px;
+    line-height: 1;
+}
+
 .clients-table td.col-tags {
     max-width: 220px;
 }
