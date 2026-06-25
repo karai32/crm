@@ -3,10 +3,12 @@
 class SectorController
 {
     private SectorRepository $sectors;
+    private PhosphorIconCatalog $icons;
 
     public function __construct()
     {
         $this->sectors = new SectorRepository();
+        $this->icons = new PhosphorIconCatalog();
     }
 
     public function index(): void
@@ -70,10 +72,12 @@ class SectorController
         }
 
         View::render('sectors/edit', [
-            'title'  => 'Edit sector',
-            'styles' => ['settings.css'],
-            'sector' => $sector,
-            'error'  => null,
+            'title'            => 'Edit sector',
+            'styles'           => ['settings.css'],
+            'sector'           => $sector,
+            'error'            => null,
+            'recommendedIcons' => $this->icons->recommended(),
+            'defaultIcon'      => $this->icons->defaultIcon(),
         ]);
     }
 
@@ -83,6 +87,8 @@ class SectorController
 
         $id = (int) ($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
+        $iconInput = $_POST['icon'] ?? null;
+        $icon = $this->icons->normalize($iconInput);
         $isActive = isset($_POST['is_active']) ? 1 : 0;
         $sector = $this->sectors->find($id);
 
@@ -92,21 +98,24 @@ class SectorController
             return;
         }
 
-        if ($name === '') {
+        if ($name === '' || !$this->icons->isValid($iconInput)) {
             View::render('sectors/edit', [
-                'title'  => 'Edit sector',
-                'styles' => ['settings.css'],
-                'error'  => 'Sector name is required.',
-                'sector' => [
+                'title'            => 'Edit sector',
+                'styles'           => ['settings.css'],
+                'error'            => $name === '' ? 'Sector name is required.' : 'Choose an icon from the icon picker.',
+                'recommendedIcons' => $this->icons->recommended(),
+                'defaultIcon'      => $this->icons->defaultIcon(),
+                'sector'           => [
                     'id'        => $id,
                     'name'      => $name,
+                    'icon'      => $icon,
                     'is_active' => $isActive,
                 ],
             ]);
             return;
         }
 
-        $this->sectors->update($id, $name, $isActive);
+        $this->sectors->update($id, $name, $isActive, $icon);
         Auth::redirect('/sectors');
     }
 

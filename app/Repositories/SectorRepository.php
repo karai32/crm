@@ -80,7 +80,7 @@ class SectorRepository
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('
-            SELECT id, name, slug, is_active
+            SELECT id, name, slug, icon, is_active
             FROM sectors
             WHERE name LIKE :query
                OR slug LIKE :query
@@ -112,13 +112,13 @@ class SectorRepository
         return (int) $pdo->lastInsertId();
     }
 
-    public function update(int $id, string $name, int $isActive): void
+    public function update(int $id, string $name, int $isActive, ?string $icon = null): void
     {
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('
             UPDATE sectors
-            SET name = :name, slug = :slug, is_active = :is_active
+            SET name = :name, slug = :slug, icon = :icon, is_active = :is_active
             WHERE id = :id
         ');
 
@@ -126,6 +126,7 @@ class SectorRepository
             'id' => $id,
             'name' => $name,
             'slug' => $this->makeSlug($name),
+            'icon' => $icon,
             'is_active' => $isActive,
         ]);
     }

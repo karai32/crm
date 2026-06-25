@@ -253,6 +253,122 @@
     });
 })();
 
+// Sector icon picker
+(function () {
+    function debounce(callback, delay) {
+        var timer = null;
+
+        return function () {
+            var args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback.apply(null, args);
+            }, delay);
+        };
+    }
+
+    function labelFor(name) {
+        return name ? name.replace(/-/g, ' ') : 'Default icon';
+    }
+
+    function selectIcon(picker, name) {
+        var value = picker.querySelector('[data-sector-icon-value]');
+        var preview = picker.querySelector('[data-sector-icon-preview]');
+        var label = picker.querySelector('[data-sector-icon-label]');
+        var emptyIcon = picker.dataset.emptyIcon || 'crosshair';
+        var iconName = name || '';
+        var previewName = iconName || emptyIcon;
+
+        value.value = iconName;
+        preview.innerHTML = '';
+
+        var icon = document.createElement('i');
+        icon.className = 'ph ph-' + previewName;
+        preview.appendChild(icon);
+
+        label.textContent = labelFor(iconName);
+
+        picker.querySelectorAll('[data-icon-name]').forEach(function (button) {
+            button.classList.toggle('is-selected', button.dataset.iconName === iconName);
+        });
+    }
+
+    function renderIconResults(picker, items) {
+        var results = picker.querySelector('[data-sector-icon-results]');
+        var selected = picker.querySelector('[data-sector-icon-value]').value;
+
+        results.innerHTML = '';
+
+        if (!items.length) {
+            var empty = document.createElement('div');
+            empty.className = 'sector-icon-empty';
+            empty.textContent = 'No icons found.';
+            results.appendChild(empty);
+            return;
+        }
+
+        items.forEach(function (item) {
+            var button = document.createElement('button');
+            var icon = document.createElement('i');
+            var label = document.createElement('span');
+
+            button.className = 'sector-icon-option';
+            button.type = 'button';
+            button.dataset.iconName = item.name;
+            button.classList.toggle('is-selected', item.name === selected);
+
+            icon.className = 'ph ph-' + item.name;
+            label.textContent = item.name;
+
+            button.appendChild(icon);
+            button.appendChild(label);
+            results.appendChild(button);
+        });
+    }
+
+    document.querySelectorAll('[data-sector-icon-picker]').forEach(function (picker) {
+        var search = picker.querySelector('[data-sector-icon-search]');
+        var clear = picker.querySelector('[data-sector-icon-clear]');
+        var results = picker.querySelector('[data-sector-icon-results]');
+        var endpoint = picker.dataset.searchEndpoint;
+
+        results.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-icon-name]');
+
+            if (button) {
+                selectIcon(picker, button.dataset.iconName);
+            }
+        });
+
+        clear.addEventListener('click', function () {
+            selectIcon(picker, '');
+        });
+
+        search.addEventListener('input', debounce(function () {
+            var query = search.value.trim();
+
+            fetch(endpoint + '?q=' + encodeURIComponent(query), {
+                headers: { Accept: 'application/json' }
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Icon search failed');
+                    }
+
+                    return response.json();
+                })
+                .then(function (data) {
+                    renderIconResults(picker, data.items || []);
+                })
+                .catch(function () {
+                    renderIconResults(picker, []);
+                });
+        }, 180));
+
+        selectIcon(picker, picker.querySelector('[data-sector-icon-value]').value);
+    });
+})();
+
 // Settings live search for sectors and tags
 (function () {
     function debounceSettingsSearch(callback, delay) {

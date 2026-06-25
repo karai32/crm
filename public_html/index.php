@@ -48,6 +48,7 @@ require_once __DIR__ . '/../app/Repositories/CustomFieldRepository.php';
 require_once __DIR__ . '/../app/Repositories/ExportRepository.php';
 require_once __DIR__ . '/../app/Repositories/ImportRepository.php';
 require_once __DIR__ . '/../app/Services/AuthService.php';
+require_once __DIR__ . '/../app/Services/PhosphorIconCatalog.php';
 require_once __DIR__ . '/../app/Services/ExportService.php';
 require_once __DIR__ . '/../app/Services/Export/ExportWriter.php';
 require_once __DIR__ . '/../app/Services/Export/ExportManager.php';
@@ -203,6 +204,7 @@ $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch']);
 $router->get('/ajax/clients/field', [$ajaxController, 'clientFieldValues']);
 $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);
 $router->get('/ajax/sectors/search', [$ajaxController, 'sectorsSearch']);
+$router->get('/ajax/icons/search', [$ajaxController, 'iconsSearch']);
 $router->get('/ajax/custom-field/values', [$ajaxController, 'customFieldValues']);
 
 try {

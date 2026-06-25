@@ -137,10 +137,29 @@ class AjaxController
             'id' => (int) $sector['id'],
             'name' => $sector['name'],
             'slug' => $sector['slug'] ?? null,
+            'icon' => $sector['icon'] ?? null,
             'is_active' => (int) $sector['is_active'],
         ], $sectors);
 
         $this->json(['items' => $items]);
+    }
+
+    public function iconsSearch(): void
+    {
+        if (!Auth::check()) {
+            $this->json(['error' => 'Unauthenticated'], 401);
+            return;
+        }
+
+        if (!Auth::can('sectors.manage')) {
+            $this->json(['error' => 'Forbidden'], 403);
+            return;
+        }
+
+        $catalog = new PhosphorIconCatalog();
+        $query = trim($_GET['q'] ?? '');
+
+        $this->json(['items' => $catalog->search($query)]);
     }
 
     public function clientFieldValues(): void

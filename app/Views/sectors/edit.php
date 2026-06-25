@@ -9,6 +9,10 @@
     </div>
 </div>
 
+<?php
+$selectedIcon = $sector['icon'] ?: ($defaultIcon ?? 'crosshair');
+?>
+
 <?php if (!empty($error)): ?>
     <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
 <?php endif; ?>
@@ -22,6 +26,52 @@
                 <label for="name">Name <span class="required-star">*</span></label>
                 <input id="name" type="text" name="name"
                        value="<?= htmlspecialchars($sector['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+            </div>
+            <div class="field">
+                <label for="sector-icon-search">Icon</label>
+                <div class="sector-icon-picker"
+                     data-sector-icon-picker
+                     data-search-endpoint="<?= htmlspecialchars(Auth::url('/ajax/icons/search'), ENT_QUOTES, 'UTF-8') ?>"
+                     data-empty-icon="<?= htmlspecialchars($defaultIcon ?? 'crosshair', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden"
+                           name="icon"
+                           data-sector-icon-value
+                           value="<?= htmlspecialchars($sector['icon'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+                    <div class="sector-icon-current">
+                        <span class="sector-icon-preview" data-sector-icon-preview>
+                            <i class="ph ph-<?= htmlspecialchars($selectedIcon, ENT_QUOTES, 'UTF-8') ?>"></i>
+                        </span>
+                        <div class="sector-icon-current-body">
+                            <span class="sector-icon-current-label" data-sector-icon-label>
+                                <?= htmlspecialchars($sector['icon'] ?: 'Default icon', ENT_QUOTES, 'UTF-8') ?>
+                            </span>
+                            <button class="sector-icon-clear" type="button" data-sector-icon-clear>Use default</button>
+                        </div>
+                    </div>
+
+                    <div class="sector-icon-search">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input id="sector-icon-search"
+                               type="search"
+                               data-sector-icon-search
+                               placeholder="Search icons by name or tag..."
+                               autocomplete="off"
+                               spellcheck="false">
+                    </div>
+
+                    <div class="sector-icon-results" data-sector-icon-results>
+                        <?php foreach ($recommendedIcons ?? [] as $icon): ?>
+                            <button class="sector-icon-option <?= ($sector['icon'] ?? '') === $icon['name'] ? 'is-selected' : '' ?>"
+                                    type="button"
+                                    data-icon-name="<?= htmlspecialchars($icon['name'], ENT_QUOTES, 'UTF-8') ?>">
+                                <i class="ph ph-<?= htmlspecialchars($icon['name'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                                <span><?= htmlspecialchars($icon['name'], ENT_QUOTES, 'UTF-8') ?></span>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <span class="field-hint">Search uses Phosphor icon names, categories and tags.</span>
             </div>
             <div class="field checkbox-field">
                 <label>
