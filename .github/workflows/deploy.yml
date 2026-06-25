@@ -5,155 +5,49 @@ on:
     branches:
       - main
 
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  # =========================================================
-  # TIMEWEB
-  # =========================================================
   deploy-timeweb:
     name: Upload files to TimeWeb
     runs-on: ubuntu-latest
-    timeout-minutes: 20
 
     steps:
       - name: Get latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Install lftp
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends lftp
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./
+          server-dir: /crm/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.vscode/**
+            **/.claude/**
+            **/tests/**
+            **/database/**
+            **/node_modules/**
+            vendor/**
+            config/database.php
+            config/mail.php
+            storage/logs/**
+            storage/exports/**
+            storage/imports/**
+            storage/*.log
 
-      - name: Deploy via SFTP to TimeWeb
-        env:
-          SFTP_HOST: ${{ secrets.TIMEWEB_SFTP_HOST }}
-          SFTP_USER: ${{ secrets.TIMEWEB_SFTP_USER }}
-          SFTP_PASSWORD: ${{ secrets.TIMEWEB_SFTP_PASSWORD }}
-          SFTP_PORT: ${{ secrets.TIMEWEB_SFTP_PORT }}
-          SFTP_TARGET: ${{ secrets.TIMEWEB_SFTP_TARGET }}
-
-        run: |
-          set -Eeuo pipefail
-
-          if [ -z "$SFTP_HOST" ]; then
-            echo "TIMEWEB_SFTP_HOST is empty"
-            exit 1
-          fi
-
-          if [ -z "$SFTP_USER" ]; then
-            echo "TIMEWEB_SFTP_USER is empty"
-            exit 1
-          fi
-
-          if [ -z "$SFTP_PASSWORD" ]; then
-            echo "TIMEWEB_SFTP_PASSWORD is empty"
-            exit 1
-          fi
-
-          if [ -z "$SFTP_TARGET" ]; then
-            echo "TIMEWEB_SFTP_TARGET is empty"
-            exit 1
-          fi
-
-          for attempt in 1 2 3; do
-            echo "TimeWeb deploy attempt: $attempt/3"
-
-            if lftp \
-              -u "$SFTP_USER","$SFTP_PASSWORD" \
-              -p "${SFTP_PORT:-22}" \
-              "sftp://$SFTP_HOST" <<EOF
-          set cmd:fail-exit yes
-          set sftp:auto-confirm yes
-
-          set net:timeout 20
-          set net:max-retries 8
-          set net:reconnect-interval-base 5
-          set net:reconnect-interval-max 30
-
-          mkdir -p "$SFTP_TARGET"
-
-          mirror --reverse --delete --continue --verbose \
-            --exclude-glob '.git/' \
-            --exclude-glob '.git/**' \
-            --exclude-glob '.git*/' \
-            --exclude-glob '.git*/**' \
-            --exclude-glob '.github/' \
-            --exclude-glob '.github/**' \
-            --exclude-glob '.vscode/' \
-            --exclude-glob '.vscode/**' \
-            --exclude-glob '.claude/' \
-            --exclude-glob '.claude/**' \
-            --exclude-glob 'tests/' \
-            --exclude-glob 'tests/**' \
-            --exclude-glob 'database/' \
-            --exclude-glob 'database/**' \
-            --exclude-glob 'node_modules/' \
-            --exclude-glob 'node_modules/**' \
-            --exclude-glob 'vendor/' \
-            --exclude-glob 'vendor/**' \
-            --exclude-glob '.env' \
-            --exclude-glob 'config/database.php' \
-            --exclude-glob 'config/mail.php' \
-            --exclude-glob 'storage/logs/' \
-            --exclude-glob 'storage/logs/**' \
-            --exclude-glob 'storage/exports/' \
-            --exclude-glob 'storage/exports/**' \
-            --exclude-glob 'storage/imports/' \
-            --exclude-glob 'storage/imports/**' \
-            --exclude-glob 'storage/cache/' \
-            --exclude-glob 'storage/cache/**' \
-            --exclude-glob 'storage/sessions/' \
-            --exclude-glob 'storage/sessions/**' \
-            --exclude-glob 'storage/*.log' \
-            --exclude-glob 'uploads/' \
-            --exclude-glob 'uploads/**' \
-            --exclude-glob 'public/uploads/' \
-            --exclude-glob 'public/uploads/**' \
-            ./ "$SFTP_TARGET/"
-
-          bye
-          EOF
-            then
-              echo "TimeWeb deploy completed successfully"
-              exit 0
-            fi
-
-            if [ "$attempt" -lt 3 ]; then
-              wait_time=$((attempt * 10))
-              echo "TimeWeb deploy failed. Retrying in ${wait_time} seconds..."
-              sleep "$wait_time"
-            fi
-          done
-
-          echo "TimeWeb deploy failed after 3 attempts"
-          exit 1
-
-  # =========================================================
-  # UNANIMETECH
-  # =========================================================
   deploy-unanimetech:
     name: Upload files to UnanimeTech
     runs-on: ubuntu-latest
-    timeout-minutes: 20
 
     steps:
       - name: Get latest code
-        uses: actions/checkout@v6
-
-      - name: Install lftp
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends lftp
+        uses: actions/checkout@v4
 
       - name: Deploy via SFTP to UnanimeTech
         env:
@@ -162,99 +56,30 @@ jobs:
           SFTP_PASSWORD: ${{ secrets.UNANIME_SFTP_PASSWORD }}
           SFTP_PORT: ${{ secrets.UNANIME_SFTP_PORT }}
           SFTP_TARGET: ${{ secrets.UNANIME_SFTP_TARGET }}
-
         run: |
-          set -Eeuo pipefail
+          sudo apt-get update
+          sudo apt-get install -y lftp
 
-          if [ -z "$SFTP_HOST" ]; then
-            echo "UNANIME_SFTP_HOST is empty"
-            exit 1
-          fi
-
-          if [ -z "$SFTP_USER" ]; then
-            echo "UNANIME_SFTP_USER is empty"
-            exit 1
-          fi
-
-          if [ -z "$SFTP_PASSWORD" ]; then
-            echo "UNANIME_SFTP_PASSWORD is empty"
-            exit 1
-          fi
-
-          if [ -z "$SFTP_TARGET" ]; then
-            echo "UNANIME_SFTP_TARGET is empty"
-            exit 1
-          fi
-
-          for attempt in 1 2 3; do
-            echo "UnanimeTech deploy attempt: $attempt/3"
-
-            if lftp \
-              -u "$SFTP_USER","$SFTP_PASSWORD" \
-              -p "${SFTP_PORT:-22}" \
-              "sftp://$SFTP_HOST" <<EOF
-          set cmd:fail-exit yes
+          lftp -u "$SFTP_USER","$SFTP_PASSWORD" -p "${SFTP_PORT:-22}" "sftp://$SFTP_HOST" <<EOF
           set sftp:auto-confirm yes
-
-          set net:timeout 20
-          set net:max-retries 8
-          set net:reconnect-interval-base 5
-          set net:reconnect-interval-max 30
-
+          set ssl:verify-certificate no
           mkdir -p "$SFTP_TARGET"
-
-          mirror --reverse --delete --continue --verbose \
-            --exclude-glob '.git/' \
-            --exclude-glob '.git/**' \
-            --exclude-glob '.git*/' \
-            --exclude-glob '.git*/**' \
-            --exclude-glob '.github/' \
-            --exclude-glob '.github/**' \
-            --exclude-glob '.vscode/' \
-            --exclude-glob '.vscode/**' \
-            --exclude-glob '.claude/' \
-            --exclude-glob '.claude/**' \
-            --exclude-glob 'tests/' \
-            --exclude-glob 'tests/**' \
-            --exclude-glob 'database/' \
-            --exclude-glob 'database/**' \
-            --exclude-glob 'node_modules/' \
-            --exclude-glob 'node_modules/**' \
-            --exclude-glob 'vendor/' \
-            --exclude-glob 'vendor/**' \
-            --exclude-glob '.env' \
-            --exclude-glob 'config/database.php' \
-            --exclude-glob 'config/mail.php' \
-            --exclude-glob 'storage/logs/' \
-            --exclude-glob 'storage/logs/**' \
-            --exclude-glob 'storage/exports/' \
-            --exclude-glob 'storage/exports/**' \
-            --exclude-glob 'storage/imports/' \
-            --exclude-glob 'storage/imports/**' \
-            --exclude-glob 'storage/cache/' \
-            --exclude-glob 'storage/cache/**' \
-            --exclude-glob 'storage/sessions/' \
-            --exclude-glob 'storage/sessions/**' \
-            --exclude-glob 'storage/*.log' \
-            --exclude-glob 'uploads/' \
-            --exclude-glob 'uploads/**' \
-            --exclude-glob 'public/uploads/' \
-            --exclude-glob 'public/uploads/**' \
+          mirror --reverse --delete --verbose \
+            --exclude-glob .git/ \
+            --exclude-glob .git*/ \
+            --exclude-glob .github/ \
+            --exclude-glob .vscode/ \
+            --exclude-glob .claude/ \
+            --exclude-glob tests/ \
+            --exclude-glob database/ \
+            --exclude-glob node_modules/ \
+            --exclude-glob vendor/ \
+            --exclude-glob config/database.php \
+            --exclude-glob config/mail.php \
+            --exclude-glob storage/logs/ \
+            --exclude-glob storage/exports/ \
+            --exclude-glob storage/imports/ \
+            --exclude-glob storage/*.log \
             ./ "$SFTP_TARGET/"
-
           bye
           EOF
-            then
-              echo "UnanimeTech deploy completed successfully"
-              exit 0
-            fi
-
-            if [ "$attempt" -lt 3 ]; then
-              wait_time=$((attempt * 10))
-              echo "UnanimeTech deploy failed. Retrying in ${wait_time} seconds..."
-              sleep "$wait_time"
-            fi
-          done
-
-          echo "UnanimeTech deploy failed after 3 attempts"
-          exit 1
