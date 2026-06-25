@@ -604,7 +604,8 @@
         self.currentPage = 1;
         self.hasMore = false;
         self.loadingMore = false;
-        var url = self.endpoint + '?q=' + encodeURIComponent(q);
+        var sep = self.endpoint.indexOf('?') !== -1 ? '&' : '?';
+        var url = self.endpoint + sep + 'q=' + encodeURIComponent(q);
         if (self.paginate) { url += '&page=1'; }
         fetch(url, { headers: { Accept: 'application/json' } })
             .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
@@ -620,7 +621,8 @@
         if (!self.hasMore || self.loadingMore) { return; }
         self.loadingMore = true;
         self.currentPage++;
-        var url = self.endpoint + '?q=' + encodeURIComponent(self.currentQuery) + '&page=' + self.currentPage;
+        var sep = self.endpoint.indexOf('?') !== -1 ? '&' : '?';
+        var url = self.endpoint + sep + 'q=' + encodeURIComponent(self.currentQuery) + '&page=' + self.currentPage;
         fetch(url, { headers: { Accept: 'application/json' } })
             .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
             .then(function (d) {
