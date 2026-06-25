@@ -55,7 +55,7 @@ class TagRepository
         return $tag ?: null;
     }
 
-    public function search(string $query, int $limit = 20): array
+    public function search(string $query, int $limit = 20, int $offset = 0): array
     {
         $pdo = Database::connect();
 
@@ -64,11 +64,12 @@ class TagRepository
             FROM tags
             WHERE name LIKE :query
             ORDER BY name ASC
-            LIMIT :limit
+            LIMIT :limit OFFSET :offset
         ');
 
         $statement->bindValue('query', '%' . $query . '%');
         $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
         $statement->execute();
 
         return $statement->fetchAll();

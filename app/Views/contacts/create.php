@@ -60,6 +60,7 @@
                  data-name="tag_ids[]"
                  data-with-color="1"
                  data-placeholder="Search tags..."
+                 data-paginate="1"
                  data-selected="<?= htmlspecialchars($preselectedTagsJson, ENT_QUOTES, 'UTF-8') ?>">
             </div>
         </div>

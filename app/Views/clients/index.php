@@ -205,6 +205,7 @@ $hasExtended = (bool) array_filter(
                      data-name="tag_ids[]"
                      data-with-color="1"
                      data-placeholder="All tags"
+                     data-paginate="1"
                      data-selected="<?= htmlspecialchars($preselectedFilterTagsJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
@@ -309,6 +310,7 @@ $hasExtended = (bool) array_filter(
                              data-name="tag_ids[]"
                              data-with-color="1"
                              data-placeholder="Choose tags…"
+                             data-paginate="1"
                              data-selected="[]">
                         </div>
                     </div>

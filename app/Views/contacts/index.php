@@ -73,15 +73,11 @@ $chips = [];
 $base  = Auth::url('/contacts');
 
 $textCols = [
-    'full_name'    => 'Name',
-    'email'        => 'Email',
-    'phone'        => 'Phone',
-    'country'      => 'Country',
-    'province'     => 'Province',
-    'created_from' => 'Created ≥',
-    'created_to'   => 'Created ≤',
-    'updated_from' => 'Updated ≥',
-    'updated_to'   => 'Updated ≤',
+    'full_name' => 'Name',
+    'email'     => 'Email',
+    'phone'     => 'Phone',
+    'country'   => 'Country',
+    'province'  => 'Province',
 ];
 
 foreach ($textCols as $key => $label) {
@@ -135,7 +131,7 @@ if (!empty($filters['custom_fields'])) {
     }
 }
 
-$extendedKeys = ['client_id', 'sector_id', 'country', 'province', 'created_from', 'created_to', 'updated_from', 'updated_to'];
+$extendedKeys = ['client_id', 'sector_id', 'country', 'province'];
 $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extendedKeys, fn ($k) => !empty($filters[$k]));
 ?>
 
@@ -223,6 +219,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                      data-name="tag_ids[]"
                      data-with-color="1"
                      data-placeholder="All tags"
+                     data-paginate="1"
                      data-selected="<?= htmlspecialchars($preselectedFilterTagsJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
@@ -261,26 +258,6 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                 <label for="province">Client province</label>
                 <input id="province" type="text" name="province"
                        value="<?= htmlspecialchars($filters['province'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="created_from">Created from</label>
-                <input id="created_from" type="date" name="created_from"
-                       value="<?= htmlspecialchars($filters['created_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="created_to">Created to</label>
-                <input id="created_to" type="date" name="created_to"
-                       value="<?= htmlspecialchars($filters['created_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="updated_from">Updated from</label>
-                <input id="updated_from" type="date" name="updated_from"
-                       value="<?= htmlspecialchars($filters['updated_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="updated_to">Updated to</label>
-                <input id="updated_to" type="date" name="updated_to"
-                       value="<?= htmlspecialchars($filters['updated_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <?php if (!empty($customFilterFields)): ?>
             <div class="filter-grid-sep"></div>
@@ -332,6 +309,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                              data-name="tag_ids[]"
                              data-with-color="1"
                              data-placeholder="Choose tags…"
+                             data-paginate="1"
                              data-selected="[]">
                         </div>
                     </div>

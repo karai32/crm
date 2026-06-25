@@ -70,16 +70,13 @@ class AjaxController
             return;
         }
 
-        $query  = trim($_GET['q'] ?? '');
-        $page   = max(1, (int) ($_GET['page'] ?? 1));
-        $limit  = 20;
-        $offset = ($page - 1) * $limit;
+        $q    = trim($_GET['q'] ?? '');
+        $page = max(1, (int) ($_GET['page'] ?? 1));
 
-        $clients = $this->clients->search($query, $limit + 1, $offset);
-        $hasMore = count($clients) > $limit;
-        if ($hasMore) {
-            array_pop($clients);
-        }
+        [$clients, $hasMore] = $this->paginatedItems(
+            $q, $page,
+            fn ($q, $limit, $offset) => $this->clients->search($q, $limit, $offset)
+        );
 
         $items = array_map(function (array $client): array {
             $label = $client['commercial_name'];
@@ -88,10 +85,7 @@ class AjaxController
                 $label .= ' (' . $client['legal_name'] . ')';
             }
 
-            return [
-                'id' => (int) $client['id'],
-                'name' => $label,
-            ];
+            return ['id' => (int) $client['id'], 'name' => $label];
         }, $clients);
 
         $this->json(['items' => $items, 'has_more' => $hasMore]);
@@ -104,8 +98,13 @@ class AjaxController
             return;
         }
 
-        $query = trim($_GET['q'] ?? '');
-        $tags = $this->tags->search($query);
+        $q    = trim($_GET['q'] ?? '');
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+
+        [$tags, $hasMore] = $this->paginatedItems(
+            $q, $page,
+            fn ($q, $limit, $offset) => $this->tags->search($q, $limit, $offset)
+        );
 
         $items = array_map(fn (array $tag): array => [
             'id'    => (int) $tag['id'],
@@ -114,7 +113,7 @@ class AjaxController
             'color' => $tag['color'] ?? null,
         ], $tags);
 
-        $this->json(['items' => $items]);
+        $this->json(['items' => $items, 'has_more' => $hasMore]);
     }
 
     public function sectorsSearch(): void
@@ -140,6 +139,17 @@ class AjaxController
         ], $sectors);
 
         $this->json(['items' => $items]);
+    }
+
+    private function paginatedItems(string $q, int $page, callable $fetch, int $perPage = 20): array
+    {
+        $offset = ($page - 1) * $perPage;
+        $rows   = $fetch($q, $perPage + 1, $offset);
+        $hasMore = count($rows) > $perPage;
+        if ($hasMore) {
+            array_pop($rows);
+        }
+        return [$rows, $hasMore];
     }
 
     private function json(array $data, int $status = 200): void
