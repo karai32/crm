@@ -19,12 +19,6 @@
 /* Filter styles → base.css as .filter-panel */
 
 /* full-width divider row inside the extended grid */
-.filter-grid-sep {
-    grid-column: 1 / -1;
-    height: 1px;
-    background: var(--color-neutral-100);
-    margin: 4px 0;
-}
 
 /* Table card */
 .contacts-table-card {

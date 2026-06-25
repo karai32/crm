@@ -1393,6 +1393,13 @@ textarea {
     pointer-events: none;
 }
 
+.filter-grid-sep {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: var(--color-neutral-100);
+    margin: 4px 0;
+}
+
 .filter-panel .filter-grid--extra {
     display: none;
     border-top: 1px solid var(--color-neutral-100);
