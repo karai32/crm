@@ -36,19 +36,20 @@ class ClientController
         $selectedFilterTags = $this->selectedTagsForIds($filters['tag_ids'] ?? []);
 
         View::render('clients/index', [
-            'title'      => 'Clients',
-            'styles'     => ['clients.css'],
-            'clients'    => $clients,
-            'clientTags' => $this->clients->tagsForClients($clientIds),
-            'page'       => $page,
-            'perPage'    => $perPage,
-            'totalPages' => $totalPages,
-            'total'      => $total,
-            'filters'    => $filters,
-            'sort'       => $sort,
-            'dir'        => $dir,
-            'filterSectors' => $this->sectors->all(),
-            'filterTags' => $this->mergeSelectedRows($this->clients->firstTags(), $selectedFilterTags),
+            'title'             => 'Clients',
+            'styles'            => ['clients.css'],
+            'clients'           => $clients,
+            'clientTags'        => $this->clients->tagsForClients($clientIds),
+            'page'              => $page,
+            'perPage'           => $perPage,
+            'totalPages'        => $totalPages,
+            'total'             => $total,
+            'filters'           => $filters,
+            'sort'              => $sort,
+            'dir'               => $dir,
+            'filterSectors'     => $this->sectors->all(),
+            'filterTags'        => $this->mergeSelectedRows($this->clients->firstTags(), $selectedFilterTags),
+            'customFilterFields'=> $this->customFields->filterableFieldsForEntity('client'),
         ]);
     }
 
@@ -256,24 +257,39 @@ class ClientController
     {
         return [
             'commercial_name' => trim($_GET['commercial_name'] ?? ''),
-            'legal_name' => trim($_GET['legal_name'] ?? ''),
-            'cif' => trim($_GET['cif'] ?? ''),
-            'contact_name' => trim($_GET['contact_name'] ?? ''),
-            'sector_id' => (int) ($_GET['sector_id'] ?? 0),
-            'tag_ids' => $this->tagIdsFromGet(),
-            'city' => trim($_GET['city'] ?? ''),
-            'province' => trim($_GET['province'] ?? ''),
-            'country' => trim($_GET['country'] ?? ''),
-            'address' => trim($_GET['address'] ?? ''),
-            'postal_code' => trim($_GET['postal_code'] ?? ''),
-            'website' => trim($_GET['website'] ?? ''),
-            'notes' => trim($_GET['notes'] ?? ''),
-            'is_web_connected' => $_GET['is_web_connected'] ?? '',
-            'created_from' => trim($_GET['created_from'] ?? ''),
-            'created_to' => trim($_GET['created_to'] ?? ''),
-            'updated_from' => trim($_GET['updated_from'] ?? ''),
-            'updated_to' => trim($_GET['updated_to'] ?? ''),
+            'legal_name'      => trim($_GET['legal_name'] ?? ''),
+            'sector_id'       => (int) ($_GET['sector_id'] ?? 0),
+            'tag_ids'         => $this->tagIdsFromGet(),
+            'is_web_connected'=> $_GET['is_web_connected'] ?? '',
+            'website'         => trim($_GET['website'] ?? ''),
+            'country'         => trim($_GET['country'] ?? ''),
+            'province'        => trim($_GET['province'] ?? ''),
+            'city'            => trim($_GET['city'] ?? ''),
+            'address'         => trim($_GET['address'] ?? ''),
+            'custom_fields'   => $this->customFieldFiltersFromRequest(),
         ];
+    }
+
+    private function customFieldFiltersFromRequest(): array
+    {
+        $values = $_GET['custom_fields'] ?? [];
+
+        if (!is_array($values)) {
+            return [];
+        }
+
+        $clean = [];
+
+        foreach ($values as $fieldId => $value) {
+            $fieldId = (int) $fieldId;
+            $value   = trim((string) $value);
+
+            if ($fieldId > 0 && $value !== '') {
+                $clean[$fieldId] = $value;
+            }
+        }
+
+        return $clean;
     }
 
     private function tagIdsFromRequest(): array

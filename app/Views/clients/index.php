@@ -50,6 +50,31 @@ $preselectedFilterTagsJson = json_encode(array_values(array_map(function ($tag) 
     return in_array((int) $tag['id'], $selectedFilterTagIds ?? [], true);
 }))));
 
+$preselectedSectorJson = '[]';
+if (!empty($filters['sector_id'])) {
+    foreach ($filterSectors as $_s) {
+        if ((int) $_s['id'] === (int) $filters['sector_id']) {
+            $preselectedSectorJson = json_encode([['id' => (int) $_s['id'], 'name' => $_s['name']]]);
+            break;
+        }
+    }
+}
+
+$preselectedWebJson = '[]';
+if ($filters['is_web_connected'] !== '') {
+    $preselectedWebJson = json_encode([[
+        'id'   => $filters['is_web_connected'],
+        'name' => $filters['is_web_connected'] === '1' ? 'Connected' : 'Not connected',
+    ]]);
+}
+
+$preselectedCountryJson  = '[]';
+$preselectedProvinceJson = '[]';
+$preselectedCityJson     = '[]';
+if (!empty($filters['country']))  { $preselectedCountryJson  = json_encode([['id' => $filters['country'],  'name' => $filters['country']]]); }
+if (!empty($filters['province'])) { $preselectedProvinceJson = json_encode([['id' => $filters['province'], 'name' => $filters['province']]]); }
+if (!empty($filters['city']))     { $preselectedCityJson     = json_encode([['id' => $filters['city'],     'name' => $filters['city']]]); }
+
 /* --- Build filter chips ---------------------------------------- */
 $selectedTagObjects = array_values(array_filter($filterTags, function ($tag) use ($selectedFilterTagIds) {
     return in_array((int) $tag['id'], array_map('intval', $selectedFilterTagIds ?? []), true);
@@ -58,35 +83,12 @@ $selectedTagObjects = array_values(array_filter($filterTags, function ($tag) use
 $chips = [];
 $base  = Auth::url('/clients');
 
-$textCols = [
-    'commercial_name' => 'Name',
-    'legal_name'      => 'Legal name',
-    'cif'             => 'CIF',
-    'contact_name'    => 'Contact',
-    'city'            => 'City',
-    'province'        => 'Province',
-    'country'         => 'Country',
-    'address'         => 'Address',
-    'postal_code'     => 'Postal code',
-    'website'         => 'Website',
-    'notes'           => 'Notes',
-    'created_from'    => 'Created ≥',
-    'created_to'      => 'Created ≤',
-    'updated_from'    => 'Updated ≥',
-    'updated_to'      => 'Updated ≤',
-];
-
-foreach ($textCols as $key => $label) {
+foreach (['commercial_name' => 'Name', 'legal_name' => 'Legal name', 'website' => 'Website',
+          'country' => 'Country', 'province' => 'Province', 'city' => 'City', 'address' => 'Address'] as $key => $label) {
     if (!empty($filters[$key])) {
         $f = $filters; unset($f[$key], $f['page']);
         $chips[] = ['text' => $label . ': ' . $filters[$key], 'href' => $base . '?' . http_build_query($f)];
     }
-}
-
-if ($filters['is_web_connected'] !== '') {
-    $f = $filters; unset($f['is_web_connected'], $f['page']);
-    $webLabel = $filters['is_web_connected'] === '1' ? 'Web: Connected' : 'Web: Not connected';
-    $chips[] = ['text' => $webLabel, 'href' => $base . '?' . http_build_query($f)];
 }
 
 if (!empty($filters['sector_id'])) {
@@ -98,6 +100,12 @@ if (!empty($filters['sector_id'])) {
     $chips[] = ['text' => 'Sector: ' . $sName, 'href' => $base . '?' . http_build_query($f)];
 }
 
+if ($filters['is_web_connected'] !== '') {
+    $f = $filters; unset($f['is_web_connected'], $f['page']);
+    $chips[] = ['text' => $filters['is_web_connected'] === '1' ? 'Web: Connected' : 'Web: Not connected',
+                'href' => $base . '?' . http_build_query($f)];
+}
+
 foreach ($selectedTagObjects as $tag) {
     $f = $filters;
     $f['tag_ids'] = array_values(array_filter($f['tag_ids'] ?? [], fn ($id) => (int) $id !== (int) $tag['id']));
@@ -106,10 +114,24 @@ foreach ($selectedTagObjects as $tag) {
     $chips[] = ['text' => 'Tag: ' . $tag['name'], 'href' => $base . '?' . http_build_query($f)];
 }
 
-$hasExtended = (bool) array_filter(
-    ['address', 'postal_code', 'website', 'notes', 'created_from', 'created_to', 'updated_from', 'updated_to'],
-    fn ($k) => !empty($filters[$k])
-);
+if (!empty($filters['custom_fields'])) {
+    foreach ($filters['custom_fields'] as $fieldId => $value) {
+        if ($value !== '') {
+            $fieldName = '';
+            foreach ($customFilterFields as $cf) {
+                if ((int) $cf['id'] === (int) $fieldId) { $fieldName = $cf['name']; break; }
+            }
+            $f = $filters;
+            unset($f['custom_fields'][(int) $fieldId]);
+            if (empty($f['custom_fields'])) unset($f['custom_fields']);
+            unset($f['page']);
+            $chips[] = ['text' => ($fieldName ?: 'Field') . ': ' . $value, 'href' => $base . '?' . http_build_query($f)];
+        }
+    }
+}
+
+$hasExtended = !empty($filters['country']) || !empty($filters['province']) || !empty($filters['city'])
+            || !empty($filters['address']) || !empty($filters['custom_fields']);
 ?>
 
 <!-- Header -->
@@ -177,26 +199,14 @@ $hasExtended = (bool) array_filter(
                        value="<?= htmlspecialchars($filters['legal_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
-                <label for="cif">CIF</label>
-                <input id="cif" type="text" name="cif"
-                       value="<?= htmlspecialchars($filters['cif'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="contact_name">Contact name</label>
-                <input id="contact_name" type="text" name="contact_name"
-                       value="<?= htmlspecialchars($filters['contact_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="sector_id">Sector</label>
-                <select id="sector_id" name="sector_id">
-                    <option value="">All sectors</option>
-                    <?php foreach ($filterSectors as $sector): ?>
-                        <option value="<?= (int) $sector['id'] ?>"
-                            <?= ((int) ($filters['sector_id'] ?? 0) === (int) $sector['id']) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($sector['name'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <label>Sector</label>
+                <div class="token-picker token-picker--filter"
+                     data-name="sector_id"
+                     data-max="1"
+                     data-placeholder="All sectors"
+                     data-options="<?= htmlspecialchars(json_encode(array_map(fn ($s) => ['id' => (int) $s['id'], 'name' => $s['name']], $filterSectors)), ENT_QUOTES, 'UTF-8') ?>"
+                     data-selected="<?= htmlspecialchars($preselectedSectorJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
                 <label>Tags</label>
@@ -210,71 +220,124 @@ $hasExtended = (bool) array_filter(
                 </div>
             </div>
             <div class="field">
-                <label for="city">City</label>
-                <input id="city" type="text" name="city"
-                       value="<?= htmlspecialchars($filters['city'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="province">Province</label>
-                <input id="province" type="text" name="province"
-                       value="<?= htmlspecialchars($filters['province'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="country">Country</label>
-                <input id="country" type="text" name="country"
-                       value="<?= htmlspecialchars($filters['country'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="is_web_connected">Web / API</label>
-                <select id="is_web_connected" name="is_web_connected">
-                    <option value="">All</option>
-                    <option value="1" <?= ($filters['is_web_connected'] ?? '') === '1' ? 'selected' : '' ?>>Connected</option>
-                    <option value="0" <?= ($filters['is_web_connected'] ?? '') === '0' ? 'selected' : '' ?>>Not connected</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="clientFilterExtra">
-            <div class="field">
-                <label for="address">Address</label>
-                <input id="address" type="text" name="address"
-                       value="<?= htmlspecialchars($filters['address'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            </div>
-            <div class="field">
-                <label for="postal_code">Postal code</label>
-                <input id="postal_code" type="text" name="postal_code"
-                       value="<?= htmlspecialchars($filters['postal_code'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>Web / API</label>
+                <div class="token-picker token-picker--filter"
+                     data-name="is_web_connected"
+                     data-max="1"
+                     data-placeholder="All"
+                     data-options='[{"id":"1","name":"Connected"},{"id":"0","name":"Not connected"}]'
+                     data-selected="<?= htmlspecialchars($preselectedWebJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
                 <label for="website">Website</label>
                 <input id="website" type="text" name="website"
                        value="<?= htmlspecialchars($filters['website'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
+        </div>
+
+        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="clientFilterExtra">
             <div class="field">
-                <label for="notes">Notes</label>
-                <input id="notes" type="text" name="notes"
-                       value="<?= htmlspecialchars($filters['notes'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>Country</label>
+                <div class="token-picker token-picker--filter"
+                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/field?field=country'), ENT_QUOTES, 'UTF-8') ?>"
+                     data-name="country"
+                     data-max="1"
+                     data-paginate="1"
+                     data-placeholder="All countries"
+                     data-selected="<?= htmlspecialchars($preselectedCountryJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
-                <label for="created_from">Created from</label>
-                <input id="created_from" type="date" name="created_from"
-                       value="<?= htmlspecialchars($filters['created_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>Province</label>
+                <div class="token-picker token-picker--filter"
+                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/field?field=province'), ENT_QUOTES, 'UTF-8') ?>"
+                     data-name="province"
+                     data-max="1"
+                     data-paginate="1"
+                     data-placeholder="All provinces"
+                     data-selected="<?= htmlspecialchars($preselectedProvinceJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
-                <label for="created_to">Created to</label>
-                <input id="created_to" type="date" name="created_to"
-                       value="<?= htmlspecialchars($filters['created_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label>City</label>
+                <div class="token-picker token-picker--filter"
+                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/field?field=city'), ENT_QUOTES, 'UTF-8') ?>"
+                     data-name="city"
+                     data-max="1"
+                     data-paginate="1"
+                     data-placeholder="All cities"
+                     data-selected="<?= htmlspecialchars($preselectedCityJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
-                <label for="updated_from">Updated from</label>
-                <input id="updated_from" type="date" name="updated_from"
-                       value="<?= htmlspecialchars($filters['updated_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label for="address">Address</label>
+                <input id="address" type="text" name="address"
+                       value="<?= htmlspecialchars($filters['address'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
+            <?php if (!empty($customFilterFields)): ?>
+            <div class="filter-grid-sep"></div>
+            <?php foreach ($customFilterFields as $field):
+                $cfId  = (int) $field['id'];
+                $cfVal = $filters['custom_fields'][$cfId] ?? '';
+            ?>
             <div class="field">
-                <label for="updated_to">Updated to</label>
-                <input id="updated_to" type="date" name="updated_to"
-                       value="<?= htmlspecialchars($filters['updated_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></label>
+                <?php if ($field['field_type'] === 'select'): ?>
+                    <?php
+                        $cfOptions = array_map(fn ($o) => ['id' => $o['value'], 'name' => $o['label']], $field['options']);
+                        $cfPreselected = '[]';
+                        if ($cfVal !== '') {
+                            $cfLabel = $cfVal;
+                            foreach ($field['options'] as $_o) {
+                                if ($_o['value'] === $cfVal) { $cfLabel = $_o['label']; break; }
+                            }
+                            $cfPreselected = json_encode([['id' => $cfVal, 'name' => $cfLabel]]);
+                        }
+                    ?>
+                    <div class="token-picker token-picker--filter"
+                         data-name="custom_fields[<?= $cfId ?>]"
+                         data-max="1"
+                         data-placeholder="Any"
+                         data-options="<?= htmlspecialchars(json_encode($cfOptions), ENT_QUOTES, 'UTF-8') ?>"
+                         data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                <?php elseif ($field['field_type'] === 'checkbox'): ?>
+                    <?php
+                        $cfPreselected = '[]';
+                        if ($cfVal !== '') {
+                            $cfPreselected = json_encode([['id' => $cfVal, 'name' => $cfVal === '1' ? 'Yes' : 'No']]);
+                        }
+                    ?>
+                    <div class="token-picker token-picker--filter"
+                         data-name="custom_fields[<?= $cfId ?>]"
+                         data-max="1"
+                         data-placeholder="Any"
+                         data-options='[{"id":"1","name":"Yes"},{"id":"0","name":"No"}]'
+                         data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                <?php elseif ($field['field_type'] === 'text'): ?>
+                    <?php
+                        $cfPreselected = $cfVal !== '' ? json_encode([['id' => $cfVal, 'name' => $cfVal]]) : '[]';
+                    ?>
+                    <div class="token-picker token-picker--filter"
+                         data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/custom-field/values?field_id=' . $cfId), ENT_QUOTES, 'UTF-8') ?>"
+                         data-name="custom_fields[<?= $cfId ?>]"
+                         data-max="1"
+                         data-paginate="1"
+                         data-placeholder="Any"
+                         data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                <?php elseif ($field['field_type'] === 'number'): ?>
+                    <input type="number" name="custom_fields[<?= $cfId ?>]"
+                           value="<?= htmlspecialchars($cfVal, ENT_QUOTES, 'UTF-8') ?>">
+                <?php elseif ($field['field_type'] === 'date'): ?>
+                    <input type="date" name="custom_fields[<?= $cfId ?>]"
+                           value="<?= htmlspecialchars($cfVal, ENT_QUOTES, 'UTF-8') ?>">
+                <?php endif; ?>
             </div>
+            <?php endforeach; ?>
+            <?php endif; ?>
         </div>
 
         <div class="filter-footer">

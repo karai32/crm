@@ -470,6 +470,41 @@ class ClientRepository
             $params['updated_to'] = $filters['updated_to'] . ' 23:59:59';
         }
 
+        foreach (($filters['custom_fields'] ?? []) as $fieldId => $value) {
+            $fieldId = (int) $fieldId;
+            $value   = trim((string) $value);
+
+            if ($fieldId <= 0 || $value === '') {
+                continue;
+            }
+
+            $fp  = 'custom_field_' . $fieldId;
+            $tp  = 'custom_value_text_' . $fieldId;
+            $np  = 'custom_value_number_' . $fieldId;
+            $dp  = 'custom_value_date_' . $fieldId;
+            $bp  = 'custom_value_bool_' . $fieldId;
+
+            $where[] = "
+                EXISTS (
+                    SELECT 1 FROM custom_field_values
+                    WHERE custom_field_values.entity_type = 'client'
+                    AND custom_field_values.entity_id = clients.id
+                    AND custom_field_values.field_id = :{$fp}
+                    AND (
+                        custom_field_values.value_text LIKE :{$tp}
+                        OR CAST(custom_field_values.value_number AS CHAR) LIKE :{$np}
+                        OR CAST(custom_field_values.value_date AS CHAR) LIKE :{$dp}
+                        OR CAST(custom_field_values.value_bool AS CHAR) LIKE :{$bp}
+                    )
+                )
+            ";
+            $params[$fp] = $fieldId;
+            $params[$tp] = '%' . $value . '%';
+            $params[$np] = '%' . $value . '%';
+            $params[$dp] = '%' . $value . '%';
+            $params[$bp] = '%' . $value . '%';
+        }
+
         return [
             empty($where) ? '' : 'WHERE ' . implode(' AND ', $where),
             $params,
