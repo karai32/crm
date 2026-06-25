@@ -30,11 +30,6 @@ $preselectedFilterTagsJson = json_encode(array_values(array_map(function ($tag) 
     return in_array((int) $tag['id'], $selectedFilterTagIds ?? [], true);
 }))));
 
-$preselectedCompanyJson = '[]';
-if (!empty($filters['company'])) {
-    $preselectedCompanyJson = json_encode([['id' => $filters['company'], 'name' => $filters['company'] === 'company' ? 'Company' : 'Person']]);
-}
-
 $preselectedSectorJson = '[]';
 if (!empty($filters['sector_id'])) {
     foreach ($filterSectors as $_s) {
@@ -43,16 +38,6 @@ if (!empty($filters['sector_id'])) {
             break;
         }
     }
-}
-
-$preselectedCountryJson = '[]';
-if (!empty($filters['country'])) {
-    $preselectedCountryJson = json_encode([['id' => $filters['country'], 'name' => $filters['country']]]);
-}
-
-$preselectedProvinceJson = '[]';
-if (!empty($filters['province'])) {
-    $preselectedProvinceJson = json_encode([['id' => $filters['province'], 'name' => $filters['province']]]);
 }
 
 $from = $total > 0 ? ($page - 1) * $perPage + 1 : 0;
@@ -101,8 +86,6 @@ $textCols = [
     'full_name' => 'Name',
     'email'     => 'Email',
     'phone'     => 'Phone',
-    'country'   => 'Country',
-    'province'  => 'Province',
 ];
 
 foreach ($textCols as $key => $label) {
@@ -112,10 +95,11 @@ foreach ($textCols as $key => $label) {
     }
 }
 
-if (!empty($filters['company'])) {
-    $typeLabel = $filters['company'] === 'company' ? 'Company' : 'Person';
-    $f = $filters; unset($f['company'], $f['page']);
-    $chips[] = ['text' => 'Type: ' . $typeLabel, 'href' => $base . '?' . http_build_query($f)];
+foreach (['created_from' => 'Created from', 'updated_from' => 'Updated from'] as $key => $label) {
+    if (!empty($filters[$key])) {
+        $f = $filters; unset($f[$key], $f['page']);
+        $chips[] = ['text' => $label . ': ' . $filters[$key], 'href' => $base . '?' . http_build_query($f)];
+    }
 }
 
 if (!empty($filters['client_id'])) {
@@ -156,8 +140,7 @@ if (!empty($filters['custom_fields'])) {
     }
 }
 
-$extendedKeys = ['client_id', 'sector_id', 'country', 'province'];
-$hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extendedKeys, fn ($k) => !empty($filters[$k]));
+$hasExtended = !empty($filters['custom_fields']);
 ?>
 
 <!-- Header -->
@@ -230,16 +213,6 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                        value="<?= htmlspecialchars($filters['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
-                <label>Type</label>
-                <div class="token-picker token-picker--filter"
-                     data-name="company"
-                     data-max="1"
-                     data-placeholder="All"
-                     data-options='[{"id":"company","name":"Company"},{"id":"person","name":"Person"}]'
-                     data-selected="<?= htmlspecialchars($preselectedCompanyJson, ENT_QUOTES, 'UTF-8') ?>">
-                </div>
-            </div>
-            <div class="field">
                 <label>Tags</label>
                 <div class="token-picker token-picker--filter"
                      data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
@@ -250,9 +223,16 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                      data-selected="<?= htmlspecialchars($preselectedFilterTagsJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
-        </div>
-
-        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="filterExtra">
+            <div class="field">
+                <label for="created_from">Created date</label>
+                <input id="created_from" type="date" name="created_from"
+                       value="<?= htmlspecialchars($filters['created_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+            <div class="field">
+                <label for="updated_from">Updated date</label>
+                <input id="updated_from" type="date" name="updated_from"
+                       value="<?= htmlspecialchars($filters['updated_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            </div>
             <div class="field">
                 <label>Linked client</label>
                 <div class="token-picker token-picker--filter"
@@ -274,30 +254,10 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                      data-selected="<?= htmlspecialchars($preselectedSectorJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
-            <div class="field">
-                <label>Client country</label>
-                <div class="token-picker token-picker--filter"
-                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/field?field=country'), ENT_QUOTES, 'UTF-8') ?>"
-                     data-name="country"
-                     data-max="1"
-                     data-paginate="1"
-                     data-placeholder="All countries"
-                     data-selected="<?= htmlspecialchars($preselectedCountryJson, ENT_QUOTES, 'UTF-8') ?>">
-                </div>
-            </div>
-            <div class="field">
-                <label>Client province</label>
-                <div class="token-picker token-picker--filter"
-                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/field?field=province'), ENT_QUOTES, 'UTF-8') ?>"
-                     data-name="province"
-                     data-max="1"
-                     data-paginate="1"
-                     data-placeholder="All provinces"
-                     data-selected="<?= htmlspecialchars($preselectedProvinceJson, ENT_QUOTES, 'UTF-8') ?>">
-                </div>
-            </div>
+        </div>
+
+        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="filterExtra">
             <?php if (!empty($customFilterFields)): ?>
-            <div class="filter-grid-sep"></div>
             <?php foreach ($customFilterFields as $field):
                 $cfId  = (int) $field['id'];
                 $cfVal = $filters['custom_fields'][$cfId] ?? '';
@@ -362,6 +322,7 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
         </div>
 
         <div class="filter-footer">
+            <?php if (!empty($customFilterFields)): ?>
             <button type="button" id="filterToggleBtn"
                     class="filter-toggle-btn <?= $hasExtended ? 'open' : '' ?>">
                 <span class="filter-toggle-label"><?= $hasExtended ? 'Less filters' : 'More filters' ?></span>
@@ -369,6 +330,9 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
                     <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </button>
+            <?php else: ?>
+            <div></div>
+            <?php endif; ?>
             <div class="filter-actions">
                 <button class="btn btn-primary" type="submit">Filter</button>
                 <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">Reset</a>
