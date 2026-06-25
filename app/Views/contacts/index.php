@@ -98,12 +98,8 @@ if (!empty($filters['company'])) {
 }
 
 if (!empty($filters['client_id'])) {
-    $cName = '';
-    foreach ($filterClients as $c) {
-        if ((int) $c['id'] === (int) $filters['client_id']) { $cName = $c['commercial_name']; break; }
-    }
     $f = $filters; unset($f['client_id'], $f['page']);
-    $chips[] = ['text' => 'Client: ' . $cName, 'href' => $base . '?' . http_build_query($f)];
+    $chips[] = ['text' => 'Client: ' . $filterClientName, 'href' => $base . '?' . http_build_query($f)];
 }
 
 if (!empty($filters['sector_id'])) {
@@ -234,16 +230,15 @@ $hasExtended  = !empty($filters['custom_fields']) || (bool) array_filter($extend
 
         <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="filterExtra">
             <div class="field">
-                <label for="client_id">Linked client</label>
-                <select id="client_id" name="client_id">
-                    <option value="">All clients</option>
-                    <?php foreach ($filterClients as $client): ?>
-                        <option value="<?= (int) $client['id'] ?>"
-                            <?= ((int) ($filters['client_id'] ?? 0) === (int) $client['id']) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($client['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <label>Linked client</label>
+                <div class="token-picker token-picker--filter"
+                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/search'), ENT_QUOTES, 'UTF-8') ?>"
+                     data-name="client_id"
+                     data-placeholder="All clients"
+                     data-max="1"
+                     data-paginate="1"
+                     data-selected="<?= htmlspecialchars($preselectedFilterClientJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="field">
                 <label for="sector_id">Client sector</label>

@@ -440,6 +440,12 @@
         self.inputName = el.dataset.name;
         self.withColor = el.dataset.withColor === '1';
         self.placeholder = el.dataset.placeholder || 'Search...';
+        self.max = parseInt(el.dataset.max, 10) || 0;
+        self.paginate = el.dataset.paginate === '1';
+        self.currentQuery = '';
+        self.currentPage = 1;
+        self.hasMore = false;
+        self.loadingMore = false;
         self.selected = [];
 
         try { var p = JSON.parse(el.dataset.selected || '[]'); if (Array.isArray(p)) self.selected = p; } catch (e) { }
@@ -514,6 +520,9 @@
     };
 
     TokenPicker.prototype.add = function (item) {
+        if (this.max === 1) {
+            this.selected = [];
+        }
         if (!this.isSelected(item.id)) {
             this.selected.push(item);
             this.render();
@@ -525,6 +534,32 @@
         this.render();
     };
 
+    TokenPicker.prototype.buildDropItem = function (item) {
+        var self = this;
+        var opt = document.createElement('div');
+        opt.className = 'token-picker-option' + (self.isSelected(item.id) ? ' token-picker-option--selected' : '');
+        if (self.withColor && item.color) {
+            var dot = document.createElement('span');
+            dot.className = 'token-picker-option-dot';
+            dot.style.background = item.color;
+            opt.appendChild(dot);
+        }
+        var lbl = document.createElement('span');
+        lbl.textContent = item.name;
+        opt.appendChild(lbl);
+        opt.dataset.id = item.id;
+        opt.dataset.name = item.name;
+        opt.dataset.color = item.color || '';
+        return opt;
+    };
+
+    TokenPicker.prototype.appendDropItems = function (items) {
+        var self = this;
+        items.forEach(function (item) {
+            self.dropEl.appendChild(self.buildDropItem(item));
+        });
+    };
+
     TokenPicker.prototype.openDrop = function (items) {
         var self = this;
         self.dropEl.innerHTML = '';
@@ -534,23 +569,7 @@
             empty.textContent = 'No results found.';
             self.dropEl.appendChild(empty);
         } else {
-            items.forEach(function (item) {
-                var opt = document.createElement('div');
-                opt.className = 'token-picker-option' + (self.isSelected(item.id) ? ' token-picker-option--selected' : '');
-                if (self.withColor && item.color) {
-                    var dot = document.createElement('span');
-                    dot.className = 'token-picker-option-dot';
-                    dot.style.background = item.color;
-                    opt.appendChild(dot);
-                }
-                var lbl = document.createElement('span');
-                lbl.textContent = item.name;
-                opt.appendChild(lbl);
-                opt.dataset.id = item.id;
-                opt.dataset.name = item.name;
-                opt.dataset.color = item.color || '';
-                self.dropEl.appendChild(opt);
-            });
+            self.appendDropItems(items);
         }
         self.dropEl.classList.add('open');
     };
@@ -562,10 +581,35 @@
 
     TokenPicker.prototype.search = function (q) {
         var self = this;
-        fetch(self.endpoint + '?q=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } })
+        self.currentQuery = q;
+        self.currentPage = 1;
+        self.hasMore = false;
+        self.loadingMore = false;
+        var url = self.endpoint + '?q=' + encodeURIComponent(q);
+        if (self.paginate) { url += '&page=1'; }
+        fetch(url, { headers: { Accept: 'application/json' } })
             .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-            .then(function (d) { self.openDrop(d.items || []); })
+            .then(function (d) {
+                if (self.paginate) { self.hasMore = !!d.has_more; }
+                self.openDrop(d.items || []);
+            })
             .catch(function () { self.closeDrop(); });
+    };
+
+    TokenPicker.prototype.loadMore = function () {
+        var self = this;
+        if (!self.hasMore || self.loadingMore) { return; }
+        self.loadingMore = true;
+        self.currentPage++;
+        var url = self.endpoint + '?q=' + encodeURIComponent(self.currentQuery) + '&page=' + self.currentPage;
+        fetch(url, { headers: { Accept: 'application/json' } })
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function (d) {
+                self.hasMore = !!d.has_more;
+                self.loadingMore = false;
+                self.appendDropItems(d.items || []);
+            })
+            .catch(function () { self.loadingMore = false; });
     };
 
     TokenPicker.prototype.bind = function () {
@@ -589,9 +633,21 @@
                 opt.classList.add('token-picker-option--selected');
             }
             self.inputEl.value = '';
-            self.inputEl.focus();
-            self.search('');
+            if (self.max === 1) {
+                self.closeDrop();
+            } else {
+                self.inputEl.focus();
+                self.search('');
+            }
         });
+
+        if (self.paginate) {
+            self.dropEl.addEventListener('scroll', function () {
+                if (self.dropEl.scrollHeight - self.dropEl.scrollTop <= self.dropEl.clientHeight + 50) {
+                    self.loadMore();
+                }
+            });
+        }
 
         self.tokensEl.addEventListener('click', function (e) {
             var rm = e.target.closest('.token-chip-remove');

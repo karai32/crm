@@ -70,8 +70,16 @@ class AjaxController
             return;
         }
 
-        $query = trim($_GET['q'] ?? '');
-        $clients = $this->clients->search($query);
+        $query  = trim($_GET['q'] ?? '');
+        $page   = max(1, (int) ($_GET['page'] ?? 1));
+        $limit  = 20;
+        $offset = ($page - 1) * $limit;
+
+        $clients = $this->clients->search($query, $limit + 1, $offset);
+        $hasMore = count($clients) > $limit;
+        if ($hasMore) {
+            array_pop($clients);
+        }
 
         $items = array_map(function (array $client): array {
             $label = $client['commercial_name'];
@@ -86,7 +94,7 @@ class AjaxController
             ];
         }, $clients);
 
-        $this->json(['items' => $items]);
+        $this->json(['items' => $items, 'has_more' => $hasMore]);
     }
 
     public function tagsSearch(): void

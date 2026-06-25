@@ -5,11 +5,13 @@ class ContactController
     use SortableTrait;
     private ContactRepository $contacts;
     private CustomFieldRepository $customFields;
+    private ClientRepository $clients;
 
     public function __construct()
     {
         $this->contacts = new ContactRepository();
         $this->customFields = new CustomFieldRepository();
+        $this->clients = new ClientRepository();
     }
 
     public function index(): void
@@ -32,23 +34,35 @@ class ContactController
         $contactIds = array_map('intval', array_column($contacts, 'id'));
         $selectedFilterTags = $this->selectedTagsForIds($filters['tag_ids'] ?? []);
 
+        $selectedClientId = (int) ($filters['client_id'] ?? 0);
+        $filterClientName = '';
+        $preselectedFilterClientJson = '[]';
+        if ($selectedClientId > 0) {
+            $sc = $this->clients->find($selectedClientId);
+            if ($sc) {
+                $filterClientName = $sc['commercial_name'];
+                $preselectedFilterClientJson = json_encode([['id' => $selectedClientId, 'name' => $sc['commercial_name']]]);
+            }
+        }
+
         View::render('contacts/index', [
-            'title'              => 'Contacts',
-            'styles'             => ['contacts.css'],
-            'contacts'           => $contacts,
-            'contactTags'        => $this->contacts->tagsForContacts($contactIds),
-            'contactClients'     => $this->contacts->clientsForContacts($contactIds),
-            'page'               => $page,
-            'perPage'            => $perPage,
-            'totalPages'         => $totalPages,
-            'total'              => $total,
-            'filters'            => $filters,
-            'sort'               => $sort,
-            'dir'                => $dir,
-            'filterClients'      => $this->contacts->firstClients(),
-            'filterSectors'      => $this->contacts->allSectors(),
-            'filterTags'         => $this->mergeSelectedRows($this->contacts->firstTags(), $selectedFilterTags),
-            'customFilterFields' => $this->customFields->filterableFieldsForEntity('contact'),
+            'title'                      => 'Contacts',
+            'styles'                     => ['contacts.css'],
+            'contacts'                   => $contacts,
+            'contactTags'                => $this->contacts->tagsForContacts($contactIds),
+            'contactClients'             => $this->contacts->clientsForContacts($contactIds),
+            'page'                       => $page,
+            'perPage'                    => $perPage,
+            'totalPages'                 => $totalPages,
+            'total'                      => $total,
+            'filters'                    => $filters,
+            'sort'                       => $sort,
+            'dir'                        => $dir,
+            'filterClientName'           => $filterClientName,
+            'preselectedFilterClientJson'=> $preselectedFilterClientJson,
+            'filterSectors'              => $this->contacts->allSectors(),
+            'filterTags'                 => $this->mergeSelectedRows($this->contacts->firstTags(), $selectedFilterTags),
+            'customFilterFields'         => $this->customFields->filterableFieldsForEntity('contact'),
         ]);
     }
 
