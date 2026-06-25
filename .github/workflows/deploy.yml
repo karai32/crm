@@ -14,32 +14,40 @@ jobs:
       - name: Get latest code
         uses: actions/checkout@v4
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./
-          server-dir: /crm/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            **/.vscode/**
-            **/.claude/**
-            **/tests/**
-            **/database/**
-            **/node_modules/**
-            vendor/**
-            config/database.php
-            config/mail.php
-            storage/logs/**
-            storage/exports/**
-            storage/imports/**
-            storage/*.log
+      - name: Deploy via SFTP to TimeWeb
+        env:
+          SFTP_HOST: ${{ secrets.TIMEWEB_SFTP_HOST }}
+          SFTP_USER: ${{ secrets.TIMEWEB_SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.TIMEWEB_SFTP_PASSWORD }}
+          SFTP_PORT: ${{ secrets.TIMEWEB_SFTP_PORT }}
+          SFTP_TARGET: ${{ secrets.TIMEWEB_SFTP_TARGET }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends lftp
+
+          lftp -u "$SFTP_USER","$SFTP_PASSWORD" -p "${SFTP_PORT:-22}" "sftp://$SFTP_HOST" <<EOF
+          set sftp:auto-confirm yes
+          set ssl:verify-certificate no
+          mkdir -p "$SFTP_TARGET"
+          mirror --reverse --delete --verbose \
+            --exclude-glob .git/ \
+            --exclude-glob .git*/ \
+            --exclude-glob .github/ \
+            --exclude-glob .vscode/ \
+            --exclude-glob .claude/ \
+            --exclude-glob tests/ \
+            --exclude-glob database/ \
+            --exclude-glob node_modules/ \
+            --exclude-glob vendor/ \
+            --exclude-glob config/database.php \
+            --exclude-glob config/mail.php \
+            --exclude-glob storage/logs/ \
+            --exclude-glob storage/exports/ \
+            --exclude-glob storage/imports/ \
+            --exclude-glob storage/*.log \
+            ./ "$SFTP_TARGET/"
+          bye
+          EOF
 
   deploy-unanimetech:
     name: Upload files to UnanimeTech
@@ -57,8 +65,8 @@ jobs:
           SFTP_PORT: ${{ secrets.UNANIME_SFTP_PORT }}
           SFTP_TARGET: ${{ secrets.UNANIME_SFTP_TARGET }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends lftp
 
           lftp -u "$SFTP_USER","$SFTP_PASSWORD" -p "${SFTP_PORT:-22}" "sftp://$SFTP_HOST" <<EOF
           set sftp:auto-confirm yes
