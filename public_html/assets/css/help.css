@@ -1,4 +1,4 @@
-/* ── Help Centre ────────────────────────────────────────────────────── */
+﻿/* ── Help Centre ────────────────────────────────────────────────────── */
 
 /* Hero header */
 .help-hero {
@@ -57,12 +57,12 @@
 }
 
 .help-lang-pill:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text);
 }
 
 .help-lang-pill.active {
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
 }
 
@@ -118,7 +118,7 @@
 }
 
 .help-toc-item:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     text-decoration: none;
 }
 
@@ -181,11 +181,11 @@
 }
 
 .help-toc-item--indigo.is-active .help-toc-dot {
-    background: #6366f1;
+    background: #2563EB;
 }
 
 .help-toc-item--indigo.is-active {
-    color: #4338ca;
+    color: #1D4ED8;
 }
 
 .help-toc-item--sky.is-active .help-toc-dot {
@@ -247,7 +247,7 @@
     align-items: flex-start;
     gap: 16px;
     padding: 20px 22px 16px;
-    border-bottom: 1px solid var(--color-neutral-100);
+    border-bottom: 1px solid var(--color-bg);
 }
 
 .help-card-icon {
@@ -497,7 +497,7 @@
 }
 
 .help-tip--indigo {
-    background: #eef2ff;
+    background: #EBF2FF;
     color: #3730a3;
 }
 
@@ -699,7 +699,7 @@
 
 /* Help api: inline code in base URL */
 .help-api-base-url code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 2px 7px;
     border-radius: 4px;
     font-size: 12px;
@@ -717,7 +717,7 @@
 
 /* Help api: link in primary color */
 .api-link-primary {
-    color: var(--color-primary);
+    color: var(--color-ink);
 }
 
 /* Help api: section header card with top margin */
@@ -744,7 +744,7 @@
 
 /* Help api: settings link */
 .help-card-body a.help-api-link {
-    color: var(--color-primary);
+    color: var(--color-ink);
 }
 
 /* Help api: api-label margin-top spacer */
@@ -777,7 +777,7 @@
 
 /* Help api: inline code in body text */
 .help-api-inline-code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 11.5px;
@@ -794,7 +794,7 @@
 /* Help api: filter param code chip */
 .api-filter-params code,
 .api-scopes-row-clients code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 2px 7px;
     border-radius: 4px;
     font-size: 12px;
@@ -817,7 +817,7 @@
 
 /* Help api: sectors delete note inline code */
 .api-sectors-delete-note code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 11.5px;
@@ -837,7 +837,7 @@
 
 /* Help api: PATCH note inline code */
 .api-patch-note code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 11.5px;
@@ -845,7 +845,7 @@
 
 /* Help api: clients description inline code */
 .help-api-clients-desc code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 12px;
@@ -869,7 +869,7 @@
 }
 
 .help-p code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 12px;
@@ -955,7 +955,7 @@
 .help-callout--green  { background: #f0fdf4; color: #166534; }
 .help-callout--amber  { background: #fffbeb; color: #92400e; }
 .help-callout--teal   { background: #f0fdfa; color: #134e4a; }
-.help-callout--indigo { background: #eef2ff; color: #3730a3; }
+.help-callout--indigo { background: #EBF2FF; color: #3730a3; }
 .help-callout--sky    { background: #f0f9ff; color: #075985; }
 .help-callout--cyan   { background: #ecfeff; color: #164e63; }
 .help-callout--slate  { background: #f8fafc; color: #334155; }
@@ -974,3 +974,4 @@
 .help-sub-label:first-child {
     margin-top: 0;
 }
+

@@ -1,4 +1,4 @@
-/* --- Imports pages ---------------------------------------- */
+﻿/* --- Imports pages ---------------------------------------- */
 
 /* Header */
 .imports-header {
@@ -131,7 +131,7 @@
     align-items: center;
     gap: 10px;
     padding: 14px 24px;
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     border-top: 1px solid var(--color-neutral-200);
 }
 
@@ -183,7 +183,7 @@
     text-transform: uppercase;
     color: var(--color-neutral);
     border-bottom: 1px solid var(--color-neutral-200);
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .import-data-table td {
@@ -229,7 +229,7 @@
 }
 
 .import-mapping-table tbody tr:hover td {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .import-mapping-table .col-csv {
@@ -254,7 +254,7 @@
 
 .import-mapping-table select:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
     box-shadow: none;
 }
 
@@ -277,7 +277,7 @@
     align-items: center;
     gap: 10px;
     padding: 16px;
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     border-top: 1px solid var(--color-neutral-200);
 }
 
@@ -307,7 +307,7 @@
 }
 
 .import-stat-value--green {
-    color: var(--color-secondary);
+    color: var(--color-success);
 }
 
 .import-stat-value--amber {
@@ -443,7 +443,7 @@
 
 /* Imports index: imported rows (secondary color) */
 .imports-table td.col-imported {
-    color: var(--color-secondary);
+    color: var(--color-success);
 }
 
 /* Imports index: error rows (danger color when > 0) */
@@ -474,7 +474,7 @@
 /* Import upload: template download link */
 .import-template-link {
     font-size: 12.5px;
-    color: var(--color-tertiary);
+    color: var(--color-accent);
     margin-left: 6px;
 }
 
@@ -482,3 +482,4 @@
 .imports-table th.col-num-header {
     text-align: right;
 }
+

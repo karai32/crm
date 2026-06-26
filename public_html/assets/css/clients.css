@@ -1,4 +1,4 @@
-/* --- Clients pages --------------------------------------- */
+﻿/* --- Clients pages --------------------------------------- */
 
 /* Header */
 .clients-header {
@@ -66,7 +66,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     border: 1px solid var(--color-neutral-200);
     color: var(--color-neutral);
 }
@@ -120,7 +120,7 @@
     width: 50px;
     height: 50px;
     border-radius: 10px;
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
     font-size: 22px;
     display: flex;
@@ -157,7 +157,7 @@
 }
 
 .client-hero-meta-item a {
-    color: var(--color-tertiary);
+    color: var(--color-accent);
 }
 
 .client-hero-meta-item a:hover {
@@ -209,7 +209,7 @@
 }
 
 .related-contacts-table tbody tr:hover td {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 /* sidebar-list, status-badge → base.css */
@@ -330,7 +330,7 @@
 
 /* Client show: website link in detail table */
 .detail-td a.client-website-link {
-    color: var(--color-tertiary);
+    color: var(--color-accent);
 }
 
 /* Client show: hero avatar icon */
@@ -351,3 +351,5 @@
     color: #065F46;
     white-space: nowrap;
 }
+
+

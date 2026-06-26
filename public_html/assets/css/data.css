@@ -1,4 +1,4 @@
-/* ── Export / Import hub pages ─────────────────────────────────────── */
+﻿/* ── Export / Import hub pages ─────────────────────────────────────── */
 
 /* Header */
 .exports-header {
@@ -46,8 +46,8 @@
 }
 
 .data-tab.active {
-    color: var(--color-tertiary);
-    border-bottom-color: var(--color-tertiary);
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
 }
 
 .data-tab svg {
@@ -125,7 +125,7 @@
 }
 
 .export-field-label:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
 }
 
 .export-field-label input[type="checkbox"] {
@@ -135,7 +135,7 @@
     margin: 0;
     padding: 0;
     max-width: none;
-    accent-color: var(--color-primary);
+    accent-color: var(--color-ink);
     cursor: pointer;
 }
 
@@ -194,7 +194,7 @@
 }
 
 .format-option:hover {
-    border-color: var(--color-tertiary);
+    border-color: var(--color-accent);
     color: var(--color-text);
 }
 
@@ -203,9 +203,9 @@
 }
 
 .format-option.selected {
-    border-color: var(--color-tertiary);
-    background: var(--color-tertiary-bg);
-    color: var(--color-tertiary);
+    border-color: var(--color-accent);
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
 }
 
 .format-option.format-option--disabled {
@@ -292,14 +292,14 @@
     gap: 8px;
     padding: 9px 18px;
     font-size: 13px;
-    color: var(--color-tertiary);
+    color: var(--color-accent);
     border-top: 1px solid var(--color-neutral-200);
     transition: background .1s;
     text-decoration: none;
 }
 
 .export-template-link:hover {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     text-decoration: none;
 }
 
@@ -376,7 +376,7 @@
     font-weight: 600;
     letter-spacing: .04em;
     text-transform: uppercase;
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-neutral);
 }
 
@@ -473,3 +473,4 @@
     display: flex;
     gap: 8px;
 }
+

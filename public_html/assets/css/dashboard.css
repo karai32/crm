@@ -1,4 +1,4 @@
-/* --- Dashboard Header --------------------------------- */
+﻿/* --- Dashboard Header --------------------------------- */
 .dashboard-header {
     margin-bottom: 24px;
 }
@@ -146,7 +146,7 @@ a.stat-card:hover {
 }
 
 .company-indicator-dot.yes {
-    background: var(--color-secondary);
+    background: var(--color-success);
 }
 
 .company-indicator-dot.no {
@@ -189,7 +189,7 @@ a.stat-card:hover {
 }
 
 .sector-row:hover {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .sector-row-name {
@@ -208,14 +208,14 @@ a.stat-card:hover {
 .sector-row-bar {
     height: 4px;
     border-radius: 2px;
-    background: var(--color-tertiary-bg);
+    background: var(--color-accent-bg);
     flex: 1;
     overflow: hidden;
 }
 
 .sector-row-bar-fill {
     height: 100%;
-    background: var(--color-tertiary);
+    background: var(--color-accent);
     border-radius: 2px;
 }
 
@@ -251,7 +251,7 @@ a.stat-card:hover {
 }
 
 .top-client-item:hover {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     text-decoration: none;
 }
 
@@ -277,7 +277,7 @@ a.stat-card:hover {
 .avatar-c6,
 .avatar-c7,
 .avatar-c8 {
-    background: var(--color-primary);
+    background: var(--color-ink);
 }
 
 .client-meta {
@@ -354,3 +354,4 @@ a.stat-card:hover {
 
 /* Sector distribution bar fill — width is set dynamically via inline style (CSS custom property approach not needed as width is the only dynamic value) */
 /* Note: .sector-row-bar-fill width is dynamic (PHP value), kept as inline style */
+

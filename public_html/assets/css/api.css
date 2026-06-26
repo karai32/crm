@@ -1,4 +1,4 @@
-/* ── API Reference ───────────────────────────────────────────────────── */
+﻿/* ── API Reference ───────────────────────────────────────────────────── */
 
 /* Method badges */
 .api-method {
@@ -48,7 +48,7 @@
     align-items: center;
     gap: 12px;
     padding: 9px 14px;
-    border-bottom: 1px solid var(--color-neutral-100);
+    border-bottom: 1px solid var(--color-bg);
     background: var(--color-white);
 }
 
@@ -57,7 +57,7 @@
 }
 
 .api-endpoint:hover {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .api-endpoint-path {
@@ -91,8 +91,8 @@
     font-size: 10.5px;
     font-weight: 600;
     font-family: var(--font-mono, monospace);
-    background: var(--color-secondary-bg);
-    border: 1px solid #6ee7b7;
+    background: var(--color-success-bg);
+    border: 1px solid #6EE7B7;
     color: #065f46;
     flex-shrink: 0;
     white-space: nowrap;
@@ -130,14 +130,14 @@
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--color-neutral);
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     border-bottom: 1px solid var(--color-neutral-200);
     text-align: left;
 }
 
 .api-fields tbody td {
     padding: 8px 12px;
-    border-bottom: 1px solid var(--color-neutral-100);
+    border-bottom: 1px solid var(--color-bg);
     color: var(--color-text);
     vertical-align: top;
     line-height: 1.45;
@@ -148,7 +148,7 @@
 }
 
 .api-fields code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 11.5px;
@@ -307,7 +307,7 @@
 /* Divider inside card */
 .api-card-divider {
     height: 1px;
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     margin: 0 -22px 20px;
 }
 
@@ -427,7 +427,7 @@
 /* API page: create form section */
 .api-card-create {
     padding: 20px 22px;
-    border-bottom: 1px solid var(--color-neutral-100);
+    border-bottom: 1px solid var(--color-bg);
 }
 
 /* API page: section heading label */
@@ -512,7 +512,7 @@
 
 /* API keys table: client_id code */
 .api-keys-table td .api-key-code {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     padding: 2px 6px;
     border-radius: 3px;
     font-size: 11.5px;
@@ -527,7 +527,7 @@
 
 /* API keys table: revoked badge */
 .tag-badge.api-badge-revoked {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     border-color: var(--color-neutral-300);
     color: var(--color-neutral);
 }
@@ -593,7 +593,7 @@
 
 .api-key-rename-btn:hover {
     opacity: 1;
-    color: var(--color-primary-hover);
+    color: var(--color-ink-hover);
     background: transparent;
 }
 
@@ -619,14 +619,14 @@
 }
 
 .api-key-inline-input:focus {
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
 }
 
 .api-key-inline-save {
     font-size: 12px;
     padding: 4px 11px;
     cursor: pointer;
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
     border: 0;
     border-radius: var(--radius-sm);
@@ -635,7 +635,7 @@
 }
 
 .api-key-inline-save:hover {
-    background: var(--color-primary-hover);
+    background: var(--color-ink-hover);
     color: #fff;
 }
 
@@ -651,7 +651,7 @@
 }
 
 .api-key-inline-cancel:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text-muted);
 }
 
@@ -737,7 +737,7 @@
 }
 
 .api-logs-table tbody tr:hover td {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .api-log-row--error td {
@@ -865,7 +865,7 @@
     justify-content: center;
     width: 22px;
     height: 22px;
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     border: 1px solid var(--color-neutral-200);
     border-radius: 4px;
     cursor: pointer;
@@ -977,3 +977,4 @@
         border-top: 1px solid rgba(255, 255, 255, .07);
     }
 }
+

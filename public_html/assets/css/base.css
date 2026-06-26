@@ -1,16 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* --- Design Tokens ------------------------------------ */
 :root {
-    --color-primary: #1D1D1D;
-    --color-primary-hover: #333333;
-    --color-secondary: #10B981;
-    --color-secondary-bg: #D1FAE5;
-    --color-tertiary: #6366F1;
-    --color-tertiary-bg: #EEF2FF;
+    --color-ink: #1D1D1D;
+    --color-ink-hover: #333333;
+    --color-success: #059669;
+    --color-success-bg: #D1FAE5;
+    --color-accent: #2563EB;
+    --color-accent-bg: #EBF2FF;
     --color-neutral: #64748B;
-    --color-neutral-50: #F8FAFC;
-    --color-neutral-100: #F1F4F3;
+    --color-bg-subtle: #F5F7FA;
+    --color-bg: #ECEFF1;
     --color-neutral-200: #E2E8F0;
     --color-neutral-300: #CBD5E1;
     --color-text: #1D1D1D;
@@ -18,7 +18,7 @@
     --color-white: #FFFFFF;
     --color-danger: #EF4444;
     --color-danger-bg: #FEF2F2;
-    --color-success-bg: #F0FDF4;
+    --color-alert-bg: #F0FDF4;
     --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --sidebar-width: 220px;
     --sidebar-collapsed: 65px;
@@ -37,13 +37,13 @@
 }
 
 input[type="checkbox"] {
-    accent-color: var(--color-primary);
+    accent-color: var(--color-ink);
 }
 
 body {
     margin: 0;
     font-family: var(--font);
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text);
     font-size: 14px;
     line-height: 1.6;
@@ -51,7 +51,7 @@ body {
 }
 
 a {
-    color: var(--color-tertiary);
+    color: var(--color-accent);
     text-decoration: none;
 }
 
@@ -111,7 +111,7 @@ h3 {
 .sidebar-logo {
     width: 46px;
     height: 46px;
-    background: var(--color-primary);
+    background: var(--color-ink);
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
@@ -238,7 +238,7 @@ h3 {
 }
 
 .nav-item:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text);
     text-decoration: none;
 }
@@ -249,13 +249,13 @@ h3 {
 
 .nav-item.active {
     background: #efefef;
-    color: var(--color-primary);
+    color: var(--color-ink);
     font-weight: 600;
 }
 
 .nav-item.active svg,
 .nav-item.active i {
-    color: var(--color-primary);
+    color: var(--color-ink);
 }
 
 .nav-item.active::before {
@@ -265,7 +265,7 @@ h3 {
     top: 5px;
     bottom: 5px;
     width: 3px;
-    background: var(--color-primary);
+    background: var(--color-ink);
     border-radius: 0 2px 2px 0;
 }
 
@@ -295,7 +295,7 @@ h3 {
 }
 
 .sidebar-user:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
 }
 
 /* Sidebar user expandable actions */
@@ -333,7 +333,7 @@ h3 {
 }
 
 .sidebar-user-action:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text);
     text-decoration: none;
 }
@@ -359,7 +359,7 @@ h3 {
     width: 42px;
     height: 42px;
     border-radius: var(--radius-sm);
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
     font-size: 12.5px;
     font-weight: 600;
@@ -473,7 +473,7 @@ h3 {
 }
 
 .topbar-search:focus-within {
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
     box-shadow: none;
 }
 
@@ -504,7 +504,7 @@ h3 {
     padding: 10px 12px;
     color: var(--color-text);
     text-decoration: none;
-    border-bottom: 1px solid var(--color-neutral-100);
+    border-bottom: 1px solid var(--color-bg);
     transition: background .12s;
 }
 
@@ -514,7 +514,7 @@ h3 {
 
 .topbar-search-option:hover,
 .topbar-search-option.active {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     text-decoration: none;
 }
 
@@ -526,13 +526,13 @@ h3 {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: var(--color-tertiary-bg);
-    color: var(--color-tertiary);
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
 }
 
 .topbar-search-option-icon.client {
-    background: var(--color-secondary-bg);
-    color: var(--color-secondary);
+    background: var(--color-success-bg);
+    color: var(--color-success);
 }
 
 .topbar-search-option-icon svg {
@@ -616,7 +616,7 @@ h3 {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-sm);
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
     font-size: 12.5px;
     font-weight: 600;
@@ -723,7 +723,7 @@ h3 {
 }
 
 .profile-dropdown-item:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     text-decoration: none;
 }
 
@@ -782,7 +782,7 @@ body.sidebar-open .sidebar-overlay {
 
 .card-header a:not(.btn) {
     font-size: 13px;
-    color: var(--color-secondary);
+    color: var(--color-success);
     font-weight: 500;
 }
 
@@ -808,16 +808,16 @@ body.sidebar-open .sidebar-overlay {
 }
 
 .btn-primary {
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: var(--color-primary-hover);
+    background: var(--color-ink-hover);
 }
 
 .btn-secondary {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text);
     border: 1px solid var(--color-neutral-200);
 }
@@ -827,7 +827,7 @@ body.sidebar-open .sidebar-overlay {
 }
 
 .btn-green {
-    background: var(--color-secondary);
+    background: var(--color-success);
     color: #fff;
 }
 
@@ -842,7 +842,7 @@ body.sidebar-open .sidebar-overlay {
 }
 
 .btn-outlined:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
 }
 
 .btn-danger {
@@ -967,8 +967,8 @@ body.sidebar-open .sidebar-overlay {
 }
 
 .action-view {
-    background: #EDEEF8;
-    color: #6366F1;
+    background: #EBF2FF;
+    color: #2563EB;
 }
 
 .action-view:hover {
@@ -1003,7 +1003,7 @@ body.sidebar-open .sidebar-overlay {
 }
 
 .btn-icon-edit {
-    background: var(--color-tertiary);
+    background: var(--color-accent);
     color: #fff;
 }
 
@@ -1030,7 +1030,7 @@ body.sidebar-open .sidebar-overlay {
 .alert-success {
     color: #166534;
     border-color: #bbf7d0;
-    background: var(--color-success-bg);
+    background: var(--color-alert-bg);
 }
 
 /* --- Tag badge ---------------------------------------- */
@@ -1044,7 +1044,7 @@ body.sidebar-open .sidebar-overlay {
     font-size: 12px;
     font-weight: 500;
     white-space: nowrap;
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-neutral);
     border: 1px solid var(--color-neutral-200);
 }
@@ -1090,7 +1090,7 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
     box-shadow: none;
 }
 
@@ -1198,14 +1198,14 @@ textarea {
 }
 
 .filter-bar-btn:hover {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     border-color: var(--color-neutral);
 }
 
 .filter-bar-btn.active {
-    background: var(--color-tertiary-bg);
-    border-color: var(--color-tertiary);
-    color: var(--color-tertiary);
+    background: var(--color-accent-bg);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
 }
 
 .filter-bar-btn svg {
@@ -1228,7 +1228,7 @@ textarea {
     height: 19px;
     padding: 0 5px;
     border-radius: 20px;
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
     font-size: 11px;
     font-weight: 700;
@@ -1248,9 +1248,9 @@ textarea {
     gap: 4px;
     height: 28px;
     padding: 0 6px 0 10px;
-    background: var(--color-tertiary-bg);
-    color: var(--color-tertiary);
-    border: 1px solid #c7d2fe;
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    border: 1px solid #BFDBFE;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
@@ -1366,7 +1366,7 @@ textarea {
 .filter-panel input:focus,
 .filter-panel select:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
     box-shadow: none;
 }
 
@@ -1383,7 +1383,7 @@ textarea {
 }
 
 .date-range-field:focus-within {
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
     box-shadow: none;
 }
 
@@ -1414,13 +1414,13 @@ textarea {
 .filter-grid-sep {
     grid-column: 1 / -1;
     height: 1px;
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     margin: 4px 0;
 }
 
 .filter-panel .filter-grid--extra {
     display: none;
-    border-top: 1px solid var(--color-neutral-100);
+    border-top: 1px solid var(--color-bg);
     padding-top: 14px;
     margin-top: 2px;
     margin-bottom: 14px;
@@ -1558,7 +1558,7 @@ textarea {
     justify-content: space-between;
     padding-top: 12px;
     margin-top: 14px;
-    border-top: 1px solid var(--color-neutral-100);
+    border-top: 1px solid var(--color-bg);
 }
 
 .actions-selected-hint {
@@ -1589,7 +1589,7 @@ textarea {
 }
 
 .actions-bar-btn--has-items {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
     border-color: var(--color-neutral);
 }
 
@@ -1616,13 +1616,13 @@ textarea {
 }
 
 .col-select input[type="checkbox"]:hover {
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
 }
 
 .col-select input[type="checkbox"]:checked,
 .col-select input[type="checkbox"]:indeterminate {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
+    background: var(--color-ink);
+    border-color: var(--color-ink);
 }
 
 .col-select input[type="checkbox"]:checked::after {
@@ -1673,7 +1673,7 @@ tr:last-child td {
 }
 
 tbody tr:hover td {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 /* ── Unified Table Card Container ──────────────────────────── */
@@ -1718,7 +1718,7 @@ tbody tr:hover td {
 }
 
 .data-table tbody tr:hover td {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .col-row-link {
@@ -1773,14 +1773,14 @@ tbody tr:hover td {
 }
 
 .page-btn:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     text-decoration: none;
 }
 
 .page-btn.active {
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
 }
 
 .page-btn.disabled {
@@ -1827,7 +1827,7 @@ tbody tr:hover td {
 /* --- Auth page ---------------------------------------- */
 .auth-body {
     min-height: 100vh;
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
 }
 
 .auth-page {
@@ -1859,7 +1859,7 @@ tbody tr:hover td {
     width: 38px;
     height: 38px;
     border-radius: var(--radius-sm);
-    background: var(--color-primary);
+    background: var(--color-ink);
     color: #fff;
     display: flex;
     align-items: center;
@@ -1954,12 +1954,12 @@ tbody tr:hover td {
 }
 
 .password-toggle:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text);
 }
 
 .password-toggle:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-ink);
     outline-offset: 1px;
 }
 
@@ -2025,7 +2025,7 @@ tbody tr:hover td {
 }
 
 .token-picker-field:focus-within {
-    border-color: var(--color-primary);
+    border-color: var(--color-ink);
     box-shadow: none;
 }
 
@@ -2088,7 +2088,7 @@ tbody tr:hover td {
     font-size: 12.5px;
     font-weight: 500;
     border: 1px solid var(--color-neutral-200);
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
     color: var(--color-text);
     white-space: nowrap;
     line-height: 1.5;
@@ -2150,11 +2150,11 @@ tbody tr:hover td {
 }
 
 .token-picker-option:hover {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .token-picker-option--selected {
-    color: var(--color-secondary);
+    color: var(--color-success);
 }
 
 .token-picker-option--selected::after {
@@ -2330,7 +2330,7 @@ tbody tr:hover td {
 }
 
 .th-sort>a:hover {
-    color: var(--color-tertiary);
+    color: var(--color-accent);
     text-decoration: none;
 }
 
@@ -2345,7 +2345,7 @@ tbody tr:hover td {
 
 .th-sort--asc .sort-icon,
 .th-sort--desc .sort-icon {
-    color: var(--color-tertiary);
+    color: var(--color-accent);
 }
 
 /* --- Detail table (key-value) — shared by contacts & clients --- */
@@ -2356,7 +2356,7 @@ tbody tr:hover td {
 
 .detail-table tr:hover .detail-th,
 .detail-table tr:hover .detail-td {
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .detail-th {
@@ -2403,7 +2403,7 @@ tbody tr:hover td {
 .status-pending  { background: #F3F4F6; color: #374151; }
 .status-hot      { background: #FFEDD5; color: #9A3412; }
 .status-cold     { background: #E0F2FE; color: #075985; }
-.status-default  { background: var(--color-neutral-100); color: var(--color-neutral); }
+.status-default  { background: var(--color-bg); color: var(--color-neutral); }
 
 /* --- Form sections & grid — shared by contacts & clients ------- */
 .form-section {
@@ -2464,7 +2464,7 @@ tbody tr:hover td {
     align-items: center;
     gap: 10px;
     padding: 16px 24px;
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 /* --- Shared sidebar list — contact/client show pages ----------- */
@@ -2547,7 +2547,7 @@ tbody tr:hover td {
 }
 
 .toggle-switch input:checked ~ .toggle-track {
-    background: var(--color-secondary);
+    background: var(--color-success);
 }
 
 .toggle-switch input:checked ~ .toggle-track::after {
@@ -2555,7 +2555,7 @@ tbody tr:hover td {
 }
 
 .toggle-switch input:focus-visible ~ .toggle-track {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
 }
 
@@ -2567,3 +2567,4 @@ tbody tr:hover td {
 .form-grid .checkbox-field .toggle-switch {
     padding-top: 22px;
 }
+

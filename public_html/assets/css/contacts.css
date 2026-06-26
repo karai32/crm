@@ -1,4 +1,4 @@
-/* --- Contacts page ------------------------------------ */
+﻿/* --- Contacts page ------------------------------------ */
 
 /* Header */
 .contacts-header {
@@ -85,8 +85,8 @@
     font-size: 11px;
     font-weight: 600;
     border-radius: 10px;
-    background: var(--color-neutral-100);
-    color: var(--color-secondary);
+    background: var(--color-bg);
+    color: var(--color-success);
     border: 1px solid #F0F0F0;
     white-space: nowrap;
     text-decoration: none;
@@ -95,8 +95,8 @@
 }
 
 .col-clients-more:hover {
-    background: var(--color-secondary-light, #e8f0fe);
-    border-color: var(--color-secondary);
+    background: var(--color-success-light, #e8f0fe);
+    border-color: var(--color-success);
     text-decoration: none;
 }
 
@@ -142,8 +142,8 @@
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: var(--color-tertiary-bg);
-    color: var(--color-tertiary);
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
     font-size: 17px;
     font-weight: 700;
     display: flex;
@@ -209,7 +209,7 @@
 
 /* Contact sidebar links */
 .contact-sidebar-item a {
-    color: var(--color-tertiary);
+    color: var(--color-accent);
     font-weight: 500;
 }
 
@@ -246,7 +246,7 @@
     border: 1px solid #F0F0F0;
     border-radius: var(--radius-sm);
     padding: 10px 12px;
-    background: var(--color-neutral-50);
+    background: var(--color-bg-subtle);
 }
 
 .checkbox-picker-grid label {
@@ -298,7 +298,7 @@
 }
 
 .export-fields-grid label:hover {
-    background: var(--color-neutral-100);
+    background: var(--color-bg);
 }
 
 .export-fields-grid input[type="checkbox"] {
@@ -307,7 +307,7 @@
     max-width: none;
     padding: 0;
     flex-shrink: 0;
-    accent-color: var(--color-primary);
+    accent-color: var(--color-ink);
     cursor: pointer;
 }
 
@@ -316,8 +316,8 @@
     align-items: flex-start;
     gap: 10px;
     padding: 12px 20px;
-    background: var(--color-tertiary-bg);
-    border-top: 1px solid #c7d2fe;
+    background: var(--color-accent-bg);
+    border-top: 1px solid #BFDBFE;
     font-size: 13px;
     color: #3730a3;
 }
@@ -386,3 +386,4 @@ i.contact-sidebar-icon {
     width: auto;
     height: auto;
 }
+
