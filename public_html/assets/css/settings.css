@@ -30,8 +30,8 @@
 
 .settings-live-search:focus {
     outline: none;
-    border-color: var(--color-tertiary);
-    box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(29, 29, 29, .1);
 }
 
 .settings-search-empty {
@@ -255,6 +255,10 @@ input[type="color"].color-picker-input {
     width: 100%;
     font-size: 13.5px;
     padding: 8px 11px;
+}
+
+.settings-form-grid select {
+    padding-right: 36px;
 }
 
 .settings-form-grid label {
@@ -592,8 +596,8 @@ input[type="color"].color-picker-input {
 }
 
 .sector-icon-search:focus-within {
-    border-color: var(--color-tertiary);
-    box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(29, 29, 29, .1);
 }
 
 .sector-icon-search i {

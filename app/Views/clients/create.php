@@ -38,16 +38,28 @@
                            value="<?= htmlspecialchars($client['cif'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field">
-                    <label for="sector_id">Sector</label>
-                    <select id="sector_id" name="sector_id">
-                        <option value="">No sector</option>
-                        <?php foreach ($sectors as $sector): ?>
-                            <option value="<?= (int) $sector['id'] ?>"
-                                    <?= ((int) ($client['sector_id'] ?? 0) === (int) $sector['id']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($sector['name'], ENT_QUOTES, 'UTF-8') ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label>Sector</label>
+                    <?php
+                    $sectorsOptionsJson = htmlspecialchars(json_encode(array_map(function ($s) {
+                        return ['id' => (int) $s['id'], 'name' => $s['name']];
+                    }, $sectors)), ENT_QUOTES, 'UTF-8');
+                    $selectedSectorArr = [];
+                    foreach ($sectors as $s) {
+                        if ((int) $s['id'] === (int) ($client['sector_id'] ?? 0)) {
+                            $selectedSectorArr = [['id' => (int) $s['id'], 'name' => $s['name']]];
+                            break;
+                        }
+                    }
+                    $selectedSectorJson = htmlspecialchars(json_encode($selectedSectorArr), ENT_QUOTES, 'UTF-8');
+                    ?>
+                    <input type="hidden" name="sector_id" value="">
+                    <div class="token-picker token-picker--single"
+                         data-options="<?= $sectorsOptionsJson ?>"
+                         data-name="sector_id"
+                         data-max="1"
+                         data-placeholder="Search sector..."
+                         data-selected="<?= $selectedSectorJson ?>">
+                    </div>
                 </div>
             </div>
         </div>
