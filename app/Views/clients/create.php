@@ -133,6 +133,14 @@
                         <span class="toggle-label">Connected to Web / API</span>
                     </label>
                 </div>
+                <div class="field checkbox-field">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="is_active" value="1"
+                               <?= !isset($client['is_active']) || !empty($client['is_active']) ? 'checked' : '' ?>>
+                        <span class="toggle-track"></span>
+                        <span class="toggle-label">Active client</span>
+                    </label>
+                </div>
                 <div class="field field-full">
                     <label for="notes">Notes</label>
                     <textarea id="notes" name="notes" class="textarea-notes"><?= htmlspecialchars($client['notes'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>

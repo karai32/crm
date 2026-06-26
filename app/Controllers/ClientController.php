@@ -22,7 +22,7 @@ class ClientController
         $page = max(1, (int) ($_GET['page'] ?? 1));
         $perPage = 20;
         $filters = $this->filtersFromRequest();
-        $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at'], 'id');
+        $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at', 'is_active'], 'id');
         $dir     = $this->dirParam();
         $total = $this->clients->countAll($filters);
         $totalPages = max(1, (int) ceil($total / $perPage));
@@ -243,6 +243,7 @@ class ClientController
             'website' => $this->emptyToNull($_POST['website'] ?? ''),
             'notes' => $this->emptyToNull($_POST['notes'] ?? ''),
             'is_web_connected' => isset($_POST['is_web_connected']) ? 1 : 0,
+            'is_active'        => isset($_POST['is_active']) ? 1 : 0,
         ];
     }
 
@@ -261,6 +262,7 @@ class ClientController
             'sector_id'       => (int) ($_GET['sector_id'] ?? 0),
             'tag_ids'         => $this->tagIdsFromGet(),
             'is_web_connected'=> $_GET['is_web_connected'] ?? '',
+            'is_active'       => $_GET['is_active'] ?? '',
             'website'         => trim($_GET['website'] ?? ''),
             'country'         => trim($_GET['country'] ?? ''),
             'province'        => trim($_GET['province'] ?? ''),

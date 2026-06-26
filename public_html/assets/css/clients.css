@@ -339,6 +339,28 @@
     line-height: 1;
 }
 
+/* Active status icon in clients table */
+.col-active {
+    text-align: center;
+    width: 60px;
+}
+
+.col-active-th {
+    text-align: center;
+}
+
+.col-active-yes {
+    font-size: 18px;
+    color: var(--color-success);
+    line-height: 1;
+}
+
+.col-active-no {
+    font-size: 18px;
+    color: var(--color-neutral-300);
+    line-height: 1;
+}
+
 /* Web/API connected badge in clients table */
 .badge-web-connected {
     display: inline-flex;

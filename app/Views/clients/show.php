@@ -92,6 +92,16 @@
                     <td class="detail-td"><?= htmlspecialchars($client['country'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
+                    <th class="detail-th">Active</th>
+                    <td class="detail-td">
+                        <?php if ((int) $client['is_active']): ?>
+                            <span class="badge-active">Active</span>
+                        <?php else: ?>
+                            <span class="badge-inactive">Inactive</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr>
                     <th class="detail-th">Website</th>
                     <td class="detail-td">
                         <?php if (!empty($client['website'])): ?>

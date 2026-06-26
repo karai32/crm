@@ -68,6 +68,14 @@ if ($filters['is_web_connected'] !== '') {
     ]]);
 }
 
+$preselectedActiveJson = '[]';
+if ($filters['is_active'] !== '') {
+    $preselectedActiveJson = json_encode([[
+        'id'   => $filters['is_active'],
+        'name' => $filters['is_active'] === '1' ? 'Active' : 'Inactive',
+    ]]);
+}
+
 $preselectedCountryJson  = '[]';
 $preselectedProvinceJson = '[]';
 $preselectedCityJson     = '[]';
@@ -103,6 +111,12 @@ if (!empty($filters['sector_id'])) {
 if ($filters['is_web_connected'] !== '') {
     $f = $filters; unset($f['is_web_connected'], $f['page']);
     $chips[] = ['text' => $filters['is_web_connected'] === '1' ? 'Web: Connected' : 'Web: Not connected',
+                'href' => $base . '?' . http_build_query($f)];
+}
+
+if ($filters['is_active'] !== '') {
+    $f = $filters; unset($f['is_active'], $f['page']);
+    $chips[] = ['text' => $filters['is_active'] === '1' ? 'Active: Yes' : 'Active: No',
                 'href' => $base . '?' . http_build_query($f)];
 }
 
@@ -227,6 +241,16 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                      data-placeholder="All"
                      data-options='[{"id":"1","name":"Connected"},{"id":"0","name":"Not connected"}]'
                      data-selected="<?= htmlspecialchars($preselectedWebJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+            </div>
+            <div class="field">
+                <label>Active</label>
+                <div class="token-picker token-picker--filter"
+                     data-name="is_active"
+                     data-max="1"
+                     data-placeholder="All"
+                     data-options='[{"id":"1","name":"Active"},{"id":"0","name":"Inactive"}]'
+                     data-selected="<?= htmlspecialchars($preselectedActiveJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
             <div class="field">
@@ -428,6 +452,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                 <?= $thSort('legal_name', 'Legal name') ?>
                 <?= $thSort('sector_name', 'Sector') ?>
                 <th>Tags</th>
+                <?= $thSort('is_active', 'Active', 'col-active-th') ?>
                 <th>Web</th>
                 <th class="col-actions">Actions</th>
             </tr>
@@ -470,6 +495,13 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                                 <?= htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8') ?>
                             </span>
                         <?php endforeach; ?>
+                    </td>
+                    <td class="col-active">
+                        <?php if ((int) $client['is_active']): ?>
+                            <i class="ph ph-check-circle col-active-yes" title="Active"></i>
+                        <?php else: ?>
+                            <i class="ph ph-x-circle col-active-no" title="Inactive"></i>
+                        <?php endif; ?>
                     </td>
                     <td>
                         <?php if ((int) $client['is_web_connected']): ?>

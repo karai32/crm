@@ -16,13 +16,14 @@ class ClientRepository
             'city'            => 'clients.city',
             'country'         => 'clients.country',
             'created_at'      => 'clients.created_at',
+            'is_active'       => 'clients.is_active',
         ];
         $orderCol = $allowed[$sort] ?? 'clients.id';
         $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
 
         $sql = "
             SELECT clients.id, clients.commercial_name, clients.legal_name, clients.city,
-                   clients.province, clients.country, clients.is_web_connected,
+                   clients.province, clients.country, clients.is_web_connected, clients.is_active,
                    clients.created_at, clients.updated_at,
                    sectors.name AS sector_name,
                    sectors.icon AS sector_icon
@@ -175,10 +176,10 @@ class ClientRepository
         $sql = "
             INSERT INTO clients (
                 commercial_name, legal_name, cif, address, postal_code, city,
-                province, country, sector_id, website, notes, is_web_connected
+                province, country, sector_id, website, notes, is_web_connected, is_active
             ) VALUES (
                 :commercial_name, :legal_name, :cif, :address, :postal_code, :city,
-                :province, :country, :sector_id, :website, :notes, :is_web_connected
+                :province, :country, :sector_id, :website, :notes, :is_web_connected, :is_active
             )
         ";
 
@@ -205,7 +206,8 @@ class ClientRepository
                 sector_id = :sector_id,
                 website = :website,
                 notes = :notes,
-                is_web_connected = :is_web_connected
+                is_web_connected = :is_web_connected,
+                is_active = :is_active
             WHERE id = :id
         ";
 
@@ -401,6 +403,11 @@ class ClientRepository
         if (isset($filters['is_web_connected']) && $filters['is_web_connected'] !== '') {
             $where[] = 'clients.is_web_connected = :is_web_connected';
             $params['is_web_connected'] = (int) $filters['is_web_connected'];
+        }
+
+        if (isset($filters['is_active']) && $filters['is_active'] !== '') {
+            $where[] = 'clients.is_active = :is_active';
+            $params['is_active'] = (int) $filters['is_active'];
         }
 
         foreach (['commercial_name', 'legal_name', 'city', 'province', 'country', 'address', 'website'] as $field) {
