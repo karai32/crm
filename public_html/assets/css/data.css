@@ -135,7 +135,7 @@
     margin: 0;
     padding: 0;
     max-width: none;
-    accent-color: var(--color-tertiary);
+    accent-color: var(--color-primary);
     cursor: pointer;
 }
 

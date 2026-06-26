@@ -29,7 +29,8 @@
                     <input id="color" type="text" name="color"
                            value="<?= htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                            placeholder="#2563eb" maxlength="7">
-                    <div class="color-preview" id="color-preview"></div>
+                    <input type="color" id="color-picker" class="color-picker-input"
+                           value="<?= htmlspecialchars($tag['color'] ?: '#2563eb', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <span class="color-hint">Hex format: #rrggbb</span>
             </div>
@@ -46,13 +47,17 @@
 
 <script>
 (function () {
-    const input = document.getElementById('color');
-    const preview = document.getElementById('color-preview');
-    function update() {
-        const val = input.value.trim();
-        preview.style.background = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(val) ? val : '';
-    }
-    input.addEventListener('input', update);
-    update();
+    const textInput = document.getElementById('color');
+    const picker = document.getElementById('color-picker');
+    const hexRe = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
+
+    textInput.addEventListener('input', function () {
+        const val = textInput.value.trim();
+        if (hexRe.test(val)) picker.value = val;
+    });
+
+    picker.addEventListener('input', function () {
+        textInput.value = picker.value;
+    });
 }());
 </script>

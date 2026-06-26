@@ -209,6 +209,18 @@
     transition: background .12s;
 }
 
+input[type="color"].color-picker-input {
+    width: 34px;
+    height: 34px;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-neutral-300);
+    cursor: pointer;
+    background: none;
+    max-width: none;
+    flex-shrink: 0;
+}
+
 .settings-form-actions {
     display: flex;
     align-items: center;
