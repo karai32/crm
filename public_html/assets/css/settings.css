@@ -31,7 +31,8 @@
 .settings-live-search:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(29, 29, 29, .1);
+    border-width: 2px;
+    box-shadow: none;
 }
 
 .settings-search-empty {
@@ -597,7 +598,8 @@ input[type="color"].color-picker-input {
 
 .sector-icon-search:focus-within {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(29, 29, 29, .1);
+    border-width: 2px;
+    box-shadow: none;
 }
 
 .sector-icon-search i {
