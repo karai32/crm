@@ -22,7 +22,7 @@
     height: 36px;
     padding: 8px 11px;
     font-size: 13.5px;
-    border: 1px solid var(--color-neutral-300);
+    border: 2px solid var(--color-neutral-300);
     border-radius: var(--radius-sm);
     background: var(--color-white);
     color: var(--color-text);
@@ -31,7 +31,6 @@
 .settings-live-search:focus {
     outline: none;
     border-color: var(--color-primary);
-    border-width: 2px;
     box-shadow: none;
 }
 
@@ -590,7 +589,7 @@ input[type="color"].color-picker-input {
     gap: 8px;
     height: 38px;
     padding: 0 11px;
-    border: 1px solid var(--color-neutral-300);
+    border: 2px solid var(--color-neutral-300);
     border-radius: var(--radius-sm);
     background: var(--color-white);
     transition: border-color .15s, box-shadow .15s;
@@ -598,7 +597,6 @@ input[type="color"].color-picker-input {
 
 .sector-icon-search:focus-within {
     border-color: var(--color-primary);
-    border-width: 2px;
     box-shadow: none;
 }
 

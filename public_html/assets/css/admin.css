@@ -190,7 +190,7 @@ textarea {
     width: 100%;
     max-width: 460px;
     padding: 10px;
-    border: 1px solid #bcccdc;
+    border: 2px solid #bcccdc;
     background: #ffffff;
 }
 
@@ -199,7 +199,6 @@ select:focus,
 textarea:focus {
     outline: none;
     border-color: var(--color-primary);
-    border-width: 2px;
     box-shadow: none;
 }
 
