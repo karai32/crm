@@ -40,6 +40,34 @@ input[type="checkbox"] {
     accent-color: var(--color-ink);
 }
 
+/* --- Scrollbar ---------------------------------------- */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(29, 29, 29, 0.2) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(29, 29, 29, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(29, 29, 29, 0.45);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
 body {
     margin: 0;
     font-family: var(--font);
