@@ -15,15 +15,10 @@ class CustomFieldController
     {
         Auth::requirePermission('custom_fields.manage');
 
-        $sort    = $this->sortParam(['entity_type', 'name', 'slug', 'field_type'], 'entity_type');
-        $dir     = $this->dirParam();
-        $perPage = SettingsRepository::perPage();
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $total   = $this->customFields->count();
-        $totalPages = max(1, (int) ceil($total / $perPage));
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $sort  = $this->sortParam(['entity_type', 'name', 'slug', 'field_type'], 'entity_type');
+        $dir   = $this->dirParam();
+        $total = $this->customFields->count();
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('custom-fields/index', [
             'title'      => 'Custom fields',

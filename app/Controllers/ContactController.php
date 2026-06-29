@@ -2,7 +2,8 @@
 
 class ContactController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
+
     private ContactRepository $contacts;
     private CustomFieldRepository $customFields;
     private ClientRepository $clients;
@@ -18,17 +19,11 @@ class ContactController
     {
         Auth::requireLogin();
 
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $perPage = SettingsRepository::perPage();
         $filters = $this->filtersFromRequest();
         $sort    = $this->sortParam(['id', 'full_name', 'email', 'created_at', 'clients'], 'id');
         $dir     = $this->dirParam();
-        $total = $this->contacts->countAll($filters);
-        $totalPages = max(1, (int) ceil($total / $perPage));
-
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $total   = $this->contacts->countAll($filters);
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         $contacts = $this->contacts->paginate($page, $perPage, $filters, $sort, $dir);
         $contactIds = array_map('intval', array_column($contacts, 'id'));
@@ -89,8 +84,8 @@ class ContactController
         Auth::requirePermission('contacts.create');
 
         $data = $this->contactDataFromRequest();
-        $tagIds = $this->tagIdsFromRequest();
-        $clientIds = $this->clientIdsFromRequest();
+        $tagIds = $this->idsFromPost('tag_ids');
+        $clientIds = $this->idsFromPost('client_ids');
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
@@ -178,8 +173,8 @@ class ContactController
         }
 
         $data = $this->contactDataFromRequest();
-        $tagIds = $this->tagIdsFromRequest();
-        $clientIds = $this->clientIdsFromRequest();
+        $tagIds = $this->idsFromPost('tag_ids');
+        $clientIds = $this->idsFromPost('client_ids');
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
@@ -225,7 +220,7 @@ class ContactController
     {
         Auth::requireLogin();
 
-        $contactIds = $this->entityIdsFromPost('contact_ids');
+        $contactIds = $this->idsFromPost('contact_ids');
         $action = $_POST['bulk_action'] ?? '';
 
         if (!empty($contactIds)) {
@@ -234,19 +229,19 @@ class ContactController
                 $this->contacts->deleteMultiple($contactIds);
             } elseif ($action === 'link_client') {
                 Auth::requirePermission('contacts.edit');
-                $clientIds = $this->linkClientIdsFromRequest();
+                $clientIds = $this->idsFromPost('link_client_ids');
                 if (!empty($clientIds)) {
                     $this->contacts->addClientsToContacts($contactIds, $clientIds);
                 }
             } elseif ($action === 'remove_tags') {
                 Auth::requirePermission('contacts.edit');
-                $tagIds = $this->tagIdsFromRequest();
+                $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->contacts->removeTags($contactIds, $tagIds);
                 }
             } else {
                 Auth::requirePermission('contacts.edit');
-                $tagIds = $this->tagIdsFromRequest();
+                $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->contacts->addTags($contactIds, $tagIds);
                 }
@@ -259,74 +254,11 @@ class ContactController
     private function contactDataFromRequest(): array
     {
         return [
-            'full_name'  => trim($_POST['full_name'] ?? ''),
-            'email'      => $this->emptyToNull($_POST['email'] ?? ''),
-            'phone'      => $this->emptyToNull($_POST['phone'] ?? ''),
-            'company' => trim($_POST['company'] ?? ''),
+            'full_name' => trim($_POST['full_name'] ?? ''),
+            'email'     => $this->emptyToNull($_POST['email'] ?? ''),
+            'phone'     => $this->emptyToNull($_POST['phone'] ?? ''),
+            'company'   => trim($_POST['company'] ?? ''),
         ];
-    }
-
-    private function emptyToNull(string $value): ?string
-    {
-        $value = trim($value);
-
-        return $value === '' ? null : $value;
-    }
-
-    private function tagIdsFromRequest(): array
-    {
-        $tagIds = $_POST['tag_ids'] ?? [];
-
-        if (!is_array($tagIds)) {
-            return [];
-        }
-
-        $tagIds = array_map('intval', $tagIds);
-        $tagIds = array_filter($tagIds, fn ($id) => $id > 0);
-
-        return array_values(array_unique($tagIds));
-    }
-
-    private function linkClientIdsFromRequest(): array
-    {
-        $clientIds = $_POST['link_client_ids'] ?? [];
-
-        if (!is_array($clientIds)) {
-            return [];
-        }
-
-        $clientIds = array_map('intval', $clientIds);
-        $clientIds = array_filter($clientIds, fn ($id) => $id > 0);
-
-        return array_values(array_unique($clientIds));
-    }
-
-    private function clientIdsFromRequest(): array
-    {
-        $clientIds = $_POST['client_ids'] ?? [];
-
-        if (!is_array($clientIds)) {
-            return [];
-        }
-
-        $clientIds = array_map('intval', $clientIds);
-        $clientIds = array_filter($clientIds, fn ($id) => $id > 0);
-
-        return array_values(array_unique($clientIds));
-    }
-
-    private function entityIdsFromPost(string $key): array
-    {
-        $ids = $_POST[$key] ?? [];
-
-        if (!is_array($ids)) {
-            return [];
-        }
-
-        $ids = array_map('intval', $ids);
-        $ids = array_filter($ids, fn ($id) => $id > 0);
-
-        return array_values(array_unique($ids));
     }
 
     private function filtersFromRequest(): array
@@ -346,50 +278,6 @@ class ContactController
         ];
     }
 
-    private function tagIdsFromGet(): array
-    {
-        $tagIds = $_GET['tag_ids'] ?? [];
-
-        if (!empty($_GET['tag_id'])) {
-            if (!is_array($tagIds)) {
-                $tagIds = [];
-            }
-
-            $tagIds[] = $_GET['tag_id'];
-        }
-
-        if (!is_array($tagIds)) {
-            return [];
-        }
-
-        $tagIds = array_map('intval', $tagIds);
-        $tagIds = array_filter($tagIds, fn ($id) => $id > 0);
-
-        return array_values(array_unique($tagIds));
-    }
-
-    private function customFieldFiltersFromRequest(): array
-    {
-        $values = $_GET['custom_fields'] ?? [];
-
-        if (!is_array($values)) {
-            return [];
-        }
-
-        $clean = [];
-
-        foreach ($values as $fieldId => $value) {
-            $fieldId = (int) $fieldId;
-            $value = trim((string) $value);
-
-            if ($fieldId > 0 && $value !== '') {
-                $clean[$fieldId] = $value;
-            }
-        }
-
-        return $clean;
-    }
-
     private function findContactOrFail(int $id): ?array
     {
         $contact = $this->contacts->find($id);
@@ -401,17 +289,6 @@ class ContactController
         }
 
         return $contact;
-    }
-
-    private function mergeSelectedRows(array $baseRows, array $selectedRows): array
-    {
-        $rows = [];
-
-        foreach (array_merge($selectedRows, $baseRows) as $row) {
-            $rows[(int) $row['id']] = $row;
-        }
-
-        return array_values($rows);
     }
 
     private function selectedTagsForIds(array $tagIds): array

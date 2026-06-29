@@ -18,15 +18,10 @@ class ApiKeyController
         $newCredentials = $_SESSION['new_api_credentials'] ?? null;
         unset($_SESSION['new_api_credentials']);
 
-        $sort    = $this->sortParam(['name', 'is_active', 'created_at'], 'created_at');
-        $dir     = $this->dirParam();
-        $perPage = SettingsRepository::perPage();
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $total   = $this->apiKeys->count();
-        $totalPages = max(1, (int) ceil($total / $perPage));
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $sort  = $this->sortParam(['name', 'is_active', 'created_at'], 'created_at');
+        $dir   = $this->dirParam();
+        $total = $this->apiKeys->count();
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('api/index', [
             'title'          => 'API Credentials',
@@ -139,8 +134,6 @@ class ApiKeyController
     {
         Auth::requireAdmin();
 
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $perPage = SettingsRepository::perPage();
         $filters = [
             'key_id'    => (int) ($_GET['key_id'] ?? 0),
             'method'    => trim($_GET['method'] ?? ''),
@@ -150,11 +143,8 @@ class ApiKeyController
             'date_to'   => trim($_GET['date_to'] ?? ''),
         ];
 
-        $total      = $this->apiKeys->countLogs($filters);
-        $totalPages = max(1, (int) ceil($total / $perPage));
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $total = $this->apiKeys->countLogs($filters);
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('api/logs', [
             'title'      => 'API Logs',

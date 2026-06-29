@@ -15,15 +15,10 @@ class UserController
     {
         Auth::requireAdmin();
 
-        $sort    = $this->sortParam(['id', 'name', 'role', 'is_active'], 'id');
-        $dir     = $this->dirParam();
-        $perPage = SettingsRepository::perPage();
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $total   = $this->users->count();
-        $totalPages = max(1, (int) ceil($total / $perPage));
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $sort  = $this->sortParam(['id', 'name', 'role', 'is_active'], 'id');
+        $dir   = $this->dirParam();
+        $total = $this->users->count();
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         $users              = $this->users->paginate($page, $perPage, $sort, $dir);
         $defaultPermissions = $this->defaultPermissions();

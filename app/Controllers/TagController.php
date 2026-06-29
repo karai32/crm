@@ -2,6 +2,8 @@
 
 class TagController
 {
+    use SortableTrait;
+
     private TagRepository $tags;
 
     public function __construct()
@@ -13,15 +15,10 @@ class TagController
     {
         Auth::requirePermission('tags.manage');
 
-        $sort    = in_array($_GET['sort'] ?? '', ['name', 'slug'], true) ? $_GET['sort'] : 'name';
-        $dir     = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
-        $perPage = SettingsRepository::perPage();
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $total   = $this->tags->count();
-        $totalPages = max(1, (int) ceil($total / $perPage));
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $sort  = in_array($_GET['sort'] ?? '', ['name', 'slug'], true) ? $_GET['sort'] : 'name';
+        $dir   = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $total = $this->tags->count();
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('tags/index', [
             'title'      => 'Tags',

@@ -2,7 +2,7 @@
 
 class ClientController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
 
     private ClientRepository $clients;
     private SectorRepository $sectors;
@@ -19,17 +19,11 @@ class ClientController
     {
         Auth::requireLogin();
 
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $perPage = SettingsRepository::perPage();
         $filters = $this->filtersFromRequest();
         $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at', 'is_active'], 'id');
         $dir     = $this->dirParam();
-        $total = $this->clients->countAll($filters);
-        $totalPages = max(1, (int) ceil($total / $perPage));
-
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $total   = $this->clients->countAll($filters);
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         $clients = $this->clients->paginate($page, $perPage, $filters, $sort, $dir);
         $clientIds = array_map('intval', array_column($clients, 'id'));
@@ -75,7 +69,7 @@ class ClientController
         Auth::requirePermission('clients.create');
 
         $data = $this->clientDataFromRequest();
-        $tagIds = $this->tagIdsFromRequest();
+        $tagIds = $this->idsFromPost('tag_ids');
         $customFields = $this->customFields->fieldsForEntity('client');
         $customValues = $_POST['custom_fields'] ?? [];
 
@@ -159,7 +153,7 @@ class ClientController
         }
 
         $data = $this->clientDataFromRequest();
-        $tagIds = $this->tagIdsFromRequest();
+        $tagIds = $this->idsFromPost('tag_ids');
         $customFields = $this->customFields->fieldsForEntity('client');
         $customValues = $_POST['custom_fields'] ?? [];
 
@@ -203,7 +197,7 @@ class ClientController
     {
         Auth::requireLogin();
 
-        $clientIds = $this->entityIdsFromPost('client_ids');
+        $clientIds = $this->idsFromPost('client_ids');
         $action = $_POST['bulk_action'] ?? '';
 
         if (!empty($clientIds)) {
@@ -212,13 +206,13 @@ class ClientController
                 $this->clients->deleteMultiple($clientIds);
             } elseif ($action === 'remove_tags') {
                 Auth::requirePermission('clients.edit');
-                $tagIds = $this->tagIdsFromRequest();
+                $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->clients->removeTagsFromClients($clientIds, $tagIds);
                 }
             } else {
                 Auth::requirePermission('clients.edit');
-                $tagIds = $this->tagIdsFromRequest();
+                $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->clients->addTagsToClients($clientIds, $tagIds);
                 }
@@ -231,115 +225,38 @@ class ClientController
     private function clientDataFromRequest(): array
     {
         return [
-            'commercial_name' => trim($_POST['commercial_name'] ?? ''),
-            'legal_name' => $this->emptyToNull($_POST['legal_name'] ?? ''),
-            'cif' => $this->emptyToNull($_POST['cif'] ?? ''),
-            'address' => $this->emptyToNull($_POST['address'] ?? ''),
-            'postal_code' => $this->emptyToNull($_POST['postal_code'] ?? ''),
-            'city' => $this->emptyToNull($_POST['city'] ?? ''),
-            'province' => $this->emptyToNull($_POST['province'] ?? ''),
-            'country' => $this->emptyToNull($_POST['country'] ?? ''),
-            'sector_id' => (int) ($_POST['sector_id'] ?? 0) ?: null,
-            'website' => $this->emptyToNull($_POST['website'] ?? ''),
-            'notes' => $this->emptyToNull($_POST['notes'] ?? ''),
+            'commercial_name'  => trim($_POST['commercial_name'] ?? ''),
+            'legal_name'       => $this->emptyToNull($_POST['legal_name'] ?? ''),
+            'cif'              => $this->emptyToNull($_POST['cif'] ?? ''),
+            'address'          => $this->emptyToNull($_POST['address'] ?? ''),
+            'postal_code'      => $this->emptyToNull($_POST['postal_code'] ?? ''),
+            'city'             => $this->emptyToNull($_POST['city'] ?? ''),
+            'province'         => $this->emptyToNull($_POST['province'] ?? ''),
+            'country'          => $this->emptyToNull($_POST['country'] ?? ''),
+            'sector_id'        => (int) ($_POST['sector_id'] ?? 0) ?: null,
+            'website'          => $this->emptyToNull($_POST['website'] ?? ''),
+            'notes'            => $this->emptyToNull($_POST['notes'] ?? ''),
             'is_web_connected' => isset($_POST['is_web_connected']) ? 1 : 0,
             'is_active'        => isset($_POST['is_active']) ? 1 : 0,
         ];
     }
 
-    private function emptyToNull(string $value): ?string
-    {
-        $value = trim($value);
-
-        return $value === '' ? null : $value;
-    }
-
     private function filtersFromRequest(): array
     {
         return [
-            'commercial_name' => trim($_GET['commercial_name'] ?? ''),
-            'legal_name'      => trim($_GET['legal_name'] ?? ''),
-            'sector_id'       => (int) ($_GET['sector_id'] ?? 0),
-            'tag_ids'         => $this->tagIdsFromGet(),
+            'commercial_name'  => trim($_GET['commercial_name'] ?? ''),
+            'legal_name'       => trim($_GET['legal_name'] ?? ''),
+            'sector_id'        => (int) ($_GET['sector_id'] ?? 0),
+            'tag_ids'          => $this->tagIdsFromGet(),
             'is_web_connected' => $_GET['is_web_connected'] ?? '',
-            'is_active'       => $_GET['is_active'] ?? '',
-            'website'         => trim($_GET['website'] ?? ''),
-            'country'         => trim($_GET['country'] ?? ''),
-            'province'        => trim($_GET['province'] ?? ''),
-            'city'            => trim($_GET['city'] ?? ''),
-            'address'         => trim($_GET['address'] ?? ''),
-            'custom_fields'   => $this->customFieldFiltersFromRequest(),
+            'is_active'        => $_GET['is_active'] ?? '',
+            'website'          => trim($_GET['website'] ?? ''),
+            'country'          => trim($_GET['country'] ?? ''),
+            'province'         => trim($_GET['province'] ?? ''),
+            'city'             => trim($_GET['city'] ?? ''),
+            'address'          => trim($_GET['address'] ?? ''),
+            'custom_fields'    => $this->customFieldFiltersFromRequest(),
         ];
-    }
-
-    private function customFieldFiltersFromRequest(): array
-    {
-        $values = $_GET['custom_fields'] ?? [];
-
-        if (!is_array($values)) {
-            return [];
-        }
-
-        $clean = [];
-
-        foreach ($values as $fieldId => $value) {
-            $fieldId = (int) $fieldId;
-            $value   = trim((string) $value);
-
-            if ($fieldId > 0 && $value !== '') {
-                $clean[$fieldId] = $value;
-            }
-        }
-
-        return $clean;
-    }
-
-    private function tagIdsFromRequest(): array
-    {
-        $tagIds = $_POST['tag_ids'] ?? [];
-
-        return $this->cleanTagIds($tagIds);
-    }
-
-    private function tagIdsFromGet(): array
-    {
-        $tagIds = $_GET['tag_ids'] ?? [];
-
-        if (!empty($_GET['tag_id'])) {
-            if (!is_array($tagIds)) {
-                $tagIds = [];
-            }
-
-            $tagIds[] = $_GET['tag_id'];
-        }
-
-        return $this->cleanTagIds($tagIds);
-    }
-
-    private function cleanTagIds(mixed $tagIds): array
-    {
-        if (!is_array($tagIds)) {
-            return [];
-        }
-
-        $tagIds = array_map('intval', $tagIds);
-        $tagIds = array_filter($tagIds, fn ($id) => $id > 0);
-
-        return array_values(array_unique($tagIds));
-    }
-
-    private function entityIdsFromPost(string $key): array
-    {
-        $ids = $_POST[$key] ?? [];
-
-        if (!is_array($ids)) {
-            return [];
-        }
-
-        $ids = array_map('intval', $ids);
-        $ids = array_filter($ids, fn ($id) => $id > 0);
-
-        return array_values(array_unique($ids));
     }
 
     private function findClientOrFail(int $id): ?array
@@ -364,16 +281,5 @@ class ClientController
         return array_values(array_filter($this->clients->firstTags(500), function ($tag) use ($tagIds) {
             return in_array((int) $tag['id'], $tagIds, true);
         }));
-    }
-
-    private function mergeSelectedRows(array $baseRows, array $selectedRows): array
-    {
-        $rows = [];
-
-        foreach (array_merge($selectedRows, $baseRows) as $row) {
-            $rows[(int) $row['id']] = $row;
-        }
-
-        return array_values($rows);
     }
 }

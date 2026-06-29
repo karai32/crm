@@ -4,19 +4,6 @@ $activeFilters = array_filter($filters, function ($value) {
 });
 
 $paginateParams = array_merge($activeFilters, ['sort' => $sort, 'dir' => $dir]);
-$sortUrl = function (string $col) use ($sort, $dir, $activeFilters): string {
-    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
-    return Auth::url('/contacts?' . http_build_query(array_merge($activeFilters, ['sort' => $col, 'dir' => $nd, 'page' => 1])));
-};
-$thSort = function (string $col, string $label, string $xClass = '') use ($sort, $dir, $sortUrl): string {
-    $active = $sort === $col;
-    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
-    $cls    = trim('th-sort' . ($active ? ' th-sort--' . $dir : '') . ($xClass !== '' ? ' ' . $xClass : ''));
-    $href   = htmlspecialchars($sortUrl($col), ENT_QUOTES, 'UTF-8');
-    return '<th class="' . $cls . '"><a href="' . $href . '">'
-        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
-        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
-};
 
 $canCreateContacts  = Auth::can('contacts.create');
 $canEditContacts    = Auth::can('contacts.edit');
@@ -43,23 +30,6 @@ if (!empty($filters['sector_id'])) {
 $from = $total > 0 ? ($page - 1) * $perPage + 1 : 0;
 $to   = min($page * $perPage, $total);
 
-
-function paginationRange(int $current, int $last): array {
-    $pages = [];
-    for ($i = 1; $i <= $last; $i++) {
-        if ($i === 1 || $i === $last || abs($i - $current) <= 2) {
-            $pages[] = $i;
-        }
-    }
-    $result = [];
-    $prev   = null;
-    foreach ($pages as $p) {
-        if ($prev !== null && $p - $prev > 1) { $result[] = '...'; }
-        $result[] = $p;
-        $prev = $p;
-    }
-    return $result;
-}
 
 /* --- Build filter chips ---------------------------------------- */
 $selectedTagObjects = array_values(array_filter($filterTags, function ($tag) use ($selectedFilterTagIds) {
@@ -436,10 +406,10 @@ $hasExtended = !empty($filters['custom_fields']);
                     <input type="checkbox" id="contactsSelectAll" aria-label="Select all">
                     <?php endif; ?>
                 </th>
-                <?= $thSort('id', 'ID', 'col-id') ?>
-                <?= $thSort('full_name', 'Name') ?>
-                <?= $thSort('email', 'Email') ?>
-                <?= $thSort('clients', 'Clients') ?>
+                <?= thSort('id', 'ID', $sort, $dir, '/contacts', $activeFilters, 'col-id') ?>
+                <?= thSort('full_name', 'Name', $sort, $dir, '/contacts', $activeFilters) ?>
+                <?= thSort('email', 'Email', $sort, $dir, '/contacts', $activeFilters) ?>
+                <?= thSort('clients', 'Clients', $sort, $dir, '/contacts', $activeFilters) ?>
                 <th>Tags</th>
                 <th class="col-actions">Actions</th>
             </tr>
@@ -514,42 +484,7 @@ $hasExtended = !empty($filters['custom_fields']);
 
 </div>
 
-<div class="contacts-pagination">
-    <span>Showing <?= $from ?> to <?= $to ?> of <?= (int) $total ?> entries</span>
-
-    <div class="pagination-pages">
-        <?php if ($page > 1): ?>
-            <a class="page-btn"
-               href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($paginateParams, ['page' => $page - 1]))), ENT_QUOTES, 'UTF-8') ?>">
-                &#8249;
-            </a>
-        <?php else: ?>
-            <span class="page-btn disabled">&#8249;</span>
-        <?php endif; ?>
-
-        <?php foreach (paginationRange($page, $totalPages) as $p): ?>
-            <?php if ($p === '...'): ?>
-                <span class="page-ellipsis">...</span>
-            <?php elseif ($p === $page): ?>
-                <span class="page-btn active"><?= $p ?></span>
-            <?php else: ?>
-                <a class="page-btn"
-                   href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($paginateParams, ['page' => $p]))), ENT_QUOTES, 'UTF-8') ?>">
-                    <?= $p ?>
-                </a>
-            <?php endif; ?>
-        <?php endforeach; ?>
-
-        <?php if ($page < $totalPages): ?>
-            <a class="page-btn"
-               href="<?= htmlspecialchars(Auth::url('/contacts?' . http_build_query(array_merge($paginateParams, ['page' => $page + 1]))), ENT_QUOTES, 'UTF-8') ?>">
-                &#8250;
-            </a>
-        <?php else: ?>
-            <span class="page-btn disabled">&#8250;</span>
-        <?php endif; ?>
-    </div>
-</div>
+<?php renderPagination($page, $totalPages, $total, $perPage, '/contacts', $paginateParams, 'contacts-pagination'); ?>
 <?php endif; ?>
 
 <script>

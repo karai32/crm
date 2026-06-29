@@ -1,39 +1,9 @@
 <?php
-if (!function_exists('clientPaginationRange')) {
-    function clientPaginationRange(int $page, int $totalPages): array
-    {
-        if ($totalPages <= 7) {
-            return range(1, $totalPages);
-        }
-        $pages = [1];
-        if ($page > 3) $pages[] = '...';
-        for ($i = max(2, $page - 1); $i <= min($totalPages - 1, $page + 1); $i++) {
-            $pages[] = $i;
-        }
-        if ($page < $totalPages - 2) $pages[] = '...';
-        $pages[] = $totalPages;
-        return $pages;
-    }
-}
-
 $activeFilters = array_filter($filters, function ($value) {
     return is_array($value) ? !empty($value) : ($value !== '' && $value !== 0 && $value !== null);
 });
 
 $paginateParams = array_merge($activeFilters, ['sort' => $sort, 'dir' => $dir]);
-$sortUrl = function (string $col) use ($sort, $dir, $activeFilters): string {
-    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
-    return Auth::url('/clients?' . http_build_query(array_merge($activeFilters, ['sort' => $col, 'dir' => $nd, 'page' => 1])));
-};
-$thSort = function (string $col, string $label, string $xClass = '') use ($sort, $dir, $sortUrl): string {
-    $active = $sort === $col;
-    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
-    $cls    = trim('th-sort' . ($active ? ' th-sort--' . $dir : '') . ($xClass !== '' ? ' ' . $xClass : ''));
-    $href   = htmlspecialchars($sortUrl($col), ENT_QUOTES, 'UTF-8');
-    return '<th class="' . $cls . '"><a href="' . $href . '">'
-        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
-        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
-};
 
 $from = ($page - 1) * $perPage + 1;
 $to   = min($page * $perPage, $total);
@@ -447,12 +417,12 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                     <input type="checkbox" id="clientsSelectAll" aria-label="Select all">
                     <?php endif; ?>
                 </th>
-                <?= $thSort('id', '#', 'col-id') ?>
-                <?= $thSort('commercial_name', 'Commercial name') ?>
-                <?= $thSort('legal_name', 'Legal name') ?>
-                <?= $thSort('sector_name', 'Sector') ?>
+                <?= thSort('id', '#', $sort, $dir, '/clients', $activeFilters, 'col-id') ?>
+                <?= thSort('commercial_name', 'Commercial name', $sort, $dir, '/clients', $activeFilters) ?>
+                <?= thSort('legal_name', 'Legal name', $sort, $dir, '/clients', $activeFilters) ?>
+                <?= thSort('sector_name', 'Sector', $sort, $dir, '/clients', $activeFilters) ?>
                 <th>Tags</th>
-                <?= $thSort('is_active', 'Active', 'col-active-th') ?>
+                <?= thSort('is_active', 'Active', $sort, $dir, '/clients', $activeFilters, 'col-active-th') ?>
                 <th>Web</th>
                 <th class="col-actions">Actions</th>
             </tr>
@@ -540,34 +510,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
     <?php endif; ?>
 </div>
 
-<?php if (!empty($clients)): ?>
-<div class="clients-pagination">
-    <span>Showing <?= $from ?>–<?= $to ?> of <?= (int) $total ?></span>
-
-    <div class="pagination-pages">
-        <?php if ($page > 1): ?>
-            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/clients?' . http_build_query(array_merge($paginateParams, ['page' => $page - 1]))), ENT_QUOTES, 'UTF-8') ?>">&#8249;</a>
-        <?php else: ?>
-            <span class="page-btn disabled">&#8249;</span>
-        <?php endif; ?>
-
-        <?php foreach (clientPaginationRange($page, $totalPages) as $p): ?>
-            <?php if ($p === '...'): ?>
-                <span class="page-ellipsis">...</span>
-            <?php else: ?>
-                <a class="page-btn <?= $p === $page ? 'active' : '' ?>"
-                   href="<?= htmlspecialchars(Auth::url('/clients?' . http_build_query(array_merge($paginateParams, ['page' => $p]))), ENT_QUOTES, 'UTF-8') ?>"><?= $p ?></a>
-            <?php endif; ?>
-        <?php endforeach; ?>
-
-        <?php if ($page < $totalPages): ?>
-            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/clients?' . http_build_query(array_merge($paginateParams, ['page' => $page + 1]))), ENT_QUOTES, 'UTF-8') ?>">&#8250;</a>
-        <?php else: ?>
-            <span class="page-btn disabled">&#8250;</span>
-        <?php endif; ?>
-    </div>
-</div>
-<?php endif; ?>
+<?php renderPagination($page, $totalPages, $total, $perPage, '/clients', $paginateParams, 'clients-pagination'); ?>
 
 <script>
 (function () {

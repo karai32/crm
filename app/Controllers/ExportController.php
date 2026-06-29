@@ -23,16 +23,11 @@ class ExportController
             ? $_GET['entity']
             : 'contacts';
 
-        $sort       = $this->sortParam(['id', 'entity_type', 'stored_filename'], 'id');
-        $dir        = $this->dirParam();
-        $pageData   = $this->manager->page($entity);
-        $perPage    = SettingsRepository::perPage();
-        $pageNum    = max(1, (int) ($_GET['page'] ?? 1));
-        $total      = $this->exports->count();
-        $totalPages = max(1, (int) ceil($total / $perPage));
-        if ($pageNum > $totalPages) {
-            $pageNum = $totalPages;
-        }
+        $sort     = $this->sortParam(['id', 'entity_type', 'stored_filename'], 'id');
+        $dir      = $this->dirParam();
+        $pageData = $this->manager->page($entity);
+        $total    = $this->exports->count();
+        [$pageNum, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('exports/index', [
             'title'         => 'Export data',

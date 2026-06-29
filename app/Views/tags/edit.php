@@ -45,19 +45,4 @@
     </div>
 </form>
 
-<script>
-(function () {
-    const textInput = document.getElementById('color');
-    const picker = document.getElementById('color-picker');
-    const hexRe = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
-
-    textInput.addEventListener('input', function () {
-        const val = textInput.value.trim();
-        if (hexRe.test(val)) picker.value = val;
-    });
-
-    picker.addEventListener('input', function () {
-        textInput.value = picker.value;
-    });
-}());
-</script>
+<?php require __DIR__ . '/../partials/color-picker-script.php'; ?>

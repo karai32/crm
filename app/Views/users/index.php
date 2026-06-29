@@ -25,19 +25,6 @@ function userPermissionIcon(string $permission): string
     };
 }
 
-$userSortUrl = function (string $col) use ($sort, $dir): string {
-    $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
-    return Auth::url('/users?' . http_build_query(['sort' => $col, 'dir' => $nd]));
-};
-$userThSort = function (string $col, string $label) use ($sort, $dir, $userSortUrl): string {
-    $active = $sort === $col;
-    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
-    $cls    = 'th-sort' . ($active ? ' th-sort--' . $dir : '');
-    $href   = htmlspecialchars($userSortUrl($col), ENT_QUOTES, 'UTF-8');
-    return '<th class="' . $cls . '"><a href="' . $href . '">'
-        . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
-        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
-};
 ?>
 
 <!-- Header -->
@@ -61,10 +48,10 @@ $userThSort = function (string $col, string $label) use ($sort, $dir, $userSortU
     <table class="data-table settings-table">
         <thead>
             <tr>
-                <?= $userThSort('name', 'User') ?>
-                <?= $userThSort('role', 'Role') ?>
+                <?= thSort('name', 'User', $sort, $dir, '/users') ?>
+                <?= thSort('role', 'Role', $sort, $dir, '/users') ?>
                 <th>Permissions</th>
-                <?= $userThSort('is_active', 'Status') ?>
+                <?= thSort('is_active', 'Status', $sort, $dir, '/users') ?>
                 <th>Last login</th>
                 <th class="col-actions">Actions</th>
             </tr>
@@ -151,43 +138,4 @@ $userThSort = function (string $col, string $label) use ($sort, $dir, $userSortU
     <?php endif; ?>
 </div>
 
-<?php if ($totalPages > 1): ?>
-<?php
-function usersPaginationRange(int $current, int $last): array {
-    $pages = [];
-    for ($i = 1; $i <= $last; $i++) {
-        if ($i === 1 || $i === $last || abs($i - $current) <= 2) { $pages[] = $i; }
-    }
-    $result = []; $prev = null;
-    foreach ($pages as $p) {
-        if ($prev !== null && $p - $prev > 1) { $result[] = '...'; }
-        $result[] = $p; $prev = $p;
-    }
-    return $result;
-}
-$from = ($page - 1) * $perPage + 1; $to = min($page * $perPage, $total);
-?>
-<div class="list-pagination">
-    <span>Showing <?= $from ?>–<?= $to ?> of <?= (int) $total ?></span>
-    <div class="pagination-pages">
-        <?php if ($page > 1): ?>
-            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/users?' . http_build_query(['sort' => $sort, 'dir' => $dir, 'page' => $page - 1])), ENT_QUOTES, 'UTF-8') ?>">&#8249;</a>
-        <?php else: ?>
-            <span class="page-btn disabled">&#8249;</span>
-        <?php endif; ?>
-        <?php foreach (usersPaginationRange($page, $totalPages) as $p): ?>
-            <?php if ($p === '...'): ?>
-                <span class="page-ellipsis">...</span>
-            <?php else: ?>
-                <a class="page-btn <?= $p === $page ? 'active' : '' ?>"
-                   href="<?= htmlspecialchars(Auth::url('/users?' . http_build_query(['sort' => $sort, 'dir' => $dir, 'page' => $p])), ENT_QUOTES, 'UTF-8') ?>"><?= $p ?></a>
-            <?php endif; ?>
-        <?php endforeach; ?>
-        <?php if ($page < $totalPages): ?>
-            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/users?' . http_build_query(['sort' => $sort, 'dir' => $dir, 'page' => $page + 1])), ENT_QUOTES, 'UTF-8') ?>">&#8250;</a>
-        <?php else: ?>
-            <span class="page-btn disabled">&#8250;</span>
-        <?php endif; ?>
-    </div>
-</div>
-<?php endif; ?>
+<?php renderPagination($page, $totalPages, $total, $perPage, '/users', ['sort' => $sort, 'dir' => $dir]); ?>

@@ -2,6 +2,8 @@
 
 class SectorController
 {
+    use SortableTrait;
+
     private SectorRepository $sectors;
     private PhosphorIconCatalog $icons;
 
@@ -15,15 +17,10 @@ class SectorController
     {
         Auth::requirePermission('sectors.manage');
 
-        $sort    = in_array($_GET['sort'] ?? '', ['name', 'slug', 'is_active'], true) ? $_GET['sort'] : 'name';
-        $dir     = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
-        $perPage = SettingsRepository::perPage();
-        $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $total   = $this->sectors->count();
-        $totalPages = max(1, (int) ceil($total / $perPage));
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
+        $sort  = in_array($_GET['sort'] ?? '', ['name', 'slug', 'is_active'], true) ? $_GET['sort'] : 'name';
+        $dir   = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $total = $this->sectors->count();
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('sectors/index', [
             'title'      => 'Sectors',
