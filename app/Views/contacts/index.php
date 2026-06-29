@@ -446,7 +446,7 @@ $hasExtended = !empty($filters['custom_fields']);
                             $cCount = count($cList);
                             ?>
                             <?php if ($cCount > 0): ?>
-                                <a class="col-client-link" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $cList[0]['id']), ENT_QUOTES, 'UTF-8') ?>">
+                                <span class="col-client-main">
                                     <?php if (!empty($cList[0]['sector_icon'])): ?>
                                         <span class="sector-list-icon">
                                             <i class="ph ph-<?= htmlspecialchars($cList[0]['sector_icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
@@ -454,8 +454,11 @@ $hasExtended = !empty($filters['custom_fields']);
                                         </span>
                                     <?php endif; ?>
 
-                                    <?= htmlspecialchars($cList[0]['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
-                                </a>
+                                    <a class="col-client-link" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $cList[0]['id']), ENT_QUOTES, 'UTF-8') ?>">
+                                        <?= htmlspecialchars($cList[0]['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
+                                    </a>
+                                </span>
+
                                 <?php if ($cCount > 1):
                                     $moreUrl = Auth::url('/clients?' . http_build_query(['contact_name' => $contact['full_name']]));
                                 ?>

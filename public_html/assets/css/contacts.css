@@ -62,11 +62,14 @@
 }
 
 /* Client links in the contacts table */
-.col-client-link {
+.col-client-main {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
+}
+
+.col-client-link {
     font-size: 13px;
     color: var(--color-text);
     font-weight: 600;
@@ -109,7 +112,9 @@
     left: 50%;
     transform: translateX(-50%);
     opacity: 0;
-    transition: opacity .15s, visibility .15s;
+    transition:
+        opacity 0.15s,
+        visibility 0.15s;
     pointer-events: none;
 }
 
