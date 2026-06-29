@@ -136,6 +136,7 @@
     margin: 0 0 4px;
 }
 .client-active-status {
+    position: relative;
     display: inline-flex;
     align-items: center;
     color: var(--color-success);
@@ -147,43 +148,6 @@
     margin-left: 5px;
 }
 
-.client-active-status .tooltip-text {
-    visibility: hidden;
-    white-space: nowrap;
-    background-color: #1e293b;
-    color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 4px 8px;
-    font-size: 11px;
-    font-weight: 500;
-    position: absolute;
-    z-index: 100;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    opacity: 0;
-    transition:
-        opacity 0.15s,
-        visibility 0.15s;
-    pointer-events: none;
-}
-
-.client-active-status .tooltip-text::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -4px;
-    border-width: 4px;
-    border-style: solid;
-    border-color: #1e293b transparent transparent transparent;
-}
-
-.client-active-status:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
-}
 
 .client-hero-meta {
     display: flex;

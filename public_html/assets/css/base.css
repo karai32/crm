@@ -944,7 +944,7 @@ body.sidebar-open .sidebar-overlay {
     position: relative;
 }
 
-.action-btn .tooltip-text {
+.tooltip-text {
     visibility: hidden;
     white-space: nowrap;
     background-color: #1e293b;
@@ -964,7 +964,7 @@ body.sidebar-open .sidebar-overlay {
     pointer-events: none;
 }
 
-.action-btn .tooltip-text::after {
+.tooltip-text::after {
     content: '';
     position: absolute;
     top: 100%;
@@ -975,7 +975,7 @@ body.sidebar-open .sidebar-overlay {
     border-color: #1e293b transparent transparent transparent;
 }
 
-.action-btn:hover .tooltip-text {
+*:hover > .tooltip-text {
     visibility: visible;
     opacity: 1;
 }
