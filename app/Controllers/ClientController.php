@@ -49,7 +49,7 @@ class ClientController
             'dir'               => $dir,
             'filterSectors'     => $this->sectors->all(),
             'filterTags'        => $this->mergeSelectedRows($this->clients->firstTags(), $selectedFilterTags),
-            'customFilterFields'=> $this->customFields->filterableFieldsForEntity('client'),
+            'customFilterFields' => $this->customFields->filterableFieldsForEntity('client'),
         ]);
     }
 
@@ -261,7 +261,7 @@ class ClientController
             'legal_name'      => trim($_GET['legal_name'] ?? ''),
             'sector_id'       => (int) ($_GET['sector_id'] ?? 0),
             'tag_ids'         => $this->tagIdsFromGet(),
-            'is_web_connected'=> $_GET['is_web_connected'] ?? '',
+            'is_web_connected' => $_GET['is_web_connected'] ?? '',
             'is_active'       => $_GET['is_active'] ?? '',
             'website'         => trim($_GET['website'] ?? ''),
             'country'         => trim($_GET['country'] ?? ''),

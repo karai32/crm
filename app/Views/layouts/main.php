@@ -6,7 +6,7 @@
     <title><?= htmlspecialchars($title ?? 'ContactCore', ENT_QUOTES, 'UTF-8') ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= htmlspecialchars(Auth::url('/favicon.svg'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+ <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     <link rel="stylesheet" href="<?= htmlspecialchars(Auth::url('/assets/css/admin.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(Auth::url('/assets/css/base.css'), ENT_QUOTES, 'UTF-8') ?>">
     <?php foreach ($styles ?? [] as $stylesheet): ?>
@@ -16,26 +16,26 @@
 <body>
 
 <?php
-$currentPath = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
-$isActive = function(string $segment) use ($currentPath): string {
-    return str_contains($currentPath, $segment) ? 'active' : '';
-};
+    $currentPath = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
+    $isActive = function (string $segment) use ($currentPath): string {
+        return str_contains($currentPath, $segment) ? 'active' : '';
+    };
 
-$authUser   = class_exists('Auth') && Auth::check() ? Auth::user() : null;
-$initials   = '';
-$canManageSectors = class_exists('Auth') && Auth::can('sectors.manage');
-$canManageTags = class_exists('Auth') && Auth::can('tags.manage');
-$canManageCustomFields = class_exists('Auth') && Auth::can('custom_fields.manage');
-$canManageImports = class_exists('Auth') && Auth::can('imports.manage');
-$canUseExports = class_exists('Auth') && Auth::can('exports.use');
-$canManageUsers   = class_exists('Auth') && Auth::isAdmin();
-$canManageApiKeys = class_exists('Auth') && Auth::isAdmin();
-$showSettingsNav = $canManageSectors || $canManageTags || $canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers || $canManageApiKeys;
-if ($authUser) {
-    $parts    = explode(' ', trim($authUser['name'] ?? ''));
-    $initials = strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1));
-}
-?>
+    $authUser   = class_exists('Auth') && Auth::check() ? Auth::user() : null;
+    $initials   = '';
+    $canManageSectors = class_exists('Auth') && Auth::can('sectors.manage');
+    $canManageTags = class_exists('Auth') && Auth::can('tags.manage');
+    $canManageCustomFields = class_exists('Auth') && Auth::can('custom_fields.manage');
+    $canManageImports = class_exists('Auth') && Auth::can('imports.manage');
+    $canUseExports = class_exists('Auth') && Auth::can('exports.use');
+    $canManageUsers   = class_exists('Auth') && Auth::isAdmin();
+    $canManageApiKeys = class_exists('Auth') && Auth::isAdmin();
+    $showSettingsNav = $canManageSectors || $canManageTags || $canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers || $canManageApiKeys;
+    if ($authUser) {
+        $parts    = explode(' ', trim($authUser['name'] ?? ''));
+        $initials = strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1));
+    }
+    ?>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="app-shell">
@@ -92,8 +92,16 @@ if ($authUser) {
             </a>
             <?php endif; ?>
 
-            <?php if ($canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers || $canManageApiKeys): ?>
-            <div class="sidebar-section-label"><span class="nav-label">Admin</span></div>
+            <?php if ($canManageCustomFields || $canManageImports || $canUseExports): ?>
+            <div class="sidebar-section-label"><span class="nav-label">Settings</span></div>
+            <?php endif; ?>
+
+            <?php if ($authUser): ?>
+            <a href="<?= htmlspecialchars(Auth::url('/settings'), ENT_QUOTES, 'UTF-8') ?>"
+               class="nav-item <?= $isActive('/settings') ?>" title="Settings">
+                <span class="nav-icon"><i class="ph ph-gear"></i></span>
+                <span class="nav-label">Settings</span>
+            </a>
             <?php endif; ?>
 
             <?php if ($canManageCustomFields): ?>
@@ -119,13 +127,19 @@ if ($authUser) {
                 <span class="nav-label">Exports</span>
             </a>
             <?php endif; ?>
+            
+            <?php endif; ?>
+
+            <?php if ($authUser && ($canManageUsers || $canManageApiKeys)): ?>
+                <div class="sidebar-section-label"><span class="nav-label">Admin</span></div>
+            <?php endif; ?>
 
             <?php if ($canManageUsers): ?>
-            <a href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>"
-               class="nav-item <?= $isActive('/users') ?>" title="Users">
-                <span class="nav-icon"><i class="ph ph-users"></i></span>
-                <span class="nav-label">Users</span>
-            </a>
+                <a href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>"
+                class="nav-item <?= $isActive('/users') ?>" title="Users">
+                    <span class="nav-icon"><i class="ph ph-users"></i></span>
+                    <span class="nav-label">Users</span>
+               </a>
             <?php endif; ?>
 
             <?php if ($canManageApiKeys): ?>
@@ -133,17 +147,6 @@ if ($authUser) {
                class="nav-item <?= $isActive('/api-keys') ?>" title="API Credentials">
                 <span class="nav-icon"><i class="ph ph-key"></i></span>
                 <span class="nav-label">API Credentials</span>
-            </a>
-            <?php endif; ?>
-
-            <?php endif; ?>
-
-            <?php if ($authUser): ?>
-            <div class="sidebar-section-label"><span class="nav-label">Account</span></div>
-            <a href="<?= htmlspecialchars(Auth::url('/settings'), ENT_QUOTES, 'UTF-8') ?>"
-               class="nav-item <?= $isActive('/settings') ?>" title="Settings">
-                <span class="nav-icon"><i class="ph ph-gear"></i></span>
-                <span class="nav-label">Settings</span>
             </a>
             <?php endif; ?>
 

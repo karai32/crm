@@ -76,7 +76,8 @@ class AjaxController
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
         [$clients, $hasMore] = $this->paginatedItems(
-            $q, $page,
+            $q,
+            $page,
             fn ($q, $limit, $offset) => $this->clients->search($q, $limit, $offset)
         );
 
@@ -104,7 +105,8 @@ class AjaxController
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
         [$tags, $hasMore] = $this->paginatedItems(
-            $q, $page,
+            $q,
+            $page,
             fn ($q, $limit, $offset) => $this->tags->search($q, $limit, $offset)
         );
 
@@ -174,7 +176,8 @@ class AjaxController
         $page  = max(1, (int) ($_GET['page'] ?? 1));
 
         [$items, $hasMore] = $this->paginatedItems(
-            $q, $page,
+            $q,
+            $page,
             fn ($q, $limit, $offset) => $this->clients->distinctFieldValues($field, $q, $limit, $offset)
         );
 
@@ -198,7 +201,8 @@ class AjaxController
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
         [$items, $hasMore] = $this->paginatedItems(
-            $q, $page,
+            $q,
+            $page,
             fn ($q, $limit, $offset) => $this->customFields->distinctTextValues($fieldId, $q, $limit, $offset)
         );
 

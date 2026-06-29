@@ -9,7 +9,7 @@ class HelpController
         $locale  = $this->localeFromRequest();
         $content = $this->content()[$locale];
 
-        $cards = array_map(static fn($s) => [
+        $cards = array_map(static fn ($s) => [
             'id'      => $s['id'],
             'icon'    => $s['icon'],
             'accent'  => $s['accent'],
