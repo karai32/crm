@@ -63,6 +63,7 @@ class HelpController
             View::render($view, [
                 'title'            => $title,
                 'styles'           => $styles,
+                'scripts'          => ['help.js'],
                 'locale'           => $locale,
                 'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
             ]);

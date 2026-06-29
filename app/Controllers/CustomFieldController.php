@@ -42,6 +42,7 @@ class CustomFieldController
         View::render('custom-fields/create', [
             'title'       => 'Create custom field',
             'styles'      => ['settings.css'],
+            'scripts'     => ['custom-fields.js'],
             'field'       => ['entity_type' => 'contact', 'field_type' => 'text', 'is_filterable' => 1, 'sort_order' => 0],
             'optionsText' => '',
             'error'       => null,
@@ -88,6 +89,7 @@ class CustomFieldController
         View::render('custom-fields/edit', [
             'title'       => 'Edit custom field',
             'styles'      => ['settings.css'],
+            'scripts'     => ['custom-fields.js'],
             'field'       => $field,
             'optionsText' => implode("\n", $options),
             'error'       => null,

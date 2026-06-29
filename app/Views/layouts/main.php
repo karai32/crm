@@ -244,5 +244,8 @@
 </div>
 
 <script src="<?= htmlspecialchars(Auth::url('/assets/js/admin.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<?php foreach ($scripts ?? [] as $script): ?>
+    <script src="<?= htmlspecialchars(Auth::url('/assets/js/' . $script), ENT_QUOTES, 'UTF-8') ?>"></script>
+<?php endforeach; ?>
 </body>
 </html>

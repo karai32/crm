@@ -45,20 +45,3 @@
 
     <button class="btn btn-primary auth-submit" type="submit">Sign in</button>
 </form>
-
-<script>
-(function () {
-    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
-        var input = document.getElementById(button.getAttribute('data-password-toggle'));
-
-        if (!input) return;
-
-        button.addEventListener('click', function () {
-            var isVisible = input.type === 'text';
-            input.type = isVisible ? 'password' : 'text';
-            button.setAttribute('aria-pressed', isVisible ? 'false' : 'true');
-            button.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
-        });
-    });
-}());
-</script>

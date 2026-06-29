@@ -38,9 +38,10 @@ class TagController
         Auth::requirePermission('tags.manage');
 
         View::render('tags/create', [
-            'title'  => 'Create tag',
-            'styles' => ['settings.css'],
-            'error'  => null,
+            'title'   => 'Create tag',
+            'styles'  => ['settings.css'],
+            'scripts' => ['color-picker.js'],
+            'error'   => null,
         ]);
     }
 
@@ -80,10 +81,11 @@ class TagController
         }
 
         View::render('tags/edit', [
-            'title'  => 'Edit tag',
-            'styles' => ['settings.css'],
-            'tag'    => $tag,
-            'error'  => null,
+            'title'   => 'Edit tag',
+            'styles'  => ['settings.css'],
+            'scripts' => ['color-picker.js'],
+            'tag'     => $tag,
+            'error'   => null,
         ]);
     }
 
@@ -104,10 +106,11 @@ class TagController
 
         if ($name === '') {
             View::render('tags/edit', [
-                'title'  => 'Edit tag',
-                'styles' => ['settings.css'],
-                'error'  => 'Tag name is required.',
-                'tag'    => [
+                'title'   => 'Edit tag',
+                'styles'  => ['settings.css'],
+                'scripts' => ['color-picker.js'],
+                'error'   => 'Tag name is required.',
+                'tag'     => [
                     'id'    => $id,
                     'name'  => $name,
                     'color' => $color,

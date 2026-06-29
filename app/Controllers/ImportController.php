@@ -42,9 +42,10 @@ class ImportController
         Auth::requirePermission('imports.manage');
 
         View::render('imports/upload', [
-            'title'  => 'Upload import file',
-            'styles' => ['imports.css'],
-            'error'  => null,
+            'title'   => 'Upload import file',
+            'styles'  => ['imports.css'],
+            'scripts' => ['imports-upload.js'],
+            'error'   => null,
         ]);
     }
 
@@ -61,9 +62,10 @@ class ImportController
 
         if (!$result['success']) {
             View::render('imports/upload', [
-                'title'  => 'Upload import file',
-                'styles' => ['imports.css'],
-                'error'  => $result['message'],
+                'title'   => 'Upload import file',
+                'styles'  => ['imports.css'],
+                'scripts' => ['imports-upload.js'],
+                'error'   => $result['message'],
             ]);
             return;
         }
@@ -86,6 +88,7 @@ class ImportController
         View::render('imports/preview', [
             'title'   => 'Import preview',
             'styles'  => ['imports.css'],
+            'scripts' => ['imports-preview.js'],
             'preview' => $preview,
         ]);
     }

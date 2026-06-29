@@ -34,6 +34,7 @@
                 <span class="import-template-hint-text">Not sure about the format?</span>
                 <a href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>"
                    id="import-template-link"
+                   data-base-href="<?= htmlspecialchars(Auth::url('/exports/template/'), ENT_QUOTES, 'UTF-8') ?>"
                    class="import-template-link">
                     Download template
                 </a>
@@ -50,10 +51,3 @@
         </div>
     </div>
 </form>
-<script>
-document.getElementById('entity_type').addEventListener('change', function () {
-    var entity = this.value === 'clients' ? 'clients' : 'contacts';
-    document.getElementById('import-template-link').href =
-        <?= json_encode(Auth::url('/exports/template/'), JSON_UNESCAPED_SLASHES) ?> + entity;
-});
-</script>

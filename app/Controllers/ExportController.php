@@ -32,6 +32,7 @@ class ExportController
         View::render('exports/index', [
             'title'         => 'Export data',
             'styles'        => ['data.css'],
+            'scripts'       => ['exports.js'],
             'entity'        => $pageData['entity'],
             'fieldDefs'     => $pageData['fieldDefs'],
             'defaultFields' => $pageData['defaultFields'],

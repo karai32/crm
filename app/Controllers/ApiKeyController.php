@@ -26,6 +26,7 @@ class ApiKeyController
         View::render('api/index', [
             'title'          => 'API Credentials',
             'styles'         => ['api.css'],
+            'scripts'        => ['api-keys.js'],
             'apiKeys'        => $this->apiKeys->paginate($page, $perPage, $sort, $dir),
             'newCredentials' => $newCredentials,
             'sort'           => $sort,
@@ -149,6 +150,7 @@ class ApiKeyController
         View::render('api/logs', [
             'title'      => 'API Logs',
             'styles'     => ['api.css'],
+            'scripts'    => ['api-logs.js'],
             'logs'       => $this->apiKeys->pageLogs($page, $perPage, $filters),
             'apiKeys'    => $this->apiKeys->all(),
             'filters'    => $filters,

@@ -32,6 +32,7 @@ class ClientController
         View::render('clients/index', [
             'title'             => 'Clients',
             'styles'            => ['clients.css'],
+            'scripts'           => ['clients.js'],
             'clients'           => $clients,
             'clientTags'        => $this->clients->tagsForClients($clientIds),
             'page'              => $page,

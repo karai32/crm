@@ -52,8 +52,9 @@ class UserController
         $defaultRole = $this->users->findRoleByName('user');
 
         View::render('users/create', [
-            'title'  => 'Create user',
-            'styles' => ['settings.css'],
+            'title'   => 'Create user',
+            'styles'  => ['settings.css'],
+            'scripts' => ['users.js'],
             'user'   => ['is_active' => 1, 'role_id' => (int) ($defaultRole['id'] ?? 0)],
             'roles'  => $this->users->allRoles(),
             'permissionDefinitions' => Auth::permissionDefinitions(),
@@ -113,8 +114,9 @@ class UserController
         }
 
         View::render('users/edit', [
-            'title'  => 'Edit user',
-            'styles' => ['settings.css'],
+            'title'   => 'Edit user',
+            'styles'  => ['settings.css'],
+            'scripts' => ['users.js'],
             'user'   => $user,
             'roles'  => $this->users->allRoles(),
             'permissionDefinitions' => Auth::permissionDefinitions(),

@@ -41,4 +41,3 @@
     </div>
 </form>
 
-<?php require __DIR__ . '/../partials/color-picker-script.php'; ?>

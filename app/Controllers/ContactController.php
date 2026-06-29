@@ -43,6 +43,7 @@ class ContactController
         View::render('contacts/index', [
             'title'                      => 'Contacts',
             'styles'                     => ['contacts.css'],
+            'scripts'                    => ['contacts.js'],
             'contacts'                   => $contacts,
             'contactTags'                => $this->contacts->tagsForContacts($contactIds),
             'contactClients'             => $this->contacts->clientsForContacts($contactIds),
