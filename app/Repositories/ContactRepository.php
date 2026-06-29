@@ -234,9 +234,10 @@ class ContactRepository
         $placeholders = implode(',', array_fill(0, count($contactIds), '?'));
 
         $statement = $pdo->prepare("
-            SELECT cc.contact_id, cl.id, cl.commercial_name
+            SELECT cc.contact_id, cl.id, cl.commercial_name, s.icon AS sector_icon
             FROM client_contacts cc
             INNER JOIN clients cl ON cl.id = cc.client_id
+            LEFT JOIN sectors s ON s.id = cl.sector_id
             WHERE cc.contact_id IN ($placeholders)
             ORDER BY cl.commercial_name ASC
         ");
