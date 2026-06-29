@@ -12,7 +12,7 @@
                 <?php if (!empty($client['is_active']) && $client['is_active'] === 1): ?>
                     <div class="client-active-status">
                         <i class="ph ph-check"></i>
-                        active
+                        <span class="tooltip-text">Active</span>
                     </div>
                 <?php endif; ?>
             </div>
@@ -21,12 +21,6 @@
                     <span class="client-hero-meta-item">
                         <i class="ph ph-tag"></i>
                         <?= htmlspecialchars($client['sector_name'], ENT_QUOTES, 'UTF-8') ?>
-                    </span>
-                <?php endif; ?>
-                <?php if (!empty($client['city']) || !empty($client['country'])): ?>
-                    <span class="client-hero-meta-item">
-                        <i class="ph ph-map-pin"></i>
-                        <?= htmlspecialchars(implode(', ', array_filter([$client['city'] ?? '', $client['country'] ?? ''])), ENT_QUOTES, 'UTF-8') ?>
                     </span>
                 <?php endif; ?>
                 <?php if (!empty($client['website'])): ?>
@@ -98,16 +92,6 @@
                     <th class="detail-th">Country</th>
                     <td class="detail-td"><?= htmlspecialchars($client['country'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
-                <!--<tr>
-                    <th class="detail-th">Active</th>
-                    <td class="detail-td">
-                        <?php if ((int) $client['is_active']): ?>
-                            <span class="badge-active">Active</span>
-                        <?php else: ?>
-                            <span class="badge-inactive">Inactive</span>
-                        <?php endif; ?>
-                    </td>
-                </tr> -->
                 <tr>
                     <th class="detail-th">Website</th>
                     <td class="detail-td">

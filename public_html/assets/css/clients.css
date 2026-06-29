@@ -98,7 +98,7 @@
 /* --- Client hero (show page) ------------------------------ */
 .client-hero {
     background: var(--color-white);
-    border: 1px solid #F0F0F0;
+    border: 1px solid #f0f0f0;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     padding: 20px 24px;
@@ -134,6 +134,55 @@
     font-weight: 700;
     color: var(--color-text);
     margin: 0 0 4px;
+}
+.client-active-status {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-success);
+}
+.client-active-status i {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--color-success);
+    margin-left: 5px;
+}
+
+.client-active-status .tooltip-text {
+    visibility: hidden;
+    white-space: nowrap;
+    background-color: #1e293b;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    position: absolute;
+    z-index: 100;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition:
+        opacity 0.15s,
+        visibility 0.15s;
+    pointer-events: none;
+}
+
+.client-active-status .tooltip-text::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -4px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #1e293b transparent transparent transparent;
+}
+
+.client-active-status:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
 
 .client-hero-meta {
@@ -190,17 +239,17 @@
     padding: 9px 14px;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-neutral);
-    border-bottom: 1px solid #F0F0F0;
+    border-bottom: 1px solid #f0f0f0;
     white-space: nowrap;
 }
 
 .related-contacts-table td {
     padding: 10px 14px;
     font-size: 13px;
-    border-bottom: 1px solid #F0F0F0;
+    border-bottom: 1px solid #f0f0f0;
     vertical-align: middle;
 }
 
@@ -217,7 +266,7 @@
 /* --- Form card (create / edit) ---------------------------- */
 .client-form-card {
     background: var(--color-white);
-    border: 1px solid #F0F0F0;
+    border: 1px solid #f0f0f0;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -267,7 +316,7 @@
 /* Client show: sidebar section header bar */
 .card-section-header {
     padding: 12px 16px 8px;
-    border-bottom: 1px solid #F0F0F0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 /* Client show: sidebar section label (uppercase small) */
@@ -275,7 +324,7 @@
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     color: var(--color-neutral);
 }
 
@@ -291,7 +340,7 @@
 /* Client show: related contacts header row */
 .card-related-contacts-header {
     padding: 14px 16px 10px;
-    border-bottom: 1px solid #F0F0F0;
+    border-bottom: 1px solid #f0f0f0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -369,9 +418,7 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
-    background: #D1FAE5;
-    color: #065F46;
+    background: #d1fae5;
+    color: #065f46;
     white-space: nowrap;
 }
-
-
