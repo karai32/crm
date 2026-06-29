@@ -452,7 +452,6 @@ $hasExtended = !empty($filters['custom_fields']);
                                     <?php endif; ?>
 
                                     <?= htmlspecialchars($cList[0]['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
-                                    <?php print_r($cList[0]); ?>
                                 </a>
                                 <?php if ($cCount > 1):
                                     $moreUrl = Auth::url('/clients?' . http_build_query(['contact_name' => $contact['full_name']]));
