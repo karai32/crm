@@ -17,15 +17,26 @@ class ImportController
     {
         Auth::requirePermission('imports.manage');
 
-        $sort = $this->sortParam(['id', 'original_filename', 'entity_type', 'status'], 'id');
-        $dir  = $this->dirParam();
+        $sort    = $this->sortParam(['id', 'original_filename', 'entity_type', 'status'], 'id');
+        $dir     = $this->dirParam();
+        $perPage = SettingsRepository::perPage();
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $total   = $this->imports->countBatches();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
 
         View::render('imports/index', [
-            'title'   => 'Imports',
-            'styles'  => ['imports.css'],
-            'batches' => $this->imports->allBatches($sort, $dir),
-            'sort'    => $sort,
-            'dir'     => $dir,
+            'title'      => 'Imports',
+            'styles'     => ['imports.css'],
+            'batches'    => $this->imports->paginateBatches($page, $perPage, $sort, $dir),
+            'sort'       => $sort,
+            'dir'        => $dir,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
+            'totalPages' => $totalPages,
         ]);
     }
 

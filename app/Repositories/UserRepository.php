@@ -28,6 +28,43 @@ class UserRepository
         return $statement->fetchAll();
     }
 
+    public function count(): int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM users');
+        $stmt->execute();
+
+        return (int) ($stmt->fetch()['total'] ?? 0);
+    }
+
+    public function paginate(int $page, int $perPage, string $sort = 'id', string $dir = 'asc'): array
+    {
+        $pdo     = Database::connect();
+        $allowed = [
+            'id'        => 'users.id',
+            'name'      => 'users.name',
+            'role'      => 'roles.name',
+            'is_active' => 'users.is_active',
+        ];
+        $orderCol = $allowed[$sort] ?? 'users.id';
+        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
+        $offset   = ($page - 1) * $perPage;
+
+        $stmt = $pdo->prepare("
+            SELECT users.id, users.name, users.email, users.is_active, users.last_login_at,
+                   users.created_at, roles.name AS role, roles.label AS role_label
+            FROM users
+            INNER JOIN roles ON roles.id = users.role_id
+            ORDER BY {$orderCol} {$orderDir}
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function allRoles(): array
     {
         $pdo = Database::connect();

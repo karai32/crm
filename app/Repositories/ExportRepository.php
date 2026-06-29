@@ -54,6 +54,41 @@ class ExportRepository
         $statement->execute(['id' => $id, 'status' => 'failed']);
     }
 
+    public function count(): int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM export_batches');
+        $stmt->execute();
+
+        return (int) ($stmt->fetch()['total'] ?? 0);
+    }
+
+    public function paginate(int $page, int $perPage, string $sort = 'id', string $dir = 'desc'): array
+    {
+        $pdo     = Database::connect();
+        $allowed = [
+            'id'              => 'eb.id',
+            'entity_type'     => 'eb.entity_type',
+            'stored_filename' => 'eb.stored_filename',
+        ];
+        $orderCol = $allowed[$sort] ?? 'eb.id';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $offset   = ($page - 1) * $perPage;
+
+        $stmt = $pdo->prepare("
+            SELECT eb.*, u.name AS user_name
+            FROM export_batches eb
+            LEFT JOIN users u ON u.id = eb.user_id
+            ORDER BY {$orderCol} {$orderDir}
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function recentExports(int $limit = 15, string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();

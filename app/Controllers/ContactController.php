@@ -18,8 +18,8 @@ class ContactController
     {
         Auth::requireLogin();
 
-        $page = max(1, (int) ($_GET['page'] ?? 1));
-        $perPage = 20;
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = SettingsRepository::perPage();
         $filters = $this->filtersFromRequest();
         $sort    = $this->sortParam(['id', 'full_name', 'email', 'created_at', 'clients'], 'id');
         $dir     = $this->dirParam();

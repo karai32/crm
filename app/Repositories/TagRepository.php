@@ -16,6 +16,31 @@ class TagRepository
         return $statement->fetchAll();
     }
 
+    public function count(): int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM tags');
+        $stmt->execute();
+
+        return (int) ($stmt->fetch()['total'] ?? 0);
+    }
+
+    public function paginate(int $page, int $perPage, string $sort = 'name', string $dir = 'asc'): array
+    {
+        $pdo      = Database::connect();
+        $allowed  = ['name' => 'name', 'slug' => 'slug'];
+        $orderCol = $allowed[$sort] ?? 'name';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $offset   = ($page - 1) * $perPage;
+
+        $stmt = $pdo->prepare("SELECT * FROM tags ORDER BY {$orderCol} {$orderDir} LIMIT :limit OFFSET :offset");
+        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function filter(string $name = ''): array
     {
         $pdo = Database::connect();

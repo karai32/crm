@@ -26,6 +26,42 @@ class ImportRepository
         return $statement->fetchAll();
     }
 
+    public function countBatches(): int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM import_batches');
+        $stmt->execute();
+
+        return (int) ($stmt->fetch()['total'] ?? 0);
+    }
+
+    public function paginateBatches(int $page, int $perPage, string $sort = 'id', string $dir = 'desc'): array
+    {
+        $pdo     = Database::connect();
+        $allowed = [
+            'id'                => 'import_batches.id',
+            'original_filename' => 'import_batches.original_filename',
+            'entity_type'       => 'import_batches.entity_type',
+            'status'            => 'import_batches.status',
+        ];
+        $orderCol = $allowed[$sort] ?? 'import_batches.id';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $offset   = ($page - 1) * $perPage;
+
+        $stmt = $pdo->prepare("
+            SELECT import_batches.*, users.name AS user_name
+            FROM import_batches
+            LEFT JOIN users ON users.id = import_batches.user_id
+            ORDER BY {$orderCol} {$orderDir}
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function createBatch(
         ?int $userId,
         string $originalFilename,

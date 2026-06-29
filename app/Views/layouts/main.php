@@ -92,8 +92,16 @@ if ($authUser) {
             </a>
             <?php endif; ?>
 
-            <?php if ($canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers): ?>
+            <?php if ($canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers || $canManageApiKeys): ?>
             <div class="sidebar-section-label"><span class="nav-label">Settings</span></div>
+            <?php endif; ?>
+
+            <?php if ($canManageApiKeys): ?>
+            <a href="<?= htmlspecialchars(Auth::url('/settings'), ENT_QUOTES, 'UTF-8') ?>"
+               class="nav-item <?= $isActive('/settings') ?>" title="Settings">
+                <span class="nav-icon"><i class="ph ph-gear"></i></span>
+                <span class="nav-label">Settings</span>
+            </a>
             <?php endif; ?>
 
             <?php if ($canManageCustomFields): ?>

@@ -164,11 +164,12 @@ $exportThSort = function (string $col, string $label) use ($sort, $dir, $exportS
 
 <!-- Export history -->
 <div class="export-history-section">
-    <div class="export-history-header">Recent exports</div>
+    <div class="export-history-header">Export history</div>
 
     <div class="export-history-card">
         <?php if (empty($recentExports)): ?>
             <p class="export-no-history">No exports yet.</p>
+        <?php // note: $recentExports variable holds paginated results ?>
         <?php else: ?>
         <table class="data-table export-history-table">
             <thead>
@@ -219,6 +220,47 @@ $exportThSort = function (string $col, string $label) use ($sort, $dir, $exportS
         <?php endif; ?>
     </div>
 </div>
+
+<?php if ($totalPages > 1): ?>
+<?php
+function exportsPaginationRange(int $current, int $last): array {
+    $pages = [];
+    for ($i = 1; $i <= $last; $i++) {
+        if ($i === 1 || $i === $last || abs($i - $current) <= 2) { $pages[] = $i; }
+    }
+    $result = []; $prev = null;
+    foreach ($pages as $p) {
+        if ($prev !== null && $p - $prev > 1) { $result[] = '...'; }
+        $result[] = $p; $prev = $p;
+    }
+    return $result;
+}
+$from = ($page - 1) * $perPage + 1; $to = min($page * $perPage, $total);
+?>
+<div class="list-pagination">
+    <span>Showing <?= $from ?>–<?= $to ?> of <?= (int) $total ?></span>
+    <div class="pagination-pages">
+        <?php if ($page > 1): ?>
+            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/exports?' . http_build_query(['entity' => $entity, 'sort' => $sort, 'dir' => $dir, 'page' => $page - 1])), ENT_QUOTES, 'UTF-8') ?>">&#8249;</a>
+        <?php else: ?>
+            <span class="page-btn disabled">&#8249;</span>
+        <?php endif; ?>
+        <?php foreach (exportsPaginationRange($page, $totalPages) as $p): ?>
+            <?php if ($p === '...'): ?>
+                <span class="page-ellipsis">...</span>
+            <?php else: ?>
+                <a class="page-btn <?= $p === $page ? 'active' : '' ?>"
+                   href="<?= htmlspecialchars(Auth::url('/exports?' . http_build_query(['entity' => $entity, 'sort' => $sort, 'dir' => $dir, 'page' => $p])), ENT_QUOTES, 'UTF-8') ?>"><?= $p ?></a>
+            <?php endif; ?>
+        <?php endforeach; ?>
+        <?php if ($page < $totalPages): ?>
+            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/exports?' . http_build_query(['entity' => $entity, 'sort' => $sort, 'dir' => $dir, 'page' => $page + 1])), ENT_QUOTES, 'UTF-8') ?>">&#8250;</a>
+        <?php else: ?>
+            <span class="page-btn disabled">&#8250;</span>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
 
 <script>
 function selectFormat(fmt, el) {

@@ -9,6 +9,7 @@ USE crm;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS api_logs;
 DROP TABLE IF EXISTS api_keys;
 DROP TABLE IF EXISTS audit_logs;
@@ -350,6 +351,16 @@ CREATE TABLE api_logs (
     INDEX idx_api_logs_key_created (api_key_id, created_at),
     INDEX idx_api_logs_status_created (response_status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE settings (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(80) NOT NULL UNIQUE,
+    setting_value TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO settings (setting_key, setting_value) VALUES ('per_page', '20');
 
 INSERT INTO roles (name, label) VALUES
 ('admin', 'Administrator'),

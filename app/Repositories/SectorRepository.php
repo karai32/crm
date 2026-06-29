@@ -19,6 +19,34 @@ class SectorRepository
         return $statement->fetchAll();
     }
 
+    public function count(): int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM sectors');
+        $stmt->execute();
+
+        return (int) ($stmt->fetch()['total'] ?? 0);
+    }
+
+    public function paginate(int $page, int $perPage, string $sort = 'name', string $dir = 'asc'): array
+    {
+        $pdo      = Database::connect();
+        $allowed  = ['name' => 'name', 'slug' => 'slug', 'is_active' => 'is_active'];
+        $orderCol = $allowed[$sort] ?? 'name';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $orderSql = $sort === 'is_active'
+            ? "is_active {$orderDir}, name ASC"
+            : "{$orderCol} {$orderDir}";
+        $offset   = ($page - 1) * $perPage;
+
+        $stmt = $pdo->prepare("SELECT * FROM sectors ORDER BY {$orderSql} LIMIT :limit OFFSET :offset");
+        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function active(): array
     {
         $pdo = Database::connect();

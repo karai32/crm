@@ -681,6 +681,19 @@ input[type="color"].color-picker-input {
 
 /* === Migrated from inline styles === */
 
+/* --- Settings page: small select --------------------------------- */
+.settings-select-sm {
+    max-width: 160px;
+    padding-right: 36px;
+}
+
+/* --- Settings table: inline pagination -------------------------  */
+.settings-table-card .list-pagination {
+    padding: 12px 0 0;
+    margin-top: 0;
+    border-top: 1px solid #F0F0F0;
+}
+
 /* Tag color hint text */
 .color-hint {
     font-size: 12px;

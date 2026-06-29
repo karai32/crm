@@ -19,8 +19,8 @@ class ClientController
     {
         Auth::requireLogin();
 
-        $page = max(1, (int) ($_GET['page'] ?? 1));
-        $perPage = 20;
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage = SettingsRepository::perPage();
         $filters = $this->filtersFromRequest();
         $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at', 'is_active'], 'id');
         $dir     = $this->dirParam();

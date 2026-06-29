@@ -1,4 +1,17 @@
 <?php
+function tagPaginationRange(int $current, int $last): array {
+    $pages = [];
+    for ($i = 1; $i <= $last; $i++) {
+        if ($i === 1 || $i === $last || abs($i - $current) <= 2) { $pages[] = $i; }
+    }
+    $result = []; $prev = null;
+    foreach ($pages as $p) {
+        if ($prev !== null && $p - $prev > 1) { $result[] = '...'; }
+        $result[] = $p; $prev = $p;
+    }
+    return $result;
+}
+
 $sortUrl = function (string $col) use ($sort, $dir): string {
     $nd = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
     return Auth::url('/tags?' . http_build_query(['sort' => $col, 'dir' => $nd]));
@@ -17,7 +30,7 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
 <div class="page-header settings-header">
     <div>
         <h1>Tags</h1>
-        <span class="count-label"><?= count($tags) ?> tags</span>
+        <span class="count-label"><?= (int) $total ?> tags</span>
     </div>
     <div class="page-actions">
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/tags/create'), ENT_QUOTES, 'UTF-8') ?>">
@@ -97,4 +110,31 @@ $thSort = function (string $col, string $label) use ($sort, $dir, $sortUrl): str
     </table>
     <?php endif; ?>
 </div>
+
+<?php if ($totalPages > 1): ?>
+<?php $from = ($page - 1) * $perPage + 1; $to = min($page * $perPage, $total); ?>
+<div class="list-pagination">
+    <span>Showing <?= $from ?>–<?= $to ?> of <?= (int) $total ?></span>
+    <div class="pagination-pages">
+        <?php if ($page > 1): ?>
+            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/tags?' . http_build_query(['sort' => $sort, 'dir' => $dir, 'page' => $page - 1])), ENT_QUOTES, 'UTF-8') ?>">&#8249;</a>
+        <?php else: ?>
+            <span class="page-btn disabled">&#8249;</span>
+        <?php endif; ?>
+        <?php foreach (tagPaginationRange($page, $totalPages) as $p): ?>
+            <?php if ($p === '...'): ?>
+                <span class="page-ellipsis">...</span>
+            <?php else: ?>
+                <a class="page-btn <?= $p === $page ? 'active' : '' ?>"
+                   href="<?= htmlspecialchars(Auth::url('/tags?' . http_build_query(['sort' => $sort, 'dir' => $dir, 'page' => $p])), ENT_QUOTES, 'UTF-8') ?>"><?= $p ?></a>
+            <?php endif; ?>
+        <?php endforeach; ?>
+        <?php if ($page < $totalPages): ?>
+            <a class="page-btn" href="<?= htmlspecialchars(Auth::url('/tags?' . http_build_query(['sort' => $sort, 'dir' => $dir, 'page' => $page + 1])), ENT_QUOTES, 'UTF-8') ?>">&#8250;</a>
+        <?php else: ?>
+            <span class="page-btn disabled">&#8250;</span>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
 

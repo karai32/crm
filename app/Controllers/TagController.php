@@ -13,15 +13,26 @@ class TagController
     {
         Auth::requirePermission('tags.manage');
 
-        $sort = in_array($_GET['sort'] ?? '', ['name', 'slug'], true) ? $_GET['sort'] : 'name';
-        $dir  = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $sort    = in_array($_GET['sort'] ?? '', ['name', 'slug'], true) ? $_GET['sort'] : 'name';
+        $dir     = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $perPage = SettingsRepository::perPage();
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $total   = $this->tags->count();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
 
         View::render('tags/index', [
-            'title'  => 'Tags',
-            'styles' => ['settings.css'],
-            'tags'   => $this->tags->all($sort, $dir),
-            'sort'   => $sort,
-            'dir'    => $dir,
+            'title'      => 'Tags',
+            'styles'     => ['settings.css'],
+            'tags'       => $this->tags->paginate($page, $perPage, $sort, $dir),
+            'sort'       => $sort,
+            'dir'        => $dir,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
+            'totalPages' => $totalPages,
         ]);
     }
 

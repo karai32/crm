@@ -15,15 +15,26 @@ class SectorController
     {
         Auth::requirePermission('sectors.manage');
 
-        $sort = in_array($_GET['sort'] ?? '', ['name', 'slug', 'is_active'], true) ? $_GET['sort'] : 'name';
-        $dir  = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $sort    = in_array($_GET['sort'] ?? '', ['name', 'slug', 'is_active'], true) ? $_GET['sort'] : 'name';
+        $dir     = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $perPage = SettingsRepository::perPage();
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $total   = $this->sectors->count();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
 
         View::render('sectors/index', [
-            'title'   => 'Sectors',
-            'styles'  => ['settings.css'],
-            'sectors' => $this->sectors->all($sort, $dir),
-            'sort'    => $sort,
-            'dir'     => $dir,
+            'title'      => 'Sectors',
+            'styles'     => ['settings.css'],
+            'sectors'    => $this->sectors->paginate($page, $perPage, $sort, $dir),
+            'sort'       => $sort,
+            'dir'        => $dir,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
+            'totalPages' => $totalPages,
         ]);
     }
 

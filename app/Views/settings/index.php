@@ -1,0 +1,31 @@
+<?php
+$savedPerPage   = (int) ($settings['per_page'] ?? 20);
+$perPageOptions = [10, 15, 20, 25, 50, 100];
+?>
+
+<div class="page-header settings-header">
+    <div>
+        <h1>Settings</h1>
+        <span class="count-label">System configuration</span>
+    </div>
+</div>
+
+<div class="settings-form-card">
+    <form method="post" action="<?= htmlspecialchars(Auth::url('/settings/update'), ENT_QUOTES, 'UTF-8') ?>">
+        <?= Csrf::field() ?>
+        <div class="settings-form-body">
+            <div class="field">
+                <label for="per_page">Records per page</label>
+                <select id="per_page" name="per_page" class="settings-select-sm">
+                    <?php foreach ($perPageOptions as $opt): ?>
+                    <option value="<?= $opt ?>" <?= $savedPerPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="field-hint">Number of rows displayed per page in all tables across the system.</span>
+            </div>
+        </div>
+        <div class="settings-form-actions">
+            <button type="submit" class="btn btn-primary">Save settings</button>
+        </div>
+    </form>
+</div>

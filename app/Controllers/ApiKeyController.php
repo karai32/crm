@@ -18,16 +18,27 @@ class ApiKeyController
         $newCredentials = $_SESSION['new_api_credentials'] ?? null;
         unset($_SESSION['new_api_credentials']);
 
-        $sort = $this->sortParam(['name', 'is_active', 'created_at'], 'created_at');
-        $dir  = $this->dirParam();
+        $sort    = $this->sortParam(['name', 'is_active', 'created_at'], 'created_at');
+        $dir     = $this->dirParam();
+        $perPage = SettingsRepository::perPage();
+        $page    = max(1, (int) ($_GET['page'] ?? 1));
+        $total   = $this->apiKeys->count();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
 
         View::render('api/index', [
             'title'          => 'API Credentials',
             'styles'         => ['api.css'],
-            'apiKeys'        => $this->apiKeys->all($sort, $dir),
+            'apiKeys'        => $this->apiKeys->paginate($page, $perPage, $sort, $dir),
             'newCredentials' => $newCredentials,
             'sort'           => $sort,
             'dir'            => $dir,
+            'page'           => $page,
+            'perPage'        => $perPage,
+            'total'          => $total,
+            'totalPages'     => $totalPages,
         ]);
     }
 
@@ -129,7 +140,7 @@ class ApiKeyController
         Auth::requireAdmin();
 
         $page    = max(1, (int) ($_GET['page'] ?? 1));
-        $perPage = 50;
+        $perPage = SettingsRepository::perPage();
         $filters = [
             'key_id'    => (int) ($_GET['key_id'] ?? 0),
             'method'    => trim($_GET['method'] ?? ''),

@@ -22,6 +22,36 @@ class ApiKeyRepository
         return $statement->fetchAll();
     }
 
+    public function count(): int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM api_keys');
+        $stmt->execute();
+
+        return (int) ($stmt->fetch()['total'] ?? 0);
+    }
+
+    public function paginate(int $page, int $perPage, string $sort = 'created_at', string $dir = 'desc'): array
+    {
+        $pdo     = Database::connect();
+        $allowed = ['name' => 'name', 'is_active' => 'is_active', 'created_at' => 'created_at'];
+        $orderCol = $allowed[$sort] ?? 'created_at';
+        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $offset   = ($page - 1) * $perPage;
+
+        $stmt = $pdo->prepare("
+            SELECT id, name, client_id, scopes, is_active, last_used_at, created_at
+            FROM api_keys
+            ORDER BY {$orderCol} {$orderDir}
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function findActiveByClientId(string $clientId): ?array
     {
         $pdo = Database::connect();
