@@ -63,10 +63,32 @@
 
 /* Client links in the contacts table */
 .col-client-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
     font-size: 13px;
     color: var(--color-text);
     font-weight: 600;
     white-space: nowrap;
+}
+
+.col-clients .sector-list-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-neutral-200);
+    color: var(--color-neutral);
+}
+
+.col-clients .sector-list-icon i {
+    font-size: 15px;
+    line-height: 1;
 }
 
 .col-client-link:hover {
@@ -87,7 +109,7 @@
     border-radius: 10px;
     background: var(--color-bg);
     color: var(--color-success);
-    border: 1px solid #F0F0F0;
+    border: 1px solid #f0f0f0;
     white-space: nowrap;
     text-decoration: none;
     vertical-align: middle;
@@ -120,7 +142,7 @@
 /* --- Contact hero (show page) ------------------------- */
 .contact-hero {
     background: var(--color-white);
-    border: 1px solid #F0F0F0;
+    border: 1px solid #f0f0f0;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     padding: 20px 24px;
@@ -220,7 +242,7 @@
 /* --- Form card (create / edit) ------------------------ */
 .contact-form-card {
     background: var(--color-white);
-    border: 1px solid #F0F0F0;
+    border: 1px solid #f0f0f0;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -243,7 +265,7 @@
     gap: 5px;
     max-height: 150px;
     overflow-y: auto;
-    border: 1px solid #F0F0F0;
+    border: 1px solid #f0f0f0;
     border-radius: var(--radius-sm);
     padding: 10px 12px;
     background: var(--color-bg-subtle);
@@ -260,7 +282,7 @@
     margin: 0;
 }
 
-.checkbox-picker-grid input[type="checkbox"] {
+.checkbox-picker-grid input[type='checkbox'] {
     width: auto;
     max-width: none;
     padding: 0;
@@ -269,7 +291,7 @@
 /* --- Export page -------------------------------------- */
 .export-card {
     background: var(--color-white);
-    border: 1px solid #F0F0F0;
+    border: 1px solid #f0f0f0;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -293,7 +315,7 @@
     cursor: pointer;
     padding: 6px 10px;
     border-radius: var(--radius-sm);
-    transition: background .12s;
+    transition: background 0.12s;
     margin: 0;
 }
 
@@ -301,7 +323,7 @@
     background: var(--color-bg);
 }
 
-.export-fields-grid input[type="checkbox"] {
+.export-fields-grid input[type='checkbox'] {
     width: 15px;
     height: 15px;
     max-width: none;
@@ -317,7 +339,7 @@
     gap: 10px;
     padding: 12px 20px;
     background: var(--color-accent-bg);
-    border-top: 1px solid #BFDBFE;
+    border-top: 1px solid #bfdbfe;
     font-size: 13px;
     color: #3730a3;
 }
@@ -386,4 +408,3 @@ i.contact-sidebar-icon {
     width: auto;
     height: auto;
 }
-
