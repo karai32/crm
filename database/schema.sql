@@ -9,7 +9,7 @@ USE crm;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS settings;
+DROP TABLE IF EXISTS user_preferences;
 DROP TABLE IF EXISTS api_logs;
 DROP TABLE IF EXISTS api_keys;
 DROP TABLE IF EXISTS audit_logs;
@@ -352,15 +352,17 @@ CREATE TABLE api_logs (
     INDEX idx_api_logs_status_created (response_status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE settings (
+CREATE TABLE user_preferences (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    setting_key VARCHAR(80) NOT NULL UNIQUE,
-    setting_value TEXT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    preference_key VARCHAR(80) NOT NULL,
+    preference_value TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_user_pref (user_id, preference_key),
+    CONSTRAINT fk_user_preferences_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    INDEX idx_user_preferences_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-INSERT INTO settings (setting_key, setting_value) VALUES ('per_page', '20');
 
 INSERT INTO roles (name, label) VALUES
 ('admin', 'Administrator'),

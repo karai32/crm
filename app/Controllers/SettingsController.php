@@ -2,31 +2,37 @@
 
 class SettingsController
 {
-    private SettingsRepository $settings;
+    private SettingsRepository $prefs;
 
     public function __construct()
     {
-        $this->settings = new SettingsRepository();
+        $this->prefs = new SettingsRepository();
     }
 
     public function index(): void
     {
-        Auth::requireAdmin();
+        Auth::requireLogin();
+
+        $user   = Auth::user();
+        $userId = (int) ($user['id'] ?? 0);
 
         View::render('settings/index', [
             'title'    => 'Settings',
             'styles'   => ['settings.css'],
-            'settings' => $this->settings->all(),
+            'prefs'    => $this->prefs->all($userId),
         ]);
     }
 
     public function update(): void
     {
-        Auth::requireAdmin();
+        Auth::requireLogin();
+
+        $user   = Auth::user();
+        $userId = (int) ($user['id'] ?? 0);
 
         $perPage = (int) ($_POST['per_page'] ?? 20);
         $perPage = max(5, min(500, $perPage));
-        $this->settings->set('per_page', $perPage);
+        $this->prefs->set($userId, 'per_page', $perPage);
 
         Auth::redirect('/settings');
     }

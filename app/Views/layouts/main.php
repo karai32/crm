@@ -93,15 +93,7 @@ if ($authUser) {
             <?php endif; ?>
 
             <?php if ($canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers || $canManageApiKeys): ?>
-            <div class="sidebar-section-label"><span class="nav-label">Settings</span></div>
-            <?php endif; ?>
-
-            <?php if ($canManageApiKeys): ?>
-            <a href="<?= htmlspecialchars(Auth::url('/settings'), ENT_QUOTES, 'UTF-8') ?>"
-               class="nav-item <?= $isActive('/settings') ?>" title="Settings">
-                <span class="nav-icon"><i class="ph ph-gear"></i></span>
-                <span class="nav-label">Settings</span>
-            </a>
+            <div class="sidebar-section-label"><span class="nav-label">Admin</span></div>
             <?php endif; ?>
 
             <?php if ($canManageCustomFields): ?>
@@ -144,6 +136,15 @@ if ($authUser) {
             </a>
             <?php endif; ?>
 
+            <?php endif; ?>
+
+            <?php if ($authUser): ?>
+            <div class="sidebar-section-label"><span class="nav-label">Account</span></div>
+            <a href="<?= htmlspecialchars(Auth::url('/settings'), ENT_QUOTES, 'UTF-8') ?>"
+               class="nav-item <?= $isActive('/settings') ?>" title="Settings">
+                <span class="nav-icon"><i class="ph ph-gear"></i></span>
+                <span class="nav-label">Settings</span>
+            </a>
             <?php endif; ?>
 
         </nav>

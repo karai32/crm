@@ -1,12 +1,12 @@
 <?php
-$savedPerPage   = (int) ($settings['per_page'] ?? 20);
+$savedPerPage   = (int) ($prefs['per_page'] ?? 20);
 $perPageOptions = [10, 15, 20, 25, 50, 100];
 ?>
 
 <div class="page-header settings-header">
     <div>
         <h1>Settings</h1>
-        <span class="count-label">System configuration</span>
+        <span class="count-label">Your personal preferences</span>
     </div>
 </div>
 
@@ -21,7 +21,7 @@ $perPageOptions = [10, 15, 20, 25, 50, 100];
                     <option value="<?= $opt ?>" <?= $savedPerPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                     <?php endforeach; ?>
                 </select>
-                <span class="field-hint">Number of rows displayed per page in all tables across the system.</span>
+                <span class="field-hint">Number of rows displayed per page in all tables.</span>
             </div>
         </div>
         <div class="settings-form-actions">
