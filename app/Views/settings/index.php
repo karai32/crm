@@ -1,6 +1,6 @@
 <?php
 $savedPerPage   = (int) ($prefs['per_page'] ?? 20);
-$perPageOptions = [10, 15, 20, 25, 50, 100];
+$perPageOptions = [20, 50, 100, 200];
 ?>
 
 <div class="page-header settings-header">
@@ -18,7 +18,7 @@ $perPageOptions = [10, 15, 20, 25, 50, 100];
                 <label for="per_page">Records per page</label>
                 <select id="per_page" name="per_page" class="settings-select-sm">
                     <?php foreach ($perPageOptions as $opt): ?>
-                    <option value="<?= $opt ?>" <?= $savedPerPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                        <option value="<?= $opt ?>" <?= $savedPerPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                     <?php endforeach; ?>
                 </select>
                 <span class="field-hint">Number of rows displayed per page in all tables.</span>
