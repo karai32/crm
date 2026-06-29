@@ -22,7 +22,7 @@ class DashboardRepository
         return $this->countTable('tags');
     }
 
-    public function latestContacts(int $limit = 5): array
+    public function latestContacts(int $limit = 25): array
     {
         $pdo = Database::connect();
 

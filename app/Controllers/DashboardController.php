@@ -15,7 +15,7 @@ class DashboardController
     {
         Auth::requireLogin();
 
-        $latestContacts = $this->dashboardRepository->latestContacts(5);
+        $latestContacts = $this->dashboardRepository->latestContacts(25);
         $contactIds = array_map('intval', array_column($latestContacts, 'id'));
 
         View::render('dashboard/index', [
