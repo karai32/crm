@@ -448,7 +448,9 @@ $hasExtended = !empty($filters['custom_fields']);
                             <?php if ($cCount > 0): ?>
                                 <a class="col-client-link" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $cList[0]['id']), ENT_QUOTES, 'UTF-8') ?>">
                                     <?php if (!empty($cList[0]['sector_icon'])): ?>
-                                        <i class="ph ph-<?= htmlspecialchars($cList[0]['sector_icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                                        <span class="sector-list-icon">
+                                            <i class="ph ph-<?= htmlspecialchars($cList[0]['sector_icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                                        </span>
                                     <?php endif; ?>
 
                                     <?= htmlspecialchars($cList[0]['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
