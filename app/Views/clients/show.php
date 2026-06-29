@@ -7,7 +7,15 @@
             <i class="ph ph-buildings"></i>
         </div>
         <div>
-            <div class="client-hero-name"><?= htmlspecialchars($client['commercial_name'], ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="client-hero-name">
+                <?= htmlspecialchars($client['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
+                <?php if (!empty($client['is_active']) && $client['is_active'] === 1): ?>
+                    <div class="client-active-status">
+                        <i class="ph ph-check"></i>
+                        active
+                    </div>
+                <?php endif; ?>
+            </div>
             <div class="client-hero-meta">
                 <?php if (!empty($client['sector_name'])): ?>
                     <span class="client-hero-meta-item">
@@ -29,7 +37,13 @@
                         </a>
                     </span>
                 <?php endif; ?>
-                <?php print_r($client); ?>
+                <?php if (!empty($client['is_web_connected']) && $client['is_web_connected'] === 1): ?>
+                    <span class="client-hero-meta-item">
+                        <i class="ph ph-plugs-connected"></i>
+                        Connected to api
+                    </span>
+                <?php endif; ?>
+
             </div>
         </div>
     </div>
@@ -84,7 +98,7 @@
                     <th class="detail-th">Country</th>
                     <td class="detail-td"><?= htmlspecialchars($client['country'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
-                <tr>
+                <!--<tr>
                     <th class="detail-th">Active</th>
                     <td class="detail-td">
                         <?php if ((int) $client['is_active']): ?>
@@ -93,7 +107,7 @@
                             <span class="badge-inactive">Inactive</span>
                         <?php endif; ?>
                     </td>
-                </tr>
+                </tr> -->
                 <tr>
                     <th class="detail-th">Website</th>
                     <td class="detail-td">
