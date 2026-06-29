@@ -84,6 +84,7 @@
     background: var(--color-bg-subtle);
     border: 1px solid var(--color-neutral-200);
     color: var(--color-neutral);
+    text-decoration: none;
 }
 
 .col-clients .sector-list-icon i {

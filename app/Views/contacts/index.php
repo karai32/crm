@@ -450,6 +450,7 @@ $hasExtended = !empty($filters['custom_fields']);
                                     <?php if (!empty($cList[0]['sector_icon'])): ?>
                                         <span class="sector-list-icon">
                                             <i class="ph ph-<?= htmlspecialchars($cList[0]['sector_icon'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                                            <span class="tooltip-text">View</span>
                                         </span>
                                     <?php endif; ?>
 
