@@ -419,6 +419,29 @@ class ContactRepository
         }
     }
 
+    public function countUninspected(): int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->query("SELECT COUNT(*) FROM contacts WHERE email IS NOT NULL AND email != '' AND is_corporate_email IS NULL");
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function uninspectedBatch(int $limit): array
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare("SELECT id, email FROM contacts WHERE email IS NOT NULL AND email != '' AND is_corporate_email IS NULL ORDER BY id ASC LIMIT :limit");
+        $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function updateEmailInspection(int $id, ?int $isCorporate, ?string $status): void
+    {
+        $pdo = Database::connect();
+        $pdo->prepare('UPDATE contacts SET is_corporate_email = :is_corporate, email_status = :status WHERE id = :id')
+            ->execute(['is_corporate' => $isCorporate, 'status' => $status, 'id' => $id]);
+    }
+
     private function buildFilterSql(array $filters): array
     {
         $where = [];

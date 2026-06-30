@@ -214,6 +214,7 @@ $router->get('/ajax/tags/search', [$ajaxController, 'tagsSearch']);
 $router->get('/ajax/sectors/search', [$ajaxController, 'sectorsSearch']);
 $router->get('/ajax/icons/search', [$ajaxController, 'iconsSearch']);
 $router->get('/ajax/custom-field/values', [$ajaxController, 'customFieldValues']);
+$router->post('/ajax/contacts/inspect-email-batch', [$ajaxController, 'inspectEmailBatch']);
 
 try {
     $isApiRequest = str_contains($_SERVER['REQUEST_URI'] ?? '/', '/api/v1/');

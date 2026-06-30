@@ -209,6 +209,35 @@ class AjaxController
         $this->json(['items' => $items, 'has_more' => $hasMore]);
     }
 
+    public function inspectEmailBatch(): void
+    {
+        Auth::requireLogin();
+
+        set_time_limit(120);
+
+        $batchSize = 50;
+        $total     = $this->contacts->countUninspected();
+        $batch     = $this->contacts->uninspectedBatch($batchSize);
+
+        foreach ($batch as $contact) {
+            $result = EmailInspector::inspect($contact['email']);
+            $this->contacts->updateEmailInspection(
+                (int) $contact['id'],
+                $result['is_corporate_email'],
+                $result['email_status']
+            );
+        }
+
+        $processed = count($batch);
+        $remaining = max(0, $total - $processed);
+
+        $this->json([
+            'processed' => $processed,
+            'remaining' => $remaining,
+            'done'      => $processed === 0,
+        ]);
+    }
+
     private function paginatedItems(string $q, int $page, callable $fetch, int $perPage = 20): array
     {
         $offset = ($page - 1) * $perPage;
