@@ -154,7 +154,7 @@ class ExportService
         if ($needCfv && !empty($cfIds)) {
             $cfCases = [];
             foreach ($cfIds as $cfId) {
-                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) END) AS cf_" . $cfId;
+                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN CONVERT(COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) USING utf8mb4) END) AS cf_" . $cfId;
             }
             $subqueryJoins[] = "LEFT JOIN (
                 SELECT entity_id, " . implode(', ', $cfCases) . "
@@ -239,7 +239,7 @@ class ExportService
         if ($needCfv && !empty($cfIds)) {
             $cfCases = [];
             foreach ($cfIds as $cfId) {
-                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) END) AS cf_" . $cfId;
+                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN CONVERT(COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) USING utf8mb4) END) AS cf_" . $cfId;
             }
             $subqueryJoins[] = "LEFT JOIN (
                 SELECT entity_id, " . implode(', ', $cfCases) . "
