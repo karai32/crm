@@ -73,8 +73,18 @@ $perPageOptions = [20, 50, 100, 200];
 
     function runBatch() {
         fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) {
+                    return r.text().then(function (t) { throw new Error('HTTP ' + r.status + ': ' + t.slice(0, 120)); });
+                }
+                return r.json();
+            })
             .then(function (data) {
+                if (data.error) {
+                    setProgress(0, '✗ Server error: ' + data.error.slice(0, 120));
+                    finish(true);
+                    return;
+                }
                 totalProcessed += data.processed;
 
                 if (totalInitial === null) {

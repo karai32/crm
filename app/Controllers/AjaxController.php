@@ -215,27 +215,35 @@ class AjaxController
 
         set_time_limit(120);
 
-        $batchSize = 50;
-        $total     = $this->contacts->countUninspected();
-        $batch     = $this->contacts->uninspectedBatch($batchSize);
+        try {
+            $batchSize = 50;
+            $total     = $this->contacts->countUninspected();
+            $batch     = $this->contacts->uninspectedBatch($batchSize);
 
-        foreach ($batch as $contact) {
-            $result = EmailInspector::inspect($contact['email']);
-            $this->contacts->updateEmailInspection(
-                (int) $contact['id'],
-                $result['is_corporate_email'],
-                $result['email_status']
-            );
+            foreach ($batch as $contact) {
+                $result = EmailInspector::inspect($contact['email']);
+                $this->contacts->updateEmailInspection(
+                    (int) $contact['id'],
+                    $result['is_corporate_email'],
+                    $result['email_status']
+                );
+            }
+
+            $processed = count($batch);
+
+            $this->json([
+                'processed' => $processed,
+                'remaining' => max(0, $total - $processed),
+                'done'      => $processed === 0,
+            ]);
+        } catch (Throwable $e) {
+            $this->json([
+                'error'     => $e->getMessage(),
+                'processed' => 0,
+                'remaining' => 0,
+                'done'      => true,
+            ], 500);
         }
-
-        $processed = count($batch);
-        $remaining = max(0, $total - $processed);
-
-        $this->json([
-            'processed' => $processed,
-            'remaining' => $remaining,
-            'done'      => $processed === 0,
-        ]);
     }
 
     private function paginatedItems(string $q, int $page, callable $fetch, int $perPage = 20): array

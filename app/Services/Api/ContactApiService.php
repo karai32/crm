@@ -99,8 +99,8 @@ class ContactApiService extends AbstractApiService
             'email'              => $contact['email'],
             'phone'              => $contact['phone'],
             'company'            => $contact['company'],
-            'is_corporate_email' => $contact['is_corporate_email'],
-            'email_status'       => $contact['email_status'],
+            'is_corporate_email' => $contact['is_corporate_email'] ?? null,
+            'email_status'       => $contact['email_status'] ?? null,
         ];
 
         foreach (['full_name', 'email', 'phone', 'company'] as $field) {

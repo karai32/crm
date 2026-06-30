@@ -217,9 +217,11 @@ $router->get('/ajax/custom-field/values', [$ajaxController, 'customFieldValues']
 $router->post('/ajax/contacts/inspect-email-batch', [$ajaxController, 'inspectEmailBatch']);
 
 try {
-    $isApiRequest = str_contains($_SERVER['REQUEST_URI'] ?? '/', '/api/v1/');
+    $requestUri   = $_SERVER['REQUEST_URI'] ?? '/';
+    $isApiRequest  = str_contains($requestUri, '/api/v1/');
+    $isAjaxRequest = str_contains($requestUri, '/ajax/');
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiRequest && !Csrf::validate($_POST['_csrf_token'] ?? null)) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiRequest && !$isAjaxRequest && !Csrf::validate($_POST['_csrf_token'] ?? null)) {
         http_response_code(419);
         echo 'Invalid form token. Please go back and try again.';
         exit;
