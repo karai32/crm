@@ -213,7 +213,7 @@ abstract class AbstractApiController
 
     private function truncate(string $s, int $limit = 64000): string
     {
-        return mb_strlen($s) > $limit ? mb_substr($s, 0, $limit) . '…' : $s;
+        return strlen($s) > $limit ? substr($s, 0, $limit) . '…' : $s;
     }
 
     private function error(string $code, string $message, array $details = []): array
