@@ -20,8 +20,8 @@ class ClientController
         Auth::requireLogin();
 
         $filters = $this->filtersFromRequest();
-        $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at', 'is_active'], 'id');
-        $dir     = $this->dirParam();
+        $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at', 'is_active'], 'commercial_name');
+        $dir     = $this->dirParam('asc');
         $total   = $this->clients->countAll($filters);
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 

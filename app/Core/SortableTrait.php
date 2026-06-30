@@ -8,9 +8,13 @@ trait SortableTrait
         return in_array($v, $allowed, true) ? $v : $default;
     }
 
-    private function dirParam(): string
+    private function dirParam(string $default = 'desc'): string
     {
-        return ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
+        $v = $_GET['dir'] ?? '';
+        if ($v === 'asc' || $v === 'desc') {
+            return $v;
+        }
+        return $default;
     }
 
     protected function pageParams(int $total): array

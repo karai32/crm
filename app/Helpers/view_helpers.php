@@ -25,12 +25,12 @@ function thSort(string $col, string $label, string $sort, string $dir, string $b
     $nd     = ($sort === $col && $dir === 'asc') ? 'desc' : 'asc';
     $url    = Auth::url($basePath . '?' . http_build_query(array_merge($baseParams, ['sort' => $col, 'dir' => $nd])));
     $active = $sort === $col;
-    $icon   = $active ? ($dir === 'asc' ? '↑' : '↓') : '↕';
+    $iconName = $active ? ($dir === 'asc' ? 'ph-arrow-up' : 'ph-arrow-down') : 'ph-arrows-down-up';
     $cls    = trim('th-sort' . ($active ? ' th-sort--' . $dir : '') . ($xClass !== '' ? ' ' . $xClass : ''));
     $href   = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
     return '<th class="' . $cls . '"><a href="' . $href . '">'
         . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
-        . ' <span class="sort-icon" aria-hidden="true">' . $icon . '</span></a></th>';
+        . ' <i class="ph ' . $iconName . ' sort-icon" aria-hidden="true"></i></a></th>';
 }
 
 function renderPagination(int $page, int $totalPages, int $total, int $perPage, string $basePath, array $baseParams = [], string $cssClass = 'list-pagination'): void
