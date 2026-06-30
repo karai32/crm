@@ -161,41 +161,46 @@
 
 <!-- Related contacts -->
 <div class="card card-related-contacts">
-    <div class="card-related-contacts-header">
-        <span class="card-related-contacts-title">Related contacts</span>
-        <span class="card-related-contacts-count"><?= count($contacts) ?> total</span>
+    <div class="card-related-contacts-header" id="relatedContactsToggle" role="button" tabindex="0" aria-expanded="false">
+        <div class="card-related-contacts-left">
+            <span class="card-related-contacts-title">Related contacts</span>
+            <span class="card-related-contacts-count"><?= count($contacts) ?> total</span>
+        </div>
+        <i class="ph ph-caret-down card-related-contacts-chevron" aria-hidden="true"></i>
     </div>
 
-    <?php if (empty($contacts)): ?>
-        <p class="card-no-contacts">No contacts linked to this client.</p>
-    <?php else: ?>
-        <table class="data-table related-contacts-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($contacts as $contact): ?>
+    <div class="related-contacts-body" id="relatedContactsBody">
+        <?php if (empty($contacts)): ?>
+            <p class="card-no-contacts">No contacts linked to this client.</p>
+        <?php else: ?>
+            <table class="data-table related-contacts-table">
+                <thead>
                     <tr>
-                        <td class="col-contact-name">
-                            <?= htmlspecialchars($contact['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                        </td>
-                        <td class="col-contact-muted"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                        <td class="col-contact-muted"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                        <td>
-                            <div class="action-links">
-                                <a class="action-btn action-view" title="View" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
-                                    <i class="ph ph-eye"></i>
-                                </a>
-                            </div>
-                        </td>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th></th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
+                </thead>
+                <tbody>
+                    <?php foreach ($contacts as $contact): ?>
+                        <tr>
+                            <td class="col-contact-name">
+                                <?= htmlspecialchars($contact['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                            </td>
+                            <td class="col-contact-muted"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="col-contact-muted"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
+                                <div class="action-links">
+                                    <a class="action-btn action-view" title="View" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
+                                        <i class="ph ph-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
 </div>

@@ -303,11 +303,36 @@
 
 /* Client show: related contacts header row */
 .card-related-contacts-header {
-    padding: 14px 16px 10px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 14px 16px;
+    border-bottom: 1px solid transparent;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.18s;
+}
+
+.card-related-contacts-header.open {
+    border-bottom-color: #f0f0f0;
+}
+
+/* Client show: related contacts header left group */
+.card-related-contacts-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Client show: related contacts chevron */
+.card-related-contacts-chevron {
+    font-size: 15px;
+    color: var(--color-neutral);
+    transition: transform 0.25s ease;
+}
+
+.card-related-contacts-header.open .card-related-contacts-chevron {
+    transform: rotate(180deg);
 }
 
 /* Client show: related contacts header title */
@@ -321,6 +346,13 @@
 .card-related-contacts-count {
     font-size: 12px;
     color: var(--color-text-muted);
+}
+
+/* Client show: collapsible body */
+.related-contacts-body {
+    overflow: hidden;
+    height: 0;
+    transition: height 0.25s ease;
 }
 
 /* Client show: no contacts linked message */
