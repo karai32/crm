@@ -108,6 +108,7 @@ class ClientController
         View::render('clients/show', [
             'title'               => 'Client details',
             'styles'              => ['clients.css'],
+            'scripts'             => ['clients.js'],
             'client'              => $client,
             'contacts'            => $this->clients->contactsForClient((int) $client['id']),
             'tags'                => $this->clients->tagsForClient((int) $client['id']),
