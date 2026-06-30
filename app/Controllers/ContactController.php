@@ -106,6 +106,7 @@ class ContactController
             return;
         }
 
+        $data = array_merge($data, EmailInspector::inspect($data['email']));
         $id = $this->contacts->create($data);
         $this->contacts->syncTags($id, $tagIds);
         $this->contacts->syncClients($id, $clientIds);
@@ -197,6 +198,7 @@ class ContactController
             return;
         }
 
+        $data = array_merge($data, EmailInspector::inspect($data['email']));
         $this->contacts->update($id, $data);
         $this->contacts->syncTags($id, $tagIds);
         $this->contacts->syncClients($id, $clientIds);
@@ -273,9 +275,11 @@ class ContactController
             'tag_ids'       => $this->tagIdsFromGet(),
             'created_from'  => trim($_GET['created_from'] ?? ''),
             'created_to'    => trim($_GET['created_to'] ?? ''),
-            'updated_from'  => trim($_GET['updated_from'] ?? ''),
-            'updated_to'    => trim($_GET['updated_to'] ?? ''),
-            'custom_fields' => $this->customFieldFiltersFromRequest(),
+            'updated_from'       => trim($_GET['updated_from'] ?? ''),
+            'updated_to'         => trim($_GET['updated_to'] ?? ''),
+            'is_corporate_email' => $_GET['is_corporate_email'] ?? '',
+            'email_status'       => $_GET['email_status'] ?? '',
+            'custom_fields'      => $this->customFieldFiltersFromRequest(),
         ];
     }
 

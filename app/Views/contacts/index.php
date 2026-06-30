@@ -99,6 +99,18 @@ foreach ($selectedTagObjects as $tag) {
     $chips[] = ['text' => 'Tag: ' . $tag['name'], 'href' => $base . '?' . http_build_query($f)];
 }
 
+if ($filters['is_corporate_email'] !== '') {
+    $f = $filters; unset($f['is_corporate_email'], $f['page']);
+    $chips[] = ['text' => $filters['is_corporate_email'] === '1' ? 'Email: Corporate' : 'Email: Consumer',
+                'href' => $base . '?' . http_build_query($f)];
+}
+
+if ($filters['email_status'] !== '') {
+    $f = $filters; unset($f['email_status'], $f['page']);
+    $chips[] = ['text' => 'Email status: ' . ucfirst($filters['email_status']),
+                'href' => $base . '?' . http_build_query($f)];
+}
+
 if (!empty($filters['custom_fields'])) {
     foreach ($filters['custom_fields'] as $fieldId => $value) {
         if ($value !== '') {
@@ -240,6 +252,44 @@ $hasExtended = !empty($filters['custom_fields']);
                     data-placeholder="All sectors"
                     data-options="<?= htmlspecialchars(json_encode(array_map(fn($s) => ['id' => (int) $s['id'], 'name' => $s['name']], $filterSectors)), ENT_QUOTES, 'UTF-8') ?>"
                     data-selected="<?= htmlspecialchars($preselectedSectorJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+            </div>
+            <div class="field">
+                <label>Email type</label>
+                <?php
+                    $preselectedEmailTypeJson = '[]';
+                    if ($filters['is_corporate_email'] !== '') {
+                        $preselectedEmailTypeJson = json_encode([[
+                            'id'   => $filters['is_corporate_email'],
+                            'name' => $filters['is_corporate_email'] === '1' ? 'Corporate' : 'Consumer',
+                        ]]);
+                    }
+                ?>
+                <div class="token-picker token-picker--filter"
+                    data-name="is_corporate_email"
+                    data-max="1"
+                    data-placeholder="All"
+                    data-options='[{"id":"1","name":"Corporate"},{"id":"0","name":"Consumer"}]'
+                    data-selected="<?= htmlspecialchars($preselectedEmailTypeJson, ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+            </div>
+            <div class="field">
+                <label>Email status</label>
+                <?php
+                    $preselectedEmailStatusJson = '[]';
+                    if ($filters['email_status'] !== '') {
+                        $preselectedEmailStatusJson = json_encode([[
+                            'id'   => $filters['email_status'],
+                            'name' => ucfirst($filters['email_status']),
+                        ]]);
+                    }
+                ?>
+                <div class="token-picker token-picker--filter"
+                    data-name="email_status"
+                    data-max="1"
+                    data-placeholder="All"
+                    data-options='[{"id":"valid","name":"Valid"},{"id":"invalid","name":"Invalid"}]'
+                    data-selected="<?= htmlspecialchars($preselectedEmailStatusJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
         </div>
@@ -439,7 +489,21 @@ $hasExtended = !empty($filters['custom_fields']);
                         </td>
                         <td class="col-id"><?= (int) $contact['id'] ?></td>
                         <td class="col-name"><a class="col-row-link" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?></a></td>
-                        <td class="col-email"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="col-email">
+                            <?php if (!empty($contact['email'])): ?>
+                                <span class="email-cell">
+                                    <?= htmlspecialchars($contact['email'], ENT_QUOTES, 'UTF-8') ?>
+                                    <?php if ($contact['is_corporate_email'] === '0'): ?>
+                                        <i class="ph ph-user-circle email-badge email-badge--consumer" title="Consumer email"></i>
+                                    <?php endif; ?>
+                                    <?php if ($contact['email_status'] === 'invalid'): ?>
+                                        <i class="ph ph-warning email-badge email-badge--invalid" title="Invalid email (no MX record)"></i>
+                                    <?php endif; ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="col-muted">-</span>
+                            <?php endif; ?>
+                        </td>
                         <td class="col-clients">
                             <?php
                             $cList  = $contactClients[(int) $contact['id']] ?? [];

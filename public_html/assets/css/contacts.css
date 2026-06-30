@@ -53,6 +53,51 @@
     font-size: 13px;
 }
 
+/* Email cell with badges */
+.email-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.email-badge {
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.email-badge--consumer {
+    color: var(--color-text-muted);
+}
+
+.email-badge--invalid {
+    color: #e05050;
+}
+
+/* Email tags in detail view */
+.email-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 6px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+.email-tag--consumer {
+    background: #f0f0f0;
+    color: var(--color-neutral);
+}
+
+.email-tag--invalid {
+    background: #fef0f0;
+    color: #c0392b;
+    border: 1px solid #f5c6c6;
+}
+
 .contacts-table td.col-tags {
     max-width: 220px;
 }

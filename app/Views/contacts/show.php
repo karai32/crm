@@ -76,7 +76,19 @@ $canEditContacts = Auth::can('contacts.edit');
                     </tr>
                     <tr>
                         <td class="detail-th">Email</td>
-                        <td class="detail-td"><?= htmlspecialchars($contact['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="detail-td">
+                            <?php if (!empty($contact['email'])): ?>
+                                <?= htmlspecialchars($contact['email'], ENT_QUOTES, 'UTF-8') ?>
+                                <?php if (isset($contact['is_corporate_email']) && $contact['is_corporate_email'] === '0'): ?>
+                                    <span class="email-tag email-tag--consumer"><i class="ph ph-user-circle"></i> Consumer</span>
+                                <?php endif; ?>
+                                <?php if (isset($contact['email_status']) && $contact['email_status'] === 'invalid'): ?>
+                                    <span class="email-tag email-tag--invalid"><i class="ph ph-warning"></i> Invalid</span>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
                     </tr>
                     <tr>
                         <td class="detail-th">Phone</td>

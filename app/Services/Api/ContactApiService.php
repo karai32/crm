@@ -95,10 +95,12 @@ class ContactApiService extends AbstractApiService
         }
 
         $updated = [
-            'full_name' => $contact['full_name'],
-            'email' => $contact['email'],
-            'phone' => $contact['phone'],
-            'company' => $contact['company'],
+            'full_name'          => $contact['full_name'],
+            'email'              => $contact['email'],
+            'phone'              => $contact['phone'],
+            'company'            => $contact['company'],
+            'is_corporate_email' => $contact['is_corporate_email'],
+            'email_status'       => $contact['email_status'],
         ];
 
         foreach (['full_name', 'email', 'phone', 'company'] as $field) {
@@ -112,6 +114,12 @@ class ContactApiService extends AbstractApiService
                     : $this->nullableString($body[$field]));
         }
         $updated['full_name'] = $updated['full_name'] ?: $contact['full_name'];
+
+        if (array_key_exists('email', $body)) {
+            $inspection = EmailInspector::inspect($updated['email']);
+            $updated['is_corporate_email'] = $inspection['is_corporate_email'];
+            $updated['email_status']       = $inspection['email_status'];
+        }
 
         $pdo = Database::connect();
         $pdo->beginTransaction();
@@ -182,11 +190,14 @@ class ContactApiService extends AbstractApiService
         [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
         [$clientIds, $clientCreated] = $this->resolveClientIds($this->splitNames($item['clients'] ?? null));
 
+        $inspection = EmailInspector::inspect($email === '' ? null : $email);
         $contactId = $this->contacts->create([
-            'full_name' => $fullName,
-            'email' => $email === '' ? null : $email,
-            'phone' => $this->nullableString($item['phone'] ?? null),
-            'company' => trim((string) ($item['company'] ?? '')),
+            'full_name'          => $fullName,
+            'email'              => $email === '' ? null : $email,
+            'phone'              => $this->nullableString($item['phone'] ?? null),
+            'company'            => trim((string) ($item['company'] ?? '')),
+            'is_corporate_email' => $inspection['is_corporate_email'],
+            'email_status'       => $inspection['email_status'],
         ]);
 
         if ($tagIds !== []) {

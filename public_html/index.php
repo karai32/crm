@@ -50,6 +50,7 @@ require_once __DIR__ . '/../app/Repositories/CustomFieldRepository.php';
 require_once __DIR__ . '/../app/Repositories/ExportRepository.php';
 require_once __DIR__ . '/../app/Repositories/ImportRepository.php';
 require_once __DIR__ . '/../app/Services/AuthService.php';
+require_once __DIR__ . '/../app/Services/EmailInspector.php';
 require_once __DIR__ . '/../app/Services/PhosphorIconCatalog.php';
 require_once __DIR__ . '/../app/Services/ExportService.php';
 require_once __DIR__ . '/../app/Services/Export/ExportWriter.php';

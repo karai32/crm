@@ -19,7 +19,7 @@ class ContactRepository
         $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
 
         $sql = "
-            SELECT id, full_name, email, phone, created_at
+            SELECT id, full_name, email, phone, created_at, is_corporate_email, email_status
             FROM contacts
             {$whereSql}
             ORDER BY {$orderCol} {$orderDir}
@@ -125,8 +125,8 @@ class ContactRepository
         $pdo = Database::connect();
 
         $sql = "
-            INSERT INTO contacts (full_name, email, phone, company)
-            VALUES (:full_name, :email, :phone, :company)
+            INSERT INTO contacts (full_name, email, phone, company, is_corporate_email, email_status)
+            VALUES (:full_name, :email, :phone, :company, :is_corporate_email, :email_status)
         ";
 
         $statement = $pdo->prepare($sql);
@@ -141,10 +141,12 @@ class ContactRepository
 
         $sql = "
             UPDATE contacts
-            SET full_name  = :full_name,
-                email      = :email,
-                phone      = :phone,
-                company = :company
+            SET full_name          = :full_name,
+                email              = :email,
+                phone              = :phone,
+                company            = :company,
+                is_corporate_email = :is_corporate_email,
+                email_status       = :email_status
             WHERE id = :id
         ";
 
@@ -473,6 +475,16 @@ class ContactRepository
                 )
             ';
             $params['sector_id'] = (int) $filters['sector_id'];
+        }
+
+        if ($filters['is_corporate_email'] !== '' && $filters['is_corporate_email'] !== null) {
+            $where[] = 'contacts.is_corporate_email = :is_corporate_email';
+            $params['is_corporate_email'] = (int) $filters['is_corporate_email'];
+        }
+
+        if (!empty($filters['email_status'])) {
+            $where[] = 'contacts.email_status = :email_status';
+            $params['email_status'] = $filters['email_status'];
         }
 
         if (!empty($filters['created_from'])) {
