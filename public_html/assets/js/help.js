@@ -1,6 +1,9 @@
 (function () {
-    var items = document.querySelectorAll('.help-toc-item');
-    if (!items.length || !window.IntersectionObserver) { return; }
+    var items = Array.from(document.querySelectorAll('.help-toc-item'));
+    if (!items.length) { return; }
+
+    var cards = Array.from(document.querySelectorAll('.help-card[id]'));
+    if (!cards.length) { return; }
 
     var active = null;
 
@@ -12,18 +15,30 @@
         });
     }
 
-    var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { if (e.isIntersecting) { setActive(e.target.id); } });
-    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
-
-    document.querySelectorAll('.help-card').forEach(function (card) { observer.observe(card); });
-
-    var lastItem = items[items.length - 1];
-    window.addEventListener('scroll', function () {
-        if (lastItem && window.innerHeight + window.scrollY >= document.body.scrollHeight - 64) {
-            setActive(lastItem.dataset.section);
+    function update() {
+        // If scrolled to the very bottom — always activate last card
+        if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 8) {
+            setActive(cards[cards.length - 1].id);
+            return;
         }
-    }, { passive: true });
+
+        // Trigger line = 30% from top of viewport
+        var line = window.innerHeight * 0.30;
+        var current = cards[0].id;
+
+        for (var i = 0; i < cards.length; i++) {
+            if (cards[i].getBoundingClientRect().top <= line) {
+                current = cards[i].id;
+            } else {
+                break;
+            }
+        }
+
+        setActive(current);
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
 
     items.forEach(function (a) {
         a.addEventListener('click', function (e) {
