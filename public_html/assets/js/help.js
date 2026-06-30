@@ -18,6 +18,13 @@
 
     document.querySelectorAll('.help-card').forEach(function (card) { observer.observe(card); });
 
+    var lastItem = items[items.length - 1];
+    window.addEventListener('scroll', function () {
+        if (lastItem && window.innerHeight + window.scrollY >= document.body.scrollHeight - 64) {
+            setActive(lastItem.dataset.section);
+        }
+    }, { passive: true });
+
     items.forEach(function (a) {
         a.addEventListener('click', function (e) {
             var t = document.getElementById(a.dataset.section);
