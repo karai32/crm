@@ -67,7 +67,7 @@
 }
 
 .email-badge--consumer {
-    color: var(--color-text-muted);
+    color: var(--color-success);
 }
 
 .email-badge--invalid {
@@ -140,7 +140,6 @@
     font-size: 15px;
     line-height: 1;
 }
-
 
 .col-client-link:hover {
     text-decoration: underline;

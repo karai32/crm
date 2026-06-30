@@ -100,15 +100,21 @@ foreach ($selectedTagObjects as $tag) {
 }
 
 if ($filters['is_corporate_email'] !== '') {
-    $f = $filters; unset($f['is_corporate_email'], $f['page']);
-    $chips[] = ['text' => $filters['is_corporate_email'] === '1' ? 'Email: Corporate' : 'Email: Consumer',
-                'href' => $base . '?' . http_build_query($f)];
+    $f = $filters;
+    unset($f['is_corporate_email'], $f['page']);
+    $chips[] = [
+        'text' => $filters['is_corporate_email'] === '1' ? 'Email: Corporate' : 'Email: Consumer',
+        'href' => $base . '?' . http_build_query($f)
+    ];
 }
 
 if ($filters['email_status'] !== '') {
-    $f = $filters; unset($f['email_status'], $f['page']);
-    $chips[] = ['text' => 'Email status: ' . ucfirst($filters['email_status']),
-                'href' => $base . '?' . http_build_query($f)];
+    $f = $filters;
+    unset($f['email_status'], $f['page']);
+    $chips[] = [
+        'text' => 'Email status: ' . ucfirst($filters['email_status']),
+        'href' => $base . '?' . http_build_query($f)
+    ];
 }
 
 if (!empty($filters['custom_fields'])) {
@@ -257,13 +263,13 @@ $hasExtended = !empty($filters['custom_fields']);
             <div class="field">
                 <label>Email type</label>
                 <?php
-                    $preselectedEmailTypeJson = '[]';
-                    if ($filters['is_corporate_email'] !== '') {
-                        $preselectedEmailTypeJson = json_encode([[
-                            'id'   => $filters['is_corporate_email'],
-                            'name' => $filters['is_corporate_email'] === '1' ? 'Corporate' : 'Consumer',
-                        ]]);
-                    }
+                $preselectedEmailTypeJson = '[]';
+                if ($filters['is_corporate_email'] !== '') {
+                    $preselectedEmailTypeJson = json_encode([[
+                        'id'   => $filters['is_corporate_email'],
+                        'name' => $filters['is_corporate_email'] === '1' ? 'Corporate' : 'Consumer',
+                    ]]);
+                }
                 ?>
                 <div class="token-picker token-picker--filter"
                     data-name="is_corporate_email"
@@ -276,13 +282,13 @@ $hasExtended = !empty($filters['custom_fields']);
             <div class="field">
                 <label>Email status</label>
                 <?php
-                    $preselectedEmailStatusJson = '[]';
-                    if ($filters['email_status'] !== '') {
-                        $preselectedEmailStatusJson = json_encode([[
-                            'id'   => $filters['email_status'],
-                            'name' => ucfirst($filters['email_status']),
-                        ]]);
-                    }
+                $preselectedEmailStatusJson = '[]';
+                if ($filters['email_status'] !== '') {
+                    $preselectedEmailStatusJson = json_encode([[
+                        'id'   => $filters['email_status'],
+                        'name' => ucfirst($filters['email_status']),
+                    ]]);
+                }
                 ?>
                 <div class="token-picker token-picker--filter"
                     data-name="email_status"
@@ -572,6 +578,17 @@ $hasExtended = !empty($filters['custom_fields']);
             </tbody>
         </table>
 
+    </div>
+
+    <div class="legend">
+        <span class="legend-item">
+            <i class="ph ph-user-circle email-badge email-badge--consumer"></i>
+            Consumer email
+        </span>
+        <span class="legend-item">
+            <i class="ph ph-warning email-badge email-badge--invalid"></i>
+            Invalid email
+        </span>
     </div>
 
     <?php renderPagination($page, $totalPages, $total, $perPage, '/contacts', $paginateParams, 'contacts-pagination'); ?>
