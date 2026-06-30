@@ -35,6 +35,20 @@
     border-collapse: collapse;
 }
 
+.legend {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.legend-item {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    background: var(--color-white);
+    padding: 4px 10px;
+    border-radius: var(--radius-lg);
+}
 /* th/td → .data-table in base.css */
 
 .contacts-table .col-id {
