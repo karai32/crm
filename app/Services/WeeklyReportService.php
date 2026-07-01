@@ -21,12 +21,16 @@ class WeeklyReportService
 
     private function queryNewContacts(PDO $pdo, string $from, string $to): array
     {
-        $stmt = $pdo->prepare('
+        $stmt = $pdo->prepare("
             SELECT full_name, email, company, created_at
             FROM contacts
             WHERE created_at >= :from AND created_at < :to
+              AND full_name NOT LIKE '%http%'
+              AND full_name NOT LIKE '%://%'
+              AND full_name NOT LIKE '%www.%'
+              AND LENGTH(full_name) < 150
             ORDER BY created_at DESC
-        ');
+        ");
         $stmt->execute(compact('from', 'to'));
         return $stmt->fetchAll();
     }
@@ -233,7 +237,7 @@ class WeeklyReportService
             $lines[] = str_repeat('-', 30);
             if (count($s['items']) > 0) {
                 foreach ($s['items'] as $r) {
-                    $lines[] = '• ' . $r[$s['key']];
+                    $lines[] = '• ' . $this->sanitize($r[$s['key']]);
                 }
             } else {
                 $lines[] = 'Sin actividad esta semana.';
@@ -292,8 +296,17 @@ class WeeklyReportService
         return '<p style="color:#94a3b8;font-size:13px;margin:0;font-style:italic">' . $this->e($msg) . '</p>';
     }
 
+    private function sanitize(string $str, int $maxLen = 120): string
+    {
+        $str = preg_replace('/https?:\/\/\S+/i', '', $str);
+        $str = preg_replace('/www\.\S+/i', '', $str);
+        $str = strip_tags($str);
+        $str = preg_replace('/\s+/', ' ', $str);
+        return mb_substr(trim($str), 0, $maxLen);
+    }
+
     private function e(string $str): string
     {
-        return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($this->sanitize($str), ENT_QUOTES, 'UTF-8');
     }
 }
