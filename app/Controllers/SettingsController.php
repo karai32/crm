@@ -35,7 +35,9 @@ class SettingsController
 
         $user    = Auth::user();
         $service = new WeeklyReportService();
-        $data    = $service->collect();
+        $dayOfWeek = (int) date('N'); // 1=Monday … 7=Sunday
+        $mondayTs  = mktime(0, 0, 0) - ($dayOfWeek - 1) * 86400;
+        $data    = $service->collect(date('Y-m-d 00:00:00', $mondayTs));
 
         $from    = date('d/m/Y', strtotime($data['period_from']));
         $to      = date('d/m/Y', strtotime($data['period_to']));

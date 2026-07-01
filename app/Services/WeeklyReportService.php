@@ -2,11 +2,14 @@
 
 class WeeklyReportService
 {
-    public function collect(): array
+    public function collect(string $from = ''): array
     {
-        $pdo  = Database::connect();
-        $to   = date('Y-m-d H:i:s');
-        $from = date('Y-m-d H:i:s', strtotime('-7 days'));
+        $pdo = Database::connect();
+        $to  = date('Y-m-d H:i:s');
+
+        if ($from === '') {
+            $from = date('Y-m-d H:i:s', strtotime('-7 days'));
+        }
 
         return [
             'period_from'   => $from,
