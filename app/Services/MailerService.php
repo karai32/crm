@@ -1,6 +1,7 @@
 <?php
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception as MailerException;
 
 class MailerService
@@ -18,6 +19,10 @@ class MailerService
 
         try {
             $mail->isSMTP();
+            $mail->SMTPDebug  = SMTP::DEBUG_SERVER;
+            $mail->Debugoutput = static function (string $str): void {
+                logApplicationError('SMTP: ' . trim($str));
+            };
             $mail->Host       = $config['smtp_host'];
             $mail->SMTPAuth   = true;
             $mail->Username   = $config['smtp_username'];
