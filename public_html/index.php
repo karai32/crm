@@ -62,6 +62,7 @@ require_once __DIR__ . '/../app/Services/Import/AbstractImportProcessor.php';
 require_once __DIR__ . '/../app/Services/Import/ContactImportProcessor.php';
 require_once __DIR__ . '/../app/Services/Import/ClientImportProcessor.php';
 require_once __DIR__ . '/../app/Services/Import/ImportManager.php';
+require_once __DIR__ . '/../app/Services/MailerService.php';
 require_once __DIR__ . '/../app/Services/TwoFactorService.php';
 require_once __DIR__ . '/../app/Controllers/AuthController.php';
 require_once __DIR__ . '/../app/Controllers/DashboardController.php';

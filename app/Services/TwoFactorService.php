@@ -111,18 +111,18 @@ class TwoFactorService
 
     private function sendCode(string $email, string $name, string $code): bool
     {
-        $config = require dirname(__DIR__, 2) . '/config/mail.php';
-        $fromEmail = $config['from_email'] ?? 'no-reply@localhost';
-        $fromName = $config['from_name'] ?? 'CRM';
-        $subject = 'Your CRM login code';
         $safeName = trim($name) !== '' ? $name : 'there';
-        $message = "Hello {$safeName},\n\nYour CRM login code is: {$code}\n\nThis code expires in 10 minutes.";
-        $headers = [
-            'From: ' . $fromName . ' <' . $fromEmail . '>',
-            'Reply-To: ' . $fromEmail,
-            'Content-Type: text/plain; charset=UTF-8',
-        ];
+        $subject  = 'Your CRM login code';
 
-        return mail($email, $subject, $message, implode("\r\n", $headers));
+        $textBody = "Hello {$safeName},\n\nYour CRM login code is: {$code}\n\nThis code expires in 10 minutes.";
+
+        $htmlBody = '<!DOCTYPE html><html><body style="font-family:sans-serif;color:#1a1a1a;max-width:480px;margin:0 auto;padding:32px 16px">'
+            . '<p>Hello ' . htmlspecialchars($safeName) . ',</p>'
+            . '<p>Your CRM login code is:</p>'
+            . '<p style="font-size:36px;font-weight:700;letter-spacing:8px;margin:24px 0">' . $code . '</p>'
+            . '<p style="color:#666;font-size:13px">This code expires in 10 minutes. If you did not request this, please ignore this email.</p>'
+            . '</body></html>';
+
+        return MailerService::send($email, $safeName, $subject, $textBody, $htmlBody);
     }
 }
