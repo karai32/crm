@@ -40,15 +40,15 @@ class AuthController
         }
 
         // 2FA temporarily disabled — skip email verification
-        // if (!$this->twoFactorService->start($user)) {
-        //     View::render('auth/login', [
-        //         'title' => 'Login',
-        //         'error' => 'Password is correct, but the verification email could not be sent. Check mail settings.',
-        //         'email' => $email,
-        //     ], 'auth');
-        //     return;
-        // }
-        // Auth::redirect('/login/verify');
+        if (!$this->twoFactorService->start($user)) {
+            View::render('auth/login', [
+                'title' => 'Login',
+                'error' => 'Password is correct, but the verification email could not be sent. Check mail settings.',
+                'email' => $email,
+            ], 'auth');
+            return;
+        }
+        Auth::redirect('/login/verify');
 
         $this->authService->completeLogin($user);
 
@@ -126,5 +126,4 @@ class AuthController
         Auth::logout();
         Auth::redirect('/login');
     }
-
 }
