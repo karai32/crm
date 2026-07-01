@@ -815,3 +815,31 @@ input[type='color'].color-picker-input {
 .tag-color-code {
     font-size: 12px;
 }
+
+/* --- Settings notices (report send feedback) --------------------- */
+.settings-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.settings-notice--success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.settings-notice--error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.settings-notice i {
+    font-size: 16px;
+    flex-shrink: 0;
+}

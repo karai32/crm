@@ -30,6 +30,8 @@ $perPageOptions = [20, 50, 100, 200];
     </form>
 </div>
 
+<?php if (Auth::isAdmin()): ?>
+
 <div class="settings-form-card">
     <div class="settings-form-body">
         <div class="field">
@@ -51,6 +53,37 @@ $perPageOptions = [20, 50, 100, 200];
             <i class="ph ph-envelope-simple-open"></i>
             Run email validation
         </button>
+    </div>
+</div>
+
+<div class="settings-form-card">
+    <div class="settings-form-body">
+        <div class="field">
+            <label>Weekly report</label>
+            <span class="field-hint">
+                Send a snapshot of the current week's activity to your email. Includes new contacts, new clients, platform connections and deactivations.
+            </span>
+        </div>
+        <?php if (($reportStatus ?? null) === 'sent'): ?>
+            <div class="settings-notice settings-notice--success">
+                <i class="ph ph-check-circle"></i>
+                Report sent to <strong><?= htmlspecialchars(Auth::user()['email'], ENT_QUOTES, 'UTF-8') ?></strong>.
+            </div>
+        <?php elseif (($reportStatus ?? null) === 'error'): ?>
+            <div class="settings-notice settings-notice--error">
+                <i class="ph ph-warning-circle"></i>
+                Failed to send the report. Check <code>storage/app.log</code> for details.
+            </div>
+        <?php endif; ?>
+    </div>
+    <div class="settings-form-actions">
+        <form method="post" action="<?= htmlspecialchars(Auth::url('/settings/send-report'), ENT_QUOTES, 'UTF-8') ?>">
+            <?= Csrf::field() ?>
+            <button type="submit" class="btn btn-secondary">
+                <i class="ph ph-paper-plane-tilt"></i>
+                Send report to my email
+            </button>
+        </form>
     </div>
 </div>
 
@@ -98,7 +131,6 @@ $perPageOptions = [20, 50, 100, 200];
                 }
 
                 var pct  = Math.round((totalProcessed / totalInitial) * 100);
-                var left = data.remaining;
                 setProgress(pct, 'Processing… ' + totalProcessed + ' / ' + totalInitial + ' contacts (' + pct + '%)');
 
                 if (data.done) {
@@ -134,3 +166,5 @@ $perPageOptions = [20, 50, 100, 200];
     });
 }());
 </script>
+
+<?php endif; ?>

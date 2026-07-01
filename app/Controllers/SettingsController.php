@@ -17,10 +17,39 @@ class SettingsController
         $userId = (int) ($user['id'] ?? 0);
 
         View::render('settings/index', [
-            'title'    => 'Settings',
-            'styles'   => ['settings.css'],
-            'prefs'    => $this->prefs->all($userId),
+            'title'        => 'Settings',
+            'styles'       => ['settings.css'],
+            'prefs'        => $this->prefs->all($userId),
+            'reportStatus' => $_GET['report'] ?? null,
         ]);
+    }
+
+    public function sendReport(): void
+    {
+        Auth::requireLogin();
+
+        if (!Auth::isAdmin()) {
+            http_response_code(403);
+            exit;
+        }
+
+        $user    = Auth::user();
+        $service = new WeeklyReportService();
+        $data    = $service->collect();
+
+        $from    = date('d/m/Y', strtotime($data['period_from']));
+        $to      = date('d/m/Y', strtotime($data['period_to']));
+        $subject = "Informe CRM (manual) — Del {$from} al {$to}";
+
+        $ok = MailerService::send(
+            $user['email'],
+            $user['name'],
+            $subject,
+            $service->buildText($data),
+            $service->buildHtml($data)
+        );
+
+        Auth::redirect('/settings?report=' . ($ok ? 'sent' : 'error'));
     }
 
     public function update(): void
