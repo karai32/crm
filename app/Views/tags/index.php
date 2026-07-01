@@ -1,13 +1,13 @@
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
-        <h1>Tags</h1>
-        <span class="count-label"><?= (int) $total ?> tags</span>
+        <h1><?= t('tags.title') ?></h1>
+        <span class="count-label"><?= htmlspecialchars(Lang::get('tags.n_tags', ['n' => $total]), ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/tags/create'), ENT_QUOTES, 'UTF-8') ?>">
             <i class="ph ph-plus"></i>
-            Create tag
+            <?= t('tags.create_btn') ?>
         </a>
     </div>
 </div>
@@ -15,7 +15,7 @@
 <div class="settings-search-card">
     <input type="text"
            class="settings-live-search"
-           placeholder="Search tags..."
+           placeholder="<?= t('common.search_tags') ?>"
            autocomplete="off"
            data-settings-search="tags"
            data-search-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
@@ -31,10 +31,10 @@
     <table class="data-table settings-table">
         <thead>
             <tr>
-                <?= thSort('name', 'Name', $sort, $dir, '/tags') ?>
-                <?= thSort('slug', 'Slug', $sort, $dir, '/tags') ?>
-                <th>Color</th>
-                <th class="col-actions">Actions</th>
+                <?= thSort('name', t('common.name'), $sort, $dir, '/tags') ?>
+                <?= thSort('slug', t('sectors.slug'), $sort, $dir, '/tags') ?>
+                <th><?= t('tags.color') ?></th>
+                <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>
         <tbody id="tagsSearchResults">
@@ -66,13 +66,13 @@
                         <div class="action-links">
                             <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/tags/edit?id=' . $tag['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-pencil"></i>
-                                <span class="tooltip-text">Edit</span>
+                                <span class="tooltip-text"><?= t('common.edit') ?></span>
                             </a>
                             <a class="action-btn action-delete"
                                href="<?= htmlspecialchars(Auth::url('/tags/delete?id=' . $tag['id']), ENT_QUOTES, 'UTF-8') ?>"
-                               onclick="return confirm('Delete this tag? Existing contact and client links will be removed.')">
+                               onclick="return confirm('<?= htmlspecialchars(Lang::get('tags.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
                                 <i class="ph ph-trash"></i>
-                                <span class="tooltip-text">Delete</span>
+                                <span class="tooltip-text"><?= t('common.delete') ?></span>
                             </a>
                         </div>
                     </td>
@@ -84,4 +84,3 @@
 </div>
 
 <?php renderPagination($page, $totalPages, $total, $perPage, '/tags', ['sort' => $sort, 'dir' => $dir]); ?>
-

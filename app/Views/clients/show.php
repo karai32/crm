@@ -12,7 +12,7 @@
                 <?php if (!empty($client['is_active']) && $client['is_active'] === 1): ?>
                     <div class="client-active-status">
                         <i class="ph ph-check"></i>
-                        <span class="tooltip-text">Active</span>
+                        <span class="tooltip-text"><?= t('common.active') ?></span>
                     </div>
                 <?php endif; ?>
             </div>
@@ -34,7 +34,7 @@
                 <?php if (!empty($client['is_web_connected']) && $client['is_web_connected'] === 1): ?>
                     <span class="client-hero-meta-item">
                         <i class="ph ph-plugs-connected"></i>
-                        Connected to api
+                        <?= t('clients.connected_to_api') ?>
                     </span>
                 <?php endif; ?>
 
@@ -42,9 +42,9 @@
         </div>
     </div>
     <div class="client-hero-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">Back</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.back') ?></a>
         <?php if ($canEditClients): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/clients/edit?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
+            <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/clients/edit?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.edit') ?></a>
         <?php endif; ?>
     </div>
 </div>
@@ -57,43 +57,43 @@
         <table class="detail-table">
             <tbody>
                 <tr>
-                    <th class="detail-th">Commercial name</th>
+                    <th class="detail-th"><?= t('clients.commercial_name') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['commercial_name'], ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">Legal name</th>
+                    <th class="detail-th"><?= t('clients.legal_name') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['legal_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">CIF</th>
+                    <th class="detail-th"><?= t('clients.cif') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['cif'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">Sector</th>
+                    <th class="detail-th"><?= t('common.sector') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['sector_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">Address</th>
+                    <th class="detail-th"><?= t('common.address') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['address'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">Postal code</th>
+                    <th class="detail-th"><?= t('common.postal_code') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['postal_code'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">City</th>
+                    <th class="detail-th"><?= t('common.city') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['city'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">Province</th>
+                    <th class="detail-th"><?= t('common.province') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['province'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">Country</th>
+                    <th class="detail-th"><?= t('common.country') ?></th>
                     <td class="detail-td"><?= htmlspecialchars($client['country'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
                 <tr>
-                    <th class="detail-th">Website</th>
+                    <th class="detail-th"><?= t('common.website') ?></th>
                     <td class="detail-td">
                         <?php if (!empty($client['website'])): ?>
                             <a class="client-website-link" href="<?= htmlspecialchars($client['website'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">
@@ -104,7 +104,7 @@
                 </tr>
                 <?php if (!empty($client['notes'])): ?>
                     <tr>
-                        <th class="detail-th">Notes</th>
+                        <th class="detail-th"><?= t('common.notes') ?></th>
                         <td class="detail-td"><?= nl2br(htmlspecialchars($client['notes'], ENT_QUOTES, 'UTF-8')) ?></td>
                     </tr>
                 <?php endif; ?>
@@ -115,7 +115,7 @@
     <!-- Sidebar: tags -->
     <div class="card card-flush">
         <div class="card-section-header">
-            <span class="card-section-label">Tags</span>
+            <span class="card-section-label"><?= t('common.tags') ?></span>
         </div>
         <?php if (empty($tags)): ?>
             <div class="sidebar-empty">No tags assigned.</div>
@@ -138,7 +138,7 @@
     <?php if (!empty($customFields)): ?>
         <div class="card card-flush">
             <div class="card-section-header">
-                <span class="card-section-label">Custom fields</span>
+                <span class="card-section-label"><?= t('common.custom_fields') ?></span>
             </div>
             <table class="detail-table">
                 <tbody>
@@ -163,7 +163,7 @@
 <div class="card card-related-contacts">
     <div class="card-related-contacts-header" id="relatedContactsToggle" role="button" tabindex="0" aria-expanded="false">
         <div class="card-related-contacts-left">
-            <span class="card-related-contacts-title">Related contacts</span>
+            <span class="card-related-contacts-title"><?= t('clients.related_contacts') ?></span>
             <span class="card-related-contacts-count"><?= count($contacts) ?> total</span>
         </div>
         <i class="ph ph-caret-down card-related-contacts-chevron" aria-hidden="true"></i>
@@ -171,14 +171,14 @@
 
     <div class="related-contacts-body" id="relatedContactsBody">
         <?php if (empty($contacts)): ?>
-            <p class="card-no-contacts">No contacts linked to this client.</p>
+            <p class="card-no-contacts"><?= t('clients.no_contacts_linked') ?></p>
         <?php else: ?>
             <table class="data-table related-contacts-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
+                        <th><?= t('common.name') ?></th>
+                        <th><?= t('common.email') ?></th>
+                        <th><?= t('common.phone') ?></th>
                         <th></th>
                     </tr>
                 </thead>
@@ -192,7 +192,7 @@
                             <td class="col-contact-muted"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
                                 <div class="action-links">
-                                    <a class="action-btn action-view" title="View" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
+                                    <a class="action-btn action-view" title="<?= t('common.view') ?>" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
                                         <i class="ph ph-eye"></i>
                                     </a>
                                 </div>

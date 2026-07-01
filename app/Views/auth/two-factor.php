@@ -6,13 +6,13 @@
     </div>
     <div>
         <span class="auth-brand-title">ContactCore</span>
-        <span class="auth-brand-subtitle">Client relationship CRM</span>
+        <span class="auth-brand-subtitle"><?= t('nav.subtitle') ?></span>
     </div>
 </div>
 
 <div class="auth-header">
-    <h1>Enter code</h1>
-    <p>We sent a 6-digit code to <?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>.</p>
+    <h1><?= t('auth.2fa_title') ?></h1>
+    <p><?= t('auth.2fa_subtitle') ?></p>
 </div>
 
 <?php if (!empty($error)): ?>
@@ -26,14 +26,14 @@
 <form class="auth-form" method="post" action="<?= htmlspecialchars(Auth::url('/login/verify'), ENT_QUOTES, 'UTF-8') ?>">
     <?= Csrf::field() ?>
     <div class="field">
-        <label for="code">Code</label>
+        <label for="code"><?= t('auth.2fa_code') ?></label>
         <input class="auth-code-input" id="code" type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required autofocus>
     </div>
 
-    <button class="btn btn-primary auth-submit" type="submit">Verify</button>
+    <button class="btn btn-primary auth-submit" type="submit"><?= t('auth.2fa_verify') ?></button>
 </form>
 
 <form class="auth-secondary-form" method="post" action="<?= htmlspecialchars(Auth::url('/login/resend-code'), ENT_QUOTES, 'UTF-8') ?>">
     <?= Csrf::field() ?>
-    <button class="btn btn-outlined auth-submit" type="submit" <?= empty($canResend) ? 'disabled' : '' ?>>Send another code</button>
+    <button class="btn btn-outlined auth-submit" type="submit" <?= empty($canResend) ? 'disabled' : '' ?>><?= t('auth.2fa_resend') ?></button>
 </form>

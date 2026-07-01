@@ -48,9 +48,9 @@ $canEditContacts = Auth::can('contacts.edit');
         </div>
     </div>
     <div class="contact-hero-actions">
-        <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">Back</a>
+        <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.back') ?></a>
         <?php if ($canEditContacts): ?>
-        <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts/edit?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
+        <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts/edit?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.edit') ?></a>
         <?php endif; ?>
     </div>
 </div>
@@ -63,7 +63,7 @@ $canEditContacts = Auth::can('contacts.edit');
 
         <!-- Main info card -->
         <div class="card">
-            <div class="card-header"><h2>Contact Information</h2></div>
+            <div class="card-header"><h2><?= t('contacts.info_title') ?></h2></div>
             <table class="detail-table">
                 <tbody>
                     <tr>
@@ -71,19 +71,19 @@ $canEditContacts = Auth::can('contacts.edit');
                         <td class="detail-td"><?= (int) $contact['id'] ?></td>
                     </tr>
                     <tr>
-                        <td class="detail-th">Full name</td>
+                        <td class="detail-th"><?= t('contacts.full_name') ?></td>
                         <td class="detail-td"><?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                     <tr>
-                        <td class="detail-th">Email</td>
+                        <td class="detail-th"><?= t('common.email') ?></td>
                         <td class="detail-td">
                             <?php if (!empty($contact['email'])): ?>
                                 <?= htmlspecialchars($contact['email'], ENT_QUOTES, 'UTF-8') ?>
                                 <?php if (isset($contact['is_corporate_email']) && $contact['is_corporate_email'] === '0'): ?>
-                                    <span class="email-tag email-tag--consumer"><i class="ph ph-user-circle"></i> Consumer</span>
+                                    <span class="email-tag email-tag--consumer"><i class="ph ph-user-circle"></i> <?= t('common.consumer') ?></span>
                                 <?php endif; ?>
                                 <?php if (isset($contact['email_status']) && $contact['email_status'] === 'invalid'): ?>
-                                    <span class="email-tag email-tag--invalid"><i class="ph ph-warning"></i> Invalid</span>
+                                    <span class="email-tag email-tag--invalid"><i class="ph ph-warning"></i> <?= t('common.invalid') ?></span>
                                 <?php endif; ?>
                             <?php else: ?>
                                 -
@@ -91,15 +91,15 @@ $canEditContacts = Auth::can('contacts.edit');
                         </td>
                     </tr>
                     <tr>
-                        <td class="detail-th">Phone</td>
+                        <td class="detail-th"><?= t('common.phone') ?></td>
                         <td class="detail-td"><?= htmlspecialchars($contact['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                     <tr>
-                        <td class="detail-th">Company</td>
+                        <td class="detail-th"><?= t('contacts.company') ?></td>
                         <td class="detail-td"><?= htmlspecialchars($contact['company'] !== '' ? $contact['company'] : '—', ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                     <tr>
-                        <td class="detail-th">Created</td>
+                        <td class="detail-th"><?= t('common.created') ?></td>
                         <td class="detail-td"><?= htmlspecialchars($contact['created_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                 </tbody>
@@ -109,7 +109,7 @@ $canEditContacts = Auth::can('contacts.edit');
         <!-- Custom Fields -->
         <?php if (!empty($customFields)): ?>
         <div class="card">
-            <div class="card-header"><h2>Custom Fields</h2></div>
+            <div class="card-header"><h2><?= t('common.custom_fields') ?></h2></div>
             <table class="detail-table">
                 <tbody>
                     <?php foreach ($customFields as $field): ?>
@@ -134,7 +134,7 @@ $canEditContacts = Auth::can('contacts.edit');
 
         <!-- Tags -->
         <div class="card">
-            <div class="card-header"><h2>Tags</h2></div>
+            <div class="card-header"><h2><?= t('common.tags') ?></h2></div>
             <?php if (empty($tags)): ?>
                 <div class="sidebar-empty">No tags assigned.</div>
             <?php else: ?>
@@ -153,7 +153,7 @@ $canEditContacts = Auth::can('contacts.edit');
 
         <!-- Clients -->
         <div class="card">
-            <div class="card-header"><h2>Linked Clients</h2></div>
+            <div class="card-header"><h2><?= t('contacts.linked_clients') ?></h2></div>
             <?php if (empty($clients)): ?>
                 <div class="sidebar-empty">No clients linked.</div>
             <?php else: ?>

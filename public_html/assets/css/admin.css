@@ -336,3 +336,35 @@ button:hover,
     }
 }
 
+
+/* -- Language switcher ---------------------------------------- */
+.sidebar-lang {
+    display: flex;
+    gap: 4px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+    margin-bottom: 4px;
+}
+.lang-btn {
+    flex: 1;
+    padding: 4px 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--color-text-muted, #6b7280);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+    text-align: center;
+}
+.lang-btn:hover {
+    background: var(--color-hover, #f3f4f6);
+    color: var(--color-text, #111827);
+}
+.lang-btn--active {
+    background: var(--color-primary-light, #eff6ff);
+    color: var(--color-primary, #1d4ed8);
+    border-color: var(--color-primary-light, #bfdbfe);
+}

@@ -1,11 +1,11 @@
 <!-- Header -->
 <div class="page-header clients-header">
     <div>
-        <h1>Edit client</h1>
+        <h1><?= t('clients.edit_title') ?></h1>
         <span class="count-label"><?= htmlspecialchars($client['commercial_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $client['id']), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $client['id']), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
     </div>
 </div>
 
@@ -21,25 +21,25 @@
 
         <!-- Basic info -->
         <div class="form-section">
-            <div class="form-section-title">Basic Information</div>
+            <div class="form-section-title"><?= t('common.basic_info') ?></div>
             <div class="form-grid">
                 <div class="field">
-                    <label for="commercial_name">Commercial name <span class="required-star">*</span></label>
+                    <label for="commercial_name"><?= t('clients.commercial_name') ?> <span class="required-star">*</span></label>
                     <input id="commercial_name" type="text" name="commercial_name"
                            value="<?= htmlspecialchars($client['commercial_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
                 </div>
                 <div class="field">
-                    <label for="legal_name">Legal name</label>
+                    <label for="legal_name"><?= t('clients.legal_name') ?></label>
                     <input id="legal_name" type="text" name="legal_name"
                            value="<?= htmlspecialchars($client['legal_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field">
-                    <label for="cif">CIF</label>
+                    <label for="cif"><?= t('clients.cif') ?></label>
                     <input id="cif" type="text" name="cif"
                            value="<?= htmlspecialchars($client['cif'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field">
-                    <label>Sector</label>
+                    <label><?= t('common.sector') ?></label>
                     <?php
                     $sectorsOptionsJson = htmlspecialchars(json_encode(array_map(function ($s) {
                         return ['id' => (int) $s['id'], 'name' => $s['name']];
@@ -58,7 +58,7 @@
                          data-options="<?= $sectorsOptionsJson ?>"
                          data-name="sector_id"
                          data-max="1"
-                         data-placeholder="Search sector..."
+                         data-placeholder="<?= t('common.search_sector') ?>"
                          data-selected="<?= $selectedSectorJson ?>">
                     </div>
                 </div>
@@ -74,12 +74,12 @@
         }))));
         ?>
         <div class="form-section">
-            <div class="form-section-title">Tags</div>
+            <div class="form-section-title"><?= t('common.tags') ?></div>
             <div class="token-picker"
                  data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
                  data-name="tag_ids[]"
                  data-with-color="1"
-                 data-placeholder="Search tags..."
+                 data-placeholder="<?= t('common.search_tags') ?>"
                  data-paginate="1"
                  data-selected="<?= htmlspecialchars($preselectedTagsJson, ENT_QUOTES, 'UTF-8') ?>">
             </div>
@@ -87,30 +87,30 @@
 
         <!-- Location -->
         <div class="form-section">
-            <div class="form-section-title">Location</div>
+            <div class="form-section-title"><?= t('common.location') ?></div>
             <div class="form-grid">
                 <div class="field field-full">
-                    <label for="address">Address</label>
+                    <label for="address"><?= t('common.address') ?></label>
                     <input id="address" type="text" name="address"
                            value="<?= htmlspecialchars($client['address'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field">
-                    <label for="postal_code">Postal code</label>
+                    <label for="postal_code"><?= t('common.postal_code') ?></label>
                     <input id="postal_code" type="text" name="postal_code"
                            value="<?= htmlspecialchars($client['postal_code'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field">
-                    <label for="city">City</label>
+                    <label for="city"><?= t('common.city') ?></label>
                     <input id="city" type="text" name="city"
                            value="<?= htmlspecialchars($client['city'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field">
-                    <label for="province">Province</label>
+                    <label for="province"><?= t('common.province') ?></label>
                     <input id="province" type="text" name="province"
                            value="<?= htmlspecialchars($client['province'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="field">
-                    <label for="country">Country</label>
+                    <label for="country"><?= t('common.country') ?></label>
                     <input id="country" type="text" name="country"
                            value="<?= htmlspecialchars($client['country'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
@@ -119,10 +119,10 @@
 
         <!-- Online & Notes -->
         <div class="form-section">
-            <div class="form-section-title">Other</div>
+            <div class="form-section-title"><?= t('common.other') ?></div>
             <div class="form-grid">
                 <div class="field">
-                    <label for="website">Website</label>
+                    <label for="website"><?= t('common.website') ?></label>
                     <input id="website" type="url" name="website"
                            value="<?= htmlspecialchars($client['website'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
@@ -131,7 +131,7 @@
                         <input type="checkbox" name="is_web_connected" value="1"
                                <?= !empty($client['is_web_connected']) ? 'checked' : '' ?>>
                         <span class="toggle-track"></span>
-                        <span class="toggle-label">Connected to Web / API</span>
+                        <span class="toggle-label"><?= t('clients.connected_to_web') ?></span>
                     </label>
                 </div>
                 <div class="field checkbox-field">
@@ -139,11 +139,11 @@
                         <input type="checkbox" name="is_active" value="1"
                                <?= !empty($client['is_active']) ? 'checked' : '' ?>>
                         <span class="toggle-track"></span>
-                        <span class="toggle-label">Active client</span>
+                        <span class="toggle-label"><?= t('clients.active_client') ?></span>
                     </label>
                 </div>
                 <div class="field field-full">
-                    <label for="notes">Notes</label>
+                    <label for="notes"><?= t('common.notes') ?></label>
                     <textarea id="notes" name="notes" class="textarea-notes"><?= htmlspecialchars($client['notes'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                 </div>
             </div>
@@ -152,7 +152,7 @@
         <!-- Custom fields -->
         <?php if (!empty($customFields)): ?>
         <div class="form-section">
-            <div class="form-section-title">Custom Fields</div>
+            <div class="form-section-title"><?= t('common.custom_fields') ?></div>
             <div class="form-grid">
                 <?php foreach ($customFields as $field): ?>
                 <?php
@@ -170,7 +170,7 @@
                     <?php elseif ($field['field_type'] === 'select'): ?>
                         <label for="cf_<?= $fieldId ?>"><?= htmlspecialchars($field['name'], ENT_QUOTES, 'UTF-8') ?></label>
                         <select id="cf_<?= $fieldId ?>" name="custom_fields[<?= $fieldId ?>]">
-                            <option value="">Choose...</option>
+                            <option value=""><?= t('common.choose') ?></option>
                             <?php foreach ($field['options'] as $opt): ?>
                                 <option value="<?= htmlspecialchars($opt['value'], ENT_QUOTES, 'UTF-8') ?>"
                                         <?= ((string) $rawValue === (string) $opt['value']) ? 'selected' : '' ?>>
@@ -199,12 +199,12 @@
 
         <!-- Actions -->
         <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Update client</button>
+            <button class="btn btn-primary" type="submit"><?= t('clients.update_btn') ?></button>
             <a class="btn btn-outlined"
-               href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $client['id']), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+               href="<?= htmlspecialchars(Auth::url('/clients/show?id=' . (int) $client['id']), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
             <a class="btn btn-danger btn-sm"
                href="<?= htmlspecialchars(Auth::url('/clients/delete?id=' . (int) $client['id']), ENT_QUOTES, 'UTF-8') ?>"
-               onclick="return confirm('Delete this client?')">Delete</a>
+               onclick="return confirm('<?= htmlspecialchars(Lang::get('clients.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')"><?= t('common.delete') ?></a>
         </div>
 
     </div>

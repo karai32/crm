@@ -40,9 +40,9 @@ $chips = [];
 $base  = Auth::url('/contacts');
 
 $textCols = [
-    'full_name' => 'Name',
-    'email'     => 'Email',
-    'phone'     => 'Phone',
+    'full_name' => Lang::get('filter.name'),
+    'email'     => Lang::get('filter.email'),
+    'phone'     => Lang::get('filter.phone'),
 ];
 
 foreach ($textCols as $key => $label) {
@@ -55,8 +55,8 @@ foreach ($textCols as $key => $label) {
 
 foreach (
     [
-        ['from' => 'created_from', 'to' => 'created_to', 'label' => 'Created'],
-        ['from' => 'updated_from', 'to' => 'updated_to', 'label' => 'Updated'],
+        ['from' => 'created_from', 'to' => 'created_to', 'label' => Lang::get('filter.created')],
+        ['from' => 'updated_from', 'to' => 'updated_to', 'label' => Lang::get('filter.updated')],
     ] as $_dr
 ) {
     $hasFrom = !empty($filters[$_dr['from']]);
@@ -75,7 +75,7 @@ foreach (
 if (!empty($filters['client_id'])) {
     $f = $filters;
     unset($f['client_id'], $f['page']);
-    $chips[] = ['text' => 'Client: ' . $filterClientName, 'href' => $base . '?' . http_build_query($f)];
+    $chips[] = ['text' => Lang::get('filter.client') . ': ' . $filterClientName, 'href' => $base . '?' . http_build_query($f)];
 }
 
 if (!empty($filters['sector_id'])) {
@@ -88,7 +88,7 @@ if (!empty($filters['sector_id'])) {
     }
     $f = $filters;
     unset($f['sector_id'], $f['page']);
-    $chips[] = ['text' => 'Sector: ' . $sName, 'href' => $base . '?' . http_build_query($f)];
+    $chips[] = ['text' => Lang::get('filter.sector') . ': ' . $sName, 'href' => $base . '?' . http_build_query($f)];
 }
 
 foreach ($selectedTagObjects as $tag) {
@@ -96,14 +96,14 @@ foreach ($selectedTagObjects as $tag) {
     $f['tag_ids'] = array_values(array_filter($f['tag_ids'] ?? [], fn($id) => (int) $id !== (int) $tag['id']));
     if (empty($f['tag_ids'])) unset($f['tag_ids']);
     unset($f['page']);
-    $chips[] = ['text' => 'Tag: ' . $tag['name'], 'href' => $base . '?' . http_build_query($f)];
+    $chips[] = ['text' => Lang::get('filter.tag') . ': ' . $tag['name'], 'href' => $base . '?' . http_build_query($f)];
 }
 
 if ($filters['is_corporate_email'] !== '') {
     $f = $filters;
     unset($f['is_corporate_email'], $f['page']);
     $chips[] = [
-        'text' => $filters['is_corporate_email'] === '1' ? 'Email: Corporate' : 'Email: Consumer',
+        'text' => $filters['is_corporate_email'] === '1' ? Lang::get('common.email') . ': ' . Lang::get('common.corporate') : Lang::get('common.email') . ': ' . Lang::get('common.consumer'),
         'href' => $base . '?' . http_build_query($f)
     ];
 }
@@ -112,7 +112,7 @@ if ($filters['email_status'] !== '') {
     $f = $filters;
     unset($f['email_status'], $f['page']);
     $chips[] = [
-        'text' => 'Email status: ' . ucfirst($filters['email_status']),
+        'text' => Lang::get('filter.email_status') . ': ' . ucfirst($filters['email_status']),
         'href' => $base . '?' . http_build_query($f)
     ];
 }
@@ -142,14 +142,14 @@ $hasExtended = !empty($filters['custom_fields']);
 <!-- Header -->
 <div class="page-header contacts-header">
     <div>
-        <h1>Contacts</h1>
-        <span class="count-label"><?= (int) $total ?> contacts found</span>
+        <h1><?= t('contacts.title') ?></h1>
+        <span class="count-label"><?= htmlspecialchars(Lang::get('contacts.found', ['n' => $total]), ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
         <?php if ($canCreateContacts): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/contacts/create'), ENT_QUOTES, 'UTF-8') ?>">
                 <i class="ph ph-plus"></i>
-                Create contact
+                <?= t('contacts.create_btn') ?>
             </a>
         <?php endif; ?>
     </div>
@@ -159,7 +159,7 @@ $hasExtended = !empty($filters['custom_fields']);
 <div class="filter-bar">
     <button type="button" class="filter-bar-btn" id="filterBarBtn">
         <i class="ph ph-funnel"></i>
-        Filters
+        <?= t('common.filters') ?>
         <?php if ($chips): ?>
             <span class="filter-bar-count"><?= count($chips) ?></span>
         <?php endif; ?>
@@ -168,7 +168,7 @@ $hasExtended = !empty($filters['custom_fields']);
     <?php if ($hasBulkActions): ?>
         <button type="button" class="filter-bar-btn actions-bar-btn" id="actionsBarBtn">
             <i class="ph ph-list-dashes"></i>
-            Actions
+            <?= t('common.actions') ?>
             <span class="filter-bar-count" id="actionsBarCount" style="display:none">0</span>
         </button>
     <?php endif; ?>
@@ -182,7 +182,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 </a>
             <?php endforeach; ?>
         </div>
-        <a class="filter-bar-reset" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">Reset all</a>
+        <a class="filter-bar-reset" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.reset_all') ?></a>
     <?php endif; ?>
 </div>
 
@@ -194,27 +194,27 @@ $hasExtended = !empty($filters['custom_fields']);
 
         <div class="filter-grid">
             <div class="field">
-                <label for="full_name">Name</label>
+                <label for="full_name"><?= t('common.name') ?></label>
                 <input id="full_name" type="text" name="full_name"
                     value="<?= htmlspecialchars($filters['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
-                <label for="email">Email</label>
+                <label for="email"><?= t('common.email') ?></label>
                 <input id="email" type="text" name="email"
                     value="<?= htmlspecialchars($filters['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
-                <label for="phone">Phone</label>
+                <label for="phone"><?= t('common.phone') ?></label>
                 <input id="phone" type="text" name="phone"
                     value="<?= htmlspecialchars($filters['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
             <div class="field">
-                <label>Tags</label>
+                <label><?= t('common.tags') ?></label>
                 <div class="token-picker token-picker--filter"
                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
                     data-name="tag_ids[]"
                     data-with-color="1"
-                    data-placeholder="All tags"
+                    data-placeholder="<?= t('common.all_tags') ?>"
                     data-paginate="1"
                     data-selected="<?= htmlspecialchars($preselectedFilterTagsJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
@@ -244,7 +244,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 <div class="token-picker token-picker--filter"
                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/search'), ENT_QUOTES, 'UTF-8') ?>"
                     data-name="client_id"
-                    data-placeholder="All clients"
+                    data-placeholder="<?= t('common.all_clients') ?>"
                     data-max="1"
                     data-paginate="1"
                     data-selected="<?= htmlspecialchars($preselectedFilterClientJson, ENT_QUOTES, 'UTF-8') ?>">
@@ -255,7 +255,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 <div class="token-picker token-picker--filter"
                     data-name="sector_id"
                     data-max="1"
-                    data-placeholder="All sectors"
+                    data-placeholder="<?= t('common.all_sectors') ?>"
                     data-options="<?= htmlspecialchars(json_encode(array_map(fn($s) => ['id' => (int) $s['id'], 'name' => $s['name']], $filterSectors)), ENT_QUOTES, 'UTF-8') ?>"
                     data-selected="<?= htmlspecialchars($preselectedSectorJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
@@ -267,15 +267,15 @@ $hasExtended = !empty($filters['custom_fields']);
                 if ($filters['is_corporate_email'] !== '') {
                     $preselectedEmailTypeJson = json_encode([[
                         'id'   => $filters['is_corporate_email'],
-                        'name' => $filters['is_corporate_email'] === '1' ? 'Corporate' : 'Consumer',
+                        'name' => $filters['is_corporate_email'] === '1' ? Lang::get('common.corporate') : Lang::get('common.consumer'),
                     ]]);
                 }
                 ?>
                 <div class="token-picker token-picker--filter"
                     data-name="is_corporate_email"
                     data-max="1"
-                    data-placeholder="All"
-                    data-options='[{"id":"1","name":"Corporate"},{"id":"0","name":"Consumer"}]'
+                    data-placeholder="<?= t('common.all') ?>"
+                    data-options="<?= htmlspecialchars(json_encode([['id' => '1', 'name' => Lang::get('common.corporate')], ['id' => '0', 'name' => Lang::get('common.consumer')]]), ENT_QUOTES, 'UTF-8') ?>"
                     data-selected="<?= htmlspecialchars($preselectedEmailTypeJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
@@ -293,8 +293,8 @@ $hasExtended = !empty($filters['custom_fields']);
                 <div class="token-picker token-picker--filter"
                     data-name="email_status"
                     data-max="1"
-                    data-placeholder="All"
-                    data-options='[{"id":"valid","name":"Valid"},{"id":"invalid","name":"Invalid"}]'
+                    data-placeholder="<?= t('common.all') ?>"
+                    data-options="<?= htmlspecialchars(json_encode([['id' => 'valid', 'name' => Lang::get('common.valid')], ['id' => 'invalid', 'name' => Lang::get('common.invalid')]]), ENT_QUOTES, 'UTF-8') ?>"
                     data-selected="<?= htmlspecialchars($preselectedEmailStatusJson, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
@@ -326,7 +326,7 @@ $hasExtended = !empty($filters['custom_fields']);
                             <div class="token-picker token-picker--filter"
                                 data-name="custom_fields[<?= $cfId ?>]"
                                 data-max="1"
-                                data-placeholder="Any"
+                                data-placeholder="<?= t('common.any') ?>"
                                 data-options="<?= htmlspecialchars(json_encode($cfOptions), ENT_QUOTES, 'UTF-8') ?>"
                                 data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
                             </div>
@@ -334,14 +334,14 @@ $hasExtended = !empty($filters['custom_fields']);
                             <?php
                             $cfPreselected = '[]';
                             if ($cfVal !== '') {
-                                $cfPreselected = json_encode([['id' => $cfVal, 'name' => $cfVal === '1' ? 'Yes' : 'No']]);
+                                $cfPreselected = json_encode([['id' => $cfVal, 'name' => $cfVal === '1' ? Lang::get('common.yes') : Lang::get('common.no')]]);
                             }
                             ?>
                             <div class="token-picker token-picker--filter"
                                 data-name="custom_fields[<?= $cfId ?>]"
                                 data-max="1"
-                                data-placeholder="Any"
-                                data-options='[{"id":"1","name":"Yes"},{"id":"0","name":"No"}]'
+                                data-placeholder="<?= t('common.any') ?>"
+                                data-options="<?= htmlspecialchars(json_encode([['id' => '1', 'name' => Lang::get('common.yes')], ['id' => '0', 'name' => Lang::get('common.no')]]), ENT_QUOTES, 'UTF-8') ?>"
                                 data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
                             </div>
                         <?php elseif ($field['field_type'] === 'text'): ?>
@@ -353,7 +353,7 @@ $hasExtended = !empty($filters['custom_fields']);
                                 data-name="custom_fields[<?= $cfId ?>]"
                                 data-max="1"
                                 data-paginate="1"
-                                data-placeholder="Any"
+                                data-placeholder="<?= t('common.any') ?>"
                                 data-selected="<?= htmlspecialchars($cfPreselected, ENT_QUOTES, 'UTF-8') ?>">
                             </div>
                         <?php elseif ($field['field_type'] === 'number'): ?>
@@ -372,7 +372,7 @@ $hasExtended = !empty($filters['custom_fields']);
             <?php if (!empty($customFilterFields)): ?>
                 <button type="button" id="filterToggleBtn"
                     class="filter-toggle-btn <?= $hasExtended ? 'open' : '' ?>">
-                    <span class="filter-toggle-label"><?= $hasExtended ? 'Less filters' : 'More filters' ?></span>
+                    <span class="filter-toggle-label"><?= $hasExtended ? t('common.less_filters') : t('common.more_filters') ?></span>
                     <svg class="filter-toggle-chevron" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -381,8 +381,8 @@ $hasExtended = !empty($filters['custom_fields']);
                 <div></div>
             <?php endif; ?>
             <div class="filter-actions">
-                <button class="btn btn-primary" type="submit">Filter</button>
-                <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">Reset</a>
+                <button class="btn btn-primary" type="submit"><?= t('common.filter') ?></button>
+                <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.reset') ?></a>
             </div>
         </div>
 
@@ -398,7 +398,7 @@ $hasExtended = !empty($filters['custom_fields']);
 
                 <?php if ($canEditContacts): ?>
                     <div class="actions-panel-section">
-                        <div class="actions-section-label">Tags</div>
+                        <div class="actions-section-label"><?= t('common.tags') ?></div>
                         <div class="actions-section-row">
                             <div class="actions-section-picker">
                                 <div class="token-picker token-picker--filter"
@@ -411,8 +411,8 @@ $hasExtended = !empty($filters['custom_fields']);
                                 </div>
                             </div>
                             <div class="actions-section-btns">
-                                <button type="submit" name="bulk_action" value="add_tags" class="btn btn-sm btn-primary">Add tags</button>
-                                <button type="submit" name="bulk_action" value="remove_tags" class="btn btn-sm btn-outlined">Remove tags</button>
+                                <button type="submit" name="bulk_action" value="add_tags" class="btn btn-sm btn-primary"><?= t('common.add_tags') ?></button>
+                                <button type="submit" name="bulk_action" value="remove_tags" class="btn btn-sm btn-outlined"><?= t('common.remove_tags') ?></button>
                             </div>
                         </div>
                     </div>
@@ -420,18 +420,18 @@ $hasExtended = !empty($filters['custom_fields']);
                     <div class="actions-panel-sep"></div>
 
                     <div class="actions-panel-section">
-                        <div class="actions-section-label">Link to client</div>
+                        <div class="actions-section-label"><?= t('common.link_to_client') ?></div>
                         <div class="actions-section-row">
                             <div class="actions-section-picker">
                                 <div class="token-picker token-picker--filter"
                                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/search'), ENT_QUOTES, 'UTF-8') ?>"
                                     data-name="link_client_ids[]"
-                                    data-placeholder="Search clients…"
+                                    data-placeholder="<?= t('common.search_clients') ?>"
                                     data-selected="[]">
                                 </div>
                             </div>
                             <div class="actions-section-btns">
-                                <button type="submit" name="bulk_action" value="link_client" class="btn btn-sm btn-green">Link</button>
+                                <button type="submit" name="bulk_action" value="link_client" class="btn btn-sm btn-green"><?= t('common.link') ?></button>
                             </div>
                         </div>
                     </div>
@@ -443,10 +443,10 @@ $hasExtended = !empty($filters['custom_fields']);
 
                 <?php if ($canDeleteContacts): ?>
                     <div class="actions-panel-section actions-panel-section--danger">
-                        <div class="actions-section-label">Delete</div>
+                        <div class="actions-section-label"><?= t('common.delete') ?></div>
                         <button type="submit" name="bulk_action" value="delete" class="btn btn-sm btn-danger" id="bulkDeleteBtn"
-                            onclick="return confirm('Delete selected contacts? This cannot be undone.')">
-                            Delete <span id="deleteCountLabel">0</span> selected
+                            onclick="return confirm('<?= htmlspecialchars(Lang::get('contacts.delete_bulk_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
+                            <?= t('common.delete') ?> <span id="deleteCountLabel">0</span> selected
                         </button>
                     </div>
                 <?php endif; ?>
@@ -454,7 +454,7 @@ $hasExtended = !empty($filters['custom_fields']);
             </div>
             <div class="actions-panel-footer">
                 <span class="actions-selected-hint" id="actionsSelectedHint">0 selected</span>
-                <button type="button" class="actions-deselect-btn" id="actionsDeselectBtn">Deselect all</button>
+                <button type="button" class="actions-deselect-btn" id="actionsDeselectBtn"><?= t('common.deselect_all') ?></button>
             </div>
         </form>
     </div>
@@ -463,7 +463,7 @@ $hasExtended = !empty($filters['custom_fields']);
 <!-- Table -->
 <?php if (empty($contacts)): ?>
     <div class="contacts-table-card is-empty">
-        No contacts found.
+        <?= t('contacts.no_found') ?>
     </div>
 <?php else: ?>
     <div class="contacts-table-card">
@@ -477,11 +477,11 @@ $hasExtended = !empty($filters['custom_fields']);
                         <?php endif; ?>
                     </th>
                     <?= thSort('id', 'ID', $sort, $dir, '/contacts', $activeFilters, 'col-id') ?>
-                    <?= thSort('full_name', 'Name', $sort, $dir, '/contacts', $activeFilters) ?>
-                    <?= thSort('email', 'Email', $sort, $dir, '/contacts', $activeFilters) ?>
-                    <?= thSort('clients', 'Clients', $sort, $dir, '/contacts', $activeFilters) ?>
-                    <th>Tags</th>
-                    <th class="col-actions">Actions</th>
+                    <?= thSort('full_name', t('common.name'), $sort, $dir, '/contacts', $activeFilters) ?>
+                    <?= thSort('email', t('common.email'), $sort, $dir, '/contacts', $activeFilters) ?>
+                    <?= thSort('clients', t('clients.title'), $sort, $dir, '/contacts', $activeFilters) ?>
+                    <th><?= t('common.tags') ?></th>
+                    <th class="col-actions"><?= t('common.actions') ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -552,7 +552,7 @@ $hasExtended = !empty($filters['custom_fields']);
                                 <a class="action-btn action-view"
                                     href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
                                     <i class="ph ph-eye"></i>
-                                    <span class="tooltip-text">View</span>
+                                    <span class="tooltip-text"><?= t('common.view') ?></span>
                                 </a>
                                 <?php if ($canEditContacts): ?>
                                     <a class="action-btn action-edit"
@@ -560,15 +560,15 @@ $hasExtended = !empty($filters['custom_fields']);
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
                                         </svg>
-                                        <span class="tooltip-text">Edit</span>
+                                        <span class="tooltip-text"><?= t('common.edit') ?></span>
                                     </a>
                                 <?php endif; ?>
                                 <?php if ($canDeleteContacts): ?>
                                     <a class="action-btn action-delete"
                                         href="<?= htmlspecialchars(Auth::url('/contacts/delete?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>"
-                                        onclick="return confirm('Delete this contact?')">
+                                        onclick="return confirm('<?= htmlspecialchars(Lang::get('contacts.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
                                         <i class="ph ph-trash"></i>
-                                        <span class="tooltip-text">Delete</span>
+                                        <span class="tooltip-text"><?= t('common.delete') ?></span>
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -583,11 +583,11 @@ $hasExtended = !empty($filters['custom_fields']);
     <div class="legend">
         <span class="legend-item">
             <i class="ph ph-user-circle email-badge email-badge--consumer"></i>
-            Consumer email
+            <?= t('common.consumer') ?>
         </span>
         <span class="legend-item">
             <i class="ph ph-warning email-badge email-badge--invalid"></i>
-            Invalid email
+            <?= t('common.invalid') ?>
         </span>
     </div>
 

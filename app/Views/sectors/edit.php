@@ -1,11 +1,11 @@
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
-        <h1>Edit sector</h1>
+        <h1><?= t('sectors.edit_title') ?></h1>
         <span class="count-label"><?= htmlspecialchars($sector['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
     </div>
 </div>
 
@@ -23,7 +23,7 @@ $selectedIcon = $sector['icon'] ?: ($defaultIcon ?? 'crosshair');
     <div class="settings-form-card">
         <div class="settings-form-body">
             <div class="field">
-                <label for="name">Name <span class="required-star">*</span></label>
+                <label for="name"><?= t('sectors.name') ?> <span class="required-star">*</span></label>
                 <input id="name" type="text" name="name"
                        value="<?= htmlspecialchars($sector['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
             </div>
@@ -77,16 +77,16 @@ $selectedIcon = $sector['icon'] ?: ($defaultIcon ?? 'crosshair');
                 <label>
                     <input type="checkbox" name="is_active" value="1"
                            <?= ((int) ($sector['is_active'] ?? 0) === 1) ? 'checked' : '' ?>>
-                    Active
+                    <?= t('common.active') ?>
                 </label>
             </div>
         </div>
         <div class="settings-form-actions">
-            <button class="btn btn-primary" type="submit">Update sector</button>
-            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+            <button class="btn btn-primary" type="submit"><?= t('sectors.update') ?></button>
+            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
             <a class="btn btn-danger btn-sm"
                href="<?= htmlspecialchars(Auth::url('/sectors/delete?id=' . (int) $sector['id']), ENT_QUOTES, 'UTF-8') ?>"
-               onclick="return confirm('Delete this sector? If it is used by clients, it will be deactivated.')">Delete</a>
+               onclick="return confirm('<?= htmlspecialchars(Lang::get('sectors.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')"><?= t('common.delete') ?></a>
         </div>
     </div>
 </form>

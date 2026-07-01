@@ -30,13 +30,13 @@ function userPermissionIcon(string $permission): string
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
-        <h1>Users</h1>
-        <span class="count-label"><?= (int) $total ?> users</span>
+        <h1><?= t('users.title') ?></h1>
+        <span class="count-label"><?= htmlspecialchars(Lang::get('users.n_users', ['n' => $total]), ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/users/create'), ENT_QUOTES, 'UTF-8') ?>">
             <i class="ph ph-plus"></i>
-            Create user
+            <?= t('users.create_btn') ?>
         </a>
     </div>
 </div>
@@ -48,12 +48,12 @@ function userPermissionIcon(string $permission): string
     <table class="data-table settings-table">
         <thead>
             <tr>
-                <?= thSort('name', 'User', $sort, $dir, '/users') ?>
-                <?= thSort('role', 'Role', $sort, $dir, '/users') ?>
-                <th>Permissions</th>
-                <?= thSort('is_active', 'Status', $sort, $dir, '/users') ?>
-                <th>Last login</th>
-                <th class="col-actions">Actions</th>
+                <?= thSort('name', t('users.user_col'), $sort, $dir, '/users') ?>
+                <?= thSort('role', t('users.role'), $sort, $dir, '/users') ?>
+                <th><?= t('users.permissions') ?></th>
+                <?= thSort('is_active', t('common.status'), $sort, $dir, '/users') ?>
+                <th><?= t('users.last_login') ?></th>
+                <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>
         <tbody>
@@ -67,7 +67,7 @@ function userPermissionIcon(string $permission): string
                                 <a class="user-cell-name col-row-link" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>">
                                     <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>
                                     <?php if ($isCurrentUser): ?>
-                                        <span class="user-current-label">(you)</span>
+                                        <span class="user-current-label"><?= t('users.you') ?></span>
                                     <?php endif; ?>
                                 </a>
                                 <span class="user-cell-email"><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></span>
@@ -98,8 +98,8 @@ function userPermissionIcon(string $permission): string
                             <?php endforeach; ?>
                             <?php if (!$hasPermissions): ?>
                                 <span class="permission-icon permission-icon-muted"
-                                      title="View only"
-                                      aria-label="View only">
+                                      title="<?= t('common.view_only') ?>"
+                                      aria-label="<?= t('common.view_only') ?>">
                                     <?= userPermissionIcon('view.only') ?>
                                 </span>
                             <?php endif; ?>
@@ -107,9 +107,9 @@ function userPermissionIcon(string $permission): string
                     </td>
                     <td>
                         <?php if ((int) $user['is_active'] === 1): ?>
-                            <span class="badge-active">Active</span>
+                            <span class="badge-active"><?= t('common.active') ?></span>
                         <?php else: ?>
-                            <span class="badge-inactive">Inactive</span>
+                            <span class="badge-inactive"><?= t('common.inactive') ?></span>
                         <?php endif; ?>
                     </td>
                     <td class="col-last-login">
@@ -119,14 +119,14 @@ function userPermissionIcon(string $permission): string
                         <div class="action-links">
                             <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-pencil"></i>
-                                <span class="tooltip-text">Edit</span>
+                                <span class="tooltip-text"><?= t('common.edit') ?></span>
                             </a>
                             <?php if ((int) $user['is_active'] === 0 && !$isCurrentUser): ?>
                             <a class="action-btn action-delete"
                                href="<?= htmlspecialchars(Auth::url('/users/purge?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>"
-                               onclick="return confirm('Permanently delete user <?= htmlspecialchars(addslashes($user['name']), ENT_QUOTES, 'UTF-8') ?>? This cannot be undone.')">
+                               onclick="return confirm('<?= htmlspecialchars(Lang::get('users.delete_perm_confirm', ['name' => $user['name']]), ENT_QUOTES, 'UTF-8') ?>')">
                                 <i class="ph ph-trash"></i>
-                                <span class="tooltip-text">Delete permanently</span>
+                                <span class="tooltip-text"><?= t('common.delete_perm') ?></span>
                             </a>
                             <?php endif; ?>
                         </div>

@@ -30,7 +30,7 @@ function importDisplayStatus(array $batch): string
 <!-- Header -->
 <div class="page-header imports-header">
     <div>
-        <h1>Imports</h1>
+        <h1><?= t('imports.title') ?></h1>
         <span class="count-label"><?= (int) $total ?> batches</span>
     </div>
     <div class="page-actions">
@@ -56,8 +56,8 @@ function importDisplayStatus(array $batch): string
                 <th class="col-num-header">Imported</th>
                 <th class="col-num-header">Skipped</th>
                 <th class="col-num-header">Errors</th>
-                <th>Created</th>
-                <th class="col-actions">Actions</th>
+                <th><?= t('common.created') ?></th>
+                <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>
         <tbody>

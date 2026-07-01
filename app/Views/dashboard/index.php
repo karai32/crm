@@ -14,8 +14,8 @@ function fmtDate(string $date): string
 ?>
 
 <div class="dashboard-header">
-    <h1>Dashboard Overview</h1>
-    <p>A summary of your CRM data and recent activity.</p>
+    <h1><?= t('dashboard.title') ?></h1>
+    <p><?= t('dashboard.subtitle') ?></p>
 </div>
 
 <!-- -- Stat Cards --------------------------------------- -->
@@ -24,37 +24,37 @@ function fmtDate(string $date): string
     <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon"><i class="ph ph-user"></i></div>
-            <span class="stat-card-label">Total Contacts</span>
+            <span class="stat-card-label"><?= t('dashboard.total_contacts') ?></span>
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['contacts']) ?></div>
-        <div class="stat-card-caption">Registered in the system</div>
+        <div class="stat-card-caption"><?= t('dashboard.registered') ?></div>
     </a>
 
     <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon"><i class="ph ph-buildings"></i></div>
-            <span class="stat-card-label">Total Clients</span>
+            <span class="stat-card-label"><?= t('dashboard.total_clients') ?></span>
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['clients']) ?></div>
-        <div class="stat-card-caption">Active in the CRM</div>
+        <div class="stat-card-caption"><?= t('dashboard.active_in_crm') ?></div>
     </a>
 
     <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon"><i class="ph ph-crosshair"></i></div>
-            <span class="stat-card-label">Total Sectors</span>
+            <span class="stat-card-label"><?= t('dashboard.total_sectors') ?></span>
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['sectors']) ?></div>
-        <div class="stat-card-caption">Available categories</div>
+        <div class="stat-card-caption"><?= t('dashboard.available_cats') ?></div>
     </a>
 
     <a class="stat-card" href="<?= htmlspecialchars(Auth::url('/tags'), ENT_QUOTES, 'UTF-8') ?>">
         <div class="stat-card-header">
             <div class="stat-card-icon"><i class="ph ph-tag"></i></div>
-            <span class="stat-card-label">Total Tags</span>
+            <span class="stat-card-label"><?= t('dashboard.total_tags') ?></span>
         </div>
         <div class="stat-card-number"><?= number_format((int) $stats['tags']) ?></div>
-        <div class="stat-card-caption">Available labels</div>
+        <div class="stat-card-caption"><?= t('dashboard.available_labels') ?></div>
     </a>
 
 </div>
@@ -65,22 +65,22 @@ function fmtDate(string $date): string
     <!-- Recent Contacts -->
     <div class="card">
         <div class="card-header">
-            <h2>Recent Contacts</h2>
-            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>">View All</a>
+            <h2><?= t('dashboard.recent_contacts') ?></h2>
+            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>"><?= t('dashboard.view_all') ?></a>
         </div>
 
         <?php if (empty($latestContacts)): ?>
-            <div class="empty-state">No contacts yet.</div>
+            <div class="empty-state"><?= t('dashboard.no_contacts') ?></div>
         <?php else: ?>
             <div class="recent-table-wrap">
                 <table class="data-table recent-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Company</th>
-                            <th>Clients</th>
-                            <th>Created</th>
+                            <th><?= t('common.name') ?></th>
+                            <th><?= t('common.email') ?></th>
+                            <th><?= t('dashboard.company') ?></th>
+                            <th><?= t('dashboard.clients') ?></th>
+                            <th><?= t('common.created') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,7 +96,7 @@ function fmtDate(string $date): string
                                 <td>
                                     <span class="company-indicator">
                                         <span class="company-indicator-dot <?= ($contact['company'] ?? '') !== '' ? 'yes' : 'no' ?>"></span>
-                                        <?= ($contact['company'] ?? '') !== '' ? htmlspecialchars($contact['company'], ENT_QUOTES, 'UTF-8') : 'No' ?>
+                                        <?= ($contact['company'] ?? '') !== '' ? htmlspecialchars($contact['company'], ENT_QUOTES, 'UTF-8') : t('dashboard.no_company') ?>
                                     </span>
                                 </td>
                                 <td class="col-clients">
@@ -144,11 +144,11 @@ function fmtDate(string $date): string
         <!-- Sector Distribution -->
         <div class="card">
             <div class="card-header">
-                <h2>Sector Distribution</h2>
+                <h2><?= t('dashboard.sector_dist') ?></h2>
             </div>
 
             <?php if (empty($clientsBySector)): ?>
-                <div class="sector-empty">No sector data yet.</div>
+                <div class="sector-empty"><?= t('dashboard.no_sector_data') ?></div>
             <?php else: ?>
                 <div class="sector-rows">
                     <?php foreach (array_slice($clientsBySector, 0, 8) as $row): ?>
@@ -160,7 +160,7 @@ function fmtDate(string $date): string
                                     <div class="sector-row-bar-fill" style="width:<?= $pct ?>%"></div>
                                 </div>
                             </div>
-                            <span class="sector-row-count"><?= (int) $row['clients_count'] ?> clients</span>
+                            <span class="sector-row-count"><?= (int) $row['clients_count'] ?> <?= t('dashboard.clients_label') ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -170,11 +170,11 @@ function fmtDate(string $date): string
         <!-- Top Clients -->
         <div class="card">
             <div class="card-header">
-                <h2>Top Clients</h2>
+                <h2><?= t('dashboard.top_clients') ?></h2>
             </div>
 
             <?php if (empty($topClients)): ?>
-                <div class="empty-state">No clients yet.</div>
+                <div class="empty-state"><?= t('dashboard.no_clients') ?></div>
             <?php else: ?>
                 <?php foreach (array_slice($topClients, 0, 5) as $i => $client): ?>
                     <?php
@@ -198,13 +198,13 @@ function fmtDate(string $date): string
                         </div>
                         <div class="client-count">
                             <span class="client-count-num"><?= (int) $client['contacts_count'] ?></span>
-                            <span class="client-count-label">Contacts</span>
+                            <span class="client-count-label"><?= t('dashboard.contacts_label') ?></span>
                         </div>
                     </a>
                 <?php endforeach; ?>
 
                 <div class="card-footer">
-                    <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>">View Client Directory</a>
+                    <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>"><?= t('dashboard.view_directory') ?></a>
                 </div>
             <?php endif; ?>
         </div>

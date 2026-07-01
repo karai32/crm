@@ -44,7 +44,7 @@ function renderPagination(int $page, int $totalPages, int $total, int $perPage, 
         return htmlspecialchars(Auth::url($basePath . '?' . http_build_query(array_merge($baseParams, $extra))), ENT_QUOTES, 'UTF-8');
     };
     echo '<div class="' . htmlspecialchars($cssClass, ENT_QUOTES, 'UTF-8') . '">';
-    echo '<span>Showing ' . $from . '–' . $to . ' of ' . (int) $total . '</span>';
+    echo '<span>' . htmlspecialchars(Lang::get('pagination.showing', ['from' => $from, 'to' => $to, 'total' => $total]), ENT_QUOTES, 'UTF-8') . '</span>';
     echo '<div class="pagination-pages">';
     if ($page > 1) {
         echo '<a class="page-btn" href="' . $url(['page' => $page - 1]) . '">&#8249;</a>';

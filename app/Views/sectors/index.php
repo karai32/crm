@@ -1,13 +1,13 @@
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
-        <h1>Sectors</h1>
-        <span class="count-label"><?= (int) $total ?> sectors</span>
+        <h1><?= t('sectors.title') ?></h1>
+        <span class="count-label"><?= htmlspecialchars(Lang::get('sectors.n_sectors', ['n' => $total]), ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/sectors/create'), ENT_QUOTES, 'UTF-8') ?>">
             <i class="ph ph-plus"></i>
-            Create sector
+            <?= t('sectors.create_btn') ?>
         </a>
     </div>
 </div>
@@ -15,7 +15,7 @@
 <div class="settings-search-card">
     <input type="text"
            class="settings-live-search"
-           placeholder="Search sectors..."
+           placeholder="<?= t('sectors.search') ?>"
            autocomplete="off"
            data-settings-search="sectors"
            data-search-endpoint="<?= htmlspecialchars(Auth::url('/ajax/sectors/search'), ENT_QUOTES, 'UTF-8') ?>"
@@ -26,15 +26,15 @@
 
 <div class="settings-table-card">
     <?php if (empty($sectors)): ?>
-        <p class="table-empty-state">No sectors found.</p>
+        <p class="table-empty-state"><?= t('sectors.no_found') ?></p>
     <?php else: ?>
     <table class="data-table settings-table">
         <thead>
             <tr>
-                <?= thSort('name', 'Name', $sort, $dir, '/sectors') ?>
-                <?= thSort('slug', 'Slug', $sort, $dir, '/sectors') ?>
-                <?= thSort('is_active', 'Status', $sort, $dir, '/sectors') ?>
-                <th class="col-actions">Actions</th>
+                <?= thSort('name', t('common.name'), $sort, $dir, '/sectors') ?>
+                <?= thSort('slug', t('sectors.slug'), $sort, $dir, '/sectors') ?>
+                <?= thSort('is_active', t('common.status'), $sort, $dir, '/sectors') ?>
+                <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>
         <tbody id="sectorsSearchResults">
@@ -51,22 +51,22 @@
                     <td class="col-slug"><?= htmlspecialchars($sector['slug'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
                         <?php if ((int) $sector['is_active'] === 1): ?>
-                            <span class="badge-active">Active</span>
+                            <span class="badge-active"><?= t('common.active') ?></span>
                         <?php else: ?>
-                            <span class="badge-inactive">Inactive</span>
+                            <span class="badge-inactive"><?= t('common.inactive') ?></span>
                         <?php endif; ?>
                     </td>
                     <td class="col-actions">
                         <div class="action-links">
                             <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/sectors/edit?id=' . $sector['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-pencil"></i>
-                                <span class="tooltip-text">Edit</span>
+                                <span class="tooltip-text"><?= t('common.edit') ?></span>
                             </a>
                             <a class="action-btn action-delete"
                                href="<?= htmlspecialchars(Auth::url('/sectors/delete?id=' . $sector['id']), ENT_QUOTES, 'UTF-8') ?>"
-                               onclick="return confirm('Delete this sector? If it is used by clients, it will be deactivated.')">
+                               onclick="return confirm('<?= htmlspecialchars(Lang::get('sectors.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
                                 <i class="ph ph-trash"></i>
-                                <span class="tooltip-text">Delete</span>
+                                <span class="tooltip-text"><?= t('common.delete') ?></span>
                             </a>
                         </div>
                     </td>

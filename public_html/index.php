@@ -32,6 +32,9 @@ if (file_exists($autoloadPath) && PHP_VERSION_ID >= 80300) {
     error_log('Composer autoload skipped: PHP 8.3 or newer is required for installed dependencies. Current PHP: ' . PHP_VERSION);
 }
 
+require_once __DIR__ . '/../app/Core/Lang.php';
+Lang::load($_SESSION['lang'] ?? 'es');
+
 require_once __DIR__ . '/../app/Core/Router.php';
 require_once __DIR__ . '/../app/Core/SortableTrait.php';
 require_once __DIR__ . '/../app/Core/ControllerHelperTrait.php';
@@ -190,6 +193,12 @@ $router->get('/api-logs', [$apiKeyController, 'logs']);
 $router->get('/settings', [$settingsController, 'index']);
 $router->post('/settings/update', [$settingsController, 'update']);
 $router->post('/settings/send-report', [$settingsController, 'sendReport']);
+$router->post('/lang/switch', function () {
+    $allowed = ['en', 'es', 'ru'];
+    $lang    = $_POST['lang'] ?? 'es';
+    $_SESSION['lang'] = in_array($lang, $allowed, true) ? $lang : 'es';
+    Auth::redirect($_POST['redirect'] ?? '/');
+});
 $router->post('/api/v1/contacts', [$contactApiController, 'create']);
 $router->get('/api/v1/contacts', [$contactApiController, 'index']);
 $router->get('/api/v1/contacts/{id}', [$contactApiController, 'show']);

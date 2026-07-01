@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(Lang::locale(), ENT_QUOTES, 'UTF-8') ?>">
 
 <head>
     <meta charset="utf-8">
@@ -37,6 +37,7 @@
         $parts    = explode(' ', trim($authUser['name'] ?? ''));
         $initials = strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1));
     }
+    $currentLocale = Lang::locale();
     ?>
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -52,116 +53,128 @@
                     </div>
                     <div class="sidebar-brand-text">
                         <span class="sidebar-title">ContactCore</span>
-                        <span class="sidebar-subtitle">Client relationship CRM</span>
+                        <span class="sidebar-subtitle"><?= t('nav.subtitle') ?></span>
                     </div>
                 </a>
 
                 <nav class="sidebar-nav">
 
                     <a href="<?= htmlspecialchars(Auth::url('/dashboard'), ENT_QUOTES, 'UTF-8') ?>"
-                        class="nav-item <?= $isActive('/dashboard') ?>" title="Dashboard">
+                        class="nav-item <?= $isActive('/dashboard') ?>" title="<?= t('nav.dashboard') ?>">
                         <span class="nav-icon"><i class="ph ph-house-line"></i></span>
-                        <span class="nav-label">Dashboard</span>
+                        <span class="nav-label"><?= t('nav.dashboard') ?></span>
                     </a>
 
                     <a href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>"
-                        class="nav-item <?= $isActive('/contacts') ?>" title="Contacts">
+                        class="nav-item <?= $isActive('/contacts') ?>" title="<?= t('nav.contacts') ?>">
                         <span class="nav-icon"><i class="ph ph-address-book"></i></span>
-                        <span class="nav-label">Contacts</span>
+                        <span class="nav-label"><?= t('nav.contacts') ?></span>
                     </a>
 
                     <a href="<?= htmlspecialchars(Auth::url('/clients'), ENT_QUOTES, 'UTF-8') ?>"
-                        class="nav-item <?= $isActive('/clients') ?>" title="Clients">
+                        class="nav-item <?= $isActive('/clients') ?>" title="<?= t('nav.clients') ?>">
                         <span class="nav-icon"><i class="ph ph-buildings"></i></span>
-                        <span class="nav-label">Clients</span>
+                        <span class="nav-label"><?= t('nav.clients') ?></span>
                     </a>
 
                     <?php if ($showSettingsNav): ?>
 
                         <?php if ($canManageSectors): ?>
                             <a href="<?= htmlspecialchars(Auth::url('/sectors'), ENT_QUOTES, 'UTF-8') ?>"
-                                class="nav-item <?= $isActive('/sectors') ?>" title="Sectors">
+                                class="nav-item <?= $isActive('/sectors') ?>" title="<?= t('nav.sectors') ?>">
                                 <span class="nav-icon"><i class="ph ph-crosshair"></i></span>
-                                <span class="nav-label">Sectors</span>
+                                <span class="nav-label"><?= t('nav.sectors') ?></span>
                             </a>
                         <?php endif; ?>
 
                         <?php if ($canManageTags): ?>
                             <a href="<?= htmlspecialchars(Auth::url('/tags'), ENT_QUOTES, 'UTF-8') ?>"
-                                class="nav-item <?= $isActive('/tags') ?>" title="Tags">
+                                class="nav-item <?= $isActive('/tags') ?>" title="<?= t('nav.tags') ?>">
                                 <span class="nav-icon"><i class="ph ph-tag"></i></span>
-                                <span class="nav-label">Tags</span>
+                                <span class="nav-label"><?= t('nav.tags') ?></span>
                             </a>
                         <?php endif; ?>
 
                         <?php if ($canManageCustomFields || $canManageImports || $canUseExports): ?>
-                            <div class="sidebar-section-label"><span class="nav-label">Settings</span></div>
+                            <div class="sidebar-section-label"><span class="nav-label"><?= t('nav.section_settings') ?></span></div>
                         <?php endif; ?>
 
                         <?php if ($authUser): ?>
                             <a href="<?= htmlspecialchars(Auth::url('/settings'), ENT_QUOTES, 'UTF-8') ?>"
-                                class="nav-item <?= $isActive('/settings') ?>" title="Settings">
+                                class="nav-item <?= $isActive('/settings') ?>" title="<?= t('nav.settings') ?>">
                                 <span class="nav-icon"><i class="ph ph-gear"></i></span>
-                                <span class="nav-label">Settings</span>
+                                <span class="nav-label"><?= t('nav.settings') ?></span>
                             </a>
                         <?php endif; ?>
 
                         <?php if ($canManageCustomFields): ?>
                             <a href="<?= htmlspecialchars(Auth::url('/custom-fields'), ENT_QUOTES, 'UTF-8') ?>"
-                                class="nav-item <?= $isActive('/custom-fields') ?>" title="Custom Fields">
+                                class="nav-item <?= $isActive('/custom-fields') ?>" title="<?= t('nav.custom_fields') ?>">
                                 <span class="nav-icon"><i class="ph ph-sliders-horizontal"></i></span>
-                                <span class="nav-label">Custom Fields</span>
+                                <span class="nav-label"><?= t('nav.custom_fields') ?></span>
                             </a>
                         <?php endif; ?>
 
                         <?php if ($canManageImports): ?>
                             <a href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>"
-                                class="nav-item <?= $isActive('/imports') ?>" title="Imports">
+                                class="nav-item <?= $isActive('/imports') ?>" title="<?= t('nav.imports') ?>">
                                 <span class="nav-icon"><i class="ph ph-download-simple"></i></span>
-                                <span class="nav-label">Imports</span>
+                                <span class="nav-label"><?= t('nav.imports') ?></span>
                             </a>
                         <?php endif; ?>
 
                         <?php if ($canUseExports): ?>
                             <a href="<?= htmlspecialchars(Auth::url('/exports'), ENT_QUOTES, 'UTF-8') ?>"
-                                class="nav-item <?= $isActive('/exports') ?>" title="Exports">
+                                class="nav-item <?= $isActive('/exports') ?>" title="<?= t('nav.exports') ?>">
                                 <span class="nav-icon"><i class="ph ph-upload-simple"></i></span>
-                                <span class="nav-label">Exports</span>
+                                <span class="nav-label"><?= t('nav.exports') ?></span>
                             </a>
                         <?php endif; ?>
 
                     <?php endif; ?>
 
                     <?php if ($authUser && ($canManageUsers || $canManageApiKeys)): ?>
-                        <div class="sidebar-section-label"><span class="nav-label">Admin</span></div>
+                        <div class="sidebar-section-label"><span class="nav-label"><?= t('nav.section_admin') ?></span></div>
                     <?php endif; ?>
 
                     <?php if ($canManageUsers): ?>
                         <a href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>"
-                            class="nav-item <?= $isActive('/users') ?>" title="Users">
+                            class="nav-item <?= $isActive('/users') ?>" title="<?= t('nav.users') ?>">
                             <span class="nav-icon"><i class="ph ph-users"></i></span>
-                            <span class="nav-label">Users</span>
+                            <span class="nav-label"><?= t('nav.users') ?></span>
                         </a>
                     <?php endif; ?>
 
                     <?php if ($canManageApiKeys): ?>
                         <a href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>"
-                            class="nav-item <?= $isActive('/api-keys') ?>" title="API Credentials">
+                            class="nav-item <?= $isActive('/api-keys') ?>" title="<?= t('nav.api_keys') ?>">
                             <span class="nav-icon"><i class="ph ph-key"></i></span>
-                            <span class="nav-label">API Credentials</span>
+                            <span class="nav-label"><?= t('nav.api_keys') ?></span>
                         </a>
                     <?php endif; ?>
 
                 </nav>
 
                 <div class="sidebar-footer">
+                    <!-- Language switcher -->
+                    <div class="sidebar-lang">
+                        <?php foreach (['es' => 'ES', 'en' => 'EN', 'ru' => 'RU'] as $code => $label): ?>
+                            <form method="post" action="<?= htmlspecialchars(Auth::url('/lang/switch'), ENT_QUOTES, 'UTF-8') ?>">
+                                <?= Csrf::field() ?>
+                                <input type="hidden" name="lang" value="<?= $code ?>">
+                                <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/', ENT_QUOTES, 'UTF-8') ?>">
+                                <button type="submit" class="lang-btn <?= $currentLocale === $code ? 'lang-btn--active' : '' ?>"><?= $label ?></button>
+                            </form>
+                        <?php endforeach; ?>
+                    </div>
+
                     <div class="sidebar-user-actions" id="sidebarUserActions">
                         <?php if (Auth::isAdmin()): ?>
                             <a class="sidebar-user-action" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . ($authUser['id'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">
                                 <span class="nav-icon">
                                     <i class="ph ph-user"></i>
                                 </span>
-                                <span class="nav-label">View Profile</span>
+                                <span class="nav-label"><?= t('nav.view_profile') ?></span>
                             </a>
                         <?php endif; ?>
                         <a class="sidebar-user-action sidebar-user-action--danger"
@@ -169,7 +182,7 @@
                             <span class="nav-icon">
                                 <i class="ph ph-sign-out"></i>
                             </span>
-                            <span class="nav-label">Logout</span>
+                            <span class="nav-label"><?= t('nav.logout') ?></span>
                         </a>
                     </div>
                     <button class="sidebar-user" id="sidebarUserBtn" type="button">
@@ -200,7 +213,7 @@
                         <input type="search"
                             data-global-search-input
                             data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/global-search'), ENT_QUOTES, 'UTF-8') ?>"
-                            placeholder="Search contacts and clients..."
+                            placeholder="<?= t('topbar.search_placeholder') ?>"
                             autocomplete="off"
                             spellcheck="false">
                         <div class="topbar-search-dropdown" data-global-search-results></div>
@@ -224,13 +237,13 @@
                                 <?php if (Auth::isAdmin()): ?>
                                     <a class="profile-dropdown-item" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . ($authUser['id'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">
                                         <i class="ph ph-user"></i>
-                                        View Profile
+                                        <?= t('nav.view_profile') ?>
                                     </a>
                                 <?php endif; ?>
                                 <a class="profile-dropdown-item profile-dropdown-item--danger"
                                     href="<?= htmlspecialchars(Auth::url('/logout'), ENT_QUOTES, 'UTF-8') ?>">
                                     <i class="ph ph-sign-out"></i>
-                                    Logout
+                                    <?= t('nav.logout') ?>
                                 </a>
                             </div>
                         </div>

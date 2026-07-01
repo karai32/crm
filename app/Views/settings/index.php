@@ -5,8 +5,8 @@ $perPageOptions = [20, 50, 100, 200];
 
 <div class="page-header settings-header">
     <div>
-        <h1>Settings</h1>
-        <span class="count-label">Your personal preferences</span>
+        <h1><?= t('settings.title') ?></h1>
+        <span class="count-label"><?= t('settings.subtitle') ?></span>
     </div>
 </div>
 
@@ -15,17 +15,17 @@ $perPageOptions = [20, 50, 100, 200];
         <?= Csrf::field() ?>
         <div class="settings-form-body">
             <div class="field">
-                <label for="per_page">Records per page</label>
+                <label for="per_page"><?= t('settings.per_page') ?></label>
                 <select id="per_page" name="per_page" class="settings-select-sm">
                     <?php foreach ($perPageOptions as $opt): ?>
                         <option value="<?= $opt ?>" <?= $savedPerPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                     <?php endforeach; ?>
                 </select>
-                <span class="field-hint">Number of rows displayed per page in all tables.</span>
+                <span class="field-hint"><?= t('settings.per_page_hint') ?></span>
             </div>
         </div>
         <div class="settings-form-actions">
-            <button type="submit" class="btn btn-primary">Save settings</button>
+            <button type="submit" class="btn btn-primary"><?= t('settings.save') ?></button>
         </div>
     </form>
 </div>
@@ -35,10 +35,8 @@ $perPageOptions = [20, 50, 100, 200];
 <div class="settings-form-card">
     <div class="settings-form-body">
         <div class="field">
-            <label>Email validation</label>
-            <span class="field-hint">
-                Checks all contacts that haven't been validated yet — detects corporate vs. consumer email and validates the domain MX record. Safe to run on large databases: processed in batches of 50.
-            </span>
+            <label><?= t('settings.email_validation') ?></label>
+            <span class="field-hint"><?= t('settings.email_val_hint') ?></span>
         </div>
         <div class="inspect-progress" id="inspectProgress">
             <div class="inspect-bar-track">
@@ -51,7 +49,7 @@ $perPageOptions = [20, 50, 100, 200];
         <button type="button" class="btn btn-primary" id="inspectBtn"
                 data-url="<?= htmlspecialchars(Auth::url('/ajax/contacts/inspect-email-batch'), ENT_QUOTES, 'UTF-8') ?>">
             <i class="ph ph-envelope-simple-open"></i>
-            Run email validation
+            <?= t('settings.run_validation') ?>
         </button>
     </div>
 </div>
@@ -59,20 +57,18 @@ $perPageOptions = [20, 50, 100, 200];
 <div class="settings-form-card">
     <div class="settings-form-body">
         <div class="field">
-            <label>Weekly report</label>
-            <span class="field-hint">
-                Send a snapshot of the current week's activity to your email. Includes new contacts, new clients, platform connections and deactivations.
-            </span>
+            <label><?= t('settings.weekly_report') ?></label>
+            <span class="field-hint"><?= t('settings.weekly_report_hint') ?></span>
         </div>
         <?php if (($reportStatus ?? null) === 'sent'): ?>
             <div class="settings-notice settings-notice--success">
                 <i class="ph ph-check-circle"></i>
-                Report sent to <strong><?= htmlspecialchars(Auth::user()['email'], ENT_QUOTES, 'UTF-8') ?></strong>.
+                <?= htmlspecialchars(Lang::get('settings.report_sent', ['email' => Auth::user()['email']]), ENT_QUOTES, 'UTF-8') ?>
             </div>
         <?php elseif (($reportStatus ?? null) === 'error'): ?>
             <div class="settings-notice settings-notice--error">
                 <i class="ph ph-warning-circle"></i>
-                Failed to send the report. Check <code>storage/app.log</code> for details.
+                <?= t('settings.report_error') ?>
             </div>
         <?php endif; ?>
     </div>
@@ -81,9 +77,28 @@ $perPageOptions = [20, 50, 100, 200];
             <?= Csrf::field() ?>
             <button type="submit" class="btn btn-secondary">
                 <i class="ph ph-paper-plane-tilt"></i>
-                Send report to my email
+                <?= t('settings.send_report') ?>
             </button>
         </form>
+    </div>
+</div>
+
+<div class="settings-form-card">
+    <div class="settings-form-body">
+        <div class="field">
+            <label><?= t('settings.language') ?></label>
+            <span class="field-hint"><?= t('settings.language_hint') ?></span>
+        </div>
+        <div class="settings-lang-buttons">
+            <?php foreach (['es' => 'Español', 'en' => 'English', 'ru' => 'Русский'] as $code => $label): ?>
+                <form method="post" action="<?= htmlspecialchars(Auth::url('/lang/switch'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= Csrf::field() ?>
+                    <input type="hidden" name="lang" value="<?= $code ?>">
+                    <input type="hidden" name="redirect" value="<?= htmlspecialchars(Auth::url('/settings'), ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="submit" class="btn <?= Lang::locale() === $code ? 'btn-primary' : 'btn-outlined' ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></button>
+                </form>
+            <?php endforeach; ?>
+        </div>
     </div>
 </div>
 

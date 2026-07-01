@@ -1,11 +1,11 @@
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
-        <h1>Edit tag</h1>
+        <h1><?= t('tags.update') ?></h1>
         <span class="count-label"><?= htmlspecialchars($tag['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/tags'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/tags'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
     </div>
 </div>
 
@@ -19,12 +19,12 @@
     <div class="settings-form-card">
         <div class="settings-form-body">
             <div class="field">
-                <label for="name">Name <span class="required-star">*</span></label>
+                <label for="name"><?= t('tags.name') ?> <span class="required-star">*</span></label>
                 <input id="name" type="text" name="name"
                        value="<?= htmlspecialchars($tag['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
             </div>
             <div class="field">
-                <label for="color">Color</label>
+                <label for="color"><?= t('tags.color') ?></label>
                 <div class="color-input-row">
                     <input id="color" type="text" name="color"
                            value="<?= htmlspecialchars($tag['color'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
@@ -36,12 +36,11 @@
             </div>
         </div>
         <div class="settings-form-actions">
-            <button class="btn btn-primary" type="submit">Update tag</button>
-            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/tags'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+            <button class="btn btn-primary" type="submit"><?= t('tags.update') ?></button>
+            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/tags'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
             <a class="btn btn-danger btn-sm"
                href="<?= htmlspecialchars(Auth::url('/tags/delete?id=' . (int) $tag['id']), ENT_QUOTES, 'UTF-8') ?>"
-               onclick="return confirm('Delete this tag? Existing contact and client links will be removed.')">Delete</a>
+               onclick="return confirm('<?= htmlspecialchars(Lang::get('tags.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')"><?= t('common.delete') ?></a>
         </div>
     </div>
 </form>
-

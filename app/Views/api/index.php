@@ -1,12 +1,12 @@
 <!-- Page header -->
 <div class="page-header settings-header api-header">
     <div>
-        <h1>API Credentials</h1>
+        <h1><?= t('api.title') ?></h1>
         <span class="count-label"><?= (int) $total ?> integration<?= (int) $total !== 1 ? 's' : '' ?></span>
     </div>
     <div style="display:flex;gap:12px;align-items:center">
         <a href="<?= htmlspecialchars(Auth::url('/api-logs'), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-outlined btn-sm">
-            View logs
+            <?= t('api.logs') ?>
         </a>
         <a href="<?= htmlspecialchars(Auth::url('/help/api'), ENT_QUOTES, 'UTF-8') ?>" class="api-back-link">
             API Reference
@@ -73,12 +73,12 @@ $basicAuth = $clientId . ':' . $secret;
             <table class="data-table api-keys-table">
                 <thead>
                     <tr>
-                        <?= thSort('name', 'Name', $sort, $dir, '/api-keys') ?>
+                        <?= thSort('name', t('common.name'), $sort, $dir, '/api-keys') ?>
                         <th>Client ID</th>
-                        <?= thSort('is_active', 'Status', $sort, $dir, '/api-keys') ?>
+                        <?= thSort('is_active', t('common.status'), $sort, $dir, '/api-keys') ?>
                         <th>Last used</th>
-                        <th>Created</th>
-                        <th class="col-actions">Actions</th>
+                        <th><?= t('common.created') ?></th>
+                        <th class="col-actions"><?= t('common.actions') ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,13 +109,13 @@ $basicAuth = $clientId . ':' . $secret;
                                 <input type="text" name="name" class="api-key-inline-input" required>
                                 <button type="submit" class="api-key-inline-save">Save</button>
                                 <button type="button" class="api-key-inline-cancel"
-                                        onclick="apiKeyRenameCancel(<?= $keyId ?>)">Cancel</button>
+                                        onclick="apiKeyRenameCancel(<?= $keyId ?>)"><?= t('common.cancel') ?></button>
                             </form>
                         </td>
                         <td><code class="api-key-code"><?= htmlspecialchars($key['client_id'], ENT_QUOTES, 'UTF-8') ?></code></td>
                         <td>
                             <?php if ($isActive): ?>
-                                <span class="tag-badge api-badge-active">Active</span>
+                                <span class="tag-badge api-badge-active"><?= t('common.active') ?></span>
                             <?php else: ?>
                                 <span class="tag-badge api-badge-revoked">Disabled</span>
                             <?php endif; ?>
@@ -161,7 +161,7 @@ $basicAuth = $clientId . ':' . $secret;
                                     <button class="action-btn action-delete" type="submit"
                                             onclick="return confirm('Permanently delete these API credentials?')">
                                         <i class="ph ph-trash"></i>
-                                        <span class="tooltip-text">Delete</span>
+                                        <span class="tooltip-text"><?= t('common.delete') ?></span>
                                     </button>
                                 </form>
                             </div>

@@ -1,13 +1,13 @@
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
-        <h1>Custom fields</h1>
-        <span class="count-label"><?= (int) $total ?> fields</span>
+        <h1><?= t('cf.title') ?></h1>
+        <span class="count-label"><?= htmlspecialchars(Lang::get('cf.n_fields', ['n' => $total]), ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/custom-fields/create'), ENT_QUOTES, 'UTF-8') ?>">
             <i class="ph ph-plus"></i>
-            Create field
+            <?= t('cf.create_btn') ?>
         </a>
     </div>
 </div>
@@ -19,14 +19,14 @@
     <table class="data-table settings-table">
         <thead>
             <tr>
-                <?= thSort('entity_type', 'Entity', $sort, $dir, '/custom-fields') ?>
-                <?= thSort('name', 'Name', $sort, $dir, '/custom-fields') ?>
-                <?= thSort('slug', 'Slug', $sort, $dir, '/custom-fields') ?>
-                <?= thSort('field_type', 'Type', $sort, $dir, '/custom-fields') ?>
+                <?= thSort('entity_type', t('cf.entity'), $sort, $dir, '/custom-fields') ?>
+                <?= thSort('name', t('cf.field_name'), $sort, $dir, '/custom-fields') ?>
+                <?= thSort('slug', t('sectors.slug'), $sort, $dir, '/custom-fields') ?>
+                <?= thSort('field_type', t('cf.field_type'), $sort, $dir, '/custom-fields') ?>
                 <th>Required</th>
                 <th>Filterable</th>
                 <th>Sort</th>
-                <th class="col-actions">Actions</th>
+                <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>
         <tbody>
@@ -42,16 +42,16 @@
                     <td><span class="badge-type"><?= htmlspecialchars($field['field_type'], ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td>
                         <?php if ((int) $field['is_required'] === 1): ?>
-                            <span class="badge-active">Yes</span>
+                            <span class="badge-active"><?= t('common.yes') ?></span>
                         <?php else: ?>
-                            <span class="badge-no">No</span>
+                            <span class="badge-no"><?= t('common.no') ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
                         <?php if ((int) $field['is_filterable'] === 1): ?>
-                            <span class="badge-active">Yes</span>
+                            <span class="badge-active"><?= t('common.yes') ?></span>
                         <?php else: ?>
-                            <span class="badge-no">No</span>
+                            <span class="badge-no"><?= t('common.no') ?></span>
                         <?php endif; ?>
                     </td>
                     <td class="col-sort-order"><?= (int) $field['sort_order'] ?></td>
@@ -59,13 +59,13 @@
                         <div class="action-links">
                             <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/custom-fields/edit?id=' . $field['id']), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-pencil"></i>
-                                <span class="tooltip-text">Edit</span>
+                                <span class="tooltip-text"><?= t('common.edit') ?></span>
                             </a>
                             <a class="action-btn action-delete"
                                href="<?= htmlspecialchars(Auth::url('/custom-fields/delete?id=' . $field['id']), ENT_QUOTES, 'UTF-8') ?>"
-                               onclick="return confirm('Delete this custom field? Values will also be deleted.')">
+                               onclick="return confirm('<?= htmlspecialchars(Lang::get('cf.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
                                 <i class="ph ph-trash"></i>
-                                <span class="tooltip-text">Delete</span>
+                                <span class="tooltip-text"><?= t('common.delete') ?></span>
                             </a>
                         </div>
                     </td>

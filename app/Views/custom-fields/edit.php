@@ -1,11 +1,11 @@
 <!-- Header -->
 <div class="page-header settings-header">
     <div>
-        <h1>Edit custom field</h1>
+        <h1><?= t('cf.update') ?></h1>
         <span class="count-label"><?= htmlspecialchars($field['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/custom-fields'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/custom-fields'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
     </div>
 </div>
 
@@ -20,14 +20,14 @@
         <div class="settings-form-body">
             <div class="settings-form-grid">
                 <div class="field">
-                    <label for="entity_type">Entity type</label>
+                    <label for="entity_type"><?= t('cf.entity') ?></label>
                     <select id="entity_type" name="entity_type">
                         <option value="contact" <?= (($field['entity_type'] ?? '') === 'contact') ? 'selected' : '' ?>>Contact</option>
                         <option value="client"  <?= (($field['entity_type'] ?? '') === 'client')  ? 'selected' : '' ?>>Client</option>
                     </select>
                 </div>
                 <div class="field">
-                    <label for="field_type">Field type</label>
+                    <label for="field_type"><?= t('cf.field_type') ?></label>
                     <select id="field_type" name="field_type">
                         <?php foreach (['text', 'textarea', 'number', 'date', 'email', 'url', 'select', 'checkbox'] as $type): ?>
                             <option value="<?= $type ?>" <?= (($field['field_type'] ?? 'text') === $type) ? 'selected' : '' ?>>
@@ -37,12 +37,12 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="name">Name <span class="required-star">*</span></label>
+                    <label for="name"><?= t('cf.field_name') ?> <span class="required-star">*</span></label>
                     <input id="name" type="text" name="name"
                            value="<?= htmlspecialchars($field['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
                 </div>
                 <div class="field">
-                    <label for="slug">Slug <span class="required-star">*</span></label>
+                    <label for="slug"><?= t('sectors.slug') ?> <span class="required-star">*</span></label>
                     <input id="slug" type="text" name="slug"
                            value="<?= htmlspecialchars($field['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
@@ -77,11 +77,11 @@
             </div>
         </div>
         <div class="settings-form-actions">
-            <button class="btn btn-primary" type="submit">Update field</button>
-            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/custom-fields'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+            <button class="btn btn-primary" type="submit"><?= t('cf.update') ?></button>
+            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/custom-fields'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
             <a class="btn btn-danger btn-sm"
                href="<?= htmlspecialchars(Auth::url('/custom-fields/delete?id=' . (int) $field['id']), ENT_QUOTES, 'UTF-8') ?>"
-               onclick="return confirm('Delete this custom field? Values will also be deleted.')">Delete</a>
+               onclick="return confirm('<?= htmlspecialchars(Lang::get('cf.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')"><?= t('common.delete') ?></a>
         </div>
     </div>
 </form>

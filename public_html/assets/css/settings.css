@@ -843,3 +843,14 @@ input[type='color'].color-picker-input {
     font-size: 16px;
     flex-shrink: 0;
 }
+
+/* -- Language buttons in settings ------------------------- */
+.settings-lang-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+.settings-lang-buttons form {
+    margin: 0;
+}

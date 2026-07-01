@@ -22,7 +22,7 @@ function apiMethodClass(string $m): string
 <!-- Header -->
 <div class="page-header api-logs-header">
     <div>
-        <h1>API Logs</h1>
+        <h1><?= t('api.logs') ?></h1>
         <span class="count-label"><?= number_format($total) ?> request<?= $total !== 1 ? 's' : '' ?></span>
     </div>
     <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>">
@@ -50,7 +50,7 @@ function apiMethodClass(string $m): string
             <div class="field api-logs-field api-logs-field--sm">
                 <label for="lf_method">Method</label>
                 <select id="lf_method" name="method">
-                    <option value="">All</option>
+                    <option value=""><?= t('common.all') ?></option>
                     <?php foreach (['GET', 'POST', 'PATCH', 'DELETE'] as $m): ?>
                     <option value="<?= $m ?>" <?= ($filters['method'] ?? '') === $m ? 'selected' : '' ?>><?= $m ?></option>
                     <?php endforeach; ?>
@@ -60,7 +60,7 @@ function apiMethodClass(string $m): string
             <div class="field api-logs-field api-logs-field--sm">
                 <label for="lf_status">Result</label>
                 <select id="lf_status" name="status">
-                    <option value="">All</option>
+                    <option value=""><?= t('common.all') ?></option>
                     <option value="success" <?= ($filters['status'] ?? '') === 'success' ? 'selected' : '' ?>>Success (2xx)</option>
                     <option value="error"   <?= ($filters['status'] ?? '') === 'error'   ? 'selected' : '' ?>>Error (4xx/5xx)</option>
                 </select>
@@ -85,8 +85,8 @@ function apiMethodClass(string $m): string
             </div>
 
             <div class="api-logs-filter-actions">
-                <button class="btn btn-primary" type="submit">Filter</button>
-                <a class="btn btn-outlined" href="<?= htmlspecialchars($base, ENT_QUOTES, 'UTF-8') ?>">Reset</a>
+                <button class="btn btn-primary" type="submit"><?= t('common.filter') ?></button>
+                <a class="btn btn-outlined" href="<?= htmlspecialchars($base, ENT_QUOTES, 'UTF-8') ?>"><?= t('common.reset') ?></a>
             </div>
 
         </div>
@@ -109,7 +109,7 @@ function apiMethodClass(string $m): string
                     <th>IP</th>
                     <th>Method</th>
                     <th>Path</th>
-                    <th>Status</th>
+                    <th><?= t('common.status') ?></th>
                     <th>Error</th>
                     <th class="col-num">Items</th>
                     <th class="col-num">ms</th>

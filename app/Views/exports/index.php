@@ -17,7 +17,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
 <!-- Header -->
 <div class="page-header exports-header">
     <div>
-        <h1>Export data</h1>
+        <h1><?= t('exports.title') ?></h1>
         <span class="count-label">Download contacts and clients as CSV or XLSX</span>
     </div>
 </div>

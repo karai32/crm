@@ -11,10 +11,10 @@ foreach ($roles as $role) {
 
 <div class="page-header settings-header">
     <div>
-        <h1>Create user</h1>
+        <h1><?= t('users.create_btn') ?></h1>
     </div>
     <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
     </div>
 </div>
 
@@ -28,23 +28,23 @@ foreach ($roles as $role) {
         <div class="settings-form-body">
             <div class="settings-form-grid">
                 <div class="field">
-                    <label for="name">Name <span class="required-star">*</span></label>
+                    <label for="name"><?= t('users.full_name') ?> <span class="required-star">*</span></label>
                     <input id="name" type="text" name="name"
                            value="<?= htmlspecialchars($user['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                            required autofocus>
                 </div>
                 <div class="field">
-                    <label for="email">Email <span class="required-star">*</span></label>
+                    <label for="email"><?= t('common.email') ?> <span class="required-star">*</span></label>
                     <input id="email" type="email" name="email"
                            value="<?= htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                            required>
                 </div>
                 <div class="field">
-                    <label for="password">Password <span class="required-star">*</span></label>
+                    <label for="password"><?= t('users.password') ?> <span class="required-star">*</span></label>
                     <input id="password" type="password" name="password" required>
                 </div>
                 <div class="field">
-                    <label for="role_id">Role</label>
+                    <label for="role_id"><?= t('users.role') ?></label>
                     <select id="role_id" name="role_id" required>
                         <?php foreach ($roles as $role): ?>
                             <option value="<?= (int) $role['id'] ?>"
@@ -59,7 +59,7 @@ foreach ($roles as $role) {
                     <label>
                         <input type="checkbox" name="is_active" value="1"
                                <?= ((int) ($user['is_active'] ?? 1) === 1) ? 'checked' : '' ?>>
-                        Active
+                        <?= t('common.active') ?>
                     </label>
                 </div>
             </div>
@@ -82,8 +82,8 @@ foreach ($roles as $role) {
             </div>
         </div>
         <div class="settings-form-actions">
-            <button class="btn btn-primary" type="submit">Create user</button>
-            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+            <button class="btn btn-primary" type="submit"><?= t('users.create_btn') ?></button>
+            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
         </div>
     </div>
 </form>
