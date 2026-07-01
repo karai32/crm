@@ -191,23 +191,33 @@ class ClientRepository
 
     public function update(int $id, array $data): void
     {
-        $pdo = Database::connect();
+        $pdo     = Database::connect();
+        $current = $this->find($id);
+        $now     = date('Y-m-d H:i:s');
+
+        $data['is_web_connected_date'] = ($current && (int) ($data['is_web_connected'] ?? $current['is_web_connected']) !== (int) $current['is_web_connected'])
+            ? $now : null;
+
+        $data['is_active_date'] = ($current && (int) ($data['is_active'] ?? $current['is_active']) !== (int) $current['is_active'])
+            ? $now : null;
 
         $sql = "
             UPDATE clients
-            SET commercial_name = :commercial_name,
-                legal_name = :legal_name,
-                cif = :cif,
-                address = :address,
-                postal_code = :postal_code,
-                city = :city,
-                province = :province,
-                country = :country,
-                sector_id = :sector_id,
-                website = :website,
-                notes = :notes,
-                is_web_connected = :is_web_connected,
-                is_active = :is_active
+            SET commercial_name       = :commercial_name,
+                legal_name            = :legal_name,
+                cif                   = :cif,
+                address               = :address,
+                postal_code           = :postal_code,
+                city                  = :city,
+                province              = :province,
+                country               = :country,
+                sector_id             = :sector_id,
+                website               = :website,
+                notes                 = :notes,
+                is_web_connected      = :is_web_connected,
+                is_active             = :is_active,
+                is_web_connected_date = COALESCE(:is_web_connected_date, is_web_connected_date),
+                is_active_date        = COALESCE(:is_active_date, is_active_date)
             WHERE id = :id
         ";
 
