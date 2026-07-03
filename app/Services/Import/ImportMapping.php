@@ -52,7 +52,7 @@ class ImportMapping
                 'first name' => 'full_name', 'first_name' => 'full_name',
                 'email' => 'email', 'e-mail' => 'email', 'phone' => 'phone',
                 'is_company' => 'company', 'company indicator' => 'company', 'company name' => 'company',
-                'company' => 'client', 'client' => 'client', 'client_name' => 'client',
+                'company' => 'company', 'client' => 'client', 'client_name' => 'client',
                 'client name' => 'client', 'sector' => 'sector', 'sector_name' => 'sector',
                 'tags' => 'tags', 'tag' => 'tags',
             ];

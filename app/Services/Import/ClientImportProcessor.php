@@ -35,6 +35,8 @@ class ClientImportProcessor extends AbstractImportProcessor
             'sector_id' => $this->sectorId((string) ($mapped['sector'] ?? '')),
             'website' => $this->nullable($mapped['website'] ?? null),
             'notes' => $this->nullable($mapped['notes'] ?? null),
+            'is_web_connected' => 0,
+            'is_active' => 1,
         ]);
 
         $tagIds = $this->tagIds((string) ($mapped['tags'] ?? ''));

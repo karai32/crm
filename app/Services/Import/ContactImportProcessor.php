@@ -27,12 +27,14 @@ class ContactImportProcessor extends AbstractImportProcessor
             throw new ImportRowException('Duplicate email: ' . $email, 'skipped');
         }
 
-        $contactId = $this->contacts->create([
+        $data = [
             'full_name' => $fullName,
             'email' => $this->nullable($email),
             'phone' => $this->nullable($mapped['phone'] ?? null),
             'company' => trim((string) ($mapped['company'] ?? '')),
-        ]);
+        ];
+        $data = array_merge($data, EmailInspector::inspect($data['email']));
+        $contactId = $this->contacts->create($data);
 
         $clientId = $this->clientId(
             (string) ($mapped['client'] ?? ''),
@@ -95,6 +97,8 @@ class ContactImportProcessor extends AbstractImportProcessor
             'sector_id' => $this->sectorId($sector),
             'website' => null,
             'notes' => null,
+            'is_web_connected' => 0,
+            'is_active' => 1,
         ]);
     }
 
