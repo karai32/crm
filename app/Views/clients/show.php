@@ -9,7 +9,7 @@
         <div>
             <div class="client-hero-name">
                 <?= htmlspecialchars($client['commercial_name'], ENT_QUOTES, 'UTF-8') ?>
-                <?php if (!empty($client['is_active']) && $client['is_active'] === 1): ?>
+                <?php if ((int) $client['is_active'] === 1): ?>
                     <div class="client-active-status">
                         <i class="ph ph-check"></i>
                         <span class="tooltip-text"><?= t('common.active') ?></span>
@@ -31,7 +31,7 @@
                         </a>
                     </span>
                 <?php endif; ?>
-                <?php if (!empty($client['is_web_connected']) && $client['is_web_connected'] === 1): ?>
+                <?php if ((int) $client['is_web_connected'] === 1): ?>
                     <span class="client-hero-meta-item">
                         <i class="ph ph-plugs-connected"></i>
                         <?= t('clients.connected_to_api') ?>
