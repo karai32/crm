@@ -113,6 +113,10 @@ class ImportManager
 
         $processor = $this->processor($entityType);
 
+        // Large batches can take minutes of DB round-trips; don't let php.ini's
+        // default max_execution_time kill the request mid-import.
+        set_time_limit(0);
+
         if (!$this->imports->claimForProcessing($batchId)) {
             return $this->result($this->imports->findBatch($batchId) ?? $batch, true, 'This import is already processing.');
         }

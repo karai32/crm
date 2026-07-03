@@ -33,7 +33,7 @@ class ContactImportProcessor extends AbstractImportProcessor
             'phone' => $this->nullable($mapped['phone'] ?? null),
             'company' => trim((string) ($mapped['company'] ?? '')),
         ];
-        $data = array_merge($data, EmailInspector::inspect($data['email']));
+        $data = array_merge($data, EmailInspector::inspect($data['email'], false));
         $contactId = $this->contacts->create($data);
 
         $clientId = $this->clientId(

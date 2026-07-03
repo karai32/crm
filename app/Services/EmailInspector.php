@@ -105,8 +105,12 @@ class EmailInspector
     /**
      * Inspect an email address and return is_corporate_email + email_status.
      * Returns nulls when email is absent.
+     *
+     * $checkDns performs a live MX lookup and must stay disabled for bulk
+     * loops (e.g. CSV import) -- thousands of blocking DNS calls in one
+     * request will exceed the PHP/nginx timeout.
      */
-    public static function inspect(?string $email): array
+    public static function inspect(?string $email, bool $checkDns = true): array
     {
         if ($email === null || trim($email) === '') {
             return ['is_corporate_email' => null, 'email_status' => null];
@@ -119,6 +123,10 @@ class EmailInspector
         $domain = strtolower(substr($email, strrpos($email, '@') + 1));
 
         $isCorporate = !in_array($domain, self::$freeDomains, true) ? 1 : 0;
+
+        if (!$checkDns) {
+            return ['is_corporate_email' => $isCorporate, 'email_status' => 'unknown'];
+        }
 
         $hasMx = @checkdnsrr($domain, 'MX');
         $status = $hasMx ? 'valid' : 'invalid';
