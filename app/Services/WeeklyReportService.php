@@ -2,6 +2,30 @@
 
 class WeeklyReportService
 {
+    private function baseUrl(): string
+    {
+        static $config = null;
+        $config ??= require dirname(__DIR__, 2) . '/config/app.php';
+
+        return rtrim($config['base_url'], '/');
+    }
+
+    private function contactsUrl(array $data): string
+    {
+        return $this->baseUrl() . '/contacts?' . http_build_query([
+            'created_from' => date('Y-m-d', strtotime($data['period_from'])),
+            'created_to'   => date('Y-m-d', strtotime($data['period_to'])),
+        ]);
+    }
+
+    private function clientsUrl(array $data): string
+    {
+        return $this->baseUrl() . '/clients?' . http_build_query([
+            'created_from' => date('Y-m-d', strtotime($data['period_from'])),
+            'created_to'   => date('Y-m-d', strtotime($data['period_to'])),
+        ]);
+    }
+
     public function collect(string $from = ''): array
     {
         $pdo = Database::connect();
@@ -108,24 +132,14 @@ class WeeklyReportService
 
         $body = $this->buildSummaryRow(count($nc), count($ncl), count($wc), count($de));
 
-        // Nuevos contactos
-        if (count($nc) > 0) {
-            $rows = '';
-            foreach ($nc as $r) {
-                $rows .= '<tr>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">' . $this->e($r['full_name']) . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b">' . $this->e($r['email'] ?? '—') . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">' . $this->e($r['company']) . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b;white-space:nowrap">' . date('d/m/Y', strtotime($r['created_at'])) . '</td>'
-                    . '</tr>';
-            }
-            $body .= $this->buildSection(
-                'Nuevos contactos (' . count($nc) . ')',
-                $this->buildTable(['Nombre', 'Email', 'Empresa', 'Fecha'], $rows)
-            );
-        } else {
-            $body .= $this->buildSection('Nuevos contactos (0)', $this->emptyMsg('No hay nuevos contactos esta semana.'));
-        }
+        // Nuevos contactos y clientes (enlaces a la plataforma, filtrados por fecha)
+        $body .= $this->buildSection(
+            'Nuevos contactos y clientes',
+            $this->buildLinkButtonsRow([
+                ['label' => 'Ver ' . count($nc) . ' nuevos contactos', 'url' => $this->contactsUrl($data), 'bg' => '#1e40af'],
+                ['label' => 'Ver ' . count($ncl) . ' nuevos clientes', 'url' => $this->clientsUrl($data), 'bg' => '#16a34a'],
+            ])
+        );
 
         // Top clientes
         if (count($tc) > 0) {
@@ -142,24 +156,6 @@ class WeeklyReportService
             );
         } else {
             $body .= $this->buildSection('Top 10 clientes con más contactos nuevos', $this->emptyMsg('Sin datos esta semana.'));
-        }
-
-        // Nuevos clientes
-        if (count($ncl) > 0) {
-            $rows = '';
-            foreach ($ncl as $r) {
-                $rows .= '<tr>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">' . $this->e($r['commercial_name']) . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b">' . $this->e($r['legal_name'] ?? '—') . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b;white-space:nowrap">' . date('d/m/Y', strtotime($r['created_at'])) . '</td>'
-                    . '</tr>';
-            }
-            $body .= $this->buildSection(
-                'Nuevos clientes (' . count($ncl) . ')',
-                $this->buildTable(['Cliente', 'Razón social', 'Fecha'], $rows)
-            );
-        } else {
-            $body .= $this->buildSection('Nuevos clientes (0)', $this->emptyMsg('No hay nuevos clientes esta semana.'));
         }
 
         // Conectados a la plataforma
@@ -227,10 +223,18 @@ class WeeklyReportService
         $lines[] = str_repeat('=', 50);
         $lines[] = '';
 
+        $lines[] = 'NUEVOS CONTACTOS (' . count($data['new_contacts']) . ')';
+        $lines[] = str_repeat('-', 30);
+        $lines[] = 'Ver en la plataforma: ' . $this->contactsUrl($data);
+        $lines[] = '';
+
+        $lines[] = 'NUEVOS CLIENTES (' . count($data['new_clients']) . ')';
+        $lines[] = str_repeat('-', 30);
+        $lines[] = 'Ver en la plataforma: ' . $this->clientsUrl($data);
+        $lines[] = '';
+
         $sections = [
-            ['title' => 'NUEVOS CONTACTOS', 'items' => $data['new_contacts'], 'key' => 'full_name'],
             ['title' => 'TOP CLIENTES CON MÁS CONTACTOS', 'items' => $data['top_clients'], 'key' => 'commercial_name'],
-            ['title' => 'NUEVOS CLIENTES', 'items' => $data['new_clients'], 'key' => 'commercial_name'],
             ['title' => 'CONECTADOS A LA PLATAFORMA', 'items' => $data['web_connected'], 'key' => 'commercial_name'],
             ['title' => 'DESACTIVADOS', 'items' => $data['deactivated'], 'key' => 'commercial_name'],
         ];
@@ -278,6 +282,24 @@ class WeeklyReportService
             . '</h3>'
             . $content
             . '</div>';
+    }
+
+    private function buildLinkButtonsRow(array $buttons): string
+    {
+        $cells = '';
+        foreach ($buttons as $b) {
+            $cells .= '<td style="padding:6px" align="center">' . $this->buildButton($b['label'], $b['url'], $b['bg']) . '</td>';
+        }
+
+        return '<table width="100%" cellpadding="0" cellspacing="0"><tr>' . $cells . '</tr></table>';
+    }
+
+    private function buildButton(string $label, string $url, string $bg = '#1e40af'): string
+    {
+        return '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" '
+            . 'style="display:inline-block;padding:12px 20px;background:' . $bg . ';color:#fff;'
+            . 'text-decoration:none;border-radius:6px;font-size:13px;font-weight:600">'
+            . $this->e($label) . ' →</a>';
     }
 
     private function buildTable(array $headers, string $bodyRows): string

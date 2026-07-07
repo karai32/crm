@@ -4,6 +4,7 @@
 # Real config files with credentials
 /config/database.php
 /config/mail.php
+/config/app.php
 
 # Storage runtime data
 /storage/logs/
