@@ -66,7 +66,7 @@ function helpApiCardHead(array $item): void
 
         <!-- Back button + title -->
         <div class="help-api-back-row">
-            <a href="<?= htmlspecialchars(Auth::url('/help?lang=' . $locale), ENT_QUOTES, 'UTF-8') ?>" class="help-topic-back">
+            <a href="<?= htmlspecialchars(Auth::url('/help'), ENT_QUOTES, 'UTF-8') ?>" class="help-topic-back">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                 </svg>
@@ -124,22 +124,24 @@ function helpApiCardHead(array $item): void
             <?php helpApiCodeBlock('Basic Auth value', 'ex-formidable-auth', '<span class="cs">crm_your_client_id:your_secret</span>'); ?>
 
             <p class="api-label api-label-mt">PowerShell example</p>
-            <?php helpApiCodeBlock('PowerShell', 'ex-ps', <<<"CODE"
+            <?php
+            // Nowdoc: the $variables below are PowerShell code, not PHP.
+            helpApiCodeBlock('PowerShell', 'ex-ps', str_replace('__API_BASE__', htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8'), <<<'CODE'
 <span class="ck">$clientId</span> = <span class="cs">"crm_your_client_id"</span>
 <span class="ck">$secret</span> = <span class="cs">"your_secret"</span>
 <span class="ck">$token</span> = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(<span class="cs">"$clientId`:$secret"</span>))
 <span class="ck">$headers</span> = @{ <span class="cs">"Authorization"</span> = <span class="cs">"Basic $token"</span> }
 
 <span class="cc"># GET request</span>
-Invoke-RestMethod -Uri <span class="cs">"<?= htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8') ?>/api/v1/contacts"</span> -Headers <span class="ck">$headers</span>
+Invoke-RestMethod -Uri <span class="cs">"__API_BASE__/api/v1/contacts"</span> -Headers <span class="ck">$headers</span>
 
 <span class="cc"># POST request with JSON body</span>
 Invoke-RestMethod -Method Post `
-    -Uri <span class="cs">"<?= htmlspecialchars($apiBase, ENT_QUOTES, 'UTF-8') ?>/api/v1/contacts"</span> `
+    -Uri <span class="cs">"__API_BASE__/api/v1/contacts"</span> `
     -Headers <span class="ck">$headers</span> `
     -ContentType <span class="cs">"application/json"</span> `
     -Body <span class="cs">'[{"full_name":"Ivan Petrov","email":"ivan@example.com","tags":"VIP","clients":"Acme Corp"}]'</span>
-CODE); ?>
+CODE)); ?>
 
             <p class="api-label api-label-mt">Response envelope</p>
             <p class="help-api-body-text-muted">All responses return JSON with a consistent envelope.</p>

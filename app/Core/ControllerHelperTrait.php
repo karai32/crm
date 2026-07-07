@@ -35,6 +35,15 @@ trait ControllerHelperTrait
         return $this->cleanIds($tagIds);
     }
 
+    protected function filterRowsByIds(array $rows, array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        return array_values(array_filter($rows, fn ($row) => in_array((int) $row['id'], $ids, true)));
+    }
+
     protected function mergeSelectedRows(array $baseRows, array $selectedRows): array
     {
         $rows = [];

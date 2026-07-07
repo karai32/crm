@@ -4,12 +4,44 @@ abstract class AbstractApiController
 {
     private ApiKeyRepository $apiKeys;
     private ApiAuthenticator $authenticator;
+    private AbstractApiService $service;
     private string $rawInput = '';
 
     public function __construct()
     {
         $this->apiKeys = new ApiKeyRepository();
         $this->authenticator = new ApiAuthenticator($this->apiKeys);
+        $this->service = $this->makeService();
+    }
+
+    // Resource segment used in scopes and paths, e.g. 'contacts'.
+    abstract protected function resource(): string;
+
+    abstract protected function makeService(): AbstractApiService;
+
+    public function index(): void
+    {
+        $this->handle($this->resource() . ':read', '/api/v1/' . $this->resource(), fn (): ApiResult => $this->service->index($_GET));
+    }
+
+    public function show(): void
+    {
+        $this->handle($this->resource() . ':read', '/api/v1/' . $this->resource() . '/{id}', fn (): ApiResult => $this->service->show($this->routeId()));
+    }
+
+    public function create(): void
+    {
+        $this->handle($this->resource() . ':write', '/api/v1/' . $this->resource(), fn (): ApiResult => $this->service->createBatch($this->jsonBatch()));
+    }
+
+    public function update(): void
+    {
+        $this->handle($this->resource() . ':write', '/api/v1/' . $this->resource() . '/{id}', fn (): ApiResult => $this->service->update($this->routeId(), $this->jsonObject()));
+    }
+
+    public function destroy(): void
+    {
+        $this->handle($this->resource() . ':write', '/api/v1/' . $this->resource() . '/{id}', fn (): ApiResult => $this->service->destroy($this->routeId()));
     }
 
     protected function handle(string $scope, string $path, callable $action): void

@@ -166,7 +166,7 @@ class ContactRepository
 
     public function deleteMultiple(array $ids): void
     {
-        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
+        $ids = $this->cleanIds($ids);
 
         if (empty($ids)) {
             return;
@@ -180,8 +180,8 @@ class ContactRepository
 
     public function addClientsToContacts(array $contactIds, array $clientIds): void
     {
-        $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), fn ($id) => $id > 0)));
-        $clientIds  = array_values(array_unique(array_filter(array_map('intval', $clientIds),  fn ($id) => $id > 0)));
+        $contactIds = $this->cleanIds($contactIds);
+        $clientIds  = $this->cleanIds($clientIds);
 
         if (empty($contactIds) || empty($clientIds)) {
             return;
@@ -308,8 +308,8 @@ class ContactRepository
 
     public function addTags(array $contactIds, array $tagIds): void
     {
-        $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), fn ($id) => $id > 0)));
-        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), fn ($id) => $id > 0)));
+        $contactIds = $this->cleanIds($contactIds);
+        $tagIds = $this->cleanIds($tagIds);
 
         if (empty($contactIds) || empty($tagIds)) {
             return;
@@ -333,8 +333,8 @@ class ContactRepository
 
     public function removeTags(array $contactIds, array $tagIds): void
     {
-        $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), fn ($id) => $id > 0)));
-        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), fn ($id) => $id > 0)));
+        $contactIds = $this->cleanIds($contactIds);
+        $tagIds = $this->cleanIds($tagIds);
 
         if (empty($contactIds) || empty($tagIds)) {
             return;
@@ -440,6 +440,11 @@ class ContactRepository
         $pdo = Database::connect();
         $pdo->prepare('UPDATE contacts SET is_corporate_email = :is_corporate, email_status = :status WHERE id = :id')
             ->execute(['is_corporate' => $isCorporate, 'status' => $status, 'id' => $id]);
+    }
+
+    private function cleanIds(array $ids): array
+    {
+        return array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
     }
 
     private function buildFilterSql(array $filters): array

@@ -1,5 +1,4 @@
 <?php
-$backUrl = htmlspecialchars(Auth::url('/help?lang=' . $locale), ENT_QUOTES, 'UTF-8');
 
 $toc = [
     ['id' => 'overview',     'label' => 'Technology stack'],
@@ -18,26 +17,7 @@ $toc = [
 ];
 ?>
 
-<!-- Back + lang -->
-<div class="help-back-row">
-    <a href="<?= $backUrl ?>" class="help-topic-back">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
-        </svg>
-        Help Center
-    </a>
-    <div class="help-lang-switch">
-        <span>Language</span>
-        <div class="help-lang-pills">
-            <?php foreach ($availableLocales as $code => $label): ?>
-            <a class="help-lang-pill active"
-               href="<?= htmlspecialchars(Auth::url('/help/technical-guide?lang=' . $code), ENT_QUOTES, 'UTF-8') ?>">
-                <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
-            </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</div>
+<?php require __DIR__ . '/_topic-header.php'; ?>
 
 <!-- Layout: TOC + content -->
 <div class="help-layout help-layout-mt">
@@ -48,7 +28,7 @@ $toc = [
         <nav class="help-toc-nav">
             <?php foreach ($toc as $item): ?>
             <a href="#<?= $item['id'] ?>"
-               class="help-toc-item help-toc-item--red"
+               class="help-toc-item help-toc-item--slate"
                data-section="<?= $item['id'] ?>">
                 <span class="help-toc-dot"></span>
                 <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>
@@ -60,7 +40,7 @@ $toc = [
     <!-- Main content -->
     <div class="help-content">
 
-        <div class="help-callout help-callout--red">
+        <div class="help-callout help-callout--slate">
             <i class="ph ph-lock-key"></i>
             <p><strong>Administrators only.</strong> This guide documents the internals of the platform:
             how it is built, how data is stored, and how it is deployed. It is not visible to
@@ -401,10 +381,10 @@ $toc = [
                 </p>
                 <div class="help-callout help-callout--cyan">
                     <i class="ph ph-info"></i>
-                    <p><strong>The Help Center is an exception:</strong> its content is authored inline in
-                    <code>HelpController</code> and the <code>app/Views/help/*</code> views with its own
-                    <code>?lang=</code> switcher (Spanish/English only), independent of the session locale.
-                    This technical guide is currently <strong>English-only</strong>.</p>
+                    <p><strong>Help Center content</strong> follows the global UI locale but is authored
+                    inline in <code>HelpController::content()</code> (Spanish and English; other locales
+                    fall back to English). The API reference and this technical guide are
+                    <strong>English-only</strong>.</p>
                 </div>
             </div>
         </section>

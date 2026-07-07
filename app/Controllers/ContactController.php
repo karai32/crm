@@ -27,7 +27,7 @@ class ContactController
 
         $contacts = $this->contacts->paginate($page, $perPage, $filters, $sort, $dir);
         $contactIds = array_map('intval', array_column($contacts, 'id'));
-        $selectedFilterTags = $this->selectedTagsForIds($filters['tag_ids'] ?? []);
+        $selectedFilterTags = $this->filterRowsByIds($this->contacts->firstTags(500), $filters['tag_ids'] ?? []);
 
         $selectedClientId = (int) ($filters['client_id'] ?? 0);
         $filterClientName = '';
@@ -294,16 +294,5 @@ class ContactController
         }
 
         return $contact;
-    }
-
-    private function selectedTagsForIds(array $tagIds): array
-    {
-        if (empty($tagIds)) {
-            return [];
-        }
-
-        return array_values(array_filter($this->contacts->firstTags(500), function ($tag) use ($tagIds) {
-            return in_array((int) $tag['id'], $tagIds, true);
-        }));
     }
 }

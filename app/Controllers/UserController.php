@@ -71,28 +71,12 @@ class UserController
         $password = $_POST['password'] ?? '';
 
         if ($data['name'] === '' || $data['email'] === '' || $password === '') {
-            View::render('users/create', [
-                'title'  => Lang::get('users.create_title'),
-                'styles' => ['settings.css'],
-                'user'   => $data,
-                'roles'  => $this->users->allRoles(),
-                'permissionDefinitions' => Auth::permissionDefinitions(),
-                'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => Lang::get('users.create_required'),
-            ]);
+            $this->renderFormError('create', $data, 'users.create_required');
             return;
         }
 
         if ($this->users->findByEmail($data['email']) !== null) {
-            View::render('users/create', [
-                'title'  => Lang::get('users.create_title'),
-                'styles' => ['settings.css'],
-                'user'   => $data,
-                'roles'  => $this->users->allRoles(),
-                'permissionDefinitions' => Auth::permissionDefinitions(),
-                'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => Lang::get('users.email_already_used'),
-            ]);
+            $this->renderFormError('create', $data, 'users.email_already_used');
             return;
         }
 
@@ -141,43 +125,19 @@ class UserController
         $currentUser = Auth::user();
 
         if (($currentUser['id'] ?? null) == $id && $data['is_active'] === 0) {
-            View::render('users/edit', [
-                'title'  => Lang::get('users.edit_title'),
-                'styles' => ['settings.css'],
-                'user'   => array_merge($existingUser, $data),
-                'roles'  => $this->users->allRoles(),
-                'permissionDefinitions' => Auth::permissionDefinitions(),
-                'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => Lang::get('users.cannot_deactivate_own'),
-            ]);
+            $this->renderFormError('edit', array_merge($existingUser, $data), 'users.cannot_deactivate_own');
             return;
         }
 
         if ($data['name'] === '' || $data['email'] === '') {
-            View::render('users/edit', [
-                'title'  => Lang::get('users.edit_title'),
-                'styles' => ['settings.css'],
-                'user'   => array_merge($existingUser, $data),
-                'roles'  => $this->users->allRoles(),
-                'permissionDefinitions' => Auth::permissionDefinitions(),
-                'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => Lang::get('users.edit_required'),
-            ]);
+            $this->renderFormError('edit', array_merge($existingUser, $data), 'users.edit_required');
             return;
         }
 
         $userWithEmail = $this->users->findByEmail($data['email']);
 
         if ($userWithEmail !== null && (int) $userWithEmail['id'] !== $id) {
-            View::render('users/edit', [
-                'title'  => Lang::get('users.edit_title'),
-                'styles' => ['settings.css'],
-                'user'   => array_merge($existingUser, $data),
-                'roles'  => $this->users->allRoles(),
-                'permissionDefinitions' => Auth::permissionDefinitions(),
-                'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => Lang::get('users.email_already_used'),
-            ]);
+            $this->renderFormError('edit', array_merge($existingUser, $data), 'users.email_already_used');
             return;
         }
 
@@ -223,6 +183,20 @@ class UserController
         }
 
         Auth::redirect('/users');
+    }
+
+    // Re-renders the create/edit form with submitted values and an error message.
+    private function renderFormError(string $form, array $user, string $errorKey): void
+    {
+        View::render('users/' . $form, [
+            'title'  => Lang::get($form === 'create' ? 'users.create_title' : 'users.edit_title'),
+            'styles' => ['settings.css'],
+            'user'   => $user,
+            'roles'  => $this->users->allRoles(),
+            'permissionDefinitions' => Auth::permissionDefinitions(),
+            'userPermissions' => $this->permissionsFromRequest(),
+            'error'  => Lang::get($errorKey),
+        ]);
     }
 
     private function userDataFromRequest(): array

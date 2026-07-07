@@ -19,8 +19,7 @@ class AjaxController
 
     public function globalSearch(): void
     {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
+        if (!$this->guard()) {
             return;
         }
 
@@ -67,8 +66,7 @@ class AjaxController
 
     public function clientsSearch(): void
     {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
+        if (!$this->guard()) {
             return;
         }
 
@@ -96,8 +94,7 @@ class AjaxController
 
     public function tagsSearch(): void
     {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
+        if (!$this->guard()) {
             return;
         }
 
@@ -122,13 +119,7 @@ class AjaxController
 
     public function sectorsSearch(): void
     {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
-            return;
-        }
-
-        if (!Auth::can('sectors.manage')) {
-            $this->json(['error' => 'Forbidden'], 403);
+        if (!$this->guard('sectors.manage')) {
             return;
         }
 
@@ -148,13 +139,7 @@ class AjaxController
 
     public function iconsSearch(): void
     {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
-            return;
-        }
-
-        if (!Auth::can('sectors.manage')) {
-            $this->json(['error' => 'Forbidden'], 403);
+        if (!$this->guard('sectors.manage')) {
             return;
         }
 
@@ -166,8 +151,7 @@ class AjaxController
 
     public function clientFieldValues(): void
     {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
+        if (!$this->guard()) {
             return;
         }
 
@@ -186,8 +170,7 @@ class AjaxController
 
     public function customFieldValues(): void
     {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
+        if (!$this->guard()) {
             return;
         }
 
@@ -244,6 +227,23 @@ class AjaxController
                 'done'      => true,
             ], 500);
         }
+    }
+
+    // JSON-flavoured auth guard: 401 when unauthenticated, 403 when the
+    // optional permission is missing. Returns true when the request may proceed.
+    private function guard(?string $permission = null): bool
+    {
+        if (!Auth::check()) {
+            $this->json(['error' => 'Unauthenticated'], 401);
+            return false;
+        }
+
+        if ($permission !== null && !Auth::can($permission)) {
+            $this->json(['error' => 'Forbidden'], 403);
+            return false;
+        }
+
+        return true;
     }
 
     private function paginatedItems(string $q, int $page, callable $fetch, int $perPage = 20): array

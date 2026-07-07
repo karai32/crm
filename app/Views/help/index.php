@@ -1,6 +1,6 @@
 <?php
 $icons = [
-    'map'      => 'ph ph-airplane-tilt',
+    'map'      => 'ph ph-map-trifold',
     'person'   => 'ph ph-user',
     'building' => 'ph ph-buildings',
     'tag'      => 'ph ph-tag',
@@ -9,39 +9,23 @@ $icons = [
     'download' => 'ph ph-download-simple',
     'search'   => 'ph ph-magnifying-glass',
     'users'    => 'ph ph-users',
-    'shield'   => 'ph ph-shield-check',
     'key'      => 'ph ph-key',
     'code'     => 'ph ph-code',
 ];
 ?>
 
 <div class="help-hub-hero">
-    <div class="help-hub-hero-row">
-        <div>
-            <h1><?= htmlspecialchars($content['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></h1>
-            <p><?= htmlspecialchars($content['intro'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
-        </div>
-        <div class="help-lang-switch">
-            <span><?= htmlspecialchars($content['language_label'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
-            <div class="help-lang-pills">
-                <?php foreach ($availableLocales as $code => $label): ?>
-                <a class="help-lang-pill <?= $locale === $code ? 'active' : '' ?>"
-                   href="<?= htmlspecialchars(Auth::url('/help?lang=' . $code), ENT_QUOTES, 'UTF-8') ?>">
-                    <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
-                </a>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
+    <h1><?= htmlspecialchars($content['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></h1>
+    <p><?= htmlspecialchars($content['intro'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
 </div>
 
 <div class="help-hub-grid">
     <?php foreach ($cards as $card):
         $iconClass = $icons[$card['icon']] ?? '';
-        $url = htmlspecialchars(Auth::url('/help/' . $card['id'] . '?lang=' . $locale), ENT_QUOTES, 'UTF-8');
+        $url = htmlspecialchars(Auth::url('/help/' . $card['id']), ENT_QUOTES, 'UTF-8');
     ?>
     <a href="<?= $url ?>" class="help-hub-card">
-        <div class="help-hub-card-icon help-card-icon--<?= htmlspecialchars($card['accent'], ENT_QUOTES, 'UTF-8') ?>">
+        <div class="help-hub-card-icon help-card-icon--slate">
             <?php if ($iconClass): ?>
             <i class="<?= htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') ?>"></i>
             <?php endif; ?>

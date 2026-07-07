@@ -18,37 +18,30 @@ class Router
 
     public function get(string $path, callable $handler): void
     {
-        if (str_contains($path, '{')) {
-            $this->patterns['GET'][$path] = $handler;
-        } else {
-            $this->routes['GET'][$path] = $handler;
-        }
+        $this->add('GET', $path, $handler);
     }
 
     public function post(string $path, callable $handler): void
     {
-        if (str_contains($path, '{')) {
-            $this->patterns['POST'][$path] = $handler;
-        } else {
-            $this->routes['POST'][$path] = $handler;
-        }
+        $this->add('POST', $path, $handler);
     }
 
     public function patch(string $path, callable $handler): void
     {
-        if (str_contains($path, '{')) {
-            $this->patterns['PATCH'][$path] = $handler;
-        } else {
-            $this->routes['PATCH'][$path] = $handler;
-        }
+        $this->add('PATCH', $path, $handler);
     }
 
     public function delete(string $path, callable $handler): void
     {
+        $this->add('DELETE', $path, $handler);
+    }
+
+    private function add(string $method, string $path, callable $handler): void
+    {
         if (str_contains($path, '{')) {
-            $this->patterns['DELETE'][$path] = $handler;
+            $this->patterns[$method][$path] = $handler;
         } else {
-            $this->routes['DELETE'][$path] = $handler;
+            $this->routes[$method][$path] = $handler;
         }
     }
 

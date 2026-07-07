@@ -237,7 +237,7 @@ class ClientRepository
 
     public function deleteMultiple(array $ids): void
     {
-        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
+        $ids = $this->cleanIds($ids);
 
         if (empty($ids)) {
             return;
@@ -362,8 +362,8 @@ class ClientRepository
 
     public function addTagsToClients(array $clientIds, array $tagIds): void
     {
-        $clientIds = array_values(array_unique(array_filter(array_map('intval', $clientIds), fn ($id) => $id > 0)));
-        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), fn ($id) => $id > 0)));
+        $clientIds = $this->cleanIds($clientIds);
+        $tagIds = $this->cleanIds($tagIds);
 
         if (empty($clientIds) || empty($tagIds)) {
             return;
@@ -387,8 +387,8 @@ class ClientRepository
 
     public function removeTagsFromClients(array $clientIds, array $tagIds): void
     {
-        $clientIds = array_values(array_unique(array_filter(array_map('intval', $clientIds), fn ($id) => $id > 0)));
-        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), fn ($id) => $id > 0)));
+        $clientIds = $this->cleanIds($clientIds);
+        $tagIds = $this->cleanIds($tagIds);
 
         if (empty($clientIds) || empty($tagIds)) {
             return;
@@ -403,6 +403,11 @@ class ClientRepository
             AND tag_id IN ($tagPlaceholders)
         ");
         $statement->execute(array_merge($clientIds, $tagIds));
+    }
+
+    private function cleanIds(array $ids): array
+    {
+        return array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
     }
 
     private function buildFilterSql(array $filters): array

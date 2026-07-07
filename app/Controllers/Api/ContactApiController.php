@@ -2,36 +2,13 @@
 
 class ContactApiController extends AbstractApiController
 {
-    private ContactApiService $service;
-
-    public function __construct()
+    protected function resource(): string
     {
-        parent::__construct();
-        $this->service = new ContactApiService();
+        return 'contacts';
     }
 
-    public function index(): void
+    protected function makeService(): AbstractApiService
     {
-        $this->handle('contacts:read', '/api/v1/contacts', fn (): ApiResult => $this->service->index($_GET));
-    }
-
-    public function show(): void
-    {
-        $this->handle('contacts:read', '/api/v1/contacts/{id}', fn (): ApiResult => $this->service->show($this->routeId()));
-    }
-
-    public function create(): void
-    {
-        $this->handle('contacts:write', '/api/v1/contacts', fn (): ApiResult => $this->service->createBatch($this->jsonBatch()));
-    }
-
-    public function update(): void
-    {
-        $this->handle('contacts:write', '/api/v1/contacts/{id}', fn (): ApiResult => $this->service->update($this->routeId(), $this->jsonObject()));
-    }
-
-    public function destroy(): void
-    {
-        $this->handle('contacts:write', '/api/v1/contacts/{id}', fn (): ApiResult => $this->service->destroy($this->routeId()));
+        return new ContactApiService();
     }
 }

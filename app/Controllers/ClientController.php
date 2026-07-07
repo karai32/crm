@@ -27,7 +27,7 @@ class ClientController
 
         $clients = $this->clients->paginate($page, $perPage, $filters, $sort, $dir);
         $clientIds = array_map('intval', array_column($clients, 'id'));
-        $selectedFilterTags = $this->selectedTagsForIds($filters['tag_ids'] ?? []);
+        $selectedFilterTags = $this->filterRowsByIds($this->clients->firstTags(500), $filters['tag_ids'] ?? []);
 
         View::render('clients/index', [
             'title'             => Lang::get('clients.title'),
@@ -274,16 +274,5 @@ class ClientController
         }
 
         return $client;
-    }
-
-    private function selectedTagsForIds(array $tagIds): array
-    {
-        if (empty($tagIds)) {
-            return [];
-        }
-
-        return array_values(array_filter($this->clients->firstTags(500), function ($tag) use ($tagIds) {
-            return in_array((int) $tag['id'], $tagIds, true);
-        }));
     }
 }

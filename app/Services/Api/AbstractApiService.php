@@ -11,6 +11,17 @@ abstract class AbstractApiService
         $this->tags = new TagRepository();
     }
 
+    // The uniform CRUD surface AbstractApiController dispatches to.
+    abstract public function index(array $query): ApiResult;
+
+    abstract public function show(int $id): ApiResult;
+
+    abstract public function createBatch(array $items): ApiResult;
+
+    abstract public function update(int $id, array $body): ApiResult;
+
+    abstract public function destroy(int $id): ApiResult;
+
     protected function batch(array $items, callable $processor): ApiResult
     {
         $results = [];

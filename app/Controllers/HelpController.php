@@ -6,31 +6,28 @@ class HelpController
     {
         Auth::requireLogin();
 
-        $locale  = $this->localeFromRequest();
-        $content = $this->content()[$locale];
+        $content = $this->content()[$this->locale()];
 
-        $visibleSections = array_filter(
-            $content['sections'],
-            fn ($s) => $this->canViewTopic($s['id'])
-        );
+        $cards = [];
 
-        $cards = array_map(static fn ($s) => [
-            'id'      => $s['id'],
-            'icon'    => $s['icon'],
-            'accent'  => $s['accent'],
-            'title'   => $s['title'],
-            'summary' => $s['summary'],
-        ], array_values($visibleSections));
+        foreach ($content['sections'] as $section) {
+            if (!$this->canViewTopic($section['id'])) {
+                continue;
+            }
+            $cards[] = [
+                'id'      => $section['id'],
+                'icon'    => $section['icon'],
+                'title'   => $section['title'],
+                'summary' => $section['summary'],
+            ];
+        }
 
         if ($this->canViewTopic('api')) {
             $cards[] = [
                 'id'      => 'api',
                 'icon'    => 'key',
-                'accent'  => 'slate',
                 'title'   => 'API Reference',
-                'summary' => $locale === 'es'
-                    ? 'Documentacion completa de la API REST: autenticacion con clave, endpoints de contactos, clientes, sectores y tags, con ejemplos de uso.'
-                    : 'Full REST API documentation: key authentication, endpoints for contacts, clients, sectors and tags, with usage examples.',
+                'summary' => $content['api_summary'],
             ];
         }
 
@@ -38,21 +35,16 @@ class HelpController
             $cards[] = [
                 'id'      => 'technical-guide',
                 'icon'    => 'code',
-                'accent'  => 'red',
-                'title'   => $locale === 'es' ? 'Guia tecnica de la plataforma' : 'Platform Technical Guide',
-                'summary' => $locale === 'es'
-                    ? 'Documentacion tecnica solo para administradores: stack tecnologico, estructura de archivos, base de datos, seguridad, API y dependencias. Disponible solo en ingles.'
-                    : 'Administrator-only technical documentation: technology stack, file structure, database schema, security model, REST API internals and external dependencies.',
+                'title'   => $content['technical_guide_title'],
+                'summary' => $content['technical_guide_summary'],
             ];
         }
 
         View::render('help/index', [
-            'title'            => $content['page_title'],
-            'styles'           => ['help.css'],
-            'locale'           => $locale,
-            'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
-            'content'          => $content,
-            'cards'            => $cards,
+            'title'   => $content['page_title'],
+            'styles'  => ['help.css'],
+            'content' => $content,
+            'cards'   => $cards,
         ]);
     }
 
@@ -61,64 +53,46 @@ class HelpController
         Auth::requireLogin();
 
         $topic  = (string) ($_GET['topic'] ?? '');
-        $locale = $this->localeFromRequest();
+        $locale = $this->locale();
 
         if (!$this->canViewTopic($topic)) {
             Auth::redirect('/help');
             return;
         }
 
-        // Topics that have their own dedicated view file
-        $dedicatedViews = [
-            'api'             => ['help/api',             ['help.css', 'api.css'], 'API Reference'],
-            'getting-started' => ['help/getting-started', ['help.css'],            'Primeros pasos'],
-            'contacts'        => ['help/contacts',        ['help.css'],            'Contactos'],
-            'clients'         => ['help/clients',         ['help.css'],            'Clientes'],
-            'tags-sectors'    => ['help/tags-sectors',    ['help.css'],            'Tags y sectores'],
-            'custom-fields'   => ['help/custom-fields',   ['help.css'],            'Campos personalizados'],
-            'imports'         => ['help/imports',         ['help.css'],            'Importacion de datos'],
-            'exports'         => ['help/exports',         ['help.css'],            'Exportacion de datos'],
-            'search-filters'  => ['help/search-filters',  ['help.css'],            'Busqueda y filtros'],
-            'users-roles'     => ['help/users-roles',     ['help.css'],            'Usuarios y permisos'],
-            'technical-guide' => ['help/technical-guide', ['help.css'],            'Platform Technical Guide'],
-        ];
-
-        if (isset($dedicatedViews[$topic])) {
-            [$view, $styles, $title] = $dedicatedViews[$topic];
-            View::render($view, [
-                'title'            => $title,
-                'styles'           => $styles,
-                'scripts'          => ['help.js'],
-                'locale'           => $topic === 'technical-guide' ? 'en' : $locale,
-                'availableLocales' => $topic === 'technical-guide' ? ['en' => 'EN'] : ['es' => 'ES', 'en' => 'EN'],
+        if ($topic === 'api') {
+            View::render('help/api', [
+                'title'   => 'API Reference',
+                'styles'  => ['help.css', 'api.css'],
+                'scripts' => ['help.js'],
+                'locale'  => $locale,
             ]);
             return;
         }
 
-        // Generic checklist template for sections not yet migrated
-        $content = $this->content()[$locale];
-        $section = null;
-
-        foreach ($content['sections'] as $s) {
-            if ($s['id'] === $topic) {
-                $section = $s;
-                break;
-            }
-        }
-
-        if ($section === null) {
-            Auth::redirect('/help');
+        if ($topic === 'technical-guide') {
+            View::render('help/technical-guide', [
+                'title'   => 'Platform Technical Guide',
+                'styles'  => ['help.css'],
+                'scripts' => ['help.js'],
+                'locale'  => $locale,
+            ]);
             return;
         }
 
-        View::render('help/show', [
-            'title'            => $section['title'],
-            'styles'           => ['help.css'],
-            'locale'           => $locale,
-            'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
-            'content'          => $content,
-            'section'          => $section,
-        ]);
+        foreach ($this->content()[$locale]['sections'] as $section) {
+            if ($section['id'] === $topic) {
+                View::render('help/show', [
+                    'title'   => $section['title'],
+                    'styles'  => ['help.css'],
+                    'locale'  => $locale,
+                    'section' => $section,
+                ]);
+                return;
+            }
+        }
+
+        Auth::redirect('/help');
     }
 
     /**
@@ -140,10 +114,11 @@ class HelpController
         };
     }
 
-    private function localeFromRequest(): string
+    // Help content follows the global UI language (Settings). It exists in
+    // Spanish and English; other UI locales fall back to English.
+    private function locale(): string
     {
-        $locale = strtolower((string) ($_GET['lang'] ?? 'es'));
-        return in_array($locale, ['es', 'en'], true) ? $locale : 'es';
+        return Lang::locale() === 'es' ? 'es' : 'en';
     }
 
     private function content(): array
@@ -152,302 +127,260 @@ class HelpController
 
             // ── Spanish ────────────────────────────────────────────────────
             'es' => [
-                'page_title'         => 'Centro de ayuda',
-                'title'              => 'Centro de ayuda',
-                'intro'              => 'Todo lo que necesitas saber para sacar el maximo partido al CRM: contactos, clientes, importaciones, exportaciones, filtros y mucho mas.',
-                'language_label'     => 'Idioma',
-                'quick_topics_label' => 'Contenido',
+                'page_title' => 'Centro de ayuda',
+                'title'      => 'Centro de ayuda',
+                'intro'      => 'Referencia rapida de los modulos del CRM.',
+
+                'api_summary'             => 'API REST: autenticacion con claves y scopes; endpoints de contactos, clientes, sectores y tags.',
+                'technical_guide_title'   => 'Guia tecnica de la plataforma',
+                'technical_guide_summary' => 'Arquitectura, esquema de base de datos, modelo de seguridad y despliegue. Solo en ingles.',
+
                 'sections' => [
                     [
                         'id'      => 'getting-started',
-                        'accent'  => 'violet',
                         'icon'    => 'map',
                         'title'   => 'Primeros pasos',
-                        'summary' => 'ContactCore es un CRM ligero organizado en modulos accesibles desde el menu lateral. El flujo habitual es: crear contactos → vincularlos a clientes → clasificar con tags → filtrar y exportar cuando lo necesites.',
+                        'summary' => 'Estructura de la interfaz, busqueda global y cuenta.',
                         'items'   => [
-                            'El <strong>Dashboard</strong> es la pantalla de inicio: muestra el total de contactos, clientes, sectores y tags, y los accesos directos a las secciones principales.',
-                            'El <strong>menu lateral</strong> agrupa todo el sistema: <em>Contacts</em>, <em>Clients</em>, <em>Sectors</em>, <em>Tags</em> y la seccion de configuracion (Custom Fields, Imports, Exports, Users, API Credentials).',
-                            'La <strong>barra de busqueda superior</strong> localiza contactos y clientes en tiempo real tecleando el nombre, email o empresa. Los resultados aparecen en un desplegable instantaneo.',
-                            'El <strong>menu de perfil</strong> (avatar en la esquina superior derecha) muestra tu nombre, rol y el enlace para cerrar sesion.',
-                            'El boton <strong>☰ (hamburguesa)</strong> en movil colapsa o expande el menu lateral para ganar espacio en pantallas pequenas.',
-                            'La opcion <strong>"Recordarme"</strong> en el login mantiene la sesion activa durante 30 dias sin necesidad de volver a introducir las credenciales.',
-                            'La interfaz esta disponible en <strong>Espanol e Ingles</strong>: cambia el idioma desde el selector que aparece en la esquina superior derecha de esta pagina de ayuda.',
-                            'Si tu cuenta tiene <strong>verificacion en dos pasos activada</strong>, recibes un codigo por email tras el login que debes introducir antes de acceder.',
+                            'El <strong>menu lateral</strong> muestra los modulos disponibles; las secciones sin permiso se ocultan.',
+                            'La <strong>busqueda global</strong> de la barra superior localiza contactos y clientes por nombre, email o empresa mientras escribes.',
+                            'El <strong>Dashboard</strong> muestra los totales de contactos, clientes, sectores y tags.',
+                            '<strong>"Recordarme"</strong> en el login mantiene la sesion 30 dias.',
+                            'Con la <strong>verificacion en dos pasos</strong> activada, tras el login se envia un codigo de un solo uso por email.',
+                            'El idioma de la interfaz se cambia en <strong>Ajustes</strong>; el centro de ayuda lo sigue automaticamente.',
                         ],
-                        'tip' => 'Flujo recomendado para empezar: crea 2-3 contactos → crea un cliente → vincula los contactos a ese cliente → aplica un tag como "Lead" a los contactos. Con eso ya tendras datos reales para explorar los filtros y la exportacion.',
                     ],
                     [
                         'id'      => 'contacts',
-                        'accent'  => 'blue',
                         'icon'    => 'person',
                         'title'   => 'Contactos',
-                        'summary' => 'Los contactos son la pieza central del CRM. Cada persona tiene su propia ficha con datos de contacto, tags, clientes vinculados y campos personalizados.',
+                        'summary' => 'Fichas de personas: campos, clientes vinculados, tags y acciones en bloque.',
                         'items'   => [
-                            'Los campos principales son: nombre, apellido, email, telefono y la opcion "Is company" para personas juridicas.',
-                            'Desde la ficha de un contacto puedes vincularlo a uno o varios clientes con un solo clic.',
-                            'Los <strong>tags</strong> sirven para clasificar el estado del contacto: Lead, Client, Partner, Hot, Cold, Prospect, etc.',
-                            'Puedes <strong>seleccionar varios contactos</strong> en el listado y aplicar o quitar tags en bloque desde la barra flotante inferior.',
-                            'Los <strong>filtros</strong> permiten segmentar por nombre, email, tag, cliente, sector, fechas y campos personalizados.',
-                            'Cada contacto puede tener <strong>campos personalizados</strong> para guardar informacion especifica de tu proceso.',
+                            'Campos: <strong>nombre completo</strong> (obligatorio), email, telefono y empresa.',
+                            'Un contacto puede vincularse a <strong>varios clientes</strong> desde su ficha.',
+                            'Los <strong>tags</strong> marcan el estado (Lead, Client, Hot, Cold...); se aplican en la ficha o en bloque desde el listado.',
+                            'Acciones en bloque sobre la seleccion: anadir/quitar tags, vincular a cliente, eliminar.',
+                            'Filtros por nombre, email, tag, cliente, sector, fechas y campos personalizados filtrables.',
                         ],
-                        'tip' => 'Usa el campo "Is company" cuando el contacto represente a una empresa o autónomo y no a una persona fisica concreta.',
                     ],
                     [
                         'id'      => 'clients',
-                        'accent'  => 'green',
                         'icon'    => 'building',
                         'title'   => 'Clientes',
-                        'summary' => 'Los clientes representan empresas, marcas u organizaciones. Un cliente puede tener multiples contactos asociados y un mismo contacto puede pertenecer a varios clientes.',
+                        'summary' => 'Fichas de empresas: campos, sector y contactos vinculados.',
                         'items'   => [
-                            'Los campos disponibles son: nombre comercial, razon social, CIF/NIF, direccion, codigo postal, ciudad, provincia, pais, sector, web y notas.',
-                            'Desde la ficha del cliente puedes ver todos sus contactos vinculados y anadir nuevos.',
-                            'Los <strong>tags en clientes</strong> funcionan igual que en contactos: clasifica, filtra y actua en bloque.',
-                            'El campo <strong>Sector</strong> vincula el cliente con un sector industrial para facilitar el analisis y el filtrado.',
-                            'Los clientes tambien admiten <strong>campos personalizados</strong>, independientes de los de contactos.',
+                            'Campos: <strong>nombre comercial</strong> (obligatorio), razon social, CIF/NIF, direccion, codigo postal, ciudad, provincia, pais, web y notas.',
+                            'Un cliente agrupa <strong>varios contactos</strong>; un contacto puede pertenecer a varios clientes.',
+                            'El <strong>sector</strong> clasifica el cliente por industria y funciona como filtro.',
+                            'Tags y acciones en bloque funcionan igual que en contactos.',
+                            'Los <strong>campos personalizados</strong> de clientes son independientes de los de contactos.',
                         ],
-                        'tip' => 'Si trabajas con grupos empresariales, crea un cliente por empresa y vincula los mismos contactos a varias de ellas.',
                     ],
                     [
                         'id'      => 'tags-sectors',
-                        'accent'  => 'amber',
                         'icon'    => 'tag',
                         'title'   => 'Tags y sectores',
-                        'summary' => 'Los tags son etiquetas de colores que clasifican contactos y clientes. Los sectores agrupan clientes por industria. Ambos se gestionan desde el menu lateral.',
+                        'summary' => 'Clasificacion: tags de colores para contactos y clientes, sectores para clientes.',
                         'items'   => [
-                            'Cada tag tiene un <strong>nombre y un color</strong> que aparece en listados y fichas.',
-                            'Los tags se aplican desde la ficha individual o en bloque seleccionando varios registros en el listado.',
-                            'Usa tags para representar el <strong>estado comercial</strong> (Lead → Prospect → Client), la <strong>prioridad</strong> (Hot, Cold) o el <strong>origen</strong> (Inbound, Referral).',
-                            'Los <strong>sectores</strong> se asignan a clientes para agruparlos por actividad: Tecnologia, Salud, Construccion, etc.',
-                            'Tanto tags como sectores son <strong>editables y eliminables</strong> por usuarios con permiso de administrador.',
+                            'Un tag tiene <strong>nombre y color</strong>, visibles en listados y fichas.',
+                            'Los tags se aplican a contactos y clientes, de forma individual o en bloque.',
+                            'Los <strong>sectores</strong> solo se asignan a clientes y los agrupan por industria.',
+                            'Eliminar un tag lo quita de todas las fichas; un sector en uso se <strong>desactiva</strong> en lugar de eliminarse.',
                         ],
                     ],
                     [
                         'id'      => 'custom-fields',
-                        'accent'  => 'teal',
                         'icon'    => 'sliders',
                         'title'   => 'Campos personalizados',
-                        'summary' => 'Los campos personalizados amplian la ficha de contactos o clientes con cualquier dato adicional que necesites, sin tocar codigo.',
+                        'summary' => 'Campos adicionales en contactos y clientes, sin tocar codigo.',
                         'items'   => [
-                            'Tipos disponibles: <strong>text, textarea, number, date, email, url, select y checkbox</strong>.',
-                            'Se configuran en <em>Settings → Custom Fields</em> y se asignan a <strong>contacts</strong> o <strong>clients</strong> por separado.',
-                            'Los campos de tipo <em>select</em> permiten definir una lista de opciones cerradas.',
-                            'Activa <strong>"Filterable"</strong> para que el campo aparezca en el panel de filtros avanzados del listado.',
-                            'Durante una importacion, las columnas sin mapeo pueden <strong>crearse automaticamente</strong> como campos personalizados.',
+                            'Tipos: <strong>text, textarea, number, date, email, url, select, checkbox</strong>.',
+                            'Se definen por separado para <strong>contactos</strong> y <strong>clientes</strong>.',
+                            'Los campos <strong>select</strong> usan una lista cerrada de opciones; cada campo admite un valor por defecto.',
+                            'Los campos <strong>"Filterable"</strong> aparecen en el panel de filtros avanzados del listado.',
+                            'Durante una importacion, las columnas sin mapear pueden <strong>crearse automaticamente</strong> como campos personalizados.',
                         ],
-                        'tip' => 'Crea un campo "Presupuesto estimado" (number) o "Siguiente accion" (select) para adaptar el CRM a tu proceso de ventas.',
                     ],
                     [
                         'id'      => 'imports',
-                        'accent'  => 'indigo',
                         'icon'    => 'upload',
-                        'title'   => 'Importacion de datos',
-                        'summary' => 'Importa contactos desde un archivo CSV o XLSX en cuatro pasos: sube el archivo, revisa la previsualizacion, mapea las columnas y confirma.',
+                        'title'   => 'Importacion',
+                        'summary' => 'Carga de contactos o clientes desde CSV/XLSX.',
                         'items'   => [
-                            '<strong>Paso 1 – Subir:</strong> sube un archivo CSV o XLSX. La primera fila debe contener los nombres de columna.',
-                            '<strong>Paso 2 – Previsualizar:</strong> el sistema muestra las primeras filas para que compruebes que los datos son correctos.',
-                            '<strong>Paso 3 – Mapear:</strong> relaciona cada columna del archivo con un campo del sistema (o descartala / conviertela en campo personalizado).',
-                            '<strong>Paso 4 – Procesar:</strong> el sistema crea los contactos, omite emails duplicados y registra los errores linea a linea.',
-                            'El <strong>historial de importaciones</strong> muestra el resultado de cada carga: filas importadas, omitidas y con error.',
-                            'Descarga la plantilla CSV desde <em>Exports → Import templates</em> para usar el formato correcto desde el inicio.',
+                            'Formatos: <strong>CSV y XLSX</strong>; la primera fila debe contener los encabezados.',
+                            'Flujo: <strong>subir → previsualizar → mapear columnas → procesar</strong>.',
+                            'Para contactos la columna <strong>full_name</strong> es obligatoria; las filas con email ya existente se omiten.',
+                            'Cada fila y cada error quedan registrados; el historial muestra importadas / omitidas / con error por lote.',
+                            'Descarga las <strong>plantillas</strong> con los encabezados correctos desde Exports.',
                         ],
-                        'tip' => 'La columna "full_name" es obligatoria. Si el archivo tiene emails duplicados respecto a contactos existentes, esas filas se omiten automaticamente.',
                     ],
                     [
                         'id'      => 'exports',
-                        'accent'  => 'sky',
                         'icon'    => 'download',
-                        'title'   => 'Exportacion de datos',
-                        'summary' => 'Desde el apartado Exports puedes descargar contactos o clientes en CSV o XLSX eligiendo exactamente que campos incluir, incluyendo relaciones y campos personalizados.',
+                        'title'   => 'Exportacion',
+                        'summary' => 'Descarga de contactos o clientes en CSV o XLSX.',
                         'items'   => [
-                            'Selecciona la entidad a exportar: <strong>Contacts</strong> o <strong>Clients</strong>.',
-                            'Elige los campos por grupos: <em>Basic info</em>, <em>Related data</em> (tags, clientes vinculados, sector) y <em>Custom fields</em>.',
-                            'Usa los botones <strong>All / None</strong> de cada grupo para seleccionar o deseleccionar rapidamente.',
-                            'Elige el formato: <strong>CSV</strong> (compatible con cualquier hoja de calculo) o <strong>XLSX</strong> (requiere PhpSpreadsheet).',
-                            'El <strong>historial de exportaciones</strong> al pie de pagina muestra las ultimas descargas con fecha, entidad y numero de filas.',
-                            'Las <strong>plantillas de importacion</strong> tambien estan disponibles en este apartado para no empezar de cero.',
+                            'Elige la entidad (<strong>contactos / clientes</strong>) y el formato (<strong>CSV / XLSX</strong>).',
+                            'Seleccion de campos por grupos: datos basicos, datos relacionados (tags, clientes, sector) y campos personalizados.',
+                            'El <strong>historial</strong> muestra las exportaciones con fecha, entidad y numero de filas.',
+                            'Las <strong>plantillas de importacion</strong> tambien se descargan desde esta pagina.',
                         ],
                     ],
                     [
                         'id'      => 'search-filters',
-                        'accent'  => 'cyan',
                         'icon'    => 'search',
                         'title'   => 'Busqueda y filtros',
-                        'summary' => 'El CRM ofrece tres niveles de busqueda: busqueda global en la barra superior, filtros rapidos con chips y filtros avanzados expandibles.',
+                        'summary' => 'Busqueda global, filtros del listado y filtros avanzados.',
                         'items'   => [
-                            'La <strong>busqueda global</strong> (barra superior) localiza contactos y clientes al instante por nombre, email o empresa.',
-                            'El boton <strong>Filters</strong> en el listado abre el panel de filtros. Los activos se muestran como chips junto al boton.',
-                            'Haz clic en la <strong>X de un chip</strong> para eliminar ese filtro sin afectar al resto.',
-                            'Los <strong>filtros avanzados</strong> permiten filtrar por cliente vinculado, sector, pais, fechas de creacion/modificacion y campos personalizados filtrables.',
-                            'El enlace <strong>"Reset all"</strong> limpia todos los filtros a la vez.',
-                            'Los filtros se conservan en la URL, por lo que puedes guardar o compartir un segmento concreto.',
+                            'La <strong>busqueda global</strong> (barra superior) da resultados instantaneos de contactos y clientes.',
+                            'El boton <strong>Filters</strong> abre el panel; los filtros activos aparecen como chips y se quitan uno a uno.',
+                            'Filtros avanzados: cliente vinculado, sector, pais, fechas de creacion/edicion y campos personalizados filtrables.',
+                            'Los filtros se conservan en la <strong>URL</strong>: puedes guardar o compartir una vista filtrada.',
+                            '<strong>"Reset all"</strong> limpia todos los filtros.',
                         ],
-                        'tip' => 'Combina varios tags y un rango de fechas para crear listas de seguimiento muy precisas, como "Leads calientes creados este mes".',
                     ],
                     [
                         'id'      => 'users-roles',
-                        'accent'  => 'slate',
                         'icon'    => 'users',
                         'title'   => 'Usuarios y permisos',
-                        'summary' => 'El sistema tiene dos roles: Administrator y User. Los administradores tienen acceso total; los usuarios tienen permisos configurables por separado.',
+                        'summary' => 'Roles, permisos por usuario y gestion de cuentas.',
                         'items'   => [
-                            '<strong>Administrator:</strong> acceso completo a todas las funciones, incluida la gestion de usuarios, campos personalizados, tags y sectores.',
-                            '<strong>User:</strong> puede crear, editar y eliminar contactos y clientes segun los permisos que el administrador le otorgue.',
-                            'Los permisos granulares son: crear contactos, editar contactos, eliminar contactos, crear clientes, editar clientes, eliminar clientes, exportar datos, importar datos.',
-                            'Gestiona los usuarios desde <em>Settings → Users</em>. Solo los administradores ven esta seccion.',
-                            'Desactiva un usuario para revocar su acceso sin borrar su historial de actividad.',
+                            'Dos roles: <strong>Administrador</strong> (acceso total) y <strong>Usuario</strong> (permisos configurables).',
+                            'Permisos por usuario: crear/editar/eliminar contactos y clientes, importar, exportar, gestionar tags, sectores y campos personalizados.',
+                            'Un permiso sin configuracion explicita esta <strong>permitido por defecto</strong>; para restringir, desmarcalo.',
+                            '<strong>Desactivar</strong> un usuario revoca el acceso pero conserva el historial; un usuario desactivado puede eliminarse definitivamente.',
+                            'Se gestionan en <strong>Users</strong> (solo administradores).',
                         ],
-                        'tip' => 'Crea un usuario con rol User y permisos de solo lectura para equipos externos que necesiten consultar datos sin modificarlos.',
                     ],
                 ],
             ],
 
             // ── English ────────────────────────────────────────────────────
             'en' => [
-                'page_title'         => 'Help Center',
-                'title'              => 'Help Center',
-                'intro'              => 'Everything you need to get the most out of the CRM: contacts, clients, imports, exports, filters, and more.',
-                'language_label'     => 'Language',
-                'quick_topics_label' => 'Contents',
+                'page_title' => 'Help Center',
+                'title'      => 'Help Center',
+                'intro'      => 'Quick reference for the CRM modules.',
+
+                'api_summary'             => 'REST API: key-based authentication with scopes; endpoints for contacts, clients, sectors and tags.',
+                'technical_guide_title'   => 'Platform Technical Guide',
+                'technical_guide_summary' => 'Architecture, database schema, security model and deployment. English only.',
+
                 'sections' => [
                     [
                         'id'      => 'getting-started',
-                        'accent'  => 'violet',
                         'icon'    => 'map',
                         'title'   => 'Getting started',
-                        'summary' => 'ContactCore is a lightweight CRM organized into modules accessible from the sidebar. The typical flow is: create contacts → link them to clients → classify with tags → filter and export when needed.',
+                        'summary' => 'Interface layout, global search and account basics.',
                         'items'   => [
-                            'The <strong>Dashboard</strong> is the home screen: it shows totals for contacts, clients, sectors, and tags, plus shortcuts to the main sections.',
-                            'The <strong>sidebar</strong> groups the entire system: <em>Contacts</em>, <em>Clients</em>, <em>Sectors</em>, <em>Tags</em>, and the settings section (Custom Fields, Imports, Exports, Users, API Credentials).',
-                            'The <strong>top search bar</strong> finds contacts and clients in real time as you type a name, email, or company. Results appear instantly in a dropdown.',
-                            'The <strong>profile menu</strong> (avatar in the top-right corner) shows your name, role, and the link to log out.',
-                            'The <strong>☰ (hamburger) button</strong> on mobile collapses or expands the sidebar to free up screen space.',
-                            'The <strong>"Remember me"</strong> option at login keeps your session active for 30 days without re-entering credentials.',
-                            'The interface is available in <strong>Spanish and English</strong>: switch language using the selector in the top-right corner of this help page.',
-                            'If your account has <strong>two-factor authentication enabled</strong>, you will receive a one-time code by email after login that must be entered before access is granted.',
+                            'The <strong>sidebar</strong> lists the modules available to you; sections you have no permission for are hidden.',
+                            'The <strong>global search</strong> in the topbar finds contacts and clients by name, email or company as you type.',
+                            'The <strong>Dashboard</strong> shows current totals for contacts, clients, sectors and tags.',
+                            '<strong>"Remember me"</strong> at login keeps the session for 30 days.',
+                            'With <strong>two-factor authentication</strong> enabled, a one-time code is emailed after login.',
+                            'The interface language is set in <strong>Settings</strong>; the Help Center follows it.',
                         ],
-                        'tip' => 'Recommended starting flow: create 2–3 contacts → create a client → link those contacts to the client → apply a tag like "Lead". That gives you real data to explore filters and exports.',
                     ],
                     [
                         'id'      => 'contacts',
-                        'accent'  => 'blue',
                         'icon'    => 'person',
                         'title'   => 'Contacts',
-                        'summary' => 'Contacts are the core of the CRM. Each person has their own record with contact details, tags, linked clients, and custom fields.',
+                        'summary' => 'Records for people: fields, linked clients, tags and bulk actions.',
                         'items'   => [
-                            'Main fields: first name, last name, email, phone, and the "Is company" flag for legal entities.',
-                            'From a contact\'s record you can link them to one or more clients with a single click.',
-                            '<strong>Tags</strong> classify the contact\'s status: Lead, Client, Partner, Hot, Cold, Prospect, etc.',
-                            'You can <strong>select multiple contacts</strong> in the list and bulk-apply or remove tags from the floating bottom bar.',
-                            '<strong>Filters</strong> let you segment by name, email, tag, client, sector, dates, and custom fields.',
-                            'Each contact can have <strong>custom fields</strong> to store information specific to your process.',
+                            'Fields: <strong>full name</strong> (required), email, phone and company.',
+                            'A contact can be linked to <strong>any number of clients</strong> from its record.',
+                            '<strong>Tags</strong> track status (Lead, Client, Hot, Cold...); apply them on the record or in bulk from the list.',
+                            'Bulk actions on the list selection: add/remove tags, link to a client, delete.',
+                            'Filters cover name, email, tag, client, sector, dates and filterable custom fields.',
                         ],
-                        'tip' => 'Use the "Is company" flag when the contact represents a business or sole trader rather than an individual person.',
                     ],
                     [
                         'id'      => 'clients',
-                        'accent'  => 'green',
                         'icon'    => 'building',
                         'title'   => 'Clients',
-                        'summary' => 'Clients represent companies, brands, or organizations. A client can have multiple linked contacts, and the same contact can belong to several clients.',
+                        'summary' => 'Records for companies: fields, sector and linked contacts.',
                         'items'   => [
-                            'Available fields: commercial name, legal name, CIF/NIF, address, postal code, city, province, country, sector, website, and notes.',
-                            'From a client\'s record you can see all linked contacts and add new ones.',
-                            '<strong>Tags on clients</strong> work exactly like on contacts: classify, filter, and bulk-act.',
-                            'The <strong>Sector</strong> field links the client to an industry category for easier analysis and filtering.',
-                            'Clients also support <strong>custom fields</strong>, independent from those on contacts.',
+                            'Fields: <strong>commercial name</strong> (required), legal name, CIF/NIF, address, postal code, city, province, country, website and notes.',
+                            'A client groups <strong>any number of contacts</strong>; a contact can belong to several clients.',
+                            'The <strong>sector</strong> classifies the client by industry and is available as a filter.',
+                            'Tags and bulk actions work exactly as in contacts.',
+                            'Client <strong>custom fields</strong> are independent from contact custom fields.',
                         ],
-                        'tip' => 'If you work with corporate groups, create one client per company and link the same contacts to multiple clients.',
                     ],
                     [
                         'id'      => 'tags-sectors',
-                        'accent'  => 'amber',
                         'icon'    => 'tag',
                         'title'   => 'Tags and sectors',
-                        'summary' => 'Tags are coloured labels that classify contacts and clients. Sectors group clients by industry. Both are managed from the sidebar.',
+                        'summary' => 'Classification: coloured tags for contacts and clients, sectors for clients.',
                         'items'   => [
-                            'Each tag has a <strong>name and a colour</strong> shown in lists and records.',
-                            'Tags can be applied from an individual record or in bulk by selecting multiple rows in the list.',
-                            'Use tags to track <strong>commercial status</strong> (Lead → Prospect → Client), <strong>priority</strong> (Hot, Cold), or <strong>source</strong> (Inbound, Referral).',
-                            '<strong>Sectors</strong> are assigned to clients to group them by activity: Technology, Healthcare, Construction, etc.',
-                            'Tags and sectors are <strong>fully editable and deletable</strong> by users with administrator access.',
+                            'A tag has a <strong>name and colour</strong>, shown in lists and records.',
+                            'Tags apply to both contacts and clients — individually or in bulk.',
+                            '<strong>Sectors</strong> apply to clients only and group them by industry.',
+                            'Deleting a tag removes it from every record; a sector in use is <strong>deactivated</strong> instead of deleted.',
                         ],
                     ],
                     [
                         'id'      => 'custom-fields',
-                        'accent'  => 'teal',
                         'icon'    => 'sliders',
                         'title'   => 'Custom fields',
-                        'summary' => 'Custom fields extend contact and client records with any additional data your process requires — no code changes needed.',
+                        'summary' => 'Extra fields on contact and client records, defined without code changes.',
                         'items'   => [
-                            'Available types: <strong>text, textarea, number, date, email, url, select, and checkbox</strong>.',
-                            'Configured in <em>Settings → Custom Fields</em> and assigned to <strong>contacts</strong> or <strong>clients</strong> separately.',
-                            'The <em>select</em> type lets you define a fixed list of options.',
-                            'Enable <strong>"Filterable"</strong> to make the field appear in the advanced filter panel on the list page.',
-                            'During import, unmapped columns can be <strong>automatically created</strong> as custom fields.',
+                            'Types: <strong>text, textarea, number, date, email, url, select, checkbox</strong>.',
+                            'Fields are defined separately for <strong>contacts</strong> and for <strong>clients</strong>.',
+                            '<strong>Select</strong> fields use a fixed option list; a default value can be set per field.',
+                            'Fields marked <strong>"Filterable"</strong> appear in the advanced filter panel of the list.',
+                            'During an import, unmapped columns can be <strong>created automatically</strong> as custom fields.',
                         ],
-                        'tip' => 'Create an "Estimated budget" (number) or "Next action" (select) field to adapt the CRM to your sales workflow.',
                     ],
                     [
                         'id'      => 'imports',
-                        'accent'  => 'indigo',
                         'icon'    => 'upload',
-                        'title'   => 'Importing data',
-                        'summary' => 'Import contacts from a CSV or XLSX file in four steps: upload the file, review the preview, map the columns, and confirm.',
+                        'title'   => 'Imports',
+                        'summary' => 'Loading contacts or clients from CSV/XLSX files.',
                         'items'   => [
-                            '<strong>Step 1 – Upload:</strong> upload a CSV or XLSX file. The first row must contain column names.',
-                            '<strong>Step 2 – Preview:</strong> the system shows the first rows so you can verify the data looks correct.',
-                            '<strong>Step 3 – Map columns:</strong> match each file column to a system field (or discard it / turn it into a custom field).',
-                            '<strong>Step 4 – Process:</strong> the system creates contacts, skips duplicate emails, and logs errors row by row.',
-                            'The <strong>import history</strong> shows the result of each upload: rows imported, skipped, and with errors.',
-                            'Download the CSV template from <em>Exports → Import templates</em> to use the correct format from the start.',
+                            'Formats: <strong>CSV and XLSX</strong>; the first row must contain column headers.',
+                            'Flow: <strong>upload → preview → map columns → process</strong>.',
+                            'For contacts the <strong>full_name</strong> column is required; rows whose email already exists are skipped.',
+                            'Every row and every error is logged; the history shows imported / skipped / failed counts per batch.',
+                            'Download ready-made <strong>templates</strong> with correct headers from the Exports page.',
                         ],
-                        'tip' => 'The "full_name" column is required. If the file contains emails that already exist in the system, those rows are automatically skipped.',
                     ],
                     [
                         'id'      => 'exports',
-                        'accent'  => 'sky',
                         'icon'    => 'download',
-                        'title'   => 'Exporting data',
-                        'summary' => 'From the Exports section you can download contacts or clients as CSV or XLSX, choosing exactly which fields to include — including related data and custom fields.',
+                        'title'   => 'Exports',
+                        'summary' => 'Downloading contacts or clients as CSV or XLSX.',
                         'items'   => [
-                            'Select the entity to export: <strong>Contacts</strong> or <strong>Clients</strong>.',
-                            'Choose fields by group: <em>Basic info</em>, <em>Related data</em> (tags, linked clients, sector), and <em>Custom fields</em>.',
-                            'Use the <strong>All / None</strong> buttons per group to select or deselect quickly.',
-                            'Choose a format: <strong>CSV</strong> (compatible with any spreadsheet) or <strong>XLSX</strong> (requires PhpSpreadsheet).',
-                            'The <strong>export history</strong> at the bottom of the page lists recent downloads with date, entity, and row count.',
-                            '<strong>Import templates</strong> are also available in this section so you never start from a blank file.',
+                            'Choose the entity (<strong>contacts / clients</strong>) and the format (<strong>CSV / XLSX</strong>).',
+                            'Select fields by group: basic info, related data (tags, linked clients, sector) and custom fields.',
+                            'The <strong>history</strong> lists past exports with date, entity and row count.',
+                            '<strong>Import templates</strong> are downloaded from this page as well.',
                         ],
                     ],
                     [
                         'id'      => 'search-filters',
-                        'accent'  => 'cyan',
                         'icon'    => 'search',
                         'title'   => 'Search and filters',
-                        'summary' => 'The CRM offers three levels of search: global search in the topbar, quick filter chips, and expandable advanced filters.',
+                        'summary' => 'Global search, list filters and advanced filters.',
                         'items'   => [
-                            'The <strong>global search</strong> (topbar) finds contacts and clients instantly by name, email, or company.',
-                            'The <strong>Filters button</strong> on the list opens the filter panel. Active filters appear as chips next to the button.',
-                            'Click the <strong>× on a chip</strong> to remove that filter without affecting the rest.',
-                            '<strong>Advanced filters</strong> let you filter by linked client, sector, country, creation/update dates, and filterable custom fields.',
-                            'The <strong>"Reset all"</strong> link clears every active filter at once.',
-                            'Filters are preserved in the URL so you can bookmark or share a specific segment.',
+                            '<strong>Global search</strong> (topbar): instant results across contacts and clients.',
+                            'The <strong>Filters</strong> button opens the panel; active filters appear as chips and can be removed one by one.',
+                            'Advanced filters: linked client, sector, country, creation/update dates and filterable custom fields.',
+                            'Filters are kept in the <strong>URL</strong>, so a filtered view can be bookmarked or shared.',
+                            '<strong>"Reset all"</strong> clears every active filter.',
                         ],
-                        'tip' => 'Combine multiple tags with a date range to create precise follow-up lists, such as "Hot leads created this month".',
                     ],
                     [
                         'id'      => 'users-roles',
-                        'accent'  => 'slate',
                         'icon'    => 'users',
                         'title'   => 'Users and permissions',
-                        'summary' => 'The system has two roles: Administrator and User. Administrators have full access; users have individually configurable permissions.',
+                        'summary' => 'Roles, per-user permissions and account management.',
                         'items'   => [
-                            '<strong>Administrator:</strong> full access to everything, including user management, custom fields, tags, and sectors.',
-                            '<strong>User:</strong> can create, edit, and delete contacts and clients according to the permissions an administrator grants.',
-                            'Granular permissions: create contacts, edit contacts, delete contacts, create clients, edit clients, delete clients, export data, import data.',
-                            'Manage users from <em>Settings → Users</em>. Only administrators can see this section.',
-                            'Deactivate a user to revoke access without deleting their activity history.',
+                            'Two roles: <strong>Administrator</strong> (full access) and <strong>User</strong> (configurable permissions).',
+                            'Per-user permissions: create/edit/delete contacts and clients, import, export, manage tags, sectors and custom fields.',
+                            'A permission without an explicit setting is <strong>allowed by default</strong>; deny it explicitly to restrict.',
+                            '<strong>Deactivating</strong> a user revokes access but keeps history; a deactivated user can then be permanently deleted.',
+                            'Managed in <strong>Users</strong> (administrators only).',
                         ],
-                        'tip' => 'Create a User with read-only permissions for external teams who need to browse data without making changes.',
                     ],
                 ],
             ],

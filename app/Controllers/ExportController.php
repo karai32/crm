@@ -2,7 +2,7 @@
 
 class ExportController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
 
     private ExportManager $manager;
     private ExportRepository $exports;
@@ -98,25 +98,23 @@ class ExportController
 
     public function templateContacts(): void
     {
-        Auth::requirePermission('exports.use');
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="contacts-import-template.csv"');
-        echo $this->manager->template('contacts');
-        exit;
+        $this->downloadTemplate('contacts');
     }
 
     public function templateClients(): void
     {
+        $this->downloadTemplate('clients');
+    }
+
+    private function downloadTemplate(string $entity): void
+    {
         Auth::requirePermission('exports.use');
 
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="clients-import-template.csv"');
-        echo $this->manager->template('clients');
+        header('Content-Disposition: attachment; filename="' . $entity . '-import-template.csv"');
+        echo $this->manager->template($entity);
         exit;
     }
-
-    // ── Legacy routes (redirect to hub) ──────────────────────────────────
 
     // ── Filter helpers ────────────────────────────────────────────────────
 
@@ -128,7 +126,7 @@ class ExportController
             'phone'      => trim($_POST['phone'] ?? ''),
             'company' => trim($_POST['company'] ?? ''),
             'client_id'  => (int) ($_POST['client_id'] ?? 0),
-            'tag_ids'    => array_values(array_filter(array_map('intval', (array) ($_POST['tag_ids'] ?? [])), fn ($id) => $id > 0)),
+            'tag_ids'    => $this->idsFromPost('tag_ids'),
         ];
     }
 
@@ -141,7 +139,7 @@ class ExportController
             'country'         => trim($_POST['country'] ?? ''),
             'province'        => trim($_POST['province'] ?? ''),
             'sector_id'       => (int) ($_POST['sector_id'] ?? 0),
-            'tag_ids'         => array_values(array_filter(array_map('intval', (array) ($_POST['tag_ids'] ?? [])), fn ($id) => $id > 0)),
+            'tag_ids'         => $this->idsFromPost('tag_ids'),
         ];
     }
 }
