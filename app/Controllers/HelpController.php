@@ -9,23 +9,42 @@ class HelpController
         $locale  = $this->localeFromRequest();
         $content = $this->content()[$locale];
 
+        $visibleSections = array_filter(
+            $content['sections'],
+            fn ($s) => $this->canViewTopic($s['id'])
+        );
+
         $cards = array_map(static fn ($s) => [
             'id'      => $s['id'],
             'icon'    => $s['icon'],
             'accent'  => $s['accent'],
             'title'   => $s['title'],
             'summary' => $s['summary'],
-        ], $content['sections']);
+        ], array_values($visibleSections));
 
-        $cards[] = [
-            'id'      => 'api',
-            'icon'    => 'key',
-            'accent'  => 'slate',
-            'title'   => 'API Reference',
-            'summary' => $locale === 'es'
-                ? 'Documentacion completa de la API REST: autenticacion con clave, endpoints de contactos, clientes, sectores y tags, con ejemplos de uso.'
-                : 'Full REST API documentation: key authentication, endpoints for contacts, clients, sectors and tags, with usage examples.',
-        ];
+        if ($this->canViewTopic('api')) {
+            $cards[] = [
+                'id'      => 'api',
+                'icon'    => 'key',
+                'accent'  => 'slate',
+                'title'   => 'API Reference',
+                'summary' => $locale === 'es'
+                    ? 'Documentacion completa de la API REST: autenticacion con clave, endpoints de contactos, clientes, sectores y tags, con ejemplos de uso.'
+                    : 'Full REST API documentation: key authentication, endpoints for contacts, clients, sectors and tags, with usage examples.',
+            ];
+        }
+
+        if ($this->canViewTopic('technical-guide')) {
+            $cards[] = [
+                'id'      => 'technical-guide',
+                'icon'    => 'code',
+                'accent'  => 'red',
+                'title'   => $locale === 'es' ? 'Guia tecnica de la plataforma' : 'Platform Technical Guide',
+                'summary' => $locale === 'es'
+                    ? 'Documentacion tecnica solo para administradores: stack tecnologico, estructura de archivos, base de datos, seguridad, API y dependencias. Disponible solo en ingles.'
+                    : 'Administrator-only technical documentation: technology stack, file structure, database schema, security model, REST API internals and external dependencies.',
+            ];
+        }
 
         View::render('help/index', [
             'title'            => $content['page_title'],
@@ -44,6 +63,11 @@ class HelpController
         $topic  = (string) ($_GET['topic'] ?? '');
         $locale = $this->localeFromRequest();
 
+        if (!$this->canViewTopic($topic)) {
+            Auth::redirect('/help');
+            return;
+        }
+
         // Topics that have their own dedicated view file
         $dedicatedViews = [
             'api'             => ['help/api',             ['help.css', 'api.css'], 'API Reference'],
@@ -56,6 +80,7 @@ class HelpController
             'exports'         => ['help/exports',         ['help.css'],            'Exportacion de datos'],
             'search-filters'  => ['help/search-filters',  ['help.css'],            'Busqueda y filtros'],
             'users-roles'     => ['help/users-roles',     ['help.css'],            'Usuarios y permisos'],
+            'technical-guide' => ['help/technical-guide', ['help.css'],            'Platform Technical Guide'],
         ];
 
         if (isset($dedicatedViews[$topic])) {
@@ -64,8 +89,8 @@ class HelpController
                 'title'            => $title,
                 'styles'           => $styles,
                 'scripts'          => ['help.js'],
-                'locale'           => $locale,
-                'availableLocales' => ['es' => 'ES', 'en' => 'EN'],
+                'locale'           => $topic === 'technical-guide' ? 'en' : $locale,
+                'availableLocales' => $topic === 'technical-guide' ? ['en' => 'EN'] : ['es' => 'ES', 'en' => 'EN'],
             ]);
             return;
         }
@@ -94,6 +119,25 @@ class HelpController
             'content'          => $content,
             'section'          => $section,
         ]);
+    }
+
+    /**
+     * Role-based visibility: a topic is hidden when it documents features
+     * the current user cannot access. Mirrors the checks used by each
+     * module's controller (Auth::can / Auth::requireAdmin).
+     */
+    private function canViewTopic(string $topic): bool
+    {
+        return match ($topic) {
+            'tags-sectors'  => Auth::can('tags.manage') || Auth::can('sectors.manage'),
+            'custom-fields' => Auth::can('custom_fields.manage'),
+            'imports'       => Auth::can('imports.manage'),
+            'exports'       => Auth::can('exports.use'),
+            'users-roles',
+            'api',
+            'technical-guide' => Auth::isAdmin(),
+            default           => true,
+        };
     }
 
     private function localeFromRequest(): string

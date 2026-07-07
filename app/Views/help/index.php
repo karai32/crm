@@ -11,6 +11,7 @@ $icons = [
     'users'    => 'ph ph-users',
     'shield'   => 'ph ph-shield-check',
     'key'      => 'ph ph-key',
+    'code'     => 'ph ph-code',
 ];
 ?>
 

@@ -975,3 +975,66 @@
     margin-top: 0;
 }
 
+
+/* ── Technical guide — code block ───────────────────────────────── */
+
+.help-pre {
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin: 0 0 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--color-text);
+    overflow-x: auto;
+}
+
+/* ── Technical guide — data table ───────────────────────────────── */
+
+.help-table-wrap {
+    overflow-x: auto;
+    margin: 0 0 14px;
+}
+
+.help-table-wrap:last-child {
+    margin-bottom: 0;
+}
+
+.help-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.help-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--color-neutral);
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    white-space: nowrap;
+}
+
+.help-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-neutral-200);
+    vertical-align: top;
+    color: var(--color-text);
+    line-height: 1.55;
+}
+
+.help-table tr:last-child td {
+    border-bottom: none;
+}
+
+.help-table code {
+    background: var(--color-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    white-space: nowrap;
+}
