@@ -97,6 +97,15 @@ if ($filters['is_active'] !== '') {
                 'href' => $base . '?' . http_build_query($f)];
 }
 
+if (!empty($filters['created_from']) || !empty($filters['created_to'])) {
+    $text = Lang::get('filter.created') . ': ';
+    $text .= !empty($filters['created_from']) ? $filters['created_from'] : '…';
+    $text .= ' — ';
+    $text .= !empty($filters['created_to']) ? $filters['created_to'] : '…';
+    $f = $filters; unset($f['created_from'], $f['created_to'], $f['page']);
+    $chips[] = ['text' => $text, 'href' => $base . '?' . http_build_query($f)];
+}
+
 foreach ($selectedTagObjects as $tag) {
     $f = $filters;
     $f['tag_ids'] = array_values(array_filter($f['tag_ids'] ?? [], fn ($id) => (int) $id !== (int) $tag['id']));
@@ -234,6 +243,16 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                 <label for="website"><?= t('common.website') ?></label>
                 <input id="website" type="text" name="website"
                        value="<?= htmlspecialchars($filters['website'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+            <div class="field">
+                <label><?= t('filter.created') ?></label>
+                <div class="date-range-field">
+                    <input type="date" name="created_from"
+                        value="<?= htmlspecialchars($filters['created_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="date-range-sep">—</span>
+                    <input type="date" name="created_to"
+                        value="<?= htmlspecialchars($filters['created_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
         </div>
 

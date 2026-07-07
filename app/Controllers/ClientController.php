@@ -252,6 +252,8 @@ class ClientController
             'tag_ids'          => $this->tagIdsFromGet(),
             'is_web_connected' => $_GET['is_web_connected'] ?? '',
             'is_active'        => $_GET['is_active'] ?? '',
+            'created_from'     => trim($_GET['created_from'] ?? ''),
+            'created_to'       => trim($_GET['created_to'] ?? ''),
             'website'          => trim($_GET['website'] ?? ''),
             'country'          => trim($_GET['country'] ?? ''),
             'province'         => trim($_GET['province'] ?? ''),
