@@ -37,7 +37,6 @@
         $parts    = explode(' ', trim($authUser['name'] ?? ''));
         $initials = strtoupper(substr($parts[0] ?? '', 0, 1) . substr($parts[1] ?? '', 0, 1));
     }
-    $currentLocale = Lang::locale();
     ?>
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -156,18 +155,6 @@
                 </nav>
 
                 <div class="sidebar-footer">
-                    <!-- Language switcher -->
-                    <div class="sidebar-lang">
-                        <?php foreach (['es' => 'ES', 'en' => 'EN', 'ru' => 'RU'] as $code => $label): ?>
-                            <form method="post" action="<?= htmlspecialchars(Auth::url('/lang/switch'), ENT_QUOTES, 'UTF-8') ?>">
-                                <?= Csrf::field() ?>
-                                <input type="hidden" name="lang" value="<?= $code ?>">
-                                <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/', ENT_QUOTES, 'UTF-8') ?>">
-                                <button type="submit" class="lang-btn <?= $currentLocale === $code ? 'lang-btn--active' : '' ?>"><?= $label ?></button>
-                            </form>
-                        <?php endforeach; ?>
-                    </div>
-
                     <div class="sidebar-user-actions" id="sidebarUserActions">
                         <?php if (Auth::isAdmin()): ?>
                             <a class="sidebar-user-action" href="<?= htmlspecialchars(Auth::url('/users/edit?id=' . ($authUser['id'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">
