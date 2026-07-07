@@ -18,7 +18,7 @@ class AuthController
         }
 
         View::render('auth/login', [
-            'title' => 'Login',
+            'title' => Lang::get('auth.login_title'),
             'error' => null,
         ], 'auth');
     }
@@ -32,8 +32,8 @@ class AuthController
 
         if ($user === null) {
             View::render('auth/login', [
-                'title' => 'Login',
-                'error' => 'Invalid email or password.',
+                'title' => Lang::get('auth.login_title'),
+                'error' => Lang::get('auth.invalid_credentials'),
                 'email' => $email,
             ], 'auth');
             return;
@@ -70,7 +70,7 @@ class AuthController
         }
 
         View::render('auth/two-factor', [
-            'title' => 'Two-factor verification',
+            'title' => Lang::get('auth.2fa_title'),
             'error' => null,
             'message' => null,
             'email' => $this->twoFactorService->maskedEmail(),
@@ -89,8 +89,8 @@ class AuthController
 
         if ($user === null) {
             View::render('auth/two-factor', [
-                'title' => 'Two-factor verification',
-                'error' => 'Invalid or expired verification code.',
+                'title' => Lang::get('auth.2fa_title'),
+                'error' => Lang::get('auth.invalid_code'),
                 'message' => null,
                 'email' => $this->twoFactorService->maskedEmail(),
                 'canResend' => $this->twoFactorService->canResend(),
@@ -111,9 +111,9 @@ class AuthController
         $sent = $this->twoFactorService->resend();
 
         View::render('auth/two-factor', [
-            'title' => 'Two-factor verification',
-            'error' => $sent ? null : 'Please wait before requesting another code.',
-            'message' => $sent ? 'A new verification code has been sent.' : null,
+            'title' => Lang::get('auth.2fa_title'),
+            'error' => $sent ? null : Lang::get('auth.please_wait'),
+            'message' => $sent ? Lang::get('auth.code_resent') : null,
             'email' => $this->twoFactorService->maskedEmail(),
             'canResend' => $this->twoFactorService->canResend(),
         ], 'auth');

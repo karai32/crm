@@ -23,7 +23,7 @@ class SectorController
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('sectors/index', [
-            'title'      => 'Sectors',
+            'title'      => Lang::get('sectors.title'),
             'styles'     => ['settings.css'],
             'sectors'    => $this->sectors->paginate($page, $perPage, $sort, $dir),
             'sort'       => $sort,
@@ -40,7 +40,7 @@ class SectorController
         Auth::requirePermission('sectors.manage');
 
         View::render('sectors/create', [
-            'title'  => 'Create sector',
+            'title'  => Lang::get('sectors.create_title'),
             'styles' => ['settings.css'],
             'error'  => null,
         ]);
@@ -54,9 +54,9 @@ class SectorController
 
         if ($name === '') {
             View::render('sectors/create', [
-                'title'  => 'Create sector',
+                'title'  => Lang::get('sectors.create_title'),
                 'styles' => ['settings.css'],
-                'error'  => 'Sector name is required.',
+                'error'  => Lang::get('sectors.name_required'),
                 'name'   => $name,
             ]);
             return;
@@ -80,7 +80,7 @@ class SectorController
         }
 
         View::render('sectors/edit', [
-            'title'            => 'Edit sector',
+            'title'            => Lang::get('sectors.edit_title'),
             'styles'           => ['settings.css'],
             'sector'           => $sector,
             'error'            => null,
@@ -108,9 +108,9 @@ class SectorController
 
         if ($name === '' || !$this->icons->isValid($iconInput)) {
             View::render('sectors/edit', [
-                'title'            => 'Edit sector',
+                'title'            => Lang::get('sectors.edit_title'),
                 'styles'           => ['settings.css'],
-                'error'            => $name === '' ? 'Sector name is required.' : 'Choose an icon from the icon picker.',
+                'error'            => $name === '' ? Lang::get('sectors.name_required') : Lang::get('sectors.choose_icon'),
                 'recommendedIcons' => $this->icons->recommended(),
                 'defaultIcon'      => $this->icons->defaultIcon(),
                 'sector'           => [

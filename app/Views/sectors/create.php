@@ -20,7 +20,7 @@
                 <label for="name"><?= t('sectors.name') ?> <span class="required-star">*</span></label>
                 <input id="name" type="text" name="name"
                        value="<?= htmlspecialchars($name ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                       placeholder="e.g. Technology" required autofocus>
+                       placeholder="<?= t('sectors.name_placeholder') ?>" required autofocus>
             </div>
         </div>
         <div class="settings-form-actions">

@@ -21,7 +21,7 @@ class CustomFieldController
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('custom-fields/index', [
-            'title'      => 'Custom fields',
+            'title'      => Lang::get('cf.title'),
             'styles'     => ['settings.css'],
             'fields'     => $this->customFields->paginate($page, $perPage, $sort, $dir),
             'sort'       => $sort,
@@ -40,7 +40,7 @@ class CustomFieldController
         Auth::requirePermission('custom_fields.manage');
 
         View::render('custom-fields/create', [
-            'title'       => 'Create custom field',
+            'title'       => Lang::get('cf.create_title'),
             'styles'      => ['settings.css'],
             'scripts'     => ['custom-fields.js'],
             'field'       => ['entity_type' => 'contact', 'field_type' => 'text', 'is_filterable' => 1, 'sort_order' => 0],
@@ -58,11 +58,11 @@ class CustomFieldController
 
         if ($data['name'] === '' || $data['slug'] === '') {
             View::render('custom-fields/create', [
-                'title'       => 'Create custom field',
+                'title'       => Lang::get('cf.create_title'),
                 'styles'      => ['settings.css'],
                 'field'       => $data,
                 'optionsText' => $_POST['options'] ?? '',
-                'error'       => 'Name and slug are required.',
+                'error'       => Lang::get('cf.name_slug_required'),
             ]);
             return;
         }
@@ -87,7 +87,7 @@ class CustomFieldController
         $options = array_column($this->customFields->optionsForField((int) $field['id']), 'value');
 
         View::render('custom-fields/edit', [
-            'title'       => 'Edit custom field',
+            'title'       => Lang::get('cf.edit_title'),
             'styles'      => ['settings.css'],
             'scripts'     => ['custom-fields.js'],
             'field'       => $field,
@@ -116,11 +116,11 @@ class CustomFieldController
             $data['id'] = $id;
 
             View::render('custom-fields/edit', [
-                'title'       => 'Edit custom field',
+                'title'       => Lang::get('cf.edit_title'),
                 'styles'      => ['settings.css'],
                 'field'       => $data,
                 'optionsText' => $_POST['options'] ?? '',
-                'error'       => 'Name and slug are required.',
+                'error'       => Lang::get('cf.name_slug_required'),
             ]);
             return;
         }

@@ -19,7 +19,7 @@ class DashboardController
         $contactIds = array_map('intval', array_column($latestContacts, 'id'));
 
         View::render('dashboard/index', [
-            'title'  => 'Dashboard',
+            'title'  => Lang::get('dashboard.title'),
             'styles' => ['dashboard.css'],
             'user'   => Auth::user(),
             'stats'  => [

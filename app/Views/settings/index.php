@@ -42,7 +42,7 @@ $perPageOptions = [20, 50, 100, 200];
             <div class="inspect-bar-track">
                 <div class="inspect-bar-fill" id="inspectBarFill"></div>
             </div>
-            <span class="inspect-status" id="inspectStatus">Starting…</span>
+            <span class="inspect-status" id="inspectStatus"><?= t('settings.val_starting') ?></span>
         </div>
     </div>
     <div class="settings-form-actions">
@@ -109,6 +109,17 @@ $perPageOptions = [20, 50, 100, 200];
     var barFill  = document.getElementById('inspectBarFill');
     var status   = document.getElementById('inspectStatus');
     var url      = btn.dataset.url;
+    var i18n     = <?= json_encode([
+        'starting'     => Lang::get('settings.val_starting'),
+        'running'      => Lang::get('settings.val_running'),
+        'none'         => Lang::get('settings.val_none'),
+        'processing'   => Lang::get('settings.val_processing'),
+        'done'         => Lang::get('settings.val_done'),
+        'server_error' => Lang::get('settings.val_server_error'),
+        'error_reload' => Lang::get('settings.val_error_reload'),
+        'retry'        => Lang::get('common.retry'),
+        'run'          => Lang::get('settings.run_validation'),
+    ], JSON_HEX_TAG | JSON_UNESCAPED_UNICODE) ?>;
 
     var totalInitial   = null;
     var totalProcessed = 0;
@@ -129,7 +140,7 @@ $perPageOptions = [20, 50, 100, 200];
             })
             .then(function (data) {
                 if (data.error) {
-                    setProgress(0, '✗ Server error: ' + data.error.slice(0, 120));
+                    setProgress(0, i18n.server_error.replace(':error', data.error.slice(0, 120)));
                     finish(true);
                     return;
                 }
@@ -140,23 +151,23 @@ $perPageOptions = [20, 50, 100, 200];
                 }
 
                 if (totalInitial === 0) {
-                    setProgress(100, 'No contacts need validation.');
+                    setProgress(100, i18n.none);
                     finish(false);
                     return;
                 }
 
                 var pct  = Math.round((totalProcessed / totalInitial) * 100);
-                setProgress(pct, 'Processing… ' + totalProcessed + ' / ' + totalInitial + ' contacts (' + pct + '%)');
+                setProgress(pct, i18n.processing.replace(':n', totalProcessed).replace(':total', totalInitial).replace(':pct', pct));
 
                 if (data.done) {
-                    setProgress(100, '✓ Done — ' + totalProcessed + ' contacts validated.');
+                    setProgress(100, i18n.done.replace(':n', totalProcessed));
                     finish(false);
                 } else {
                     setTimeout(runBatch, 150);
                 }
             })
             .catch(function (err) {
-                setProgress(0, '✗ Error: ' + err.message + '. Reload and try again.');
+                setProgress(0, i18n.error_reload.replace(':error', err.message));
                 finish(true);
             });
     }
@@ -164,7 +175,7 @@ $perPageOptions = [20, 50, 100, 200];
     function finish(isError) {
         running = false;
         btn.disabled = false;
-        btn.textContent = isError ? 'Retry' : 'Run email validation';
+        btn.textContent = isError ? i18n.retry : i18n.run;
         if (!isError) btn.insertAdjacentHTML('afterbegin', '<i class="ph ph-envelope-simple-open"></i> ');
     }
 
@@ -174,9 +185,9 @@ $perPageOptions = [20, 50, 100, 200];
         totalInitial   = null;
         totalProcessed = 0;
         btn.disabled   = true;
-        btn.textContent = 'Running…';
+        btn.textContent = i18n.running;
         progress.classList.add('visible');
-        setProgress(0, 'Starting…');
+        setProgress(0, i18n.starting);
         runBatch();
     });
 }());

@@ -31,7 +31,7 @@ class UserController
         }
 
         View::render('users/index', [
-            'title'                 => 'Users',
+            'title'                 => Lang::get('users.title'),
             'styles'                => ['settings.css'],
             'users'                 => $users,
             'permissionDefinitions' => Auth::permissionDefinitions(),
@@ -52,7 +52,7 @@ class UserController
         $defaultRole = $this->users->findRoleByName('user');
 
         View::render('users/create', [
-            'title'   => 'Create user',
+            'title'   => Lang::get('users.create_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['users.js'],
             'user'   => ['is_active' => 1, 'role_id' => (int) ($defaultRole['id'] ?? 0)],
@@ -72,26 +72,26 @@ class UserController
 
         if ($data['name'] === '' || $data['email'] === '' || $password === '') {
             View::render('users/create', [
-                'title'  => 'Create user',
+                'title'  => Lang::get('users.create_title'),
                 'styles' => ['settings.css'],
                 'user'   => $data,
                 'roles'  => $this->users->allRoles(),
                 'permissionDefinitions' => Auth::permissionDefinitions(),
                 'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => 'Name, email and password are required.',
+                'error'  => Lang::get('users.create_required'),
             ]);
             return;
         }
 
         if ($this->users->findByEmail($data['email']) !== null) {
             View::render('users/create', [
-                'title'  => 'Create user',
+                'title'  => Lang::get('users.create_title'),
                 'styles' => ['settings.css'],
                 'user'   => $data,
                 'roles'  => $this->users->allRoles(),
                 'permissionDefinitions' => Auth::permissionDefinitions(),
                 'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => 'This email is already used.',
+                'error'  => Lang::get('users.email_already_used'),
             ]);
             return;
         }
@@ -114,7 +114,7 @@ class UserController
         }
 
         View::render('users/edit', [
-            'title'   => 'Edit user',
+            'title'   => Lang::get('users.edit_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['users.js'],
             'user'   => $user,
@@ -142,26 +142,26 @@ class UserController
 
         if (($currentUser['id'] ?? null) == $id && $data['is_active'] === 0) {
             View::render('users/edit', [
-                'title'  => 'Edit user',
+                'title'  => Lang::get('users.edit_title'),
                 'styles' => ['settings.css'],
                 'user'   => array_merge($existingUser, $data),
                 'roles'  => $this->users->allRoles(),
                 'permissionDefinitions' => Auth::permissionDefinitions(),
                 'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => 'You cannot deactivate your own user.',
+                'error'  => Lang::get('users.cannot_deactivate_own'),
             ]);
             return;
         }
 
         if ($data['name'] === '' || $data['email'] === '') {
             View::render('users/edit', [
-                'title'  => 'Edit user',
+                'title'  => Lang::get('users.edit_title'),
                 'styles' => ['settings.css'],
                 'user'   => array_merge($existingUser, $data),
                 'roles'  => $this->users->allRoles(),
                 'permissionDefinitions' => Auth::permissionDefinitions(),
                 'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => 'Name and email are required.',
+                'error'  => Lang::get('users.edit_required'),
             ]);
             return;
         }
@@ -170,13 +170,13 @@ class UserController
 
         if ($userWithEmail !== null && (int) $userWithEmail['id'] !== $id) {
             View::render('users/edit', [
-                'title'  => 'Edit user',
+                'title'  => Lang::get('users.edit_title'),
                 'styles' => ['settings.css'],
                 'user'   => array_merge($existingUser, $data),
                 'roles'  => $this->users->allRoles(),
                 'permissionDefinitions' => Auth::permissionDefinitions(),
                 'userPermissions' => $this->permissionsFromRequest(),
-                'error'  => 'This email is already used.',
+                'error'  => Lang::get('users.email_already_used'),
             ]);
             return;
         }

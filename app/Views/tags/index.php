@@ -26,7 +26,7 @@
 
 <div class="settings-table-card">
     <?php if (empty($tags)): ?>
-        <p class="table-empty-state">No tags found.</p>
+        <p class="table-empty-state"><?= t('tags.no_found') ?></p>
     <?php else: ?>
     <table class="data-table settings-table">
         <thead>

@@ -118,7 +118,7 @@
             <span class="card-section-label"><?= t('common.tags') ?></span>
         </div>
         <?php if (empty($tags)): ?>
-            <div class="sidebar-empty">No tags assigned.</div>
+            <div class="sidebar-empty"><?= t('common.no_tags') ?></div>
         <?php else: ?>
             <div class="card-tags-body">
                 <?php foreach ($tags as $tag): ?>
@@ -164,7 +164,7 @@
     <div class="card-related-contacts-header" id="relatedContactsToggle" role="button" tabindex="0" aria-expanded="false">
         <div class="card-related-contacts-left">
             <span class="card-related-contacts-title"><?= t('clients.related_contacts') ?></span>
-            <span class="card-related-contacts-count"><?= count($contacts) ?> total</span>
+            <span class="card-related-contacts-count"><?= htmlspecialchars(Lang::get('clients.n_total', ['n' => count($contacts)]), ENT_QUOTES, 'UTF-8') ?></span>
         </div>
         <i class="ph ph-caret-down card-related-contacts-chevron" aria-hidden="true"></i>
     </div>

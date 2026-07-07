@@ -14,7 +14,7 @@
 
 <div class="settings-table-card">
     <?php if (empty($fields)): ?>
-        <p class="table-empty-state">No custom fields found.</p>
+        <p class="table-empty-state"><?= t('cf.no_found') ?></p>
     <?php else: ?>
     <table class="data-table settings-table">
         <thead>
@@ -23,9 +23,9 @@
                 <?= thSort('name', t('cf.field_name'), $sort, $dir, '/custom-fields') ?>
                 <?= thSort('slug', t('sectors.slug'), $sort, $dir, '/custom-fields') ?>
                 <?= thSort('field_type', t('cf.field_type'), $sort, $dir, '/custom-fields') ?>
-                <th>Required</th>
-                <th>Filterable</th>
-                <th>Sort</th>
+                <th><?= t('cf.required') ?></th>
+                <th><?= t('cf.filterable') ?></th>
+                <th><?= t('cf.sort') ?></th>
                 <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>

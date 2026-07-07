@@ -25,8 +25,11 @@
     if (moreBtn && moreExtra) {
         moreBtn.addEventListener('click', function () {
             var open = moreExtra.classList.toggle('open');
+            var i18n = window.I18N || {};
             moreBtn.classList.toggle('open', open);
-            moreBtn.querySelector('.filter-toggle-label').textContent = open ? 'Less filters' : 'More filters';
+            moreBtn.querySelector('.filter-toggle-label').textContent = open
+                ? (i18n.less_filters || 'Less filters')
+                : (i18n.more_filters || 'More filters');
         });
     }
 
@@ -49,10 +52,17 @@
     function updateActions() {
         var n     = getCheckedCount();
         var total = document.querySelectorAll('input[name="contact_ids[]"]').length;
+        var i18n  = window.I18N || {};
 
         if (actionsCount)  { actionsCount.textContent = n; actionsCount.style.display = n > 0 ? '' : 'none'; }
-        if (deleteCountEl) { deleteCountEl.textContent = n; }
-        if (hintEl)        { hintEl.textContent = n + ' selected'; }
+        if (deleteCountEl) {
+            var deleteTemplate = deleteCountEl.closest('button') ? deleteCountEl.closest('button').dataset.template : null;
+            deleteCountEl.textContent = (deleteTemplate || i18n.delete_selected || ':n selected').replace(':n', n);
+        }
+        if (hintEl) {
+            var hintTemplate = hintEl.dataset.template || i18n.n_selected || ':n selected';
+            hintEl.textContent = hintTemplate.replace(':n', n);
+        }
         if (actionsBarBtn) { actionsBarBtn.classList.toggle('actions-bar-btn--has-items', n > 0); }
 
         if (selectAll) {

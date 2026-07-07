@@ -30,7 +30,7 @@ class ClientController
         $selectedFilterTags = $this->selectedTagsForIds($filters['tag_ids'] ?? []);
 
         View::render('clients/index', [
-            'title'             => 'Clients',
+            'title'             => Lang::get('clients.title'),
             'styles'            => ['clients.css'],
             'scripts'           => ['clients.js'],
             'clients'           => $clients,
@@ -53,7 +53,7 @@ class ClientController
         Auth::requirePermission('clients.create');
 
         View::render('clients/create', [
-            'title'        => 'Create client',
+            'title'        => Lang::get('clients.create_title'),
             'styles'       => ['clients.css'],
             'client'       => [],
             'sectors'      => $this->sectors->active(),
@@ -76,7 +76,7 @@ class ClientController
 
         if ($data['commercial_name'] === '') {
             View::render('clients/create', [
-                'title'        => 'Create client',
+                'title'        => Lang::get('clients.create_title'),
                 'styles'       => ['clients.css'],
                 'client'       => $data,
                 'sectors'      => $this->sectors->active(),
@@ -84,7 +84,7 @@ class ClientController
                 'selectedTagIds' => $tagIds,
                 'customFields' => $customFields,
                 'customValues' => $customValues,
-                'error'        => 'Commercial name is required.',
+                'error'        => Lang::get('clients.name_required'),
             ]);
             return;
         }
@@ -106,7 +106,7 @@ class ClientController
         }
 
         View::render('clients/show', [
-            'title'               => 'Client details',
+            'title'               => Lang::get('clients.details_title'),
             'styles'              => ['clients.css'],
             'scripts'             => ['clients.js'],
             'client'              => $client,
@@ -131,7 +131,7 @@ class ClientController
         $selectedTags = $this->clients->tagsForClient((int) $client['id']);
 
         View::render('clients/edit', [
-            'title'        => 'Edit client',
+            'title'        => Lang::get('clients.edit_title'),
             'styles'       => ['clients.css'],
             'client'       => $client,
             'sectors'      => $this->sectors->active(),
@@ -163,7 +163,7 @@ class ClientController
             $data['id'] = $id;
 
             View::render('clients/edit', [
-                'title'        => 'Edit client',
+                'title'        => Lang::get('clients.edit_title'),
                 'styles'       => ['clients.css'],
                 'client'       => $data,
                 'sectors'      => $this->sectors->active(),
@@ -171,7 +171,7 @@ class ClientController
                 'selectedTagIds' => $tagIds,
                 'customFields' => $customFields,
                 'customValues' => $customValues,
-                'error'        => 'Commercial name is required.',
+                'error'        => Lang::get('clients.name_required'),
             ]);
             return;
         }

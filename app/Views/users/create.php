@@ -65,8 +65,8 @@ foreach ($roles as $role) {
             </div>
             <div class="permissions-panel <?= $selectedRoleName === 'user' ? '' : 'is-hidden' ?>" data-permissions-panel>
                 <div class="permissions-panel-header">
-                    <h2>Individual permissions</h2>
-                    <p>These checkboxes apply only to users with the User role. Administrators always have full access.</p>
+                    <h2><?= t('users.individual_permissions') ?></h2>
+                    <p><?= t('users.permissions_hint') ?></p>
                 </div>
                 <div class="permissions-grid">
                     <?php foreach ($permissionDefinitions as $permissionKey => $permissionLabel): ?>

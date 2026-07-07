@@ -20,8 +20,8 @@
                 <div class="field">
                     <label for="entity_type"><?= t('cf.entity') ?></label>
                     <select id="entity_type" name="entity_type">
-                        <option value="contact" <?= (($field['entity_type'] ?? '') === 'contact') ? 'selected' : '' ?>>Contact</option>
-                        <option value="client"  <?= (($field['entity_type'] ?? '') === 'client')  ? 'selected' : '' ?>>Client</option>
+                        <option value="contact" <?= (($field['entity_type'] ?? '') === 'contact') ? 'selected' : '' ?>><?= t('common.contact') ?></option>
+                        <option value="client"  <?= (($field['entity_type'] ?? '') === 'client')  ? 'selected' : '' ?>><?= t('common.client') ?></option>
                     </select>
                 </div>
                 <div class="field">
@@ -43,35 +43,35 @@
                     <label for="slug"><?= t('sectors.slug') ?> <span class="required-star">*</span></label>
                     <input id="slug" type="text" name="slug"
                            value="<?= htmlspecialchars($field['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                           placeholder="auto-generated from name">
+                           placeholder="<?= t('cf.slug_placeholder') ?>">
                 </div>
                 <div class="field">
-                    <label for="sort_order">Sort order</label>
+                    <label for="sort_order"><?= t('cf.sort_order') ?></label>
                     <input id="sort_order" type="number" name="sort_order"
                            value="<?= (int) ($field['sort_order'] ?? 0) ?>" min="0">
                 </div>
                 <div class="field field-full" id="default-value-field">
-                    <label for="default_value">Default value</label>
+                    <label for="default_value"><?= t('cf.default_value') ?></label>
                     <input id="default_value" type="text" name="default_value"
                            value="<?= htmlspecialchars($field['default_value'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                           placeholder="Applied automatically when no value is set">
+                           placeholder="<?= t('cf.default_value_placeholder') ?>">
                 </div>
                 <div class="checkbox-row">
                     <label>
                         <input type="checkbox" name="is_required" value="1"
                                <?= ((int) ($field['is_required'] ?? 0) === 1) ? 'checked' : '' ?>>
-                        Required
+                        <?= t('cf.required') ?>
                     </label>
                     <label>
                         <input type="checkbox" name="is_filterable" value="1"
                                <?= ((int) ($field['is_filterable'] ?? 1) === 1) ? 'checked' : '' ?>>
-                        Filterable
+                        <?= t('cf.filterable') ?>
                     </label>
                 </div>
                 <div class="field field-full" id="options-field">
-                    <label for="options">Select options <span class="label-options-hint">(one per line)</span></label>
+                    <label for="options"><?= t('cf.select_options') ?> <span class="label-options-hint"><?= t('cf.one_per_line') ?></span></label>
                     <textarea id="options" name="options" rows="5"
-                              placeholder="Option 1&#10;Option 2&#10;Option 3"><?= htmlspecialchars($optionsText ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                              placeholder="<?= t('cf.option_placeholder') ?>"><?= htmlspecialchars($optionsText ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                 </div>
             </div>
         </div>

@@ -6,9 +6,9 @@ foreach ($fieldDefs as $key => $def) {
 }
 
 // Entity label
-$entityLabel      = $entity === 'contacts' ? 'Contacts' : 'Clients';
+$entityLabel      = $entity === 'contacts' ? Lang::get('contacts.title') : Lang::get('clients.title');
 $otherEntity      = $entity === 'contacts' ? 'clients' : 'contacts';
-$otherEntityLabel = $entity === 'contacts' ? 'Clients' : 'Contacts';
+$otherEntityLabel = $entity === 'contacts' ? Lang::get('clients.title') : Lang::get('contacts.title');
 
 $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
 
@@ -18,14 +18,14 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
 <div class="page-header exports-header">
     <div>
         <h1><?= t('exports.title') ?></h1>
-        <span class="count-label">Download contacts and clients as CSV or XLSX</span>
+        <span class="count-label"><?= t('exports.subtitle') ?></span>
     </div>
 </div>
 
 <?php if (isset($_GET['error']) && $_GET['error'] === 'phpspreadsheet'): ?>
 <div class="export-notice">
     <i class="ph ph-warning"></i>
-    PhpSpreadsheet is not installed. XLSX export is unavailable. Run: <code>composer require phpoffice/phpspreadsheet</code>
+    <?= t('exports.phpspreadsheet_missing') ?> <code>composer require phpoffice/phpspreadsheet</code>
 </div>
 <?php endif; ?>
 
@@ -34,12 +34,12 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
     <a href="<?= htmlspecialchars(Auth::url('/exports?entity=contacts'), ENT_QUOTES, 'UTF-8') ?>"
        class="data-tab <?= $entity === 'contacts' ? 'active' : '' ?>">
         <i class="ph ph-user"></i>
-        Contacts
+        <?= t('contacts.title') ?>
     </a>
     <a href="<?= htmlspecialchars(Auth::url('/exports?entity=clients'), ENT_QUOTES, 'UTF-8') ?>"
        class="data-tab <?= $entity === 'clients' ? 'active' : '' ?>">
         <i class="ph ph-buildings"></i>
-        Clients
+        <?= t('clients.title') ?>
     </a>
 </div>
 
@@ -58,8 +58,8 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                 <div class="export-section-title">
                     <?= htmlspecialchars($groupName, ENT_QUOTES, 'UTF-8') ?>
                     <div class="export-section-title-actions">
-                        <button type="button" class="btn btn-outlined btn-xs" onclick="toggleGroup(this, true)">All</button>
-                        <button type="button" class="btn btn-outlined btn-xs" onclick="toggleGroup(this, false)">None</button>
+                        <button type="button" class="btn btn-outlined btn-xs" onclick="toggleGroup(this, true)"><?= t('common.all') ?></button>
+                        <button type="button" class="btn btn-outlined btn-xs" onclick="toggleGroup(this, false)"><?= t('common.none') ?></button>
                     </div>
                 </div>
                 <div class="export-fields-grid">
@@ -83,7 +83,7 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
             <!-- Format selection -->
             <div class="export-options-card">
                 <div class="export-options-body">
-                    <label>Format</label>
+                    <label><?= t('common.format') ?></label>
                     <div class="format-options">
                         <label class="format-option selected" id="formatCsv" onclick="selectFormat('csv', this)">
                             <input type="radio" name="_format_display" value="csv" checked>
@@ -107,40 +107,40 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                 <div class="export-options-footer">
                     <button type="submit" class="btn btn-primary btn-download" id="downloadBtn">
                         <i class="ph ph-download-simple"></i>
-                        Download <?= htmlspecialchars($entityLabel, ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars(Lang::get('exports.download_btn', ['entity' => $entityLabel]), ENT_QUOTES, 'UTF-8') ?>
                     </button>
                 </div>
             </div>
 
             <!-- Summary -->
             <div class="export-summary-card">
-                <div class="export-summary-title">Selection</div>
+                <div class="export-summary-title"><?= t('exports.selection') ?></div>
                 <div class="export-summary-row">
-                    <span>Entity</span>
+                    <span><?= t('exports.entity') ?></span>
                     <span><?= htmlspecialchars($entityLabel, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
                 <div class="export-summary-row">
-                    <span>Fields selected</span>
+                    <span><?= t('exports.fields_selected') ?></span>
                     <span id="selectedCount"><?= count($defaultFields) ?></span>
                 </div>
                 <div class="export-summary-row">
-                    <span>Format</span>
+                    <span><?= t('common.format') ?></span>
                     <span id="selectedFormat">CSV</span>
                 </div>
             </div>
 
             <!-- Import templates -->
             <div class="export-templates-card">
-                <div class="export-templates-title">Import templates</div>
+                <div class="export-templates-title"><?= t('exports.templates') ?></div>
                 <a class="export-template-link"
                    href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>">
                     <i class="ph ph-download-simple"></i>
-                    Contacts CSV template
+                    <?= t('exports.contacts_template') ?>
                 </a>
                 <a class="export-template-link"
                    href="<?= htmlspecialchars(Auth::url('/exports/template/clients'), ENT_QUOTES, 'UTF-8') ?>">
                     <i class="ph ph-download-simple"></i>
-                    Clients CSV template
+                    <?= t('exports.clients_template') ?>
                 </a>
             </div>
 
@@ -151,23 +151,23 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
 
 <!-- Export history -->
 <div class="export-history-section">
-    <div class="export-history-header">Export history</div>
+    <div class="export-history-header"><?= t('exports.history') ?></div>
 
     <div class="export-history-card">
         <?php if (empty($recentExports)): ?>
-            <p class="export-no-history">No exports yet.</p>
+            <p class="export-no-history"><?= t('exports.no_history') ?></p>
         <?php // note: $recentExports variable holds paginated results ?>
         <?php else: ?>
         <table class="data-table export-history-table">
             <thead>
                 <tr>
                     <?= thSort('id', '#', $sort, $dir, '/exports', ['entity' => $entity]) ?>
-                    <?= thSort('entity_type', 'Entity', $sort, $dir, '/exports', ['entity' => $entity]) ?>
-                    <?= thSort('stored_filename', 'File', $sort, $dir, '/exports', ['entity' => $entity]) ?>
-                    <th>Format</th>
-                    <th class="col-num-header">Rows</th>
-                    <th>By</th>
-                    <th>Date</th>
+                    <?= thSort('entity_type', t('exports.entity'), $sort, $dir, '/exports', ['entity' => $entity]) ?>
+                    <?= thSort('stored_filename', t('common.file'), $sort, $dir, '/exports', ['entity' => $entity]) ?>
+                    <th><?= t('common.format') ?></th>
+                    <th class="col-num-header"><?= t('exports.rows') ?></th>
+                    <th><?= t('exports.by') ?></th>
+                    <th><?= t('common.date') ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -176,13 +176,13 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                     $filename  = $export['stored_filename'] ?? '';
                     $entityKey = ($export['entity_type'] ?? 'contacts') === 'clients' ? 'clients' : 'contacts';
                     $entityBadgeClass = 'export-entity-' . $entityKey;
-                    $entityBadgeLabel = ucfirst($entityKey);
+                    $entityBadgeLabel = $entityKey === 'clients' ? Lang::get('clients.title') : Lang::get('contacts.title');
                 ?>
                 <tr>
                     <td class="col-export-id"><?= (int) $export['id'] ?></td>
                     <td>
                         <span class="export-entity-badge <?= $entityBadgeClass ?>">
-                            <?= $entityBadgeLabel ?>
+                            <?= htmlspecialchars($entityBadgeLabel, ENT_QUOTES, 'UTF-8') ?>
                         </span>
                     </td>
                     <td class="col-export-file">

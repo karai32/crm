@@ -32,7 +32,7 @@
                     <input type="color" id="color-picker" class="color-picker-input"
                            value="<?= htmlspecialchars($tag['color'] ?: '#2563eb', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
-                <span class="color-hint">Hex format: #rrggbb</span>
+                <span class="color-hint"><?= t('tags.color_hint') ?></span>
             </div>
         </div>
         <div class="settings-form-actions">

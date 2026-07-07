@@ -21,7 +21,7 @@ class TagController
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('tags/index', [
-            'title'      => 'Tags',
+            'title'      => Lang::get('tags.title'),
             'styles'     => ['settings.css'],
             'tags'       => $this->tags->paginate($page, $perPage, $sort, $dir),
             'sort'       => $sort,
@@ -38,7 +38,7 @@ class TagController
         Auth::requirePermission('tags.manage');
 
         View::render('tags/create', [
-            'title'   => 'Create tag',
+            'title'   => Lang::get('tags.create_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['color-picker.js'],
             'error'   => null,
@@ -54,9 +54,9 @@ class TagController
 
         if ($name === '') {
             View::render('tags/create', [
-                'title'  => 'Create tag',
+                'title'  => Lang::get('tags.create_title'),
                 'styles' => ['settings.css'],
-                'error'  => 'Tag name is required.',
+                'error'  => Lang::get('tags.name_required'),
                 'name'   => $name,
                 'color'  => $color,
             ]);
@@ -81,7 +81,7 @@ class TagController
         }
 
         View::render('tags/edit', [
-            'title'   => 'Edit tag',
+            'title'   => Lang::get('tags.edit_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['color-picker.js'],
             'tag'     => $tag,
@@ -106,10 +106,10 @@ class TagController
 
         if ($name === '') {
             View::render('tags/edit', [
-                'title'   => 'Edit tag',
+                'title'   => Lang::get('tags.edit_title'),
                 'styles'  => ['settings.css'],
                 'scripts' => ['color-picker.js'],
-                'error'   => 'Tag name is required.',
+                'error'   => Lang::get('tags.name_required'),
                 'tag'     => [
                     'id'    => $id,
                     'name'  => $name,

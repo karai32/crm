@@ -1,27 +1,27 @@
 <!-- Header -->
 <div class="page-header imports-header">
     <div>
-        <h1>Import preview</h1>
+        <h1><?= t('imports.preview_title') ?></h1>
         <span class="count-label">
             <?= htmlspecialchars($preview['batch']['original_filename'], ENT_QUOTES, 'UTF-8') ?>
-            &nbsp;-&nbsp; <?= htmlspecialchars(ucfirst($preview['batch']['entity_type'] ?? 'contacts'), ENT_QUOTES, 'UTF-8') ?>
-            &nbsp;-&nbsp; <?= (int) $preview['total_rows'] ?> rows found
+            &nbsp;-&nbsp; <?= ($preview['batch']['entity_type'] ?? 'contacts') === 'clients' ? t('clients.title') : t('contacts.title') ?>
+            &nbsp;-&nbsp; <?= htmlspecialchars(Lang::get('imports.rows_found', ['n' => (int) $preview['total_rows']]), ENT_QUOTES, 'UTF-8') ?>
         </span>
     </div>
     <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
     </div>
 </div>
 
 <?php if (empty($preview['headers'])): ?>
-    <div class="alert alert-error">No headers found in this file.</div>
+    <div class="alert alert-error"><?= t('imports.no_headers') ?></div>
 <?php else: ?>
 
 <!-- Data preview -->
 <div class="import-preview-card">
     <div class="import-card-header">
-        <span class="import-card-header-title">First rows preview</span>
-        <span class="import-card-header-meta">Showing up to 10 rows</span>
+        <span class="import-card-header-title"><?= t('imports.first_rows_preview') ?></span>
+        <span class="import-card-header-meta"><?= t('imports.showing_up_to_10') ?></span>
     </div>
     <div class="import-data-scroll">
         <table class="import-data-table">
@@ -52,16 +52,16 @@
 
     <div class="import-preview-card">
         <div class="import-card-header">
-            <span class="import-card-header-title">Column mapping</span>
-            <span class="import-card-header-meta">Map each CSV column to a system field</span>
+            <span class="import-card-header-title"><?= t('imports.column_mapping') ?></span>
+            <span class="import-card-header-meta"><?= t('imports.map_hint') ?></span>
         </div>
 
         <table class="import-mapping-table">
             <thead>
                 <tr>
-                    <th>CSV column</th>
-                    <th>Map to field</th>
-                    <th>Custom field settings</th>
+                    <th><?= t('imports.csv_column') ?></th>
+                    <th><?= t('imports.map_to_field') ?></th>
+                    <th><?= t('imports.custom_field_settings') ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -72,14 +72,14 @@
                             <select name="mapping[<?= htmlspecialchars($header, ENT_QUOTES, 'UTF-8') ?>]"
                                     data-custom-mapping-select
                                     data-custom-target="custom-settings-<?= md5($header) ?>">
-                                <option value="">Do not import</option>
+                                <option value=""><?= t('imports.do_not_import') ?></option>
                                 <?php foreach ($preview['system_fields'] as $fieldKey => $label): ?>
                                     <option value="<?= htmlspecialchars($fieldKey, ENT_QUOTES, 'UTF-8') ?>"
                                             <?= (($preview['suggested_mapping'][$header] ?? '') === $fieldKey) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
                                     </option>
                                 <?php endforeach; ?>
-                                <option value="__custom">Create custom field...</option>
+                                <option value="__custom"><?= t('imports.create_custom_field') ?></option>
                             </select>
                         </td>
                         <td id="custom-settings-<?= md5($header) ?>" class="custom-field-settings">
@@ -99,9 +99,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon-sm">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
                 </svg>
-                Confirm import
+                <?= t('imports.confirm_import') ?>
             </button>
-            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>">Cancel</a>
+            <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
         </div>
     </div>
 </form>

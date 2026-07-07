@@ -9,7 +9,7 @@
             <?= t('api.logs') ?>
         </a>
         <a href="<?= htmlspecialchars(Auth::url('/help/api'), ENT_QUOTES, 'UTF-8') ?>" class="api-back-link">
-            API Reference
+            <?= t('api.reference') ?>
         </a>
     </div>
 </div>
@@ -22,22 +22,22 @@ $basicAuth = $clientId . ':' . $secret;
 ?>
 <div class="api-new-credentials">
     <div class="api-new-credentials-body">
-        <div class="api-new-credentials-title">API credentials created - copy the secret now</div>
-        <div class="api-new-credentials-subtitle">The secret will not be shown again. Use the Basic Auth value in Formidable Forms.</div>
+        <div class="api-new-credentials-title"><?= t('api.credentials_created') ?></div>
+        <div class="api-new-credentials-subtitle"><?= t('api.secret_not_shown') ?></div>
         <div class="api-new-credentials-grid">
-            <strong class="api-new-credentials-label">Client ID</strong>
+            <strong class="api-new-credentials-label"><?= t('api.client_id') ?></strong>
             <code class="api-new-credentials-code"><?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8') ?></code>
             <span></span>
 
-            <strong class="api-new-credentials-label">Secret</strong>
+            <strong class="api-new-credentials-label"><?= t('api.secret') ?></strong>
             <code id="newSecretValue" class="api-new-credentials-code"><?= htmlspecialchars($secret, ENT_QUOTES, 'UTF-8') ?></code>
             <button type="button" id="copyNewSecret" class="api-new-credentials-copy"
-                    onclick="copyCredential('newSecretValue', this, 'Copy secret')">Copy secret</button>
+                    onclick="copyCredential('newSecretValue', this, '<?= htmlspecialchars(Lang::get('api.copy_secret'), ENT_QUOTES, 'UTF-8') ?>')"><?= t('api.copy_secret') ?></button>
 
-            <strong class="api-new-credentials-label">Basic Auth</strong>
+            <strong class="api-new-credentials-label"><?= t('api.basic_auth') ?></strong>
             <code id="newBasicAuthValue" class="api-new-credentials-code"><?= htmlspecialchars($basicAuth, ENT_QUOTES, 'UTF-8') ?></code>
             <button type="button" id="copyNewBasicAuth" class="api-new-credentials-copy"
-                    onclick="copyCredential('newBasicAuthValue', this, 'Copy Basic Auth')">Copy Basic Auth</button>
+                    onclick="copyCredential('newBasicAuthValue', this, '<?= htmlspecialchars(Lang::get('api.copy_basic_auth'), ENT_QUOTES, 'UTF-8') ?>')"><?= t('api.copy_basic_auth') ?></button>
         </div>
     </div>
 </div>
@@ -45,38 +45,38 @@ $basicAuth = $clientId . ':' . $secret;
 
 <div class="api-card">
     <div class="api-card-create">
-        <div class="api-section-label">Create API credentials</div>
+        <div class="api-section-label"><?= t('api.create_credentials') ?></div>
         <form method="post" action="<?= htmlspecialchars(Auth::url('/api-keys/store'), ENT_QUOTES, 'UTF-8') ?>">
             <?= Csrf::field() ?>
             <div class="api-create-row">
                 <div class="field api-name-field">
                     <label for="keyName">
-                        Integration name <span class="required-star">*</span>
+                        <?= t('api.integration_name') ?> <span class="required-star">*</span>
                     </label>
-                    <input id="keyName" type="text" name="name" placeholder="e.g. Website contact form" required class="api-name-input">
+                    <input id="keyName" type="text" name="name" placeholder="<?= t('api.integration_name_placeholder') ?>" required class="api-name-input">
                 </div>
-                <button class="btn btn-primary api-submit-btn" type="submit">Create credentials</button>
+                <button class="btn btn-primary api-submit-btn" type="submit"><?= t('api.create_credentials_btn') ?></button>
             </div>
             <div class="api-scopes-row">
                 <?php foreach (['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'] as $scope): ?>
                 <span class="api-scope"><?= htmlspecialchars($scope, ENT_QUOTES, 'UTF-8') ?></span>
                 <?php endforeach; ?>
             </div>
-            <p class="api-scopes-note">All new integrations receive these scopes by default.</p>
+            <p class="api-scopes-note"><?= t('api.default_scopes_note') ?></p>
         </form>
     </div>
 
     <?php if (!empty($apiKeys)): ?>
     <div class="api-card-list">
-        <div class="api-section-label">Existing integrations</div>
+        <div class="api-section-label"><?= t('api.existing_integrations') ?></div>
         <div class="api-table-scroll">
             <table class="data-table api-keys-table">
                 <thead>
                     <tr>
                         <?= thSort('name', t('common.name'), $sort, $dir, '/api-keys') ?>
-                        <th>Client ID</th>
+                        <th><?= t('api.client_id') ?></th>
                         <?= thSort('is_active', t('common.status'), $sort, $dir, '/api-keys') ?>
-                        <th>Last used</th>
+                        <th><?= t('api.last_used') ?></th>
                         <th><?= t('common.created') ?></th>
                         <th class="col-actions"><?= t('common.actions') ?></th>
                     </tr>
@@ -96,7 +96,7 @@ $basicAuth = $clientId . ':' . $secret;
                         <td class="col-key-name">
                             <span class="api-key-name-display" id="nameDisplay<?= $keyId ?>">
                                 <?= $keyName ?>
-                                <button type="button" class="api-key-rename-btn" aria-label="Rename"
+                                <button type="button" class="api-key-rename-btn" aria-label="<?= t('common.edit') ?>"
                                         onclick="apiKeyRenameStart(<?= $keyId ?>, <?= $keyNameJs ?>)">
                                     <i class="ph ph-pencil"></i>
                                 </button>
@@ -107,7 +107,7 @@ $basicAuth = $clientId . ':' . $secret;
                                 <?= Csrf::field() ?>
                                 <input type="hidden" name="id" value="<?= $keyId ?>">
                                 <input type="text" name="name" class="api-key-inline-input" required>
-                                <button type="submit" class="api-key-inline-save">Save</button>
+                                <button type="submit" class="api-key-inline-save"><?= t('common.save') ?></button>
                                 <button type="button" class="api-key-inline-cancel"
                                         onclick="apiKeyRenameCancel(<?= $keyId ?>)"><?= t('common.cancel') ?></button>
                             </form>
@@ -117,7 +117,7 @@ $basicAuth = $clientId . ':' . $secret;
                             <?php if ($isActive): ?>
                                 <span class="tag-badge api-badge-active"><?= t('common.active') ?></span>
                             <?php else: ?>
-                                <span class="tag-badge api-badge-revoked">Disabled</span>
+                                <span class="tag-badge api-badge-revoked"><?= t('api.disabled') ?></span>
                             <?php endif; ?>
                         </td>
                         <td class="col-date-muted"><?= $key['last_used_at'] ? htmlspecialchars(date('d M Y', strtotime($key['last_used_at'])), ENT_QUOTES, 'UTF-8') : '-' ?></td>
@@ -129,9 +129,9 @@ $basicAuth = $clientId . ':' . $secret;
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
                                     <button class="action-btn action-view" type="submit"
-                                            onclick="return confirm('Grant this integration all current scopes?')">
+                                            onclick="return confirm('<?= htmlspecialchars(Lang::get('api.grant_scopes_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-                                        <span class="tooltip-text">Sync scopes</span>
+                                        <span class="tooltip-text"><?= t('api.sync_scopes') ?></span>
                                     </button>
                                 </form>
                                 <?php endif; ?>
@@ -140,9 +140,9 @@ $basicAuth = $clientId . ':' . $secret;
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
                                     <button class="action-btn action-warn" type="submit"
-                                            onclick="return confirm('Disable this integration? It can be re-enabled later.')">
+                                            onclick="return confirm('<?= htmlspecialchars(Lang::get('api.disable_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
                                         <i class="ph ph-cell-signal-slash"></i>
-                                        <span class="tooltip-text">Disable</span>
+                                        <span class="tooltip-text"><?= t('api.disable') ?></span>
                                     </button>
                                 </form>
                                 <?php else: ?>
@@ -151,7 +151,7 @@ $basicAuth = $clientId . ':' . $secret;
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
                                     <button class="action-btn action-edit" type="submit">
                                         <i class="ph ph-cell-signal-full"></i>
-                                        <span class="tooltip-text">Enable</span>
+                                        <span class="tooltip-text"><?= t('api.enable') ?></span>
                                     </button>
                                 </form>
                                 <?php endif; ?>
@@ -159,7 +159,7 @@ $basicAuth = $clientId . ':' . $secret;
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="id" value="<?= $keyId ?>">
                                     <button class="action-btn action-delete" type="submit"
-                                            onclick="return confirm('Permanently delete these API credentials?')">
+                                            onclick="return confirm('<?= htmlspecialchars(Lang::get('api.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
                                         <i class="ph ph-trash"></i>
                                         <span class="tooltip-text"><?= t('common.delete') ?></span>
                                     </button>
@@ -174,7 +174,7 @@ $basicAuth = $clientId . ':' . $secret;
     </div>
     <?php else: ?>
     <div class="api-empty-state">
-        No API integrations yet. Create credentials above to start using the API.
+        <?= t('api.no_integrations') ?>
     </div>
     <?php endif; ?>
 </div>

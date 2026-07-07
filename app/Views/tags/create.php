@@ -20,7 +20,7 @@
                 <label for="name"><?= t('tags.name') ?> <span class="required-star">*</span></label>
                 <input id="name" type="text" name="name"
                        value="<?= htmlspecialchars($name ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                       placeholder="e.g. VIP" required autofocus>
+                       placeholder="<?= t('tags.name_placeholder') ?>" required autofocus>
             </div>
             <div class="field">
                 <label for="color"><?= t('tags.color') ?></label>
@@ -31,7 +31,7 @@
                     <input type="color" id="color-picker" class="color-picker-input"
                            value="<?= htmlspecialchars($color ?: '#2563eb', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
-                <span class="color-hint">Hex format: #rrggbb</span>
+                <span class="color-hint"><?= t('tags.color_hint') ?></span>
             </div>
         </div>
         <div class="settings-form-actions">

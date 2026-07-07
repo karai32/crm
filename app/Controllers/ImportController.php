@@ -23,7 +23,7 @@ class ImportController
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('imports/index', [
-            'title'      => 'Imports',
+            'title'      => Lang::get('imports.title'),
             'styles'     => ['imports.css'],
             'batches'    => $this->imports->paginateBatches($page, $perPage, $sort, $dir),
             'sort'       => $sort,
@@ -42,7 +42,7 @@ class ImportController
         Auth::requirePermission('imports.manage');
 
         View::render('imports/upload', [
-            'title'   => 'Upload import file',
+            'title'   => Lang::get('imports.upload_title'),
             'styles'  => ['imports.css'],
             'scripts' => ['imports-upload.js'],
             'error'   => null,
@@ -62,7 +62,7 @@ class ImportController
 
         if (!$result['success']) {
             View::render('imports/upload', [
-                'title'   => 'Upload import file',
+                'title'   => Lang::get('imports.upload_title'),
                 'styles'  => ['imports.css'],
                 'scripts' => ['imports-upload.js'],
                 'error'   => $result['message'],
@@ -86,7 +86,7 @@ class ImportController
         }
 
         View::render('imports/preview', [
-            'title'   => 'Import preview',
+            'title'   => Lang::get('imports.preview_title'),
             'styles'  => ['imports.css'],
             'scripts' => ['imports-preview.js'],
             'preview' => $preview,
@@ -107,7 +107,7 @@ class ImportController
         }
 
         View::render('imports/errors', [
-            'title'  => 'Import errors',
+            'title'  => Lang::get('imports.errors_title'),
             'styles' => ['imports.css'],
             'batch'  => $batch,
             'errors' => $this->imports->errorsForBatch($batchId),
@@ -131,7 +131,7 @@ class ImportController
         }
 
         View::render('imports/result', [
-            'title'  => 'Import result',
+            'title'  => Lang::get('imports.result_title'),
             'styles' => ['imports.css'],
             'result' => $result,
         ]);

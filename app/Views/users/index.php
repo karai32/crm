@@ -43,7 +43,7 @@ function userPermissionIcon(string $permission): string
 
 <div class="settings-table-card">
     <?php if (empty($users)): ?>
-        <p class="table-empty-state">No users found.</p>
+        <p class="table-empty-state"><?= t('users.no_found') ?></p>
     <?php else: ?>
     <table class="data-table settings-table">
         <thead>
@@ -81,7 +81,7 @@ function userPermissionIcon(string $permission): string
                         </span>
                     </td>
                     <td>
-                        <div class="permission-icons" aria-label="User permissions">
+                        <div class="permission-icons" aria-label="<?= t('users.permissions') ?>">
                             <?php
                             $hasPermissions = false;
                             foreach ($permissionDefinitions as $permissionKey => $permissionLabel):

@@ -60,7 +60,7 @@ foreach ($roles as $role) {
                     </select>
                 </div>
                 <div class="checkbox-row">
-                    <label <?= $isCurrentUser ? 'title="You cannot deactivate your own account"' : '' ?>>
+                    <label <?= $isCurrentUser ? 'title="' . t('users.cannot_deactivate_self') . '"' : '' ?>>
                         <input type="checkbox" name="is_active" value="1"
                                <?= ((int) ($user['is_active'] ?? 0) === 1) ? 'checked' : '' ?>
                                <?= $isCurrentUser ? 'disabled' : '' ?>>
@@ -73,8 +73,8 @@ foreach ($roles as $role) {
             </div>
             <div class="permissions-panel <?= $selectedRoleName === 'user' ? '' : 'is-hidden' ?>" data-permissions-panel>
                 <div class="permissions-panel-header">
-                    <h2>Individual permissions</h2>
-                    <p>These checkboxes apply only to users with the User role. Administrators always have full access.</p>
+                    <h2><?= t('users.individual_permissions') ?></h2>
+                    <p><?= t('users.permissions_hint') ?></p>
                 </div>
                 <div class="permissions-grid">
                     <?php foreach ($permissionDefinitions as $permissionKey => $permissionLabel): ?>
@@ -90,12 +90,12 @@ foreach ($roles as $role) {
             </div>
         </div>
         <div class="settings-form-actions">
-            <button class="btn btn-primary" type="submit"><?= t('users.update_btn') ?></button>
+            <button class="btn btn-primary" type="submit"><?= t('users.update') ?></button>
             <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/users'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
             <?php if (!$isCurrentUser && (int) ($user['is_active'] ?? 0) === 1): ?>
                 <a class="btn btn-danger btn-sm"
                    href="<?= htmlspecialchars(Auth::url('/users/delete?id=' . (int) $user['id']), ENT_QUOTES, 'UTF-8') ?>"
-                   onclick="return confirm('Deactivate this user?')">Deactivate</a>
+                   onclick="return confirm('<?= htmlspecialchars(Lang::get('users.deactivate_confirm'), ENT_QUOTES, 'UTF-8') ?>')"><?= t('users.deactivate') ?></a>
             <?php endif; ?>
         </div>
     </div>

@@ -28,7 +28,7 @@ $selectedIcon = $sector['icon'] ?: ($defaultIcon ?? 'crosshair');
                        value="<?= htmlspecialchars($sector['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
             </div>
             <div class="field">
-                <label for="sector-icon-search">Icon</label>
+                <label for="sector-icon-search"><?= t('sectors.icon') ?></label>
                 <div class="sector-icon-picker"
                      data-sector-icon-picker
                      data-search-endpoint="<?= htmlspecialchars(Auth::url('/ajax/icons/search'), ENT_QUOTES, 'UTF-8') ?>"
@@ -44,9 +44,9 @@ $selectedIcon = $sector['icon'] ?: ($defaultIcon ?? 'crosshair');
                         </span>
                         <div class="sector-icon-current-body">
                             <span class="sector-icon-current-label" data-sector-icon-label>
-                                <?= htmlspecialchars($sector['icon'] ?: 'Default icon', ENT_QUOTES, 'UTF-8') ?>
+                                <?= $sector['icon'] ? htmlspecialchars($sector['icon'], ENT_QUOTES, 'UTF-8') : t('sectors.default_icon') ?>
                             </span>
-                            <button class="sector-icon-clear" type="button" data-sector-icon-clear>Use default</button>
+                            <button class="sector-icon-clear" type="button" data-sector-icon-clear><?= t('sectors.use_default') ?></button>
                         </div>
                     </div>
 
@@ -55,7 +55,7 @@ $selectedIcon = $sector['icon'] ?: ($defaultIcon ?? 'crosshair');
                         <input id="sector-icon-search"
                                type="search"
                                data-sector-icon-search
-                               placeholder="Search icons by name or tag..."
+                               placeholder="<?= t('sectors.icon_search_placeholder') ?>"
                                autocomplete="off"
                                spellcheck="false">
                     </div>
@@ -71,7 +71,7 @@ $selectedIcon = $sector['icon'] ?: ($defaultIcon ?? 'crosshair');
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <span class="field-hint">Search uses Phosphor icon names, categories and tags.</span>
+                <span class="field-hint"><?= t('sectors.icon_search_hint') ?></span>
             </div>
             <div class="field checkbox-field">
                 <label>

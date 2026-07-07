@@ -202,7 +202,7 @@
 
             <?php if ($authUser): ?>
                 <header class="topbar">
-                    <button class="burger-btn" id="burgerBtn" aria-label="Toggle menu">
+                    <button class="burger-btn" id="burgerBtn" aria-label="<?= t('common.toggle_menu') ?>">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
@@ -220,7 +220,7 @@
                     </div>
 
                     <div class="topbar-actions">
-                        <a class="topbar-icon-btn" href="<?= htmlspecialchars(Auth::url('/help'), ENT_QUOTES, 'UTF-8') ?>" title="Help" aria-label="Open help">
+                        <a class="topbar-icon-btn" href="<?= htmlspecialchars(Auth::url('/help'), ENT_QUOTES, 'UTF-8') ?>" title="<?= t('common.help') ?>" aria-label="<?= t('common.help') ?>">
                             <span class="topbar-help-mark" aria-hidden="true">?</span>
                         </a>
                         <div class="profile-wrap" id="profileWrap">
@@ -258,6 +258,24 @@
         </div>
     </div>
 
+    <script>
+        window.I18N = <?= json_encode([
+            'no_results'            => Lang::get('common.no_results'),
+            'edit'                  => Lang::get('common.edit'),
+            'delete'                => Lang::get('common.delete'),
+            'active'                => Lang::get('common.active'),
+            'inactive'              => Lang::get('common.inactive'),
+            'more_filters'          => Lang::get('common.more_filters'),
+            'less_filters'          => Lang::get('common.less_filters'),
+            'n_selected'            => Lang::get('common.n_selected'),
+            'delete_selected'       => Lang::get('common.delete_selected'),
+            'client'                => Lang::get('common.client'),
+            'contact'               => Lang::get('common.contact'),
+            'copied'                => Lang::get('common.copied'),
+            'sector_delete_confirm' => Lang::get('sectors.delete_confirm'),
+            'tag_delete_confirm'    => Lang::get('tags.delete_confirm_links'),
+        ], JSON_HEX_TAG | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
     <script src="<?= htmlspecialchars(Auth::url('/assets/js/admin.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <?php foreach ($scripts ?? [] as $script): ?>
         <script src="<?= htmlspecialchars(Auth::url('/assets/js/' . $script), ENT_QUOTES, 'UTF-8') ?>"></script>

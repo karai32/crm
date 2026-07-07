@@ -30,7 +30,7 @@ class ExportController
         [$pageNum, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('exports/index', [
-            'title'         => 'Export data',
+            'title'         => Lang::get('exports.title'),
             'styles'        => ['data.css'],
             'scripts'       => ['exports.js'],
             'entity'        => $pageData['entity'],

@@ -67,7 +67,7 @@ $canEditContacts = Auth::can('contacts.edit');
             <table class="detail-table">
                 <tbody>
                     <tr>
-                        <td class="detail-th">ID</td>
+                        <td class="detail-th"><?= t('common.id') ?></td>
                         <td class="detail-td"><?= (int) $contact['id'] ?></td>
                     </tr>
                     <tr>
@@ -136,7 +136,7 @@ $canEditContacts = Auth::can('contacts.edit');
         <div class="card">
             <div class="card-header"><h2><?= t('common.tags') ?></h2></div>
             <?php if (empty($tags)): ?>
-                <div class="sidebar-empty">No tags assigned.</div>
+                <div class="sidebar-empty"><?= t('common.no_tags') ?></div>
             <?php else: ?>
                 <div class="card-tags-body">
                     <?php foreach ($tags as $tag): ?>
@@ -155,7 +155,7 @@ $canEditContacts = Auth::can('contacts.edit');
         <div class="card">
             <div class="card-header"><h2><?= t('contacts.linked_clients') ?></h2></div>
             <?php if (empty($clients)): ?>
-                <div class="sidebar-empty">No clients linked.</div>
+                <div class="sidebar-empty"><?= t('contacts.no_clients_linked') ?></div>
             <?php else: ?>
                 <div class="contact-sidebar-list">
                     <?php foreach ($clients as $client): ?>

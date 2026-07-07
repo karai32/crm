@@ -131,7 +131,7 @@ if (!empty($filters['custom_fields'])) {
             unset($f['custom_fields'][(int) $fieldId]);
             if (empty($f['custom_fields'])) unset($f['custom_fields']);
             unset($f['page']);
-            $chips[] = ['text' => ($fieldName ?: 'Field') . ': ' . $value, 'href' => $base . '?' . http_build_query($f)];
+            $chips[] = ['text' => ($fieldName ?: Lang::get('filter.field')) . ': ' . $value, 'href' => $base . '?' . http_build_query($f)];
         }
     }
 }
@@ -220,7 +220,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 </div>
             </div>
             <div class="field">
-                <label>Created date</label>
+                <label><?= t('filter.created_date') ?></label>
                 <div class="date-range-field">
                     <input type="date" name="created_from"
                         value="<?= htmlspecialchars($filters['created_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
@@ -230,7 +230,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 </div>
             </div>
             <div class="field">
-                <label>Updated date</label>
+                <label><?= t('filter.updated_date') ?></label>
                 <div class="date-range-field">
                     <input type="date" name="updated_from"
                         value="<?= htmlspecialchars($filters['updated_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
@@ -240,7 +240,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 </div>
             </div>
             <div class="field">
-                <label>Linked client</label>
+                <label><?= t('filter.linked_client') ?></label>
                 <div class="token-picker token-picker--filter"
                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/clients/search'), ENT_QUOTES, 'UTF-8') ?>"
                     data-name="client_id"
@@ -251,7 +251,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 </div>
             </div>
             <div class="field">
-                <label>Client sector</label>
+                <label><?= t('filter.client_sector') ?></label>
                 <div class="token-picker token-picker--filter"
                     data-name="sector_id"
                     data-max="1"
@@ -261,7 +261,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 </div>
             </div>
             <div class="field">
-                <label>Email type</label>
+                <label><?= t('filter.email_type_lbl') ?></label>
                 <?php
                 $preselectedEmailTypeJson = '[]';
                 if ($filters['is_corporate_email'] !== '') {
@@ -280,7 +280,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 </div>
             </div>
             <div class="field">
-                <label>Email status</label>
+                <label><?= t('filter.email_status') ?></label>
                 <?php
                 $preselectedEmailStatusJson = '[]';
                 if ($filters['email_status'] !== '') {
@@ -405,7 +405,7 @@ $hasExtended = !empty($filters['custom_fields']);
                                     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
                                     data-name="tag_ids[]"
                                     data-with-color="1"
-                                    data-placeholder="Choose tags…"
+                                    data-placeholder="<?= t('common.choose_tags') ?>"
                                     data-paginate="1"
                                     data-selected="[]">
                                 </div>
@@ -445,15 +445,17 @@ $hasExtended = !empty($filters['custom_fields']);
                     <div class="actions-panel-section actions-panel-section--danger">
                         <div class="actions-section-label"><?= t('common.delete') ?></div>
                         <button type="submit" name="bulk_action" value="delete" class="btn btn-sm btn-danger" id="bulkDeleteBtn"
+                            data-template="<?= htmlspecialchars(Lang::get('common.delete_selected'), ENT_QUOTES, 'UTF-8') ?>"
                             onclick="return confirm('<?= htmlspecialchars(Lang::get('contacts.delete_bulk_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
-                            <?= t('common.delete') ?> <span id="deleteCountLabel">0</span> selected
+                            <span id="deleteCountLabel"><?= htmlspecialchars(Lang::get('common.delete_selected', ['n' => 0]), ENT_QUOTES, 'UTF-8') ?></span>
                         </button>
                     </div>
                 <?php endif; ?>
 
             </div>
             <div class="actions-panel-footer">
-                <span class="actions-selected-hint" id="actionsSelectedHint">0 selected</span>
+                <span class="actions-selected-hint" id="actionsSelectedHint"
+                    data-template="<?= htmlspecialchars(Lang::get('common.n_selected'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars(Lang::get('common.n_selected', ['n' => 0]), ENT_QUOTES, 'UTF-8') ?></span>
                 <button type="button" class="actions-deselect-btn" id="actionsDeselectBtn"><?= t('common.deselect_all') ?></button>
             </div>
         </form>
@@ -473,10 +475,10 @@ $hasExtended = !empty($filters['custom_fields']);
                 <tr>
                     <th class="col-select">
                         <?php if ($hasBulkActions): ?>
-                            <input type="checkbox" id="contactsSelectAll" aria-label="Select all">
+                            <input type="checkbox" id="contactsSelectAll" aria-label="<?= t('common.select_all') ?>">
                         <?php endif; ?>
                     </th>
-                    <?= thSort('id', 'ID', $sort, $dir, '/contacts', $activeFilters, 'col-id') ?>
+                    <?= thSort('id', t('common.id'), $sort, $dir, '/contacts', $activeFilters, 'col-id') ?>
                     <?= thSort('full_name', t('common.name'), $sort, $dir, '/contacts', $activeFilters) ?>
                     <?= thSort('email', t('common.email'), $sort, $dir, '/contacts', $activeFilters) ?>
                     <?= thSort('clients', t('clients.title'), $sort, $dir, '/contacts', $activeFilters) ?>
@@ -490,7 +492,7 @@ $hasExtended = !empty($filters['custom_fields']);
                         <td class="col-select">
                             <?php if ($hasBulkActions): ?>
                                 <input type="checkbox" name="contact_ids[]" value="<?= (int) $contact['id'] ?>"
-                                    form="contactsBulkForm" aria-label="Select contact">
+                                    form="contactsBulkForm" aria-label="<?= t('common.select') ?>">
                             <?php endif; ?>
                         </td>
                         <td class="col-id"><?= (int) $contact['id'] ?></td>
@@ -500,10 +502,10 @@ $hasExtended = !empty($filters['custom_fields']);
                                 <span class="email-cell">
                                     <?= htmlspecialchars($contact['email'], ENT_QUOTES, 'UTF-8') ?>
                                     <?php if ($contact['is_corporate_email'] === '0'): ?>
-                                        <i class="ph ph-user-circle email-badge email-badge--consumer" title="Consumer email"></i>
+                                        <i class="ph ph-user-circle email-badge email-badge--consumer" title="<?= t('contacts.consumer_email') ?>"></i>
                                     <?php endif; ?>
                                     <?php if ($contact['email_status'] === 'invalid'): ?>
-                                        <i class="ph ph-warning email-badge email-badge--invalid" title="Invalid email (no MX record)"></i>
+                                        <i class="ph ph-warning email-badge email-badge--invalid" title="<?= t('contacts.invalid_email_mx') ?>"></i>
                                     <?php endif; ?>
                                 </span>
                             <?php else: ?>

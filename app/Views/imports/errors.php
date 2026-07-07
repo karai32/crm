@@ -1,25 +1,25 @@
 <!-- Header -->
 <div class="page-header imports-header">
     <div>
-        <h1>Import issues</h1>
+        <h1><?= t('imports.errors_title') ?></h1>
         <span class="count-label"><?= htmlspecialchars($batch['original_filename'], ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>">Back to imports</a>
+        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>"><?= t('imports.back_to_imports') ?></a>
     </div>
 </div>
 
 <div class="imports-table-card">
     <?php if (empty($errors)): ?>
-        <p class="table-empty-state">No issues found for this import.</p>
+        <p class="table-empty-state"><?= t('imports.no_issues') ?></p>
     <?php else: ?>
     <table class="import-errors-table">
         <thead>
             <tr>
-                <th>Row</th>
-                <th>Error message</th>
-                <th>Raw data</th>
-                <th>Time</th>
+                <th><?= t('imports.col_row') ?></th>
+                <th><?= t('imports.col_error_message') ?></th>
+                <th><?= t('imports.col_raw_data') ?></th>
+                <th><?= t('common.time') ?></th>
             </tr>
         </thead>
         <tbody>

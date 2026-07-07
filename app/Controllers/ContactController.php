@@ -41,7 +41,7 @@ class ContactController
         }
 
         View::render('contacts/index', [
-            'title'                      => 'Contacts',
+            'title'                      => Lang::get('contacts.title'),
             'styles'                     => ['contacts.css'],
             'scripts'                    => ['contacts.js'],
             'contacts'                   => $contacts,
@@ -67,7 +67,7 @@ class ContactController
         Auth::requirePermission('contacts.create');
 
         View::render('contacts/create', [
-            'title'            => 'Create contact',
+            'title'            => Lang::get('contacts.create_title'),
             'styles'           => ['contacts.css'],
             'contact'          => [],
             'tags'             => $this->contacts->firstTags(),
@@ -92,7 +92,7 @@ class ContactController
 
         if ($data['full_name'] === '') {
             View::render('contacts/create', [
-                'title'            => 'Create contact',
+                'title'            => Lang::get('contacts.create_title'),
                 'styles'           => ['contacts.css'],
                 'contact'          => $data,
                 'tags'             => $this->contacts->firstTags(),
@@ -101,7 +101,7 @@ class ContactController
                 'selectedClientIds' => $clientIds,
                 'customFields'     => $customFields,
                 'customValues'     => $customValues,
-                'error'            => 'Full name is required.',
+                'error'            => Lang::get('contacts.name_required'),
             ]);
             return;
         }
@@ -125,7 +125,7 @@ class ContactController
         }
 
         View::render('contacts/show', [
-            'title'                 => 'Contact details',
+            'title'                 => Lang::get('contacts.details_title'),
             'styles'                => ['contacts.css'],
             'contact'               => $contact,
             'tags'                  => $this->contacts->tagsForContact((int) $contact['id']),
@@ -150,7 +150,7 @@ class ContactController
         $selectedClients = $this->contacts->clientsForContact((int) $contact['id']);
 
         View::render('contacts/edit', [
-            'title'            => 'Edit contact',
+            'title'            => Lang::get('contacts.edit_title'),
             'styles'           => ['contacts.css'],
             'contact'          => $contact,
             'tags'             => $this->mergeSelectedRows($this->contacts->firstTags(), $selectedTags),
@@ -184,7 +184,7 @@ class ContactController
             $data['id'] = $id;
 
             View::render('contacts/edit', [
-                'title'            => 'Edit contact',
+                'title'            => Lang::get('contacts.edit_title'),
                 'styles'           => ['contacts.css'],
                 'contact'          => $data,
                 'tags'             => $this->contacts->firstTags(),
@@ -193,7 +193,7 @@ class ContactController
                 'selectedClientIds' => $clientIds,
                 'customFields'     => $customFields,
                 'customValues'     => $customValues,
-                'error'            => 'Full name is required.',
+                'error'            => Lang::get('contacts.name_required'),
             ]);
             return;
         }

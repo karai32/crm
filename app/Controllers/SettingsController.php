@@ -17,7 +17,7 @@ class SettingsController
         $userId = (int) ($user['id'] ?? 0);
 
         View::render('settings/index', [
-            'title'        => 'Settings',
+            'title'        => Lang::get('settings.title'),
             'styles'       => ['settings.css'],
             'prefs'        => $this->prefs->all($userId),
             'reportStatus' => $_GET['report'] ?? null,

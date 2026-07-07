@@ -125,7 +125,7 @@ if (!empty($filters['custom_fields'])) {
             unset($f['custom_fields'][(int) $fieldId]);
             if (empty($f['custom_fields'])) unset($f['custom_fields']);
             unset($f['page']);
-            $chips[] = ['text' => ($fieldName ?: 'Field') . ': ' . $value, 'href' => $base . '?' . http_build_query($f)];
+            $chips[] = ['text' => ($fieldName ?: Lang::get('filter.field')) . ': ' . $value, 'href' => $base . '?' . http_build_query($f)];
         }
     }
 }
@@ -392,7 +392,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                              data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/tags/search'), ENT_QUOTES, 'UTF-8') ?>"
                              data-name="tag_ids[]"
                              data-with-color="1"
-                             data-placeholder="Choose tags…"
+                             data-placeholder="<?= t('common.choose_tags') ?>"
                              data-paginate="1"
                              data-selected="[]">
                         </div>
@@ -413,15 +413,17 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
             <div class="actions-panel-section actions-panel-section--danger">
                 <div class="actions-section-label"><?= t('common.delete') ?></div>
                 <button type="submit" name="bulk_action" value="delete" class="btn btn-sm btn-danger" id="bulkDeleteBtn"
+                        data-template="<?= htmlspecialchars(Lang::get('common.delete_selected'), ENT_QUOTES, 'UTF-8') ?>"
                         onclick="return confirm('<?= htmlspecialchars(Lang::get('clients.delete_bulk_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
-                    <?= t('common.delete') ?> <span id="deleteCountLabel">0</span> selected
+                    <span id="deleteCountLabel"><?= htmlspecialchars(Lang::get('common.delete_selected', ['n' => 0]), ENT_QUOTES, 'UTF-8') ?></span>
                 </button>
             </div>
             <?php endif; ?>
 
         </div>
         <div class="actions-panel-footer">
-            <span class="actions-selected-hint" id="actionsSelectedHint">0 selected</span>
+            <span class="actions-selected-hint" id="actionsSelectedHint"
+                data-template="<?= htmlspecialchars(Lang::get('common.n_selected'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars(Lang::get('common.n_selected', ['n' => 0]), ENT_QUOTES, 'UTF-8') ?></span>
             <button type="button" class="actions-deselect-btn" id="actionsDeselectBtn"><?= t('common.deselect_all') ?></button>
         </div>
     </form>
@@ -440,7 +442,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
             <tr>
                 <th class="col-select">
                     <?php if ($hasBulkActions): ?>
-                    <input type="checkbox" id="clientsSelectAll" aria-label="Select all">
+                    <input type="checkbox" id="clientsSelectAll" aria-label="<?= t('common.select_all') ?>">
                     <?php endif; ?>
                 </th>
                 <?= thSort('id', '#', $sort, $dir, '/clients', $activeFilters, 'col-id') ?>
@@ -449,7 +451,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                 <?= thSort('sector_name', t('common.sector'), $sort, $dir, '/clients', $activeFilters) ?>
                 <th><?= t('common.tags') ?></th>
                 <?= thSort('is_active', t('common.active'), $sort, $dir, '/clients', $activeFilters, 'col-active-th') ?>
-                <th>Web</th>
+                <th><?= t('clients.web_col') ?></th>
                 <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>
@@ -459,7 +461,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                     <td class="col-select">
                         <?php if ($hasBulkActions): ?>
                         <input type="checkbox" name="client_ids[]" value="<?= (int) $client['id'] ?>"
-                               form="clientsBulkForm" aria-label="Select client">
+                               form="clientsBulkForm" aria-label="<?= t('common.select') ?>">
                         <?php endif; ?>
                     </td>
                     <td class="col-id"><?= (int) $client['id'] ?></td>

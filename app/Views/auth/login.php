@@ -28,7 +28,7 @@
         <label for="password"><?= t('auth.password') ?></label>
         <div class="password-field">
             <input id="password" type="password" name="password" autocomplete="current-password" required>
-            <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Show password" aria-pressed="false">
+            <button class="password-toggle" type="button" data-password-toggle="password" aria-label="<?= t('common.show_password') ?>" aria-pressed="false">
                 <i class="ph ph-eye password-toggle-icon password-toggle-icon-show" aria-hidden="true"></i>
                 <i class="ph ph-eye-closed password-toggle-icon password-toggle-icon-hide" aria-hidden="true"></i>
             </button>

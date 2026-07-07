@@ -1,6 +1,6 @@
 function copyCredential(elementId, button, originalLabel) {
     navigator.clipboard.writeText(document.getElementById(elementId).textContent).then(function () {
-        button.textContent = 'Copied!';
+        button.textContent = (window.I18N && window.I18N.copied) || 'Copied!';
         setTimeout(function () { button.textContent = originalLabel; }, 2000);
     });
 }

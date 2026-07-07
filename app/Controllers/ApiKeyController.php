@@ -24,7 +24,7 @@ class ApiKeyController
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('api/index', [
-            'title'          => 'API Credentials',
+            'title'          => Lang::get('api.title'),
             'styles'         => ['api.css'],
             'scripts'        => ['api-keys.js'],
             'apiKeys'        => $this->apiKeys->paginate($page, $perPage, $sort, $dir),
@@ -148,7 +148,7 @@ class ApiKeyController
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         View::render('api/logs', [
-            'title'      => 'API Logs',
+            'title'      => Lang::get('api.logs'),
             'styles'     => ['api.css'],
             'scripts'    => ['api-logs.js'],
             'logs'       => $this->apiKeys->pageLogs($page, $perPage, $filters),

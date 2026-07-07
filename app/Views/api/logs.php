@@ -26,7 +26,7 @@ function apiMethodClass(string $m): string
         <span class="count-label"><?= number_format($total) ?> request<?= $total !== 1 ? 's' : '' ?></span>
     </div>
     <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/api-keys'), ENT_QUOTES, 'UTF-8') ?>">
-        API Keys
+        <?= t('api.title') ?>
     </a>
 </div>
 
@@ -36,9 +36,9 @@ function apiMethodClass(string $m): string
         <div class="api-logs-filter-row">
 
             <div class="field api-logs-field">
-                <label for="lf_key">Integration</label>
+                <label for="lf_key"><?= t('api.integration') ?></label>
                 <select id="lf_key" name="key_id">
-                    <option value="">All integrations</option>
+                    <option value=""><?= t('api.all_integrations') ?></option>
                     <?php foreach ($apiKeys as $key): ?>
                     <option value="<?= (int) $key['id'] ?>" <?= ((int) ($filters['key_id'] ?? 0) === (int) $key['id']) ? 'selected' : '' ?>>
                         <?= htmlspecialchars($key['name'], ENT_QUOTES, 'UTF-8') ?>
@@ -48,7 +48,7 @@ function apiMethodClass(string $m): string
             </div>
 
             <div class="field api-logs-field api-logs-field--sm">
-                <label for="lf_method">Method</label>
+                <label for="lf_method"><?= t('api.method') ?></label>
                 <select id="lf_method" name="method">
                     <option value=""><?= t('common.all') ?></option>
                     <?php foreach (['GET', 'POST', 'PATCH', 'DELETE'] as $m): ?>
@@ -58,28 +58,28 @@ function apiMethodClass(string $m): string
             </div>
 
             <div class="field api-logs-field api-logs-field--sm">
-                <label for="lf_status">Result</label>
+                <label for="lf_status"><?= t('api.result') ?></label>
                 <select id="lf_status" name="status">
                     <option value=""><?= t('common.all') ?></option>
-                    <option value="success" <?= ($filters['status'] ?? '') === 'success' ? 'selected' : '' ?>>Success (2xx)</option>
-                    <option value="error"   <?= ($filters['status'] ?? '') === 'error'   ? 'selected' : '' ?>>Error (4xx/5xx)</option>
+                    <option value="success" <?= ($filters['status'] ?? '') === 'success' ? 'selected' : '' ?>><?= t('api.success_2xx') ?></option>
+                    <option value="error"   <?= ($filters['status'] ?? '') === 'error'   ? 'selected' : '' ?>><?= t('api.error_4xx_5xx') ?></option>
                 </select>
             </div>
 
             <div class="field api-logs-field">
-                <label for="lf_path">Path contains</label>
+                <label for="lf_path"><?= t('api.path_contains') ?></label>
                 <input id="lf_path" type="text" name="path" placeholder="/api/v1/contacts"
                        value="<?= htmlspecialchars($filters['path'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
 
             <div class="field api-logs-field api-logs-field--sm">
-                <label for="lf_date_from">From</label>
+                <label for="lf_date_from"><?= t('common.from') ?></label>
                 <input id="lf_date_from" type="date" name="date_from"
                        value="<?= htmlspecialchars($filters['date_from'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
 
             <div class="field api-logs-field api-logs-field--sm">
-                <label for="lf_date_to">To</label>
+                <label for="lf_date_to"><?= t('common.to') ?></label>
                 <input id="lf_date_to" type="date" name="date_to"
                        value="<?= htmlspecialchars($filters['date_to'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             </div>
@@ -96,23 +96,23 @@ function apiMethodClass(string $m): string
 <!-- Table -->
 <div class="api-logs-card">
     <?php if (empty($logs)): ?>
-        <div class="api-logs-empty">No log entries found.</div>
+        <div class="api-logs-empty"><?= t('api.no_logs') ?></div>
     <?php else: ?>
     <div class="api-logs-table-wrap">
         <table class="data-table api-logs-table">
             <thead>
                 <tr>
                     <th></th>
-                    <th>Time</th>
-                    <th>Integration</th>
-                    <th>Origin</th>
-                    <th>IP</th>
-                    <th>Method</th>
-                    <th>Path</th>
+                    <th><?= t('common.time') ?></th>
+                    <th><?= t('api.integration') ?></th>
+                    <th><?= t('api.origin') ?></th>
+                    <th><?= t('api.ip') ?></th>
+                    <th><?= t('api.method') ?></th>
+                    <th><?= t('api.path') ?></th>
                     <th><?= t('common.status') ?></th>
-                    <th>Error</th>
-                    <th class="col-num">Items</th>
-                    <th class="col-num">ms</th>
+                    <th><?= t('api.error_col') ?></th>
+                    <th class="col-num"><?= t('api.items') ?></th>
+                    <th class="col-num"><?= t('api.ms') ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -177,12 +177,12 @@ function apiMethodClass(string $m): string
                     <td colspan="11" class="api-log-detail-cell">
                         <div class="api-log-detail-grid">
                             <div class="api-log-detail-pane">
-                                <div class="api-log-detail-label">Request body</div>
-                                <pre class="api-log-detail-pre"><?= !empty($log['request_body']) ? htmlspecialchars($log['request_body'], ENT_QUOTES, 'UTF-8') : '<span class="col-log-muted">empty</span>' ?></pre>
+                                <div class="api-log-detail-label"><?= t('api.request_body') ?></div>
+                                <pre class="api-log-detail-pre"><?= !empty($log['request_body']) ? htmlspecialchars($log['request_body'], ENT_QUOTES, 'UTF-8') : '<span class="col-log-muted">' . t('api.empty') . '</span>' ?></pre>
                             </div>
                             <div class="api-log-detail-pane">
-                                <div class="api-log-detail-label">Response body</div>
-                                <pre class="api-log-detail-pre"><?= !empty($log['response_body']) ? htmlspecialchars($log['response_body'], ENT_QUOTES, 'UTF-8') : '<span class="col-log-muted">empty</span>' ?></pre>
+                                <div class="api-log-detail-label"><?= t('api.response_body') ?></div>
+                                <pre class="api-log-detail-pre"><?= !empty($log['response_body']) ? htmlspecialchars($log['response_body'], ENT_QUOTES, 'UTF-8') : '<span class="col-log-muted">' . t('api.empty') . '</span>' ?></pre>
                             </div>
                         </div>
                     </td>

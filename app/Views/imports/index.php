@@ -31,31 +31,31 @@ function importDisplayStatus(array $batch): string
 <div class="page-header imports-header">
     <div>
         <h1><?= t('imports.title') ?></h1>
-        <span class="count-label"><?= (int) $total ?> batches</span>
+        <span class="count-label"><?= htmlspecialchars(Lang::get('imports.n_batches', ['n' => (int) $total]), ENT_QUOTES, 'UTF-8') ?></span>
     </div>
     <div class="page-actions">
         <a class="btn btn-primary" href="<?= htmlspecialchars(Auth::url('/imports/upload'), ENT_QUOTES, 'UTF-8') ?>">
             <i class="ph ph-upload-simple"></i>
-            Upload CSV / XLSX
+            <?= t('imports.upload_btn') ?>
         </a>
     </div>
 </div>
 
 <div class="imports-table-card">
     <?php if (empty($batches)): ?>
-        <p class="table-empty-state">No imports yet.</p>
+        <p class="table-empty-state"><?= t('imports.no_found') ?></p>
     <?php else: ?>
     <table class="data-table imports-table">
         <thead>
             <tr>
                 <?= thSort('id', '#', $sort, $dir, '/imports') ?>
-                <?= thSort('original_filename', 'File', $sort, $dir, '/imports') ?>
-                <?= thSort('entity_type', 'Type', $sort, $dir, '/imports') ?>
-                <?= thSort('status', 'Status', $sort, $dir, '/imports') ?>
-                <th class="col-num-header">Total</th>
-                <th class="col-num-header">Imported</th>
-                <th class="col-num-header">Skipped</th>
-                <th class="col-num-header">Errors</th>
+                <?= thSort('original_filename', t('common.file'), $sort, $dir, '/imports') ?>
+                <?= thSort('entity_type', t('imports.type'), $sort, $dir, '/imports') ?>
+                <?= thSort('status', t('common.status'), $sort, $dir, '/imports') ?>
+                <th class="col-num-header"><?= t('imports.total') ?></th>
+                <th class="col-num-header"><?= t('imports.imported') ?></th>
+                <th class="col-num-header"><?= t('imports.skipped') ?></th>
+                <th class="col-num-header"><?= t('imports.errors') ?></th>
                 <th><?= t('common.created') ?></th>
                 <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
@@ -73,8 +73,8 @@ function importDisplayStatus(array $batch): string
                             <?= htmlspecialchars($batch['original_filename'], ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </td>
-                    <td><?= htmlspecialchars(ucfirst($batch['entity_type'] ?? 'contacts'), ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><span class="import-status <?= importStatusClass($displayStatus) ?>"><?= htmlspecialchars(ucfirst($displayStatus), ENT_QUOTES, 'UTF-8') ?></span></td>
+                    <td><?= ($batch['entity_type'] ?? 'contacts') === 'clients' ? t('clients.title') : t('contacts.title') ?></td>
+                    <td><span class="import-status <?= importStatusClass($displayStatus) ?>"><?= t('imports.status_' . $displayStatus) ?></span></td>
                     <td class="col-num"><?= (int) $batch['total_rows'] ?></td>
                     <td class="col-num col-imported"><?= (int) $batch['imported_rows'] ?></td>
                     <td class="col-num"><?= (int) $batch['skipped_rows'] ?></td>
@@ -87,7 +87,7 @@ function importDisplayStatus(array $batch): string
                             <div class="action-links">
                                 <a class="action-btn action-view" href="<?= htmlspecialchars(Auth::url('/imports/errors?id=' . $batch['id']), ENT_QUOTES, 'UTF-8') ?>">
                                     <i class="ph ph-eye"></i>
-                                    <span class="tooltip-text">View issues</span>
+                                    <span class="tooltip-text"><?= t('imports.view_issues') ?></span>
                                 </a>
                             </div>
                         <?php endif; ?>

@@ -139,7 +139,7 @@
         if (!items.length) {
             var empty = document.createElement('div');
             empty.className = 'topbar-search-empty';
-            empty.textContent = 'No results found.';
+            empty.textContent = (window.I18N && window.I18N.no_results) || 'No results found.';
             dropdown.appendChild(empty);
             dropdown.classList.add('open');
             return;
@@ -162,7 +162,8 @@
             title.className = 'topbar-search-option-title';
             title.textContent = item.name || '';
             meta.className = 'topbar-search-option-meta';
-            meta.textContent = item.type === 'client' ? 'Client' : 'Contact';
+            var i18n = window.I18N || {};
+            meta.textContent = item.type === 'client' ? (i18n.client || 'Client') : (i18n.contact || 'Contact');
 
             if (item.meta) {
                 meta.textContent += ' - ' + item.meta;
@@ -288,7 +289,7 @@
         if (!items.length) {
             var empty = document.createElement('div');
             empty.className = 'sector-icon-empty';
-            empty.textContent = 'No icons found.';
+            empty.textContent = (window.I18N && window.I18N.no_results) || 'No icons found.';
             results.appendChild(empty);
             return;
         }
@@ -388,13 +389,15 @@
 
         wrap.className = 'action-links';
 
+        var i18n = window.I18N || {};
+
         edit.className = 'action-edit';
         edit.href = input.dataset.editUrl + item.id;
-        edit.textContent = 'Edit';
+        edit.textContent = i18n.edit || 'Edit';
 
         del.className = 'action-delete';
         del.href = input.dataset.deleteUrl + item.id;
-        del.textContent = 'Delete';
+        del.textContent = i18n.delete || 'Delete';
         del.addEventListener('click', function (event) {
             if (!confirm(deleteMessage)) {
                 event.preventDefault();
@@ -431,14 +434,15 @@
         nameLink.appendChild(nameText);
         nameTd.appendChild(nameLink);
 
+        var i18n = window.I18N || {};
         badge.className = Number(item.is_active) === 1 ? 'badge-active' : 'badge-inactive';
-        badge.textContent = Number(item.is_active) === 1 ? 'Active' : 'Inactive';
+        badge.textContent = Number(item.is_active) === 1 ? (i18n.active || 'Active') : (i18n.inactive || 'Inactive');
         statusTd.appendChild(badge);
 
         tr.appendChild(nameTd);
         tr.appendChild(textCell(item.slug, 'col-slug'));
         tr.appendChild(statusTd);
-        tr.appendChild(actionCell(item, input, 'Delete this sector? If it is used by clients, it will be deactivated.'));
+        tr.appendChild(actionCell(item, input, i18n.sector_delete_confirm || 'Delete this sector? If it is used by clients, it will be deactivated.'));
 
         return tr;
     }
@@ -479,10 +483,11 @@
             colorTd.textContent = '-';
         }
 
+        var i18n = window.I18N || {};
         tr.appendChild(nameTd);
         tr.appendChild(textCell(item.slug, 'col-slug'));
         tr.appendChild(colorTd);
-        tr.appendChild(actionCell(item, input, 'Delete this tag? Existing contact and client links will be removed.'));
+        tr.appendChild(actionCell(item, input, i18n.tag_delete_confirm || 'Delete this tag? Existing contact and client links will be removed.'));
 
         return tr;
     }
@@ -497,7 +502,7 @@
 
             emptyTd.colSpan = 4;
             emptyTd.className = 'settings-search-empty';
-            emptyTd.textContent = 'No results found.';
+            emptyTd.textContent = (window.I18N && window.I18N.no_results) || 'No results found.';
             emptyTr.appendChild(emptyTd);
             target.appendChild(emptyTr);
             return;
@@ -688,7 +693,7 @@
         if (!items.length) {
             var empty = document.createElement('div');
             empty.className = 'token-picker-empty';
-            empty.textContent = 'No results found.';
+            empty.textContent = (window.I18N && window.I18N.no_results) || 'No results found.';
             self.dropEl.appendChild(empty);
         } else {
             self.appendDropItems(items);
