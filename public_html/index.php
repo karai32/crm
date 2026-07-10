@@ -165,8 +165,6 @@ $router->post('/custom-fields/update', [$customFieldController, 'update']);
 $router->get('/custom-fields/delete', [$customFieldController, 'delete']);
 $router->get('/exports', [$exportController, 'index']);
 $router->post('/exports/download', [$exportController, 'download']);
-$router->get('/exports/template/contacts', [$exportController, 'templateContacts']);
-$router->get('/exports/template/clients', [$exportController, 'templateClients']);
 $router->get('/imports', [$importController, 'index']);
 $router->get('/imports/upload', [$importController, 'upload']);
 $router->post('/imports/upload', [$importController, 'storeUpload']);

@@ -100,11 +100,6 @@ class ExportManager
         }
     }
 
-    public function template(string $entity): string
-    {
-        return $this->queries->template($this->entity($entity));
-    }
-
     private function plan(string $entity, array $filters, array $selected): array
     {
         $definitions = $this->fields($entity);

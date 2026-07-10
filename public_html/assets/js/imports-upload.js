@@ -1,9 +1,11 @@
 (function () {
-    var link   = document.getElementById('import-template-link');
     var select = document.getElementById('entity_type');
-    if (!link || !select) { return; }
-    var base = link.dataset.baseHref;
+    var links = document.querySelectorAll('.import-template-link');
+    if (!select || !links.length) { return; }
     select.addEventListener('change', function () {
-        link.href = base + (select.value === 'clients' ? 'clients' : 'contacts');
+        var entity = select.value === 'clients' ? 'clients' : 'contacts';
+        links.forEach(function (link) {
+            link.href = link.dataset.baseHref + entity + '-import-template.' + link.dataset.ext;
+        });
     });
 }());

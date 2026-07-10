@@ -133,12 +133,12 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
             <div class="export-templates-card">
                 <div class="export-templates-title"><?= t('exports.templates') ?></div>
                 <a class="export-template-link"
-                   href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>">
+                   href="<?= htmlspecialchars(Auth::url('/assets/templates/contacts-import-template.csv'), ENT_QUOTES, 'UTF-8') ?>" download>
                     <i class="ph ph-download-simple"></i>
                     <?= t('exports.contacts_template') ?>
                 </a>
                 <a class="export-template-link"
-                   href="<?= htmlspecialchars(Auth::url('/exports/template/clients'), ENT_QUOTES, 'UTF-8') ?>">
+                   href="<?= htmlspecialchars(Auth::url('/assets/templates/clients-import-template.csv'), ENT_QUOTES, 'UTF-8') ?>" download>
                     <i class="ph ph-download-simple"></i>
                     <?= t('exports.clients_template') ?>
                 </a>

@@ -94,28 +94,6 @@ class ExportController
         exit;
     }
 
-    // ── Template downloads ────────────────────────────────────────────────
-
-    public function templateContacts(): void
-    {
-        $this->downloadTemplate('contacts');
-    }
-
-    public function templateClients(): void
-    {
-        $this->downloadTemplate('clients');
-    }
-
-    private function downloadTemplate(string $entity): void
-    {
-        Auth::requirePermission('exports.use');
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $entity . '-import-template.csv"');
-        echo $this->manager->template($entity);
-        exit;
-    }
-
     // ── Filter helpers ────────────────────────────────────────────────────
 
     private function contactFiltersFromPost(): array

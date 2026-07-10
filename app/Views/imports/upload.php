@@ -32,12 +32,15 @@
             </div>
             <div class="import-template-hint">
                 <span class="import-template-hint-text"><?= t('imports.unsure_format') ?></span>
-                <a href="<?= htmlspecialchars(Auth::url('/exports/template/contacts'), ENT_QUOTES, 'UTF-8') ?>"
-                   id="import-template-link"
-                   data-base-href="<?= htmlspecialchars(Auth::url('/exports/template/'), ENT_QUOTES, 'UTF-8') ?>"
-                   class="import-template-link">
-                    <?= t('imports.download_template') ?>
-                </a>
+                <span class="import-template-hint-text"><?= t('imports.download_template') ?>:</span>
+                <a href="<?= htmlspecialchars(Auth::url('/assets/templates/contacts-import-template.csv'), ENT_QUOTES, 'UTF-8') ?>"
+                   class="import-template-link" data-ext="csv"
+                   data-base-href="<?= htmlspecialchars(Auth::url('/assets/templates/'), ENT_QUOTES, 'UTF-8') ?>"
+                   download>csv</a>
+                <a href="<?= htmlspecialchars(Auth::url('/assets/templates/contacts-import-template.xlsx'), ENT_QUOTES, 'UTF-8') ?>"
+                   class="import-template-link" data-ext="xlsx"
+                   data-base-href="<?= htmlspecialchars(Auth::url('/assets/templates/'), ENT_QUOTES, 'UTF-8') ?>"
+                   download>xlsx</a>
             </div>
         </div>
         <div class="import-upload-actions">

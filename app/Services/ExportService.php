@@ -18,19 +18,6 @@ class ExportService
         return ['sql' => $sql, 'params' => $params, 'headers' => $headers];
     }
 
-    public function template(string $entity): string
-    {
-        $columns = $entity === 'clients'
-            ? ['commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes', 'sector', 'tags']
-            : ['full_name', 'email', 'phone', 'company', 'tags', 'client', 'sector'];
-        $handle = fopen('php://temp', 'r+');
-        fputcsv($handle, $columns);
-        rewind($handle);
-        $csv = stream_get_contents($handle);
-        fclose($handle);
-        return $csv;
-    }
-
     // ── Field definitions ──────────────────────────────────────────────────
 
     private function contactsFieldDefs(array $customFields): array
