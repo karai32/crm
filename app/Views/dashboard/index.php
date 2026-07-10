@@ -26,7 +26,7 @@ function fmtDate(string $date): string
             <div class="stat-card-icon"><i class="ph ph-user"></i></div>
             <span class="stat-card-label"><?= t('dashboard.total_contacts') ?></span>
         </div>
-        <div class="stat-card-number"><?= number_format((int) $stats['contacts']) ?></div>
+        <div class="stat-card-number"><?= number_format((int) $stats['contacts'], 0, '', '.') ?></div>
         <div class="stat-card-caption"><?= t('dashboard.registered') ?></div>
     </a>
 
@@ -35,7 +35,7 @@ function fmtDate(string $date): string
             <div class="stat-card-icon"><i class="ph ph-buildings"></i></div>
             <span class="stat-card-label"><?= t('dashboard.total_clients') ?></span>
         </div>
-        <div class="stat-card-number"><?= number_format((int) $stats['clients']) ?></div>
+        <div class="stat-card-number"><?= number_format((int) $stats['clients'], 0, '', '.') ?></div>
         <div class="stat-card-caption"><?= t('dashboard.active_in_crm') ?></div>
     </a>
 
@@ -44,7 +44,7 @@ function fmtDate(string $date): string
             <div class="stat-card-icon"><i class="ph ph-crosshair"></i></div>
             <span class="stat-card-label"><?= t('dashboard.total_sectors') ?></span>
         </div>
-        <div class="stat-card-number"><?= number_format((int) $stats['sectors']) ?></div>
+        <div class="stat-card-number"><?= number_format((int) $stats['sectors'], 0, '', '.') ?></div>
         <div class="stat-card-caption"><?= t('dashboard.available_cats') ?></div>
     </a>
 
@@ -53,7 +53,7 @@ function fmtDate(string $date): string
             <div class="stat-card-icon"><i class="ph ph-tag"></i></div>
             <span class="stat-card-label"><?= t('dashboard.total_tags') ?></span>
         </div>
-        <div class="stat-card-number"><?= number_format((int) $stats['tags']) ?></div>
+        <div class="stat-card-number"><?= number_format((int) $stats['tags'], 0, '', '.') ?></div>
         <div class="stat-card-caption"><?= t('dashboard.available_labels') ?></div>
     </a>
 
