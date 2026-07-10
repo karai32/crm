@@ -17,36 +17,8 @@ class ImportController
     {
         Auth::requirePermission('imports.manage');
 
-        $sort  = $this->sortParam(['id', 'original_filename', 'entity_type', 'status'], 'id');
-        $dir   = $this->dirParam();
-        $total = $this->imports->countBatches();
-        [$page, $perPage, $totalPages] = $this->pageParams($total);
-
-        View::render('imports/index', [
-            'title'      => Lang::get('imports.title'),
-            'styles'     => ['imports.css'],
-            'batches'    => $this->imports->paginateBatches($page, $perPage, $sort, $dir),
-            'sort'       => $sort,
-            'dir'        => $dir,
-            'page'       => $page,
-            'perPage'    => $perPage,
-            'total'      => $total,
-            'totalPages' => $totalPages,
-        ]);
-    }
-
-
-
-    public function upload(): void
-    {
-        Auth::requirePermission('imports.manage');
-
-        View::render('imports/upload', [
-            'title'   => Lang::get('imports.upload_title'),
-            'styles'  => ['imports.css'],
-            'scripts' => ['imports-upload.js'],
-            'error'   => null,
-        ]);
+        $previewId = (int) ($_GET['id'] ?? 0);
+        $this->renderIndex($previewId > 0 ? $this->manager->preview($previewId) : null);
     }
 
     public function storeUpload(): void
@@ -61,35 +33,33 @@ class ImportController
         );
 
         if (!$result['success']) {
-            View::render('imports/upload', [
-                'title'   => Lang::get('imports.upload_title'),
-                'styles'  => ['imports.css'],
-                'scripts' => ['imports-upload.js'],
-                'error'   => $result['message'],
-            ]);
+            $this->renderIndex(null, $result['message']);
             return;
         }
 
-        Auth::redirect('/imports/preview?id=' . $result['batch_id']);
+        Auth::redirect('/imports?id=' . $result['batch_id']);
     }
 
-    public function preview(): void
+    private function renderIndex(?array $preview, ?string $error = null): void
     {
-        Auth::requirePermission('imports.manage');
+        $sort  = $this->sortParam(['id', 'original_filename', 'entity_type', 'status'], 'id');
+        $dir   = $this->dirParam();
+        $total = $this->imports->countBatches();
+        [$page, $perPage, $totalPages] = $this->pageParams($total);
 
-        $preview = $this->manager->preview((int) ($_GET['id'] ?? 0));
-
-        if ($preview === null) {
-            http_response_code(404);
-            echo 'Import batch not found';
-            return;
-        }
-
-        View::render('imports/preview', [
-            'title'   => Lang::get('imports.preview_title'),
-            'styles'  => ['imports.css'],
-            'scripts' => ['imports-preview.js'],
-            'preview' => $preview,
+        View::render('imports/index', [
+            'title'      => Lang::get('imports.title'),
+            'styles'     => ['data.css', 'imports.css'],
+            'scripts'    => ['imports-upload.js', 'imports-preview.js'],
+            'batches'    => $this->imports->paginateBatches($page, $perPage, $sort, $dir),
+            'sort'       => $sort,
+            'dir'        => $dir,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
+            'totalPages' => $totalPages,
+            'preview'    => $preview,
+            'error'      => $error,
         ]);
     }
 

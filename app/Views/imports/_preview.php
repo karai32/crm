@@ -1,17 +1,4 @@
-<!-- Header -->
-<div class="page-header imports-header">
-    <div>
-        <h1><?= t('imports.preview_title') ?></h1>
-        <span class="count-label">
-            <?= htmlspecialchars($preview['batch']['original_filename'], ENT_QUOTES, 'UTF-8') ?>
-            &nbsp;-&nbsp; <?= ($preview['batch']['entity_type'] ?? 'contacts') === 'clients' ? t('clients.title') : t('contacts.title') ?>
-            &nbsp;-&nbsp; <?= htmlspecialchars(Lang::get('imports.rows_found', ['n' => (int) $preview['total_rows']]), ENT_QUOTES, 'UTF-8') ?>
-        </span>
-    </div>
-    <div class="page-actions">
-        <a class="btn btn-outlined" href="<?= htmlspecialchars(Auth::url('/imports'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.cancel') ?></a>
-    </div>
-</div>
+<?php /* Data preview + column mapping. Expects $preview from ImportManager::preview(). */ ?>
 
 <?php if (empty($preview['headers'])): ?>
     <div class="alert alert-error"><?= t('imports.no_headers') ?></div>
@@ -21,7 +8,13 @@
 <div class="import-preview-card">
     <div class="import-card-header">
         <span class="import-card-header-title"><?= t('imports.first_rows_preview') ?></span>
-        <span class="import-card-header-meta"><?= t('imports.showing_up_to_10') ?></span>
+        <span class="import-card-header-meta">
+            <?= htmlspecialchars($preview['batch']['original_filename'], ENT_QUOTES, 'UTF-8') ?>
+            &nbsp;&middot;&nbsp;
+            <?= htmlspecialchars(Lang::get('imports.rows_found', ['n' => (int) $preview['total_rows']]), ENT_QUOTES, 'UTF-8') ?>
+            &nbsp;&middot;&nbsp;
+            <?= t('imports.showing_up_to_10') ?>
+        </span>
     </div>
     <div class="import-data-scroll">
         <table class="import-data-table">

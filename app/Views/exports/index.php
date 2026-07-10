@@ -129,21 +129,6 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
                 </div>
             </div>
 
-            <!-- Import templates -->
-            <div class="export-templates-card">
-                <div class="export-templates-title"><?= t('exports.templates') ?></div>
-                <a class="export-template-link"
-                   href="<?= htmlspecialchars(Auth::url('/assets/templates/contacts-import-template.csv'), ENT_QUOTES, 'UTF-8') ?>" download>
-                    <i class="ph ph-download-simple"></i>
-                    <?= t('exports.contacts_template') ?>
-                </a>
-                <a class="export-template-link"
-                   href="<?= htmlspecialchars(Auth::url('/assets/templates/clients-import-template.csv'), ENT_QUOTES, 'UTF-8') ?>" download>
-                    <i class="ph ph-download-simple"></i>
-                    <?= t('exports.clients_template') ?>
-                </a>
-            </div>
-
         </div>
 
     </div>
