@@ -1,1 +1,2 @@
-full_name,email,phone,company,tags,client,sector
+full_name,email,phone,company,tags,client,sector,custom_fields.language
+John Smith,john.smith@acme.com,+34 600 123 456,Acme Solutions,Lead;Newsletter,Acme Solutions SL,Technology,Spanish
