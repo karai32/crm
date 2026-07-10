@@ -175,6 +175,7 @@ class ContactController
         }
 
         $data = $this->contactDataFromRequest();
+        $manualEmailState = $this->manualEmailStateFromRequest();
         $tagIds = $this->idsFromPost('tag_ids');
         $clientIds = $this->idsFromPost('client_ids');
         $customFields = $this->customFields->fieldsForEntity('contact');
@@ -182,6 +183,10 @@ class ContactController
 
         if ($data['full_name'] === '') {
             $data['id'] = $id;
+
+            if ($manualEmailState !== null) {
+                $data = array_merge($data, $manualEmailState);
+            }
 
             View::render('contacts/edit', [
                 'title'            => Lang::get('contacts.edit_title'),
@@ -198,7 +203,9 @@ class ContactController
             return;
         }
 
-        $data = array_merge($data, EmailInspector::inspect($data['email']));
+        $data = array_merge($data, $data['email'] !== null && $manualEmailState !== null
+            ? $manualEmailState
+            : EmailInspector::inspect($data['email']));
         $this->contacts->update($id, $data);
         $this->contacts->syncTags($id, $tagIds);
         $this->contacts->syncClients($id, $clientIds);
@@ -252,6 +259,20 @@ class ContactController
         }
 
         Auth::redirect('/contacts');
+    }
+
+    /**
+     * Manual email-state override from the edit form switcher.
+     * Returns null when nothing was selected (fall back to EmailInspector).
+     */
+    private function manualEmailStateFromRequest(): ?array
+    {
+        return match ($_POST['email_state'] ?? '') {
+            'corporate' => ['is_corporate_email' => 1, 'email_status' => 'valid'],
+            'consumer'  => ['is_corporate_email' => 0, 'email_status' => 'valid'],
+            'invalid'   => ['is_corporate_email' => null, 'email_status' => 'invalid'],
+            default     => null,
+        };
     }
 
     private function contactDataFromRequest(): array

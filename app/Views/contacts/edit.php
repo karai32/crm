@@ -33,6 +33,31 @@
                     <input id="email" type="email" name="email"
                            value="<?= htmlspecialchars($contact['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
+                <?php
+                $emailState = '';
+                if (($contact['email_status'] ?? null) === 'invalid') {
+                    $emailState = 'invalid';
+                } elseif (isset($contact['is_corporate_email'])) {
+                    $emailState = (int) $contact['is_corporate_email'] === 1 ? 'corporate' : 'consumer';
+                }
+                ?>
+                <div class="field">
+                    <label><?= t('filter.email_status') ?></label>
+                    <div class="email-state-switch" role="radiogroup" aria-label="<?= t('filter.email_status') ?>">
+                        <label class="email-state-option email-state-option--corporate">
+                            <input type="radio" name="email_state" value="corporate" <?= $emailState === 'corporate' ? 'checked' : '' ?>>
+                            <span class="email-state-option-inner"><i class="ph ph-buildings"></i><span><?= t('common.corporate') ?></span></span>
+                        </label>
+                        <label class="email-state-option email-state-option--consumer">
+                            <input type="radio" name="email_state" value="consumer" <?= $emailState === 'consumer' ? 'checked' : '' ?>>
+                            <span class="email-state-option-inner"><i class="ph ph-user-circle"></i><span><?= t('common.consumer') ?></span></span>
+                        </label>
+                        <label class="email-state-option email-state-option--invalid">
+                            <input type="radio" name="email_state" value="invalid" <?= $emailState === 'invalid' ? 'checked' : '' ?>>
+                            <span class="email-state-option-inner"><i class="ph ph-warning"></i><span><?= t('common.invalid') ?></span></span>
+                        </label>
+                    </div>
+                </div>
                 <div class="field">
                     <label for="phone"><?= t('common.phone') ?></label>
                     <input id="phone" type="text" name="phone"
