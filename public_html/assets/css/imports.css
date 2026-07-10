@@ -88,39 +88,73 @@
 }
 
 /* --- Upload card (sidebar) --------------------------------- */
-.import-upload-fields {
+.import-file-drop {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-}
-
-.import-upload-fields .field {
-    margin-bottom: 0;
-}
-
-.import-upload-fields select {
-    width: 100%;
-    max-width: 100%;
-}
-
-.import-upload-fields input[type="file"] {
-    width: 100%;
-    font-size: 12.5px;
-    padding: 8px 10px;
-    border: 2px solid var(--color-neutral-300);
+    align-items: center;
+    gap: 7px;
+    padding: 24px 12px;
+    border: 2px dashed var(--color-neutral-300);
     border-radius: var(--radius-sm);
-    background: var(--color-white);
+    background: var(--color-bg-subtle);
+    text-align: center;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+.import-file-drop input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
     cursor: pointer;
+}
+
+.import-file-drop i {
+    font-size: 26px;
+    line-height: 1;
+    color: var(--color-neutral);
+}
+
+.import-file-drop-text {
+    font-size: 12.5px;
+    color: var(--color-neutral);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.import-file-drop:hover,
+.import-file-drop.dragover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-bg);
+}
+
+.import-file-drop:hover i,
+.import-file-drop:hover .import-file-drop-text,
+.import-file-drop.dragover i,
+.import-file-drop.dragover .import-file-drop-text {
+    color: var(--color-accent);
+}
+
+.import-file-drop.has-file {
+    border-style: solid;
+    border-color: var(--color-success);
+    background: var(--color-success-bg);
+}
+
+.import-file-drop.has-file i,
+.import-file-drop.has-file .import-file-drop-text {
+    color: var(--color-success);
 }
 
 .import-upload-hint {
     display: block;
     font-size: 12px;
     color: var(--color-text-muted);
-    margin-top: 6px;
-    text-transform: none;
-    letter-spacing: normal;
-    font-weight: 400;
+    margin-top: 8px;
 }
 
 /* --- Placeholder (left column before upload) --------------- */
@@ -474,26 +508,6 @@
     color: var(--color-neutral);
     font-size: 12.5px;
     white-space: nowrap;
-}
-
-/* Import upload: template hint bar */
-.import-template-hint {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--color-neutral-200);
-}
-
-/* Import upload: hint text */
-.import-template-hint-text {
-    font-size: 12.5px;
-    color: var(--color-neutral);
-}
-
-/* Import upload: template download link */
-.import-template-link {
-    font-size: 12.5px;
-    color: var(--color-accent);
-    margin-left: 6px;
 }
 
 /* Import history table: th right-align for numeric columns */

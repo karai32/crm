@@ -41,6 +41,20 @@ $templatesBase = Auth::url('/assets/templates/');
     <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
 <?php endif; ?>
 
+<!-- Entity tabs -->
+<div class="data-tabs">
+    <a href="<?= htmlspecialchars(Auth::url('/imports?entity=contacts'), ENT_QUOTES, 'UTF-8') ?>"
+       class="data-tab <?= $entity === 'contacts' ? 'active' : '' ?>">
+        <i class="ph ph-user"></i>
+        <?= t('contacts.title') ?>
+    </a>
+    <a href="<?= htmlspecialchars(Auth::url('/imports?entity=clients'), ENT_QUOTES, 'UTF-8') ?>"
+       class="data-tab <?= $entity === 'clients' ? 'active' : '' ?>">
+        <i class="ph ph-buildings"></i>
+        <?= t('clients.title') ?>
+    </a>
+</div>
+
 <div class="export-layout">
 
     <!-- Left: preview + mapping (after upload) or placeholder -->
@@ -62,36 +76,18 @@ $templatesBase = Auth::url('/assets/templates/');
         <!-- Upload -->
         <form method="post" action="<?= htmlspecialchars(Auth::url('/imports/upload'), ENT_QUOTES, 'UTF-8') ?>" enctype="multipart/form-data">
             <?= Csrf::field() ?>
+            <input type="hidden" name="entity_type" value="<?= htmlspecialchars($entity, ENT_QUOTES, 'UTF-8') ?>">
             <div class="export-options-card">
                 <div class="export-options-body">
-                    <div class="import-upload-fields">
-                        <div class="field">
-                            <label for="entity_type"><?= t('imports.data_type') ?></label>
-                            <select id="entity_type" name="entity_type">
-                                <option value="contacts"><?= t('contacts.title') ?></option>
-                                <option value="clients"><?= t('clients.title') ?></option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="csv_file"><?= t('imports.select_file') ?></label>
-                            <input id="csv_file" type="file" name="csv_file"
-                                   accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                   required>
-                            <span class="import-upload-hint"><?= t('imports.format_hint') ?></span>
-                        </div>
+                    <label for="csv_file"><?= t('imports.select_file') ?></label>
+                    <div class="import-file-drop" id="importFileDrop">
+                        <input id="csv_file" type="file" name="csv_file"
+                               accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                               required>
+                        <i class="ph ph-file-arrow-up"></i>
+                        <span class="import-file-drop-text"><?= t('imports.choose_file') ?></span>
                     </div>
-                    <div class="import-template-hint">
-                        <span class="import-template-hint-text"><?= t('imports.unsure_format') ?></span>
-                        <span class="import-template-hint-text"><?= t('imports.download_template') ?>:</span>
-                        <a href="<?= htmlspecialchars($templatesBase . 'contacts-import-template.csv', ENT_QUOTES, 'UTF-8') ?>"
-                           class="import-template-link" data-ext="csv"
-                           data-base-href="<?= htmlspecialchars($templatesBase, ENT_QUOTES, 'UTF-8') ?>"
-                           download>csv</a>
-                        <a href="<?= htmlspecialchars($templatesBase . 'contacts-import-template.xlsx', ENT_QUOTES, 'UTF-8') ?>"
-                           class="import-template-link" data-ext="xlsx"
-                           data-base-href="<?= htmlspecialchars($templatesBase, ENT_QUOTES, 'UTF-8') ?>"
-                           download>xlsx</a>
-                    </div>
+                    <span class="import-upload-hint"><?= t('imports.format_hint') ?></span>
                 </div>
                 <div class="export-options-footer">
                     <button class="btn btn-primary btn-download" type="submit">
