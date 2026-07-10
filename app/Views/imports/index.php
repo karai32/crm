@@ -98,17 +98,16 @@ $templatesBase = Auth::url('/assets/templates/');
             </div>
         </form>
 
-        <!-- Templates -->
+        <!-- Templates (for the active entity tab) -->
+        <?php $tplLabel = $entity === 'clients' ? t('clients.title') : t('contacts.title'); ?>
         <div class="export-templates-card">
             <div class="export-templates-title"><?= t('imports.templates') ?></div>
-            <?php foreach (['contacts' => t('contacts.title'), 'clients' => t('clients.title')] as $tplEntity => $tplLabel): ?>
-                <?php foreach (['csv', 'xlsx'] as $tplExt): ?>
-                    <a class="export-template-link"
-                       href="<?= htmlspecialchars($templatesBase . $tplEntity . '-import-template.' . $tplExt, ENT_QUOTES, 'UTF-8') ?>" download>
-                        <i class="ph ph-download-simple"></i>
-                        <?= htmlspecialchars($tplLabel, ENT_QUOTES, 'UTF-8') ?> &mdash; <?= strtoupper($tplExt) ?>
-                    </a>
-                <?php endforeach; ?>
+            <?php foreach (['csv', 'xlsx'] as $tplExt): ?>
+                <a class="export-template-link"
+                   href="<?= htmlspecialchars($templatesBase . $entity . '-import-template.' . $tplExt, ENT_QUOTES, 'UTF-8') ?>" download>
+                    <i class="ph ph-download-simple"></i>
+                    <?= htmlspecialchars($tplLabel, ENT_QUOTES, 'UTF-8') ?> &mdash; <?= strtoupper($tplExt) ?>
+                </a>
             <?php endforeach; ?>
         </div>
 
