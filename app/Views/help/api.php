@@ -357,7 +357,8 @@ CODE); ?>
         <div class="help-card-body">
             <p class="help-api-clients-desc">
                 Clients are organisations or companies. Only <code class="help-api-inline-code">commercial_name</code> is required.
-                The <code class="help-api-inline-code">sector</code> field is resolved by name — the sector must already exist in the system.
+                The <code class="help-api-inline-code">sector</code> field is resolved by name and
+                <strong class="help-api-strong">created automatically</strong> when it doesn't exist yet.
                 Tags are find-or-created just like for contacts.
             </p>
 
@@ -428,7 +429,7 @@ CODE); ?>
                         <td><code>sector</code></td>
                         <td><span class="api-type">string</span></td>
                         <td><span class="api-badge-opt">optional</span></td>
-                        <td>Sector name — must exist; returns error if not found</td>
+                        <td>Sector name. Created if missing; empty string clears the sector.</td>
                     </tr>
                     <tr>
                         <td><code>address</code></td>
@@ -517,6 +518,7 @@ CODE); ?>
     <span class="ck">"id"</span>: <span class="cn">5</span>,
     <span class="ck">"commercial_name"</span>: <span class="cs">"Acme Corp"</span>,
     <span class="ck">"sector"</span>:          <span class="cs">"Technology"</span>,
+    <span class="ck">"sector_id"</span>:       <span class="cn">27</span>,
     <span class="ck">"city"</span>:            <span class="cs">"Madrid"</span>,
     <span class="ck">"tags"</span>:            [{ <span class="ck">"id"</span>: <span class="cn">1</span>, <span class="ck">"name"</span>: <span class="cs">"Enterprise"</span> }],
     <span class="ck">"contacts"</span>:        [{ <span class="ck">"id"</span>: <span class="cn">42</span>, <span class="ck">"full_name"</span>: <span class="cs">"Ivan Petrov"</span>, <span class="ck">"email"</span>: <span class="cs">"ivan@example.com"</span> }],
@@ -536,8 +538,11 @@ CODE); ?>
 
         <div class="help-card-body">
             <p class="api-desc-text">
-                Sectors are a curated reference list used to classify clients. They are <strong class="help-api-strong">not created automatically</strong> —
-                use the API (or the web UI) to manage them explicitly.
+                Sectors are a reference list used to classify clients. Referencing a sector by name on
+                <code class="help-api-inline-code">POST/PATCH /clients</code> <strong class="help-api-strong">creates it automatically</strong> when missing,
+                and client responses include both <code class="help-api-inline-code">sector</code> (name) and
+                <code class="help-api-inline-code">sector_id</code>. Use these endpoints when you need to manage
+                the list explicitly (rename, deactivate, list ids).
                 Deleting a sector that still has clients will <strong class="help-api-strong">deactivate</strong> it instead of deleting it,
                 and the response will indicate which action was taken.
             </p>

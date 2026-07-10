@@ -46,6 +46,7 @@ class ClientApiService extends AbstractApiService
                 'province' => $client['province'],
                 'country' => $client['country'],
                 'sector' => $client['sector_name'],
+                'sector_id' => $client['sector_id'] !== null ? (int) $client['sector_id'] : null,
                 'created_at' => $client['created_at'] ?? null,
                 'tags' => $this->formatTags($tags[$id] ?? []),
             ];
@@ -78,7 +79,7 @@ class ClientApiService extends AbstractApiService
 
         $sectorId = $client['sector_id'];
         if (array_key_exists('sector', $body)) {
-            $sectorId = $this->sectorId((string) ($body['sector'] ?? ''), true);
+            [$sectorId] = $this->resolveSectorId((string) ($body['sector'] ?? ''));
         }
 
         $updated = [
@@ -143,6 +144,8 @@ class ClientApiService extends AbstractApiService
             throw new ApiException(422, 'validation_error', 'Client validation failed', ['commercial_name is required']);
         }
 
+        [$sectorId, $sectorCreated] = $this->resolveSectorId((string) ($item['sector'] ?? ''));
+
         $clientId = $this->clients->create([
             'commercial_name' => $commercialName,
             'legal_name' => $this->nullableString($item['legal_name'] ?? null),
@@ -152,7 +155,7 @@ class ClientApiService extends AbstractApiService
             'city' => $this->nullableString($item['city'] ?? null),
             'province' => $this->nullableString($item['province'] ?? null),
             'country' => $this->nullableString($item['country'] ?? null),
-            'sector_id' => $this->sectorId((string) ($item['sector'] ?? ''), true),
+            'sector_id' => $sectorId,
             'website' => $this->nullableString($item['website'] ?? null),
             'notes' => $this->nullableString($item['notes'] ?? null),
         ]);
@@ -167,7 +170,7 @@ class ClientApiService extends AbstractApiService
         }
         $this->saveCustomFields('client', $clientId, is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [], true);
 
-        return ['client_id' => $clientId, 'tag_created' => $tagCreated];
+        return ['client_id' => $clientId, 'tag_created' => $tagCreated, 'sector_created' => $sectorCreated];
     }
 
     private function detail(int $id): array
@@ -191,6 +194,7 @@ class ClientApiService extends AbstractApiService
             'province' => $client['province'],
             'country' => $client['country'],
             'sector' => $client['sector_name'] ?? null,
+            'sector_id' => isset($client['sector_id']) ? (int) $client['sector_id'] : null,
             'website' => $client['website'],
             'notes' => $client['notes'],
             'created_at' => $client['created_at'] ?? null,
@@ -201,17 +205,20 @@ class ClientApiService extends AbstractApiService
         ];
     }
 
-    private function sectorId(string $name, bool $allowEmpty): ?int
+    // Resolves a sector name to an id, auto-creating it when missing (mirrors tag behavior).
+    // Returns [?int $id, bool $created]; empty name means "no sector".
+    private function resolveSectorId(string $name): array
     {
         $name = trim($name);
-        if ($name === '' && $allowEmpty) {
-            return null;
+        if ($name === '') {
+            return [null, false];
         }
 
         $sector = $this->sectors->findByName($name);
-        if ($sector === null) {
-            throw new ApiException(422, 'validation_error', "Sector '{$name}' not found");
+        if ($sector !== null) {
+            return [(int) $sector['id'], false];
         }
-        return (int) $sector['id'];
+
+        return [$this->sectors->create($name), true];
     }
 }

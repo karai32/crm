@@ -24,7 +24,7 @@ class ClientRepository
         $sql = "
             SELECT clients.id, clients.commercial_name, clients.legal_name, clients.city,
                    clients.province, clients.country, clients.is_web_connected, clients.is_active,
-                   clients.created_at, clients.updated_at,
+                   clients.created_at, clients.updated_at, clients.sector_id,
                    sectors.name AS sector_name,
                    sectors.icon AS sector_icon
             FROM clients
