@@ -8,7 +8,7 @@
     border-radius: 4px;
     font-size: 10.5px;
     font-weight: 700;
-    letter-spacing: .04em;
+    letter-spacing: 0.04em;
     font-family: var(--font-mono, monospace);
     flex-shrink: 0;
     min-width: 54px;
@@ -92,7 +92,7 @@
     font-weight: 600;
     font-family: var(--font-mono, monospace);
     background: var(--color-success-bg);
-    border: 1px solid #6EE7B7;
+    border: 1px solid #6ee7b7;
     color: #065f46;
     flex-shrink: 0;
     white-space: nowrap;
@@ -103,7 +103,7 @@
     font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .07em;
+    letter-spacing: 0.07em;
     color: var(--color-neutral);
     margin: 22px 0 10px;
 }
@@ -128,7 +128,7 @@
     font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     color: var(--color-neutral);
     background: var(--color-bg-subtle);
     border-bottom: 1px solid var(--color-neutral-200);
@@ -199,29 +199,31 @@
     justify-content: space-between;
     padding: 6px 14px;
     background: #2d3748;
-    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .api-code-label {
     font-size: 11px;
     font-weight: 600;
     color: #94a3b8;
-    letter-spacing: .04em;
+    letter-spacing: 0.04em;
 }
 
 .api-code-copy {
     background: none;
-    border: 1px solid rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     color: #94a3b8;
     padding: 2px 10px;
     border-radius: 4px;
     font-size: 11px;
     cursor: pointer;
-    transition: background .12s, color .12s;
+    transition:
+        background 0.12s,
+        color 0.12s;
 }
 
 .api-code-copy:hover {
-    background: rgba(255, 255, 255, .08);
+    background: rgba(255, 255, 255, 0.08);
     color: #e2e8f0;
 }
 
@@ -297,6 +299,10 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+}
+
+.api-keys-table tbody {
+    border-spacing: 0;
 }
 
 /* th/td → .data-table in base.css */
@@ -435,7 +441,7 @@
     font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .07em;
+    letter-spacing: 0.07em;
     color: var(--color-neutral);
     margin-bottom: 14px;
 }
@@ -572,7 +578,7 @@
     padding: 0 0 0 5px;
     cursor: pointer;
     color: var(--color-neutral);
-    opacity: .5;
+    opacity: 0.5;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
@@ -654,7 +660,6 @@
     background: var(--color-bg);
     color: var(--color-text-muted);
 }
-
 
 /* ── API Logs page ─────────────────────────────────────────────────────── */
 
@@ -877,7 +882,7 @@
 .api-log-expand-btn svg {
     width: 11px;
     height: 11px;
-    transition: transform .15s;
+    transition: transform 0.15s;
 }
 
 .api-log-expand-btn.is-open svg {
@@ -887,7 +892,7 @@
 .api-log-expand-btn i {
     font-size: 11px;
     line-height: 1;
-    transition: transform .15s;
+    transition: transform 0.15s;
     display: inline-block;
 }
 
@@ -941,15 +946,15 @@
     background: #1a202c;
 }
 
-.api-log-detail-pane+.api-log-detail-pane {
-    border-left: 1px solid rgba(255, 255, 255, .07);
+.api-log-detail-pane + .api-log-detail-pane {
+    border-left: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .api-log-detail-label {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .07em;
+    letter-spacing: 0.07em;
     color: #94a3b8;
     margin-bottom: 8px;
 }
@@ -972,9 +977,8 @@
         grid-template-columns: 1fr;
     }
 
-    .api-log-detail-pane+.api-log-detail-pane {
+    .api-log-detail-pane + .api-log-detail-pane {
         border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, .07);
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
     }
 }
-
