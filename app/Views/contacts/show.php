@@ -48,6 +48,18 @@ $canEditContacts = Auth::can('contacts.edit');
         </div>
     </div>
     <div class="contact-hero-actions">
+        <?php if (!empty($contact['email'])): ?>
+        <button
+            class="btn btn-outlined btn-sm"
+            id="geminiCompanyTest"
+            type="button"
+            data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/contacts/gemini-company-test'), ENT_QUOTES, 'UTF-8') ?>"
+            data-contact-id="<?= (int) $contact['id'] ?>"
+            data-csrf-token="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>"
+        >
+            <i class="ph ph-sparkle"></i> Test Gemini
+        </button>
+        <?php endif; ?>
         <a class="btn btn-outlined btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts'), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.back') ?></a>
         <?php if ($canEditContacts): ?>
         <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars(Auth::url('/contacts/edit?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>"><?= t('common.edit') ?></a>

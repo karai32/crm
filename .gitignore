@@ -5,6 +5,7 @@
 /config/database.php
 /config/mail.php
 /config/app.php
+/config/gemini.php
 
 # Storage runtime data
 /storage/logs/

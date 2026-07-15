@@ -229,6 +229,113 @@ class AjaxController
         }
     }
 
+    public function geminiCompanyTest(): void
+    {
+        if (!$this->guard()) {
+            return;
+        }
+
+        if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
+            $this->json(['error' => 'Invalid CSRF token'], 419);
+            return;
+        }
+
+        $contact = $this->contacts->find((int) ($_POST['contact_id'] ?? 0));
+        $email = trim((string) ($contact['email'] ?? ''));
+
+        if ($contact === null || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            $this->json(['error' => 'Contact does not have a valid email address'], 422);
+            return;
+        }
+
+        $domain = strtolower((string) substr(strrchr($email, '@') ?: '', 1));
+        if ($domain === '') {
+            $this->json(['error' => 'Could not determine the email domain'], 422);
+            return;
+        }
+
+        $apiKey = $this->geminiApiKey();
+        if ($apiKey === '') {
+            $this->json(['error' => 'Gemini API key is not configured'], 500);
+            return;
+        }
+
+        if (!function_exists('curl_init')) {
+            $this->json(['error' => 'PHP cURL extension is not installed'], 500);
+            return;
+        }
+
+        $website = 'https://' . $domain;
+        $payload = [
+            'contents' => [[
+                'parts' => [[
+                    'text' => "Изучи сайт {$website} и определи официальное название компании. "
+                        . 'Ответь кратко: название компании и URL источника. Не придумывай информацию.',
+                ]],
+            ]],
+            'tools' => [['url_context' => (object) []]],
+        ];
+
+        $curl = curl_init('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent');
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'x-goog-api-key: ' . $apiKey,
+            ],
+            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 60,
+        ]);
+
+        $responseBody = curl_exec($curl);
+        $curlError = curl_error($curl);
+        $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+        curl_close($curl);
+
+        if ($responseBody === false) {
+            $this->json(['error' => 'Gemini connection failed: ' . $curlError], 502);
+            return;
+        }
+
+        $response = json_decode($responseBody, true);
+        if (!is_array($response)) {
+            $this->json(['error' => 'Gemini returned invalid JSON'], 502);
+            return;
+        }
+
+        if ($status < 200 || $status >= 300) {
+            $message = $response['error']['message'] ?? 'Gemini API request failed';
+            $this->json(['error' => $message, 'gemini_response' => $response], 502);
+            return;
+        }
+
+        $this->json([
+            'domain' => $domain,
+            'website' => $website,
+            'answer' => $response['candidates'][0]['content']['parts'][0]['text'] ?? null,
+            'gemini_response' => $response,
+        ]);
+    }
+
+    private function geminiApiKey(): string
+    {
+        $environmentKey = getenv('GEMINI_API_KEY');
+        if (is_string($environmentKey) && trim($environmentKey) !== '') {
+            return trim($environmentKey);
+        }
+
+        $configPath = dirname(__DIR__, 2) . '/config/gemini.php';
+        if (!is_file($configPath)) {
+            return '';
+        }
+
+        $config = require $configPath;
+
+        return is_array($config) ? trim((string) ($config['api_key'] ?? '')) : '';
+    }
+
     // JSON-flavoured auth guard: 401 when unauthenticated, 403 when the
     // optional permission is missing. Returns true when the request may proceed.
     private function guard(?string $permission = null): bool

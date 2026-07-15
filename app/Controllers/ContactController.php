@@ -127,6 +127,7 @@ class ContactController
         View::render('contacts/show', [
             'title'                 => Lang::get('contacts.details_title'),
             'styles'                => ['contacts.css'],
+            'scripts'               => ['contacts.js'],
             'contact'               => $contact,
             'tags'                  => $this->contacts->tagsForContact((int) $contact['id']),
             'clients'               => $this->contacts->clientsForContact((int) $contact['id']),
