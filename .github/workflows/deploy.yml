@@ -41,6 +41,7 @@ jobs:
             --exclude-glob vendor/ \
             --exclude-glob config/database.php \
             --exclude-glob config/mail.php \
+            --exclude-glob config/gemini.php \
             --exclude-glob storage/logs/ \
             --exclude-glob storage/exports/ \
             --exclude-glob storage/imports/ \
@@ -84,6 +85,7 @@ jobs:
             --exclude-glob vendor/ \
             --exclude-glob config/database.php \
             --exclude-glob config/mail.php \
+            --exclude-glob config/gemini.php \
             --exclude-glob storage/logs/ \
             --exclude-glob storage/exports/ \
             --exclude-glob storage/imports/ \
