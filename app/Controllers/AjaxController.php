@@ -269,8 +269,8 @@ class AjaxController
         $payload = [
             'contents' => [[
                 'parts' => [[
-                    'text' => "Изучи сайт {$website} и определи официальное название компании. "
-                        . 'Ответь кратко: название компании и URL источника. Не придумывай информацию.',
+                    'text' => "Explore {$website} and determine the official name of the company. "
+                        . "Answer briefly: ONLY company name. Don't make up information.",
                 ]],
             ]],
             'tools' => [['url_context' => (object) []]],
