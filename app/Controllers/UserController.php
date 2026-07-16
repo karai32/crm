@@ -155,7 +155,7 @@ class UserController
     {
         Auth::requireAdmin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         $currentUser = Auth::user();
 
         if ($id > 0 && ($currentUser['id'] ?? null) != $id) {
@@ -169,7 +169,7 @@ class UserController
     {
         Auth::requireAdmin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         $currentUser = Auth::user();
 
         if ($id <= 0 || ($currentUser['id'] ?? null) == $id) {

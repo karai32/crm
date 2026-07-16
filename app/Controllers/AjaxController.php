@@ -235,11 +235,6 @@ class AjaxController
             return;
         }
 
-        if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            $this->json(['error' => 'Invalid CSRF token'], 419);
-            return;
-        }
-
         $contact = $this->contacts->find((int) ($_POST['contact_id'] ?? 0));
         $email = trim((string) ($contact['email'] ?? ''));
 

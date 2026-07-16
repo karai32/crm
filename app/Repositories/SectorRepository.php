@@ -134,7 +134,7 @@ class SectorRepository
 
         $statement->execute([
             'name' => $name,
-            'slug' => $this->makeSlug($name),
+            'slug' => $this->slug($name),
         ]);
 
         return (int) $pdo->lastInsertId();
@@ -153,7 +153,7 @@ class SectorRepository
         $statement->execute([
             'id' => $id,
             'name' => $name,
-            'slug' => $this->makeSlug($name),
+            'slug' => $this->slug($name),
             'icon' => $icon,
             'is_active' => $isActive,
         ]);
@@ -191,11 +191,9 @@ class SectorRepository
         $statement->execute(['id' => $id]);
     }
 
-    private function makeSlug(string $name): string
+    private function slug(string $name): string
     {
-        $slug = strtolower(trim($name));
-        $slug = preg_replace('/[^a-z0-9]+/i', '-', $slug);
-        $slug = trim($slug, '-');
+        $slug = Slugger::make($name);
 
         return $slug !== '' ? $slug : 'sector-' . time();
     }

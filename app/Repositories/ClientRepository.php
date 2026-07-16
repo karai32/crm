@@ -45,32 +45,6 @@ class ClientRepository
         return $statement->fetchAll();
     }
 
-    public function tagsForClients(array $clientIds): array
-    {
-        if (empty($clientIds)) {
-            return [];
-        }
-
-        $pdo = Database::connect();
-        $placeholders = implode(',', array_fill(0, count($clientIds), '?'));
-
-        $statement = $pdo->prepare("
-            SELECT ct.client_id, t.id, t.name, t.color
-            FROM client_tags ct
-            INNER JOIN tags t ON t.id = ct.tag_id
-            WHERE ct.client_id IN ($placeholders)
-            ORDER BY t.name ASC
-        ");
-        $statement->execute($clientIds);
-
-        $result = [];
-        foreach ($statement->fetchAll() as $row) {
-            $result[(int) $row['client_id']][] = $row;
-        }
-
-        return $result;
-    }
-
     public function countAll(array $filters = []): int
     {
         $pdo = Database::connect();
@@ -237,7 +211,7 @@ class ClientRepository
 
     public function deleteMultiple(array $ids): void
     {
-        $ids = $this->cleanIds($ids);
+        $ids = IdList::normalize($ids);
 
         if (empty($ids)) {
             return;
@@ -267,79 +241,6 @@ class ClientRepository
         return $statement->fetchAll();
     }
 
-    public function firstTags(int $limit = 50): array
-    {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM tags ORDER BY name ASC LIMIT :limit');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
-    }
-
-    public function tagsForClient(int $clientId): array
-    {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT tags.*
-            FROM tags
-            INNER JOIN client_tags ON client_tags.tag_id = tags.id
-            WHERE client_tags.client_id = :client_id
-            ORDER BY tags.name ASC
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['client_id' => $clientId]);
-
-        return $statement->fetchAll();
-    }
-
-    public function syncTags(int $clientId, array $tagIds): void
-    {
-        $pdo = Database::connect();
-
-        $delete = $pdo->prepare('DELETE FROM client_tags WHERE client_id = :client_id');
-        $delete->execute(['client_id' => $clientId]);
-
-        if (empty($tagIds)) {
-            return;
-        }
-
-        $insert = $pdo->prepare('
-            INSERT INTO client_tags (client_id, tag_id)
-            VALUES (:client_id, :tag_id)
-        ');
-
-        foreach ($tagIds as $tagId) {
-            $insert->execute([
-                'client_id' => $clientId,
-                'tag_id' => $tagId,
-            ]);
-        }
-    }
-
-    public function addTags(int $clientId, array $tagIds): void
-    {
-        if (empty($tagIds)) {
-            return;
-        }
-
-        $pdo = Database::connect();
-        $insert = $pdo->prepare('
-            INSERT IGNORE INTO client_tags (client_id, tag_id)
-            VALUES (:client_id, :tag_id)
-        ');
-
-        foreach ($tagIds as $tagId) {
-            $insert->execute([
-                'client_id' => $clientId,
-                'tag_id' => $tagId,
-            ]);
-        }
-    }
-
     public function addContacts(int $clientId, array $contactIds): void
     {
         if (empty($contactIds)) {
@@ -358,56 +259,6 @@ class ClientRepository
                 'contact_id' => $contactId,
             ]);
         }
-    }
-
-    public function addTagsToClients(array $clientIds, array $tagIds): void
-    {
-        $clientIds = $this->cleanIds($clientIds);
-        $tagIds = $this->cleanIds($tagIds);
-
-        if (empty($clientIds) || empty($tagIds)) {
-            return;
-        }
-
-        $pdo = Database::connect();
-        $insert = $pdo->prepare('
-            INSERT IGNORE INTO client_tags (client_id, tag_id)
-            VALUES (:client_id, :tag_id)
-        ');
-
-        foreach ($clientIds as $clientId) {
-            foreach ($tagIds as $tagId) {
-                $insert->execute([
-                    'client_id' => $clientId,
-                    'tag_id' => $tagId,
-                ]);
-            }
-        }
-    }
-
-    public function removeTagsFromClients(array $clientIds, array $tagIds): void
-    {
-        $clientIds = $this->cleanIds($clientIds);
-        $tagIds = $this->cleanIds($tagIds);
-
-        if (empty($clientIds) || empty($tagIds)) {
-            return;
-        }
-
-        $pdo = Database::connect();
-        $clientPlaceholders = implode(',', array_fill(0, count($clientIds), '?'));
-        $tagPlaceholders = implode(',', array_fill(0, count($tagIds), '?'));
-        $statement = $pdo->prepare("
-            DELETE FROM client_tags
-            WHERE client_id IN ($clientPlaceholders)
-            AND tag_id IN ($tagPlaceholders)
-        ");
-        $statement->execute(array_merge($clientIds, $tagIds));
-    }
-
-    private function cleanIds(array $ids): array
-    {
-        return array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
     }
 
     private function buildFilterSql(array $filters): array

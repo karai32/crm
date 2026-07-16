@@ -948,6 +948,11 @@ body.sidebar-open .sidebar-overlay {
     position: relative;
 }
 
+.action-form {
+    display: inline-flex;
+    margin: 0;
+}
+
 .tooltip-text {
     visibility: hidden;
     white-space: nowrap;
@@ -1618,7 +1623,6 @@ textarea {
     color: var(--color-neutral);
 }
 
-/* Use .actions-panel-footer parent for higher specificity than admin.css button { background: #1f2933 } */
 .actions-panel-footer .actions-deselect-btn {
     display: inline-flex;
     align-items: center;

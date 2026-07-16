@@ -66,3 +66,17 @@ function renderPagination(int $page, int $totalPages, int $total, int $perPage, 
     }
     echo '</div></div>';
 }
+
+function renderDeleteButton(string $path, int $id, string $confirmMessage, string $label): void
+{
+    $action = htmlspecialchars(Auth::url($path), ENT_QUOTES, 'UTF-8');
+    $confirm = htmlspecialchars($confirmMessage, ENT_QUOTES, 'UTF-8');
+    $tooltip = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+
+    echo '<form class="action-form" method="post" action="' . $action . '">';
+    echo Csrf::field();
+    echo '<input type="hidden" name="id" value="' . $id . '">';
+    echo '<button class="action-btn action-delete" type="submit" data-confirm="' . $confirm . '" onclick="return confirm(this.dataset.confirm)">';
+    echo '<i class="ph ph-trash"></i><span class="tooltip-text">' . $tooltip . '</span>';
+    echo '</button></form>';
+}

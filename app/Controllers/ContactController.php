@@ -7,12 +7,16 @@ class ContactController
     private ContactRepository $contacts;
     private CustomFieldRepository $customFields;
     private ClientRepository $clients;
+    private TagRepository $tags;
+    private EntityTagRepository $entityTags;
 
     public function __construct()
     {
         $this->contacts = new ContactRepository();
         $this->customFields = new CustomFieldRepository();
         $this->clients = new ClientRepository();
+        $this->tags = new TagRepository();
+        $this->entityTags = new EntityTagRepository();
     }
 
     public function index(): void
@@ -27,7 +31,7 @@ class ContactController
 
         $contacts = $this->contacts->paginate($page, $perPage, $filters, $sort, $dir);
         $contactIds = array_map('intval', array_column($contacts, 'id'));
-        $selectedFilterTags = $this->filterRowsByIds($this->contacts->firstTags(500), $filters['tag_ids'] ?? []);
+        $selectedFilterTags = $this->filterRowsByIds($this->tags->first(500), $filters['tag_ids'] ?? []);
 
         $selectedClientId = (int) ($filters['client_id'] ?? 0);
         $filterClientName = '';
@@ -43,9 +47,9 @@ class ContactController
         View::render('contacts/index', [
             'title'                      => Lang::get('contacts.title'),
             'styles'                     => ['contacts.css'],
-            'scripts'                    => ['contacts.js'],
+            'scripts'                    => ['list-page.js', 'contacts.js'],
             'contacts'                   => $contacts,
-            'contactTags'                => $this->contacts->tagsForContacts($contactIds),
+            'contactTags'                => $this->entityTags->tagsForEntities('contact', $contactIds),
             'contactClients'             => $this->contacts->clientsForContacts($contactIds),
             'page'                       => $page,
             'perPage'                    => $perPage,
@@ -57,7 +61,7 @@ class ContactController
             'filterClientName'           => $filterClientName,
             'preselectedFilterClientJson' => $preselectedFilterClientJson,
             'filterSectors'              => $this->contacts->allSectors(),
-            'filterTags'                 => $this->mergeSelectedRows($this->contacts->firstTags(), $selectedFilterTags),
+            'filterTags'                 => $this->mergeSelectedRows($this->tags->first(), $selectedFilterTags),
             'customFilterFields'         => $this->customFields->filterableFieldsForEntity('contact'),
         ]);
     }
@@ -70,7 +74,7 @@ class ContactController
             'title'            => Lang::get('contacts.create_title'),
             'styles'           => ['contacts.css'],
             'contact'          => [],
-            'tags'             => $this->contacts->firstTags(),
+            'tags'             => $this->tags->first(),
             'selectedTagIds'   => [],
             'clients'          => $this->contacts->firstClients(),
             'selectedClientIds' => [],
@@ -95,7 +99,7 @@ class ContactController
                 'title'            => Lang::get('contacts.create_title'),
                 'styles'           => ['contacts.css'],
                 'contact'          => $data,
-                'tags'             => $this->contacts->firstTags(),
+                'tags'             => $this->tags->first(),
                 'selectedTagIds'   => $tagIds,
                 'clients'          => $this->contacts->firstClients(),
                 'selectedClientIds' => $clientIds,
@@ -108,7 +112,7 @@ class ContactController
 
         $data = array_merge($data, EmailInspector::inspect($data['email']));
         $id = $this->contacts->create($data);
-        $this->contacts->syncTags($id, $tagIds);
+        $this->entityTags->sync('contact', $id, $tagIds);
         $this->contacts->syncClients($id, $clientIds);
         $this->customFields->saveValues('contact', $id, $customFields, $customValues, true);
         Auth::redirect('/contacts/show?id=' . $id);
@@ -129,7 +133,7 @@ class ContactController
             'styles'                => ['contacts.css'],
             'scripts'               => ['contacts.js'],
             'contact'               => $contact,
-            'tags'                  => $this->contacts->tagsForContact((int) $contact['id']),
+            'tags'                  => $this->entityTags->tagsForEntity('contact', (int) $contact['id']),
             'clients'               => $this->contacts->clientsForContact((int) $contact['id']),
             'customFields'          => $this->customFields->fieldsForEntity('contact'),
             'customValues'          => $this->customFields->valuesForEntity('contact', (int) $contact['id']),
@@ -147,14 +151,14 @@ class ContactController
             return;
         }
 
-        $selectedTags = $this->contacts->tagsForContact((int) $contact['id']);
+        $selectedTags = $this->entityTags->tagsForEntity('contact', (int) $contact['id']);
         $selectedClients = $this->contacts->clientsForContact((int) $contact['id']);
 
         View::render('contacts/edit', [
             'title'            => Lang::get('contacts.edit_title'),
             'styles'           => ['contacts.css'],
             'contact'          => $contact,
-            'tags'             => $this->mergeSelectedRows($this->contacts->firstTags(), $selectedTags),
+            'tags'             => $this->mergeSelectedRows($this->tags->first(), $selectedTags),
             'selectedTagIds'   => array_map('intval', array_column($selectedTags, 'id')),
             'clients'          => $this->mergeSelectedRows($this->contacts->firstClients(), $selectedClients),
             'selectedClientIds' => array_map('intval', array_column($selectedClients, 'id')),
@@ -193,7 +197,7 @@ class ContactController
                 'title'            => Lang::get('contacts.edit_title'),
                 'styles'           => ['contacts.css'],
                 'contact'          => $data,
-                'tags'             => $this->contacts->firstTags(),
+                'tags'             => $this->tags->first(),
                 'selectedTagIds'   => $tagIds,
                 'clients'          => $this->contacts->firstClients(),
                 'selectedClientIds' => $clientIds,
@@ -208,7 +212,7 @@ class ContactController
             ? $manualEmailState
             : EmailInspector::inspect($data['email']));
         $this->contacts->update($id, $data);
-        $this->contacts->syncTags($id, $tagIds);
+        $this->entityTags->sync('contact', $id, $tagIds);
         $this->contacts->syncClients($id, $clientIds);
         $this->customFields->saveValues('contact', $id, $customFields, $customValues);
         Auth::redirect('/contacts/show?id=' . $id);
@@ -218,7 +222,7 @@ class ContactController
     {
         Auth::requirePermission('contacts.delete');
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {
             $this->contacts->delete($id);
@@ -248,13 +252,13 @@ class ContactController
                 Auth::requirePermission('contacts.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
-                    $this->contacts->removeTags($contactIds, $tagIds);
+                    $this->entityTags->remove('contact', $contactIds, $tagIds);
                 }
             } else {
                 Auth::requirePermission('contacts.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
-                    $this->contacts->addTags($contactIds, $tagIds);
+                    $this->entityTags->add('contact', $contactIds, $tagIds);
                 }
             }
         }

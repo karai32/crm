@@ -47,7 +47,8 @@ $perPageOptions = [20, 50, 100, 200];
     </div>
     <div class="settings-form-actions">
         <button type="button" class="btn btn-primary" id="inspectBtn"
-                data-url="<?= htmlspecialchars(Auth::url('/ajax/contacts/inspect-email-batch'), ENT_QUOTES, 'UTF-8') ?>">
+                data-url="<?= htmlspecialchars(Auth::url('/ajax/contacts/inspect-email-batch'), ENT_QUOTES, 'UTF-8') ?>"
+                data-csrf-token="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
             <i class="ph ph-envelope-simple-open"></i>
             <?= t('settings.run_validation') ?>
         </button>
@@ -109,6 +110,7 @@ $perPageOptions = [20, 50, 100, 200];
     var barFill  = document.getElementById('inspectBarFill');
     var status   = document.getElementById('inspectStatus');
     var url      = btn.dataset.url;
+    var csrfToken = btn.dataset.csrfToken;
     var i18n     = <?= json_encode([
         'starting'     => Lang::get('settings.val_starting'),
         'running'      => Lang::get('settings.val_running'),
@@ -131,7 +133,15 @@ $perPageOptions = [20, 50, 100, 200];
     }
 
     function runBatch() {
-        fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        var body = new URLSearchParams({ _csrf_token: csrfToken });
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: body.toString()
+        })
             .then(function (r) {
                 if (!r.ok) {
                     return r.text().then(function (t) { throw new Error('HTTP ' + r.status + ': ' + t.slice(0, 120)); });

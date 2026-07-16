@@ -2,6 +2,15 @@
 
 class TagRepository
 {
+    public function first(int $limit = 50): array
+    {
+        $statement = Database::connect()->prepare('SELECT * FROM tags ORDER BY name ASC LIMIT :limit');
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll();
+    }
+
     public function all(string $sort = 'name', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
@@ -111,7 +120,7 @@ class TagRepository
 
         $statement->execute([
             'name' => $name,
-            'slug' => $this->makeSlug($name),
+            'slug' => $this->slug($name),
             'color' => $color,
         ]);
 
@@ -131,7 +140,7 @@ class TagRepository
         $statement->execute([
             'id' => $id,
             'name' => $name,
-            'slug' => $this->makeSlug($name),
+            'slug' => $this->slug($name),
             'color' => $color,
         ]);
     }
@@ -145,11 +154,9 @@ class TagRepository
         $statement->execute(['id' => $id]);
     }
 
-    private function makeSlug(string $name): string
+    private function slug(string $name): string
     {
-        $slug = strtolower(trim($name));
-        $slug = preg_replace('/[^a-z0-9]+/i', '-', $slug);
-        $slug = trim($slug, '-');
+        $slug = Slugger::make($name);
 
         return $slug !== '' ? $slug : 'tag-' . time();
     }

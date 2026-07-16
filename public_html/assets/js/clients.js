@@ -1,128 +1,31 @@
 (function () {
-    var filterBarBtn  = document.getElementById('filterBarBtn');
-    var filterPanel   = document.getElementById('filterPanel');
-    var actionsBarBtn = document.getElementById('actionsBarBtn');
-    var actionsPanel  = document.getElementById('actionsPanel');
-    var actionsCount  = document.getElementById('actionsBarCount');
-    var deleteCountEl = document.getElementById('deleteCountLabel');
-    var hintEl        = document.getElementById('actionsSelectedHint');
-    var deselectBtn   = document.getElementById('actionsDeselectBtn');
-    var selectAll     = document.getElementById('clientsSelectAll');
-    var moreBtn       = document.getElementById('clientFilterToggleBtn');
-    var moreExtra     = document.getElementById('clientFilterExtra');
-
-    if (filterBarBtn && filterPanel) {
-        filterBarBtn.addEventListener('click', function () {
-            var open = filterPanel.classList.toggle('open');
-            filterBarBtn.classList.toggle('active', open);
-            if (open && actionsPanel) {
-                actionsPanel.classList.remove('open');
-                if (actionsBarBtn) actionsBarBtn.classList.remove('active');
-            }
-        });
-    }
-
-    if (moreBtn && moreExtra) {
-        moreBtn.addEventListener('click', function () {
-            var open = moreExtra.classList.toggle('open');
-            var i18n = window.I18N || {};
-            moreBtn.classList.toggle('open', open);
-            moreBtn.querySelector('.filter-toggle-label').textContent = open
-                ? (i18n.less_filters || 'Less filters')
-                : (i18n.more_filters || 'More filters');
-        });
-    }
-
-    if (actionsBarBtn && actionsPanel) {
-        actionsBarBtn.addEventListener('click', function () {
-            if (getCheckedCount() === 0) { return; }
-            var open = actionsPanel.classList.toggle('open');
-            actionsBarBtn.classList.toggle('active', open);
-            if (open && filterPanel) {
-                filterPanel.classList.remove('open');
-                if (filterBarBtn) filterBarBtn.classList.remove('active');
-            }
-        });
-    }
-
-    function getCheckedCount() {
-        return document.querySelectorAll('input[name="client_ids[]"]:checked').length;
-    }
-
-    function updateActions() {
-        var n     = getCheckedCount();
-        var total = document.querySelectorAll('input[name="client_ids[]"]').length;
-        var i18n  = window.I18N || {};
-
-        if (actionsCount)  { actionsCount.textContent = n; actionsCount.style.display = n > 0 ? '' : 'none'; }
-        if (deleteCountEl) {
-            var deleteTemplate = deleteCountEl.closest('button') ? deleteCountEl.closest('button').dataset.template : null;
-            deleteCountEl.textContent = (deleteTemplate || i18n.delete_selected || ':n selected').replace(':n', n);
-        }
-        if (hintEl) {
-            var hintTemplate = hintEl.dataset.template || i18n.n_selected || ':n selected';
-            hintEl.textContent = hintTemplate.replace(':n', n);
-        }
-        if (actionsBarBtn) { actionsBarBtn.classList.toggle('actions-bar-btn--has-items', n > 0); }
-
-        if (selectAll) {
-            selectAll.indeterminate = n > 0 && n < total;
-            selectAll.checked = total > 0 && n === total;
-        }
-
-        if (n === 0 && actionsPanel) {
-            actionsPanel.classList.remove('open');
-            if (actionsBarBtn) actionsBarBtn.classList.remove('active');
-        }
-    }
-
-    document.addEventListener('change', function (e) {
-        if (e.target.name === 'client_ids[]') { updateActions(); }
-    });
-
-    if (selectAll) {
-        selectAll.addEventListener('change', function () {
-            document.querySelectorAll('input[name="client_ids[]"]').forEach(function (cb) {
-                cb.checked = selectAll.checked;
-            });
-            updateActions();
-        });
-    }
-
-    if (deselectBtn) {
-        deselectBtn.addEventListener('click', function () {
-            document.querySelectorAll('input[name="client_ids[]"]').forEach(function (cb) { cb.checked = false; });
-            if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
-            updateActions();
-        });
-    }
     var relatedToggle = document.getElementById('relatedContactsToggle');
     var relatedBody   = document.getElementById('relatedContactsBody');
+    if (!relatedToggle || !relatedBody) { return; }
 
-    if (relatedToggle && relatedBody) {
-        relatedToggle.addEventListener('click', function () {
-            if (relatedToggle.classList.contains('open')) {
-                relatedBody.style.height = relatedBody.scrollHeight + 'px';
-                relatedBody.offsetHeight;
-                relatedBody.style.height = '0';
-                relatedToggle.classList.remove('open');
-                relatedToggle.setAttribute('aria-expanded', 'false');
-            } else {
-                relatedBody.style.height = relatedBody.scrollHeight + 'px';
-                relatedToggle.classList.add('open');
-                relatedToggle.setAttribute('aria-expanded', 'true');
-                relatedBody.addEventListener('transitionend', function onEnd() {
-                    relatedBody.style.height = 'auto';
-                    relatedBody.removeEventListener('transitionend', onEnd);
-                });
-            }
-        });
+    relatedToggle.addEventListener('click', function () {
+        if (relatedToggle.classList.contains('open')) {
+            relatedBody.style.height = relatedBody.scrollHeight + 'px';
+            relatedBody.offsetHeight;
+            relatedBody.style.height = '0';
+            relatedToggle.classList.remove('open');
+            relatedToggle.setAttribute('aria-expanded', 'false');
+            return;
+        }
 
-        relatedToggle.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                relatedToggle.click();
-            }
+        relatedBody.style.height = relatedBody.scrollHeight + 'px';
+        relatedToggle.classList.add('open');
+        relatedToggle.setAttribute('aria-expanded', 'true');
+        relatedBody.addEventListener('transitionend', function onEnd() {
+            relatedBody.style.height = 'auto';
+            relatedBody.removeEventListener('transitionend', onEnd);
         });
-    }
+    });
+
+    relatedToggle.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            relatedToggle.click();
+        }
+    });
 }());

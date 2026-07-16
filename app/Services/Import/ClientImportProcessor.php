@@ -41,7 +41,7 @@ class ClientImportProcessor extends AbstractImportProcessor
 
         $tagIds = $this->tagIds((string) ($mapped['tags'] ?? ''));
         if ($tagIds !== []) {
-            $this->clients->syncTags($clientId, $tagIds);
+            $this->entityTags->sync('client', $clientId, $tagIds);
         }
 
         $contactIds = $this->contactIds((string) ($mapped['contact'] ?? ''));

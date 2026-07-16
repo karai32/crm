@@ -5,6 +5,7 @@ abstract class AbstractImportProcessor
     protected TagRepository $tags;
     protected SectorRepository $sectors;
     protected ContactRepository $contacts;
+    protected EntityTagRepository $entityTags;
     protected CustomFieldRepository $customFields;
     private array $tagCache = [];
     private array $sectorCache = [];
@@ -16,6 +17,7 @@ abstract class AbstractImportProcessor
         $this->tags = new TagRepository();
         $this->sectors = new SectorRepository();
         $this->contacts = new ContactRepository();
+        $this->entityTags = new EntityTagRepository();
         $this->customFields = new CustomFieldRepository();
     }
 
@@ -150,8 +152,7 @@ abstract class AbstractImportProcessor
 
     private function slug(string $value): string
     {
-        $slug = preg_replace('/[^a-z0-9]+/i', '-', $this->lower(trim($value)));
-        $slug = trim((string) $slug, '-');
+        $slug = Slugger::make($value);
         return $slug !== '' ? $slug : 'custom-field-' . substr(hash('sha256', $value), 0, 12);
     }
 

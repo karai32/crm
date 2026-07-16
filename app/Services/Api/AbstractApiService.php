@@ -4,11 +4,13 @@ abstract class AbstractApiService
 {
     protected CustomFieldRepository $customFields;
     protected TagRepository $tags;
+    protected EntityTagRepository $entityTags;
 
     public function __construct()
     {
         $this->customFields = new CustomFieldRepository();
         $this->tags = new TagRepository();
+        $this->entityTags = new EntityTagRepository();
     }
 
     // The uniform CRUD surface AbstractApiController dispatches to.

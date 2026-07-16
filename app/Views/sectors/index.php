@@ -21,7 +21,8 @@
            data-search-endpoint="<?= htmlspecialchars(Auth::url('/ajax/sectors/search'), ENT_QUOTES, 'UTF-8') ?>"
            data-search-target="sectorsSearchResults"
            data-edit-url="<?= htmlspecialchars(Auth::url('/sectors/edit?id='), ENT_QUOTES, 'UTF-8') ?>"
-           data-delete-url="<?= htmlspecialchars(Auth::url('/sectors/delete?id='), ENT_QUOTES, 'UTF-8') ?>">
+           data-delete-url="<?= htmlspecialchars(Auth::url('/sectors/delete'), ENT_QUOTES, 'UTF-8') ?>"
+           data-csrf-token="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
 </div>
 
 <div class="settings-table-card">
@@ -62,12 +63,7 @@
                                 <i class="ph ph-pencil"></i>
                                 <span class="tooltip-text"><?= t('common.edit') ?></span>
                             </a>
-                            <a class="action-btn action-delete"
-                               href="<?= htmlspecialchars(Auth::url('/sectors/delete?id=' . $sector['id']), ENT_QUOTES, 'UTF-8') ?>"
-                               onclick="return confirm('<?= htmlspecialchars(Lang::get('sectors.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
-                                <i class="ph ph-trash"></i>
-                                <span class="tooltip-text"><?= t('common.delete') ?></span>
-                            </a>
+                            <?php renderDeleteButton('/sectors/delete', (int) $sector['id'], Lang::get('sectors.delete_confirm'), Lang::get('common.delete')); ?>
                         </div>
                     </td>
                 </tr>

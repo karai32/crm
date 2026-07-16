@@ -46,9 +46,9 @@ class ContactImportProcessor extends AbstractImportProcessor
             $this->contacts->syncClients($contactId, [$clientId]);
         }
         if ($tagIds !== []) {
-            $this->contacts->syncTags($contactId, $tagIds);
+            $this->entityTags->sync('contact', $contactId, $tagIds);
             if ($clientId !== null) {
-                $this->clients->addTags($clientId, $tagIds);
+                $this->entityTags->add('client', [$clientId], $tagIds);
             }
         }
 

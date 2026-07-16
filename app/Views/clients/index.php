@@ -256,7 +256,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
             </div>
         </div>
 
-        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="clientFilterExtra">
+        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="clientFilterExtra" data-list-more-panel>
             <div class="field">
                 <label><?= t('common.country') ?></label>
                 <div class="token-picker token-picker--filter"
@@ -361,7 +361,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
         </div>
 
         <div class="filter-footer">
-            <button type="button" id="clientFilterToggleBtn"
+            <button type="button" id="clientFilterToggleBtn" data-list-more-toggle
                     class="filter-toggle-btn <?= $hasExtended ? 'open' : '' ?>">
                 <span class="filter-toggle-label"><?= $hasExtended ? t('common.less_filters') : t('common.more_filters') ?></span>
                 <svg class="filter-toggle-chevron" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -442,7 +442,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
             <tr>
                 <th class="col-select">
                     <?php if ($hasBulkActions): ?>
-                    <input type="checkbox" id="clientsSelectAll" aria-label="<?= t('common.select_all') ?>">
+                    <input type="checkbox" id="clientsSelectAll" data-list-select-all data-checkbox-name="client_ids[]" aria-label="<?= t('common.select_all') ?>">
                     <?php endif; ?>
                 </th>
                 <?= thSort('id', '#', $sort, $dir, '/clients', $activeFilters, 'col-id') ?>
@@ -521,12 +521,7 @@ $hasExtended = !empty($filters['country']) || !empty($filters['province']) || !e
                             </a>
                             <?php endif; ?>
                             <?php if ($canDeleteClients): ?>
-                            <a class="action-btn action-delete"
-                               href="<?= htmlspecialchars(Auth::url('/clients/delete?id=' . $client['id']), ENT_QUOTES, 'UTF-8') ?>"
-                               onclick="return confirm('<?= htmlspecialchars(Lang::get('clients.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
-                                <i class="ph ph-trash"></i>
-                                <span class="tooltip-text"><?= t('common.delete') ?></span>
-                            </a>
+                            <?php renderDeleteButton('/clients/delete', (int) $client['id'], Lang::get('clients.delete_confirm'), Lang::get('common.delete')); ?>
                             <?php endif; ?>
                         </div>
                     </td>

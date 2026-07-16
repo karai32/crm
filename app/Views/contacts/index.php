@@ -300,7 +300,7 @@ $hasExtended = !empty($filters['custom_fields']);
             </div>
         </div>
 
-        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="filterExtra">
+        <div class="filter-grid filter-grid--extra <?= $hasExtended ? 'open' : '' ?>" id="filterExtra" data-list-more-panel>
             <?php if (!empty($customFilterFields)): ?>
                 <?php foreach ($customFilterFields as $field):
                     $cfId  = (int) $field['id'];
@@ -370,7 +370,7 @@ $hasExtended = !empty($filters['custom_fields']);
 
         <div class="filter-footer">
             <?php if (!empty($customFilterFields)): ?>
-                <button type="button" id="filterToggleBtn"
+                <button type="button" id="filterToggleBtn" data-list-more-toggle
                     class="filter-toggle-btn <?= $hasExtended ? 'open' : '' ?>">
                     <span class="filter-toggle-label"><?= $hasExtended ? t('common.less_filters') : t('common.more_filters') ?></span>
                     <svg class="filter-toggle-chevron" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -475,7 +475,7 @@ $hasExtended = !empty($filters['custom_fields']);
                 <tr>
                     <th class="col-select">
                         <?php if ($hasBulkActions): ?>
-                            <input type="checkbox" id="contactsSelectAll" aria-label="<?= t('common.select_all') ?>">
+                            <input type="checkbox" id="contactsSelectAll" data-list-select-all data-checkbox-name="contact_ids[]" aria-label="<?= t('common.select_all') ?>">
                         <?php endif; ?>
                     </th>
                     <?= thSort('id', t('common.id'), $sort, $dir, '/contacts', $activeFilters, 'col-id') ?>
@@ -566,12 +566,7 @@ $hasExtended = !empty($filters['custom_fields']);
                                     </a>
                                 <?php endif; ?>
                                 <?php if ($canDeleteContacts): ?>
-                                    <a class="action-btn action-delete"
-                                        href="<?= htmlspecialchars(Auth::url('/contacts/delete?id=' . $contact['id']), ENT_QUOTES, 'UTF-8') ?>"
-                                        onclick="return confirm('<?= htmlspecialchars(Lang::get('contacts.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')">
-                                        <i class="ph ph-trash"></i>
-                                        <span class="tooltip-text"><?= t('common.delete') ?></span>
-                                    </a>
+                                    <?php renderDeleteButton('/contacts/delete', (int) $contact['id'], Lang::get('contacts.delete_confirm'), Lang::get('common.delete')); ?>
                                 <?php endif; ?>
                             </div>
                         </td>

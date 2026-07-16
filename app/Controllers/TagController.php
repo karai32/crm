@@ -15,8 +15,8 @@ class TagController
     {
         Auth::requirePermission('tags.manage');
 
-        $sort  = in_array($_GET['sort'] ?? '', ['name', 'slug'], true) ? $_GET['sort'] : 'name';
-        $dir   = ($_GET['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $sort  = $this->sortParam(['name', 'slug'], 'name');
+        $dir   = $this->dirParam('asc');
         $total = $this->tags->count();
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
@@ -127,7 +127,7 @@ class TagController
     {
         Auth::requirePermission('tags.manage');
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {
             $this->tags->delete($id);

@@ -166,7 +166,7 @@ class ContactRepository
 
     public function deleteMultiple(array $ids): void
     {
-        $ids = $this->cleanIds($ids);
+        $ids = IdList::normalize($ids);
 
         if (empty($ids)) {
             return;
@@ -180,8 +180,8 @@ class ContactRepository
 
     public function addClientsToContacts(array $contactIds, array $clientIds): void
     {
-        $contactIds = $this->cleanIds($contactIds);
-        $clientIds  = $this->cleanIds($clientIds);
+        $contactIds = IdList::normalize($contactIds);
+        $clientIds  = IdList::normalize($clientIds);
 
         if (empty($contactIds) || empty($clientIds)) {
             return;
@@ -198,32 +198,6 @@ class ContactRepository
                 $insert->execute(['client_id' => $clientId, 'contact_id' => $contactId]);
             }
         }
-    }
-
-    public function tagsForContacts(array $contactIds): array
-    {
-        if (empty($contactIds)) {
-            return [];
-        }
-
-        $pdo = Database::connect();
-        $placeholders = implode(',', array_fill(0, count($contactIds), '?'));
-
-        $statement = $pdo->prepare("
-            SELECT ct.contact_id, t.id, t.name, t.color
-            FROM contact_tags ct
-            INNER JOIN tags t ON t.id = ct.tag_id
-            WHERE ct.contact_id IN ($placeholders)
-            ORDER BY t.name ASC
-        ");
-        $statement->execute($contactIds);
-
-        $result = [];
-        foreach ($statement->fetchAll() as $row) {
-            $result[(int) $row['contact_id']][] = $row;
-        }
-
-        return $result;
     }
 
     public function clientsForContacts(array $contactIds): array
@@ -251,104 +225,6 @@ class ContactRepository
         }
 
         return $result;
-    }
-
-    public function firstTags(int $limit = 50): array
-    {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM tags ORDER BY name ASC LIMIT :limit');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
-    }
-
-    public function tagsForContact(int $contactId): array
-    {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT tags.*
-            FROM tags
-            INNER JOIN contact_tags ON contact_tags.tag_id = tags.id
-            WHERE contact_tags.contact_id = :contact_id
-            ORDER BY tags.name ASC
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['contact_id' => $contactId]);
-
-        return $statement->fetchAll();
-    }
-
-    public function syncTags(int $contactId, array $tagIds): void
-    {
-        $pdo = Database::connect();
-
-        $delete = $pdo->prepare('DELETE FROM contact_tags WHERE contact_id = :contact_id');
-        $delete->execute(['contact_id' => $contactId]);
-
-        if (empty($tagIds)) {
-            return;
-        }
-
-        $insert = $pdo->prepare('
-            INSERT INTO contact_tags (contact_id, tag_id)
-            VALUES (:contact_id, :tag_id)
-        ');
-
-        foreach ($tagIds as $tagId) {
-            $insert->execute([
-                'contact_id' => $contactId,
-                'tag_id' => $tagId,
-            ]);
-        }
-    }
-
-    public function addTags(array $contactIds, array $tagIds): void
-    {
-        $contactIds = $this->cleanIds($contactIds);
-        $tagIds = $this->cleanIds($tagIds);
-
-        if (empty($contactIds) || empty($tagIds)) {
-            return;
-        }
-
-        $pdo = Database::connect();
-        $insert = $pdo->prepare('
-            INSERT IGNORE INTO contact_tags (contact_id, tag_id)
-            VALUES (:contact_id, :tag_id)
-        ');
-
-        foreach ($contactIds as $contactId) {
-            foreach ($tagIds as $tagId) {
-                $insert->execute([
-                    'contact_id' => $contactId,
-                    'tag_id' => $tagId,
-                ]);
-            }
-        }
-    }
-
-    public function removeTags(array $contactIds, array $tagIds): void
-    {
-        $contactIds = $this->cleanIds($contactIds);
-        $tagIds = $this->cleanIds($tagIds);
-
-        if (empty($contactIds) || empty($tagIds)) {
-            return;
-        }
-
-        $pdo = Database::connect();
-        $contactPlaceholders = implode(',', array_fill(0, count($contactIds), '?'));
-        $tagPlaceholders = implode(',', array_fill(0, count($tagIds), '?'));
-        $statement = $pdo->prepare("
-            DELETE FROM contact_tags
-            WHERE contact_id IN ($contactPlaceholders)
-            AND tag_id IN ($tagPlaceholders)
-        ");
-        $statement->execute(array_merge($contactIds, $tagIds));
     }
 
     public function firstClients(int $limit = 50): array
@@ -440,11 +316,6 @@ class ContactRepository
         $pdo = Database::connect();
         $pdo->prepare('UPDATE contacts SET is_corporate_email = :is_corporate, email_status = :status WHERE id = :id')
             ->execute(['is_corporate' => $isCorporate, 'status' => $status, 'id' => $id]);
-    }
-
-    private function cleanIds(array $ids): array
-    {
-        return array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
     }
 
     private function buildFilterSql(array $filters): array

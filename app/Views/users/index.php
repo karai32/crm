@@ -122,12 +122,7 @@ function userPermissionIcon(string $permission): string
                                 <span class="tooltip-text"><?= t('common.edit') ?></span>
                             </a>
                             <?php if ((int) $user['is_active'] === 0 && !$isCurrentUser): ?>
-                            <a class="action-btn action-delete"
-                               href="<?= htmlspecialchars(Auth::url('/users/purge?id=' . $user['id']), ENT_QUOTES, 'UTF-8') ?>"
-                               onclick="return confirm('<?= htmlspecialchars(Lang::get('users.delete_perm_confirm', ['name' => $user['name']]), ENT_QUOTES, 'UTF-8') ?>')">
-                                <i class="ph ph-trash"></i>
-                                <span class="tooltip-text"><?= t('common.delete_perm') ?></span>
-                            </a>
+                            <?php renderDeleteButton('/users/purge', (int) $user['id'], Lang::get('users.delete_perm_confirm', ['name' => $user['name']]), Lang::get('common.delete_perm')); ?>
                             <?php endif; ?>
                         </div>
                     </td>

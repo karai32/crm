@@ -34,7 +34,7 @@ class ClientApiService extends AbstractApiService
 
         $total = $this->clients->countAll($filters);
         $items = $this->clients->paginate($page, $perPage, $filters);
-        $tags = $this->clients->tagsForClients(array_column($items, 'id'));
+        $tags = $this->entityTags->tagsForEntities('client', array_column($items, 'id'));
 
         $data = array_map(function (array $client) use ($tags): array {
             $id = (int) $client['id'];
@@ -109,7 +109,7 @@ class ClientApiService extends AbstractApiService
             $this->clients->update($id, $updated);
             if (array_key_exists('tags', $body)) {
                 [$tagIds] = $this->resolveTagIds($this->splitNames($body['tags']));
-                $this->clients->syncTags($id, $tagIds);
+                $this->entityTags->sync('client', $id, $tagIds);
             }
             if (array_key_exists('custom_fields', $body)) {
                 if (!is_array($body['custom_fields'])) {
@@ -162,7 +162,7 @@ class ClientApiService extends AbstractApiService
 
         [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
         if ($tagIds !== []) {
-            $this->clients->syncTags($clientId, $tagIds);
+            $this->entityTags->sync('client', $clientId, $tagIds);
         }
 
         if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
@@ -199,7 +199,7 @@ class ClientApiService extends AbstractApiService
             'notes' => $client['notes'],
             'created_at' => $client['created_at'] ?? null,
             'updated_at' => $client['updated_at'] ?? null,
-            'tags' => $this->formatTags($this->clients->tagsForClient($id)),
+            'tags' => $this->formatTags($this->entityTags->tagsForEntity('client', $id)),
             'contacts' => $contacts,
             'custom_fields' => $this->customFieldData('client', $id),
         ];

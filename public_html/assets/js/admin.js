@@ -385,7 +385,10 @@
         var td = document.createElement('td');
         var wrap = document.createElement('div');
         var edit = document.createElement('a');
-        var del = document.createElement('a');
+        var deleteForm = document.createElement('form');
+        var csrfInput = document.createElement('input');
+        var idInput = document.createElement('input');
+        var del = document.createElement('button');
 
         wrap.className = 'action-links';
 
@@ -395,8 +398,17 @@
         edit.href = input.dataset.editUrl + item.id;
         edit.textContent = i18n.edit || 'Edit';
 
+        deleteForm.className = 'action-form';
+        deleteForm.method = 'post';
+        deleteForm.action = input.dataset.deleteUrl;
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_csrf_token';
+        csrfInput.value = input.dataset.csrfToken;
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = item.id;
+        del.type = 'submit';
         del.className = 'action-delete';
-        del.href = input.dataset.deleteUrl + item.id;
         del.textContent = i18n.delete || 'Delete';
         del.addEventListener('click', function (event) {
             if (!confirm(deleteMessage)) {
@@ -405,7 +417,10 @@
         });
 
         wrap.appendChild(edit);
-        wrap.appendChild(del);
+        deleteForm.appendChild(csrfInput);
+        deleteForm.appendChild(idInput);
+        deleteForm.appendChild(del);
+        wrap.appendChild(deleteForm);
         td.appendChild(wrap);
 
         return td;

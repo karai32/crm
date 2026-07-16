@@ -7,12 +7,16 @@ class ClientController
     private ClientRepository $clients;
     private SectorRepository $sectors;
     private CustomFieldRepository $customFields;
+    private TagRepository $tags;
+    private EntityTagRepository $entityTags;
 
     public function __construct()
     {
         $this->clients = new ClientRepository();
         $this->sectors = new SectorRepository();
         $this->customFields = new CustomFieldRepository();
+        $this->tags = new TagRepository();
+        $this->entityTags = new EntityTagRepository();
     }
 
     public function index(): void
@@ -27,14 +31,14 @@ class ClientController
 
         $clients = $this->clients->paginate($page, $perPage, $filters, $sort, $dir);
         $clientIds = array_map('intval', array_column($clients, 'id'));
-        $selectedFilterTags = $this->filterRowsByIds($this->clients->firstTags(500), $filters['tag_ids'] ?? []);
+        $selectedFilterTags = $this->filterRowsByIds($this->tags->first(500), $filters['tag_ids'] ?? []);
 
         View::render('clients/index', [
             'title'             => Lang::get('clients.title'),
             'styles'            => ['clients.css'],
-            'scripts'           => ['clients.js'],
+            'scripts'           => ['list-page.js', 'clients.js'],
             'clients'           => $clients,
-            'clientTags'        => $this->clients->tagsForClients($clientIds),
+            'clientTags'        => $this->entityTags->tagsForEntities('client', $clientIds),
             'page'              => $page,
             'perPage'           => $perPage,
             'totalPages'        => $totalPages,
@@ -43,7 +47,7 @@ class ClientController
             'sort'              => $sort,
             'dir'               => $dir,
             'filterSectors'     => $this->sectors->all(),
-            'filterTags'        => $this->mergeSelectedRows($this->clients->firstTags(), $selectedFilterTags),
+            'filterTags'        => $this->mergeSelectedRows($this->tags->first(), $selectedFilterTags),
             'customFilterFields' => $this->customFields->filterableFieldsForEntity('client'),
         ]);
     }
@@ -57,7 +61,7 @@ class ClientController
             'styles'       => ['clients.css'],
             'client'       => [],
             'sectors'      => $this->sectors->active(),
-            'tags'         => $this->clients->firstTags(),
+            'tags'         => $this->tags->first(),
             'selectedTagIds' => [],
             'customFields' => $this->customFields->fieldsForEntity('client'),
             'customValues' => [],
@@ -80,7 +84,7 @@ class ClientController
                 'styles'       => ['clients.css'],
                 'client'       => $data,
                 'sectors'      => $this->sectors->active(),
-                'tags'         => $this->clients->firstTags(),
+                'tags'         => $this->tags->first(),
                 'selectedTagIds' => $tagIds,
                 'customFields' => $customFields,
                 'customValues' => $customValues,
@@ -90,7 +94,7 @@ class ClientController
         }
 
         $id = $this->clients->create($data);
-        $this->clients->syncTags($id, $tagIds);
+        $this->entityTags->sync('client', $id, $tagIds);
         $this->customFields->saveValues('client', $id, $customFields, $customValues, true);
         Auth::redirect('/clients/show?id=' . $id);
     }
@@ -111,7 +115,7 @@ class ClientController
             'scripts'             => ['clients.js'],
             'client'              => $client,
             'contacts'            => $this->clients->contactsForClient((int) $client['id']),
-            'tags'                => $this->clients->tagsForClient((int) $client['id']),
+            'tags'                => $this->entityTags->tagsForEntity('client', (int) $client['id']),
             'customFields'        => $this->customFields->fieldsForEntity('client'),
             'customValues'        => $this->customFields->valuesForEntity('client', (int) $client['id']),
             'customFieldRepository' => $this->customFields,
@@ -128,14 +132,14 @@ class ClientController
             return;
         }
 
-        $selectedTags = $this->clients->tagsForClient((int) $client['id']);
+        $selectedTags = $this->entityTags->tagsForEntity('client', (int) $client['id']);
 
         View::render('clients/edit', [
             'title'        => Lang::get('clients.edit_title'),
             'styles'       => ['clients.css'],
             'client'       => $client,
             'sectors'      => $this->sectors->active(),
-            'tags'         => $this->mergeSelectedRows($this->clients->firstTags(), $selectedTags),
+            'tags'         => $this->mergeSelectedRows($this->tags->first(), $selectedTags),
             'selectedTagIds' => array_map('intval', array_column($selectedTags, 'id')),
             'customFields' => $this->customFields->fieldsForEntity('client'),
             'customValues' => $this->customFields->valuesForEntity('client', (int) $client['id']),
@@ -167,7 +171,7 @@ class ClientController
                 'styles'       => ['clients.css'],
                 'client'       => $data,
                 'sectors'      => $this->sectors->active(),
-                'tags'         => $this->clients->firstTags(),
+                'tags'         => $this->tags->first(),
                 'selectedTagIds' => $tagIds,
                 'customFields' => $customFields,
                 'customValues' => $customValues,
@@ -177,7 +181,7 @@ class ClientController
         }
 
         $this->clients->update($id, $data);
-        $this->clients->syncTags($id, $tagIds);
+        $this->entityTags->sync('client', $id, $tagIds);
         $this->customFields->saveValues('client', $id, $customFields, $customValues);
         Auth::redirect('/clients/show?id=' . $id);
     }
@@ -186,7 +190,7 @@ class ClientController
     {
         Auth::requirePermission('clients.delete');
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {
             $this->clients->delete($id);
@@ -210,13 +214,13 @@ class ClientController
                 Auth::requirePermission('clients.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
-                    $this->clients->removeTagsFromClients($clientIds, $tagIds);
+                    $this->entityTags->remove('client', $clientIds, $tagIds);
                 }
             } else {
                 Auth::requirePermission('clients.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
-                    $this->clients->addTagsToClients($clientIds, $tagIds);
+                    $this->entityTags->add('client', $clientIds, $tagIds);
                 }
             }
         }

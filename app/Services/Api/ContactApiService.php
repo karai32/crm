@@ -35,7 +35,7 @@ class ContactApiService extends AbstractApiService
         $total = $this->contacts->countAll($filters);
         $items = $this->contacts->paginate($page, $perPage, $filters);
         $ids = array_column($items, 'id');
-        $tags = $this->contacts->tagsForContacts($ids);
+        $tags = $this->entityTags->tagsForEntities('contact', $ids);
         $clients = $this->contacts->clientsForContacts($ids);
 
         $data = array_map(function (array $contact) use ($tags, $clients): array {
@@ -128,7 +128,7 @@ class ContactApiService extends AbstractApiService
 
             if (array_key_exists('tags', $body)) {
                 [$tagIds] = $this->resolveTagIds($this->splitNames($body['tags']));
-                $this->contacts->syncTags($id, $tagIds);
+                $this->entityTags->sync('contact', $id, $tagIds);
             }
 
             if (array_key_exists('clients', $body)) {
@@ -201,7 +201,7 @@ class ContactApiService extends AbstractApiService
         ]);
 
         if ($tagIds !== []) {
-            $this->contacts->syncTags($contactId, $tagIds);
+            $this->entityTags->sync('contact', $contactId, $tagIds);
         }
         if ($clientIds !== []) {
             $this->contacts->syncClients($contactId, $clientIds);
@@ -230,7 +230,7 @@ class ContactApiService extends AbstractApiService
             'company' => $contact['company'],
             'created_at' => $contact['created_at'],
             'updated_at' => $contact['updated_at'] ?? null,
-            'tags' => $this->formatTags($this->contacts->tagsForContact($id)),
+            'tags' => $this->formatTags($this->entityTags->tagsForEntity('contact', $id)),
             'clients' => $this->formatClients($this->contacts->clientsForContact($id)),
             'custom_fields' => $this->customFieldData('contact', $id),
         ];

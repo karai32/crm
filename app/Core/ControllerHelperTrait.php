@@ -10,12 +10,7 @@ trait ControllerHelperTrait
 
     protected function cleanIds(mixed $ids): array
     {
-        if (!is_array($ids)) {
-            return [];
-        }
-        $ids = array_map('intval', $ids);
-        $ids = array_filter($ids, fn ($id) => $id > 0);
-        return array_values(array_unique($ids));
+        return IdList::normalize($ids);
     }
 
     protected function idsFromPost(string $key): array

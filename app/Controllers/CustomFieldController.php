@@ -134,7 +134,7 @@ class CustomFieldController
     {
         Auth::requirePermission('custom_fields.manage');
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {
             $this->customFields->delete($id);
@@ -152,7 +152,7 @@ class CustomFieldController
         return [
             'entity_type' => in_array($_POST['entity_type'] ?? '', ['contact', 'client'], true) ? $_POST['entity_type'] : 'contact',
             'name' => $name,
-            'slug' => $slug !== '' ? $this->makeSlug($slug) : $this->makeSlug($name),
+            'slug' => Slugger::make($slug !== '' ? $slug : $name),
             'field_type' => in_array($_POST['field_type'] ?? '', $this->fieldTypes(), true) ? $_POST['field_type'] : 'text',
             'is_required' => isset($_POST['is_required']) ? 1 : 0,
             'is_filterable' => isset($_POST['is_filterable']) ? 1 : 0,
@@ -175,12 +175,4 @@ class CustomFieldController
         return ['text', 'textarea', 'number', 'date', 'email', 'url', 'select', 'checkbox'];
     }
 
-    private function makeSlug(string $value): string
-    {
-        $slug = strtolower(trim($value));
-        $slug = preg_replace('/[^a-z0-9]+/i', '-', $slug);
-        $slug = trim($slug, '-');
-
-        return $slug;
-    }
 }

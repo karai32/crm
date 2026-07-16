@@ -144,7 +144,7 @@ $toc = [
                     <li class="help-step help-step--violet"><span><strong>Class loading.</strong> Application classes are loaded with explicit <code>require_once</code> calls — there is no PSR-4 autoloading for <code>app/</code> code, so new files must be added to the list.</span></li>
                     <li class="help-step help-step--violet"><span><strong>i18n.</strong> <code>Lang::load($_SESSION['lang'] ?? 'es')</code> loads the UI dictionary before anything renders.</span></li>
                     <li class="help-step help-step--violet"><span><strong>Route table.</strong> All routes are registered on a <code>Router</code> instance: exact paths plus <code>{param}</code> patterns (e.g. <code>/api/v1/contacts/{id}</code>) compiled to regex, with the captured params injected into <code>$_GET</code>.</span></li>
-                    <li class="help-step help-step--violet"><span><strong>Global CSRF gate.</strong> Every <code>POST</code> that is not an <code>/api/v1/</code> or <code>/ajax/</code> request must carry a valid <code>_csrf_token</code> field or the request dies with HTTP 419.</span></li>
+                    <li class="help-step help-step--violet"><span><strong>Global CSRF gate.</strong> Every browser <code>POST</code>, including <code>/ajax/</code> requests, must carry a valid <code>_csrf_token</code> field or the request dies with HTTP 419. Only authenticated <code>/api/v1/</code> requests are excluded.</span></li>
                     <li class="help-step help-step--violet"><span><strong>Dispatch &amp; error handling.</strong> The dispatch is wrapped in a global try/catch: <code>PDOException</code> and other <code>Throwable</code>s are logged to <code>storage/app.log</code> (via <code>logApplicationError()</code>) and the user gets a generic 500 message — stack traces are never exposed.</span></li>
                 </ol>
                 <div class="help-callout help-callout--violet">
@@ -467,7 +467,7 @@ $toc = [
             </div>
             <div class="help-card-body">
                 <p class="help-p">
-                    <strong>CSS:</strong> <code>admin.css</code> (app shell) and <code>base.css</code>
+                    <strong>CSS:</strong> <code>base.css</code> contains the app shell and shared components
                     (design tokens as CSS variables, reset, shared components) load on every page; each page
                     adds its own file (e.g. <code>contacts.css</code>, <code>help.css</code>) through the
                     <code>$styles</code> array passed to <code>View::render()</code>.
