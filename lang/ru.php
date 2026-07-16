@@ -477,6 +477,7 @@ return [
 
     // ── Misc UI (extended) ─────────────────────────────────────────────────────
     'common.show_password' => 'Показать пароль',
+    'common.hide_password' => 'Скрыть пароль',
     'common.toggle_menu'   => 'Переключить меню',
     'common.help'          => 'Помощь',
     'common.retry'         => 'Повторить',

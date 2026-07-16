@@ -15,5 +15,6 @@
             <?= $content ?>
         </div>
     </main>
+    <script src="<?= htmlspecialchars(Auth::url('/assets/js/password-toggle.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

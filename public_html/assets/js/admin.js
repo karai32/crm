@@ -882,17 +882,3 @@
 
     if (overlay) { overlay.addEventListener('click', close); }
 })();
-
-// Password toggle
-(function () {
-    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
-        var input = document.getElementById(button.getAttribute('data-password-toggle'));
-        if (!input) { return; }
-        button.addEventListener('click', function () {
-            var isVisible = input.type === 'text';
-            input.type = isVisible ? 'password' : 'text';
-            button.setAttribute('aria-pressed', isVisible ? 'false' : 'true');
-            button.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
-        });
-    });
-})();
