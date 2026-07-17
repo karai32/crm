@@ -1,2 +1,0 @@
-ALTER TABLE sectors
-    ADD COLUMN icon VARCHAR(80) NULL AFTER slug;

@@ -31,6 +31,7 @@
     $canUseExports = class_exists('Auth') && Auth::can('exports.use');
     $canManageUsers   = class_exists('Auth') && Auth::isAdmin();
     $canManageApiKeys = class_exists('Auth') && Auth::isAdmin();
+    $canUseAi         = class_exists('Auth') && Auth::isAdmin();
     $showSettingsNav = $canManageSectors || $canManageTags || $canManageCustomFields || $canManageImports || $canUseExports || $canManageUsers || $canManageApiKeys;
     if ($authUser) {
         $parts    = explode(' ', trim($authUser['name'] ?? ''));
@@ -129,6 +130,15 @@
                             </a>
                         <?php endif; ?>
 
+                    <?php endif; ?>
+
+                    <?php if ($canUseAi): ?>
+                        <div class="sidebar-section-label"><span class="nav-label"><?= t('nav.section_ai') ?></span></div>
+                        <a href="<?= htmlspecialchars(Auth::url('/ai'), ENT_QUOTES, 'UTF-8') ?>"
+                            class="nav-item <?= $isActive('/ai') ?>" title="<?= t('nav.ai_companies') ?>">
+                            <span class="nav-icon"><i class="ph ph-sparkle"></i></span>
+                            <span class="nav-label"><?= t('nav.ai_companies') ?></span>
+                        </a>
                     <?php endif; ?>
 
                     <?php if ($authUser && ($canManageUsers || $canManageApiKeys)): ?>

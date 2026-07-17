@@ -18,7 +18,17 @@ return [
     'nav.logout'           => 'Logout',
     'nav.section_settings' => 'Settings',
     'nav.section_admin'    => 'Admin',
+    'nav.section_ai'       => 'AI',
+    'nav.ai_companies'     => 'Companies',
     'nav.subtitle'         => 'Client relationship CRM',
+
+    // ── AI ─────────────────────────────────────────────────────────────────────
+    'ai.title'         => 'AI · Companies',
+    'ai.subtitle'      => 'Contacts with a corporate email but no company name.',
+    'ai.stat_contacts' => 'Contacts without company',
+    'ai.stat_domains'  => 'Unique domains',
+    'ai.domain'        => 'Domain',
+    'ai.no_found'      => 'No pending contacts — every corporate email already has a company name.',
 
     // ── Topbar ─────────────────────────────────────────────────────────────────
     'topbar.search_placeholder' => 'Search contacts and clients...',

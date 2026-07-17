@@ -18,7 +18,17 @@ return [
     'nav.logout'           => 'Cerrar sesión',
     'nav.section_settings' => 'Configuración',
     'nav.section_admin'    => 'Administración',
+    'nav.section_ai'       => 'IA',
+    'nav.ai_companies'     => 'Empresas',
     'nav.subtitle'         => 'CRM de relaciones con clientes',
+
+    // ── IA ─────────────────────────────────────────────────────────────────────
+    'ai.title'         => 'IA · Empresas',
+    'ai.subtitle'      => 'Contactos con email corporativo pero sin nombre de empresa.',
+    'ai.stat_contacts' => 'Contactos sin empresa',
+    'ai.stat_domains'  => 'Dominios únicos',
+    'ai.domain'        => 'Dominio',
+    'ai.no_found'      => 'No hay contactos pendientes: todos los emails corporativos ya tienen empresa.',
 
     // ── Topbar ─────────────────────────────────────────────────────────────────
     'topbar.search_placeholder' => 'Buscar contactos y clientes...',
