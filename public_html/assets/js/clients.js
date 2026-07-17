@@ -1,7 +1,9 @@
 (function () {
     var relatedToggle = document.getElementById('relatedContactsToggle');
-    var relatedBody   = document.getElementById('relatedContactsBody');
-    if (!relatedToggle || !relatedBody) { return; }
+    var relatedBody = document.getElementById('relatedContactsBody');
+    if (!relatedToggle || !relatedBody) {
+        return;
+    }
 
     relatedToggle.addEventListener('click', function () {
         if (relatedToggle.classList.contains('open')) {
@@ -28,4 +30,4 @@
             relatedToggle.click();
         }
     });
-}());
+})();

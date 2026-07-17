@@ -2,16 +2,16 @@
     var selectAll = document.querySelector('[data-list-select-all]');
     var checkboxName = selectAll ? selectAll.dataset.checkboxName : '';
     var checkboxSelector = checkboxName ? 'input[name="' + checkboxName + '"]' : '';
-    var filterBarBtn  = document.getElementById('filterBarBtn');
-    var filterPanel   = document.getElementById('filterPanel');
+    var filterBarBtn = document.getElementById('filterBarBtn');
+    var filterPanel = document.getElementById('filterPanel');
     var actionsBarBtn = document.getElementById('actionsBarBtn');
-    var actionsPanel  = document.getElementById('actionsPanel');
-    var actionsCount  = document.getElementById('actionsBarCount');
+    var actionsPanel = document.getElementById('actionsPanel');
+    var actionsCount = document.getElementById('actionsBarCount');
     var deleteCountEl = document.getElementById('deleteCountLabel');
-    var hintEl        = document.getElementById('actionsSelectedHint');
-    var deselectBtn   = document.getElementById('actionsDeselectBtn');
-    var moreBtn       = document.querySelector('[data-list-more-toggle]');
-    var moreExtra     = document.querySelector('[data-list-more-panel]');
+    var hintEl = document.getElementById('actionsSelectedHint');
+    var deselectBtn = document.getElementById('actionsDeselectBtn');
+    var moreBtn = document.querySelector('[data-list-more-toggle]');
+    var moreExtra = document.querySelector('[data-list-more-panel]');
 
     function checkedCount() {
         return checkboxSelector ? document.querySelectorAll(checkboxSelector + ':checked').length : 0;
@@ -45,7 +45,9 @@
 
         if (count === 0 && actionsPanel) {
             actionsPanel.classList.remove('open');
-            if (actionsBarBtn) { actionsBarBtn.classList.remove('active'); }
+            if (actionsBarBtn) {
+                actionsBarBtn.classList.remove('active');
+            }
         }
     }
 
@@ -55,7 +57,9 @@
             filterBarBtn.classList.toggle('active', open);
             if (open && actionsPanel) {
                 actionsPanel.classList.remove('open');
-                if (actionsBarBtn) { actionsBarBtn.classList.remove('active'); }
+                if (actionsBarBtn) {
+                    actionsBarBtn.classList.remove('active');
+                }
             }
         });
     }
@@ -67,27 +71,31 @@
             var label = moreBtn.querySelector('.filter-toggle-label');
             moreBtn.classList.toggle('open', open);
             if (label) {
-                label.textContent = open
-                    ? (i18n.less_filters || 'Less filters')
-                    : (i18n.more_filters || 'More filters');
+                label.textContent = open ? i18n.less_filters || 'Less filters' : i18n.more_filters || 'More filters';
             }
         });
     }
 
     if (actionsBarBtn && actionsPanel) {
         actionsBarBtn.addEventListener('click', function () {
-            if (checkedCount() === 0) { return; }
+            if (checkedCount() === 0) {
+                return;
+            }
             var open = actionsPanel.classList.toggle('open');
             actionsBarBtn.classList.toggle('active', open);
             if (open && filterPanel) {
                 filterPanel.classList.remove('open');
-                if (filterBarBtn) { filterBarBtn.classList.remove('active'); }
+                if (filterBarBtn) {
+                    filterBarBtn.classList.remove('active');
+                }
             }
         });
     }
 
     document.addEventListener('change', function (event) {
-        if (checkboxName && event.target.name === checkboxName) { updateActions(); }
+        if (checkboxName && event.target.name === checkboxName) {
+            updateActions();
+        }
     });
 
     if (selectAll) {
@@ -107,4 +115,4 @@
             updateActions();
         });
     }
-}());
+})();

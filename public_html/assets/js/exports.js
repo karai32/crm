@@ -1,13 +1,17 @@
 function selectFormat(fmt, el) {
     document.getElementById('formatInput').value = fmt;
     document.getElementById('selectedFormat').textContent = fmt.toUpperCase();
-    document.querySelectorAll('.format-option').forEach(function (o) { o.classList.remove('selected'); });
+    document.querySelectorAll('.format-option').forEach(function (o) {
+        o.classList.remove('selected');
+    });
     el.classList.add('selected');
 }
 
 function toggleGroup(btn, check) {
     var section = btn.closest('.export-section');
-    section.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = check; });
+    section.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+        cb.checked = check;
+    });
     updateCount();
 }
 

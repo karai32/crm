@@ -1,13 +1,15 @@
 function copyCredential(elementId, button, originalLabel) {
     navigator.clipboard.writeText(document.getElementById(elementId).textContent).then(function () {
         button.textContent = (window.I18N && window.I18N.copied) || 'Copied!';
-        setTimeout(function () { button.textContent = originalLabel; }, 2000);
+        setTimeout(function () {
+            button.textContent = originalLabel;
+        }, 2000);
     });
 }
 
 function apiKeyRenameStart(id, currentName) {
     document.getElementById('nameDisplay' + id).style.display = 'none';
-    var form  = document.getElementById('renameForm' + id);
+    var form = document.getElementById('renameForm' + id);
     var input = form.querySelector('input[name="name"]');
     input.value = currentName;
     form.style.display = 'flex';

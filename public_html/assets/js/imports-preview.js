@@ -3,7 +3,9 @@
         var targetId = select.getAttribute('data-custom-target');
         function toggle() {
             var cell = document.getElementById(targetId);
-            if (!cell) { return; }
+            if (!cell) {
+                return;
+            }
             if (select.value === '__custom') {
                 cell.classList.add('visible');
             } else {
@@ -13,4 +15,4 @@
         select.addEventListener('change', toggle);
         toggle();
     });
-}());
+})();

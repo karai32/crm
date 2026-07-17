@@ -1,6 +1,8 @@
 (function () {
     var drop = document.getElementById('importFileDrop');
-    if (!drop) { return; }
+    if (!drop) {
+        return;
+    }
 
     var input = drop.querySelector('input[type="file"]');
     var text = drop.querySelector('.import-file-drop-text');
@@ -13,9 +15,13 @@
     });
 
     ['dragenter', 'dragover'].forEach(function (evt) {
-        input.addEventListener(evt, function () { drop.classList.add('dragover'); });
+        input.addEventListener(evt, function () {
+            drop.classList.add('dragover');
+        });
     });
     ['dragleave', 'drop'].forEach(function (evt) {
-        input.addEventListener(evt, function () { drop.classList.remove('dragover'); });
+        input.addEventListener(evt, function () {
+            drop.classList.remove('dragover');
+        });
     });
-}());
+})();

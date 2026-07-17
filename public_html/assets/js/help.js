@@ -1,14 +1,20 @@
 (function () {
     var items = Array.from(document.querySelectorAll('.help-toc-item'));
-    if (!items.length) { return; }
+    if (!items.length) {
+        return;
+    }
 
     var cards = Array.from(document.querySelectorAll('.help-card[id]'));
-    if (!cards.length) { return; }
+    if (!cards.length) {
+        return;
+    }
 
     var active = null;
 
     function setActive(id) {
-        if (active === id) { return; }
+        if (active === id) {
+            return;
+        }
         active = id;
         items.forEach(function (a) {
             a.classList.toggle('is-active', a.dataset.section === id);
@@ -23,7 +29,7 @@
         }
 
         // Trigger line = 30% from top of viewport
-        var line = window.innerHeight * 0.30;
+        var line = window.innerHeight * 0.3;
         var current = cards[0].id;
 
         for (var i = 0; i < cards.length; i++) {
@@ -43,9 +49,11 @@
     items.forEach(function (a) {
         a.addEventListener('click', function (e) {
             var t = document.getElementById(a.dataset.section);
-            if (!t) { return; }
+            if (!t) {
+                return;
+            }
             e.preventDefault();
             t.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
-}());
+})();

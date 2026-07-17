@@ -29,28 +29,28 @@
 }
 
 .import-status-completed {
-    background: #D1FAE5;
-    color: #065F46;
+    background: #d1fae5;
+    color: #065f46;
 }
 
 .import-status-partial {
-    background: #FEF9C3;
-    color: #854D0E;
+    background: #fef9c3;
+    color: #854d0e;
 }
 
 .import-status-pending {
-    background: #F3F4F6;
+    background: #f3f4f6;
     color: #374151;
 }
 
 .import-status-processing {
-    background: #DBEAFE;
-    color: #1E40AF;
+    background: #dbeafe;
+    color: #1e40af;
 }
 
 .import-status-failed {
-    background: #FEE2E2;
-    color: #991B1B;
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 /* --- History table ---------------------------------------- */
@@ -99,10 +99,12 @@
     border-radius: var(--radius-sm);
     background: var(--color-bg-subtle);
     text-align: center;
-    transition: border-color .15s ease, background .15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
 }
 
-.import-file-drop input[type="file"] {
+.import-file-drop input[type='file'] {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -231,7 +233,7 @@
     padding: 8px 12px;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-neutral);
     border-bottom: 1px solid var(--color-neutral-200);
@@ -262,7 +264,7 @@
     padding: 10px 16px;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-neutral);
     border-bottom: 1px solid var(--color-neutral-200);
@@ -363,7 +365,7 @@
 }
 
 .import-stat-value--amber {
-    color: #D97706;
+    color: #d97706;
 }
 
 .import-stat-value--red {
@@ -394,7 +396,7 @@
     padding: 10px 14px;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-neutral);
     border-bottom: 1px solid var(--color-neutral-200);
@@ -413,7 +415,7 @@
 }
 
 .import-errors-table tbody tr:hover td {
-    background: #FFF5F5;
+    background: #fff5f5;
 }
 
 .import-errors-table .col-row {
@@ -514,4 +516,3 @@
 .imports-table th.col-num-header {
     text-align: right;
 }
-

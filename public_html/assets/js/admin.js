@@ -85,30 +85,32 @@
             }
         });
 
-        input.addEventListener('input', debounce(function () {
-            var url = input.dataset.endpoint + '?q=' + encodeURIComponent(input.value);
+        input.addEventListener(
+            'input',
+            debounce(function () {
+                var url = input.dataset.endpoint + '?q=' + encodeURIComponent(input.value);
 
-            fetch(url, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error('Search failed');
-                    }
+                fetch(url, {
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Search failed');
+                        }
 
-                    return response.json();
-                })
-                .then(function (data) {
-                    renderCheckboxes(container, data.items || [], selected);
-                })
-                .catch(function () {
-                    container.innerHTML = '<p>Search is temporarily unavailable.</p>';
-                });
-        }, 250));
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        renderCheckboxes(container, data.items || [], selected);
+                    })
+                    .catch(function () {
+                        container.innerHTML = '<p>Search is temporarily unavailable.</p>';
+                    });
+            }, 250),
+        );
     });
-
 })();
 
 // Global topbar search
@@ -163,7 +165,7 @@
             title.textContent = item.name || '';
             meta.className = 'topbar-search-option-meta';
             var i18n = window.I18N || {};
-            meta.textContent = item.type === 'client' ? (i18n.client || 'Client') : (i18n.contact || 'Contact');
+            meta.textContent = item.type === 'client' ? i18n.client || 'Client' : i18n.contact || 'Contact';
 
             if (item.meta) {
                 meta.textContent += ' - ' + item.meta;
@@ -197,7 +199,7 @@
             }
 
             fetch(input.dataset.endpoint + '?q=' + encodeURIComponent(q), {
-                headers: { Accept: 'application/json' }
+                headers: { Accept: 'application/json' },
             })
                 .then(function (response) {
                     if (!response.ok) {
@@ -331,26 +333,29 @@
             selectIcon(picker, '');
         });
 
-        search.addEventListener('input', debounce(function () {
-            var query = search.value.trim();
+        search.addEventListener(
+            'input',
+            debounce(function () {
+                var query = search.value.trim();
 
-            fetch(endpoint + '?q=' + encodeURIComponent(query), {
-                headers: { Accept: 'application/json' }
-            })
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error('Icon search failed');
-                    }
+                fetch(endpoint + '?q=' + encodeURIComponent(query), {
+                    headers: { Accept: 'application/json' },
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Icon search failed');
+                        }
 
-                    return response.json();
-                })
-                .then(function (data) {
-                    renderIconResults(picker, data.items || []);
-                })
-                .catch(function () {
-                    renderIconResults(picker, []);
-                });
-        }, 180));
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        renderIconResults(picker, data.items || []);
+                    })
+                    .catch(function () {
+                        renderIconResults(picker, []);
+                    });
+            }, 180),
+        );
 
         selectIcon(picker, picker.querySelector('[data-sector-icon-value]').value);
     });
@@ -451,13 +456,19 @@
 
         var i18n = window.I18N || {};
         badge.className = Number(item.is_active) === 1 ? 'badge-active' : 'badge-inactive';
-        badge.textContent = Number(item.is_active) === 1 ? (i18n.active || 'Active') : (i18n.inactive || 'Inactive');
+        badge.textContent = Number(item.is_active) === 1 ? i18n.active || 'Active' : i18n.inactive || 'Inactive';
         statusTd.appendChild(badge);
 
         tr.appendChild(nameTd);
         tr.appendChild(textCell(item.slug, 'col-slug'));
         tr.appendChild(statusTd);
-        tr.appendChild(actionCell(item, input, i18n.sector_delete_confirm || 'Delete this sector? If it is used by clients, it will be deactivated.'));
+        tr.appendChild(
+            actionCell(
+                item,
+                input,
+                i18n.sector_delete_confirm || 'Delete this sector? If it is used by clients, it will be deactivated.',
+            ),
+        );
 
         return tr;
     }
@@ -502,7 +513,13 @@
         tr.appendChild(nameTd);
         tr.appendChild(textCell(item.slug, 'col-slug'));
         tr.appendChild(colorTd);
-        tr.appendChild(actionCell(item, input, i18n.tag_delete_confirm || 'Delete this tag? Existing contact and client links will be removed.'));
+        tr.appendChild(
+            actionCell(
+                item,
+                input,
+                i18n.tag_delete_confirm || 'Delete this tag? Existing contact and client links will be removed.',
+            ),
+        );
 
         return tr;
     }
@@ -524,9 +541,7 @@
         }
 
         items.forEach(function (item) {
-            target.appendChild(type === 'tags'
-                ? renderTagRow(item, input)
-                : renderSectorRow(item, input));
+            target.appendChild(type === 'tags' ? renderTagRow(item, input) : renderSectorRow(item, input));
         });
     }
 
@@ -545,7 +560,7 @@
             }
 
             fetch(input.dataset.searchEndpoint + '?q=' + encodeURIComponent(input.value), {
-                headers: { Accept: 'application/json' }
+                headers: { Accept: 'application/json' },
             })
                 .then(function (response) {
                     if (!response.ok) {
@@ -570,7 +585,13 @@
 (function () {
     function debounceTP(fn, ms) {
         var t;
-        return function () { var a = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, a); }, ms); };
+        return function () {
+            var a = arguments;
+            clearTimeout(t);
+            t = setTimeout(function () {
+                fn.apply(null, a);
+            }, ms);
+        };
     }
 
     function TokenPicker(el) {
@@ -588,9 +609,15 @@
         self.loadingMore = false;
         self.selected = [];
         self.staticOptions = null;
-        try { var so = JSON.parse(el.dataset.options || 'null'); if (Array.isArray(so)) self.staticOptions = so; } catch (e) { }
+        try {
+            var so = JSON.parse(el.dataset.options || 'null');
+            if (Array.isArray(so)) self.staticOptions = so;
+        } catch (e) {}
 
-        try { var p = JSON.parse(el.dataset.selected || '[]'); if (Array.isArray(p)) self.selected = p; } catch (e) { }
+        try {
+            var p = JSON.parse(el.dataset.selected || '[]');
+            if (Array.isArray(p)) self.selected = p;
+        } catch (e) {}
 
         // Build DOM: [field box] [dropdown] [tokens below]
         el.innerHTML = '';
@@ -621,7 +648,9 @@
     }
 
     TokenPicker.prototype.isSelected = function (id) {
-        return this.selected.some(function (s) { return String(s.id) === String(id); });
+        return this.selected.some(function (s) {
+            return String(s.id) === String(id);
+        });
     };
 
     TokenPicker.prototype.render = function () {
@@ -632,7 +661,8 @@
             var chip = document.createElement('span');
             chip.className = 'token-chip';
             if (self.withColor && item.color) {
-                chip.style.cssText = 'background:' + item.color + '22;border-color:' + item.color + '55;color:' + item.color;
+                chip.style.cssText =
+                    'background:' + item.color + '22;border-color:' + item.color + '55;color:' + item.color;
             }
             var txt = document.createElement('span');
             txt.textContent = item.name;
@@ -647,7 +677,9 @@
         });
 
         // Hidden inputs
-        self.el.querySelectorAll('input[data-tp]').forEach(function (n) { n.remove(); });
+        self.el.querySelectorAll('input[data-tp]').forEach(function (n) {
+            n.remove();
+        });
         self.selected.forEach(function (item) {
             var h = document.createElement('input');
             h.type = 'hidden';
@@ -672,7 +704,9 @@
     };
 
     TokenPicker.prototype.remove = function (id) {
-        this.selected = this.selected.filter(function (s) { return String(s.id) !== String(id); });
+        this.selected = this.selected.filter(function (s) {
+            return String(s.id) !== String(id);
+        });
         this.render();
     };
 
@@ -727,18 +761,21 @@
         // Static options mode — filter locally, no AJAX
         if (self.staticOptions !== null) {
             var lq = q.toLowerCase().trim();
-            var results = lq === ''
-                ? self.staticOptions.slice()
-                : self.staticOptions.filter(function (item) {
-                    return item.name.toLowerCase().indexOf(lq) !== -1;
-                });
+            var results =
+                lq === ''
+                    ? self.staticOptions.slice()
+                    : self.staticOptions.filter(function (item) {
+                          return item.name.toLowerCase().indexOf(lq) !== -1;
+                      });
             self.currentQuery = q;
             self.hasMore = false;
             self.openDrop(results);
             return;
         }
 
-        if (!self.endpoint) { return; }
+        if (!self.endpoint) {
+            return;
+        }
 
         self.currentQuery = q;
         self.currentPage = 1;
@@ -746,39 +783,59 @@
         self.loadingMore = false;
         var sep = self.endpoint.indexOf('?') !== -1 ? '&' : '?';
         var url = self.endpoint + sep + 'q=' + encodeURIComponent(q);
-        if (self.paginate) { url += '&page=1'; }
+        if (self.paginate) {
+            url += '&page=1';
+        }
         fetch(url, { headers: { Accept: 'application/json' } })
-            .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function (r) {
+                return r.ok ? r.json() : Promise.reject();
+            })
             .then(function (d) {
-                if (self.paginate) { self.hasMore = !!d.has_more; }
+                if (self.paginate) {
+                    self.hasMore = !!d.has_more;
+                }
                 self.openDrop(d.items || []);
             })
-            .catch(function () { self.closeDrop(); });
+            .catch(function () {
+                self.closeDrop();
+            });
     };
 
     TokenPicker.prototype.loadMore = function () {
         var self = this;
-        if (!self.hasMore || self.loadingMore) { return; }
+        if (!self.hasMore || self.loadingMore) {
+            return;
+        }
         self.loadingMore = true;
         self.currentPage++;
         var sep = self.endpoint.indexOf('?') !== -1 ? '&' : '?';
         var url = self.endpoint + sep + 'q=' + encodeURIComponent(self.currentQuery) + '&page=' + self.currentPage;
         fetch(url, { headers: { Accept: 'application/json' } })
-            .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function (r) {
+                return r.ok ? r.json() : Promise.reject();
+            })
             .then(function (d) {
                 self.hasMore = !!d.has_more;
                 self.loadingMore = false;
                 self.appendDropItems(d.items || []);
             })
-            .catch(function () { self.loadingMore = false; });
+            .catch(function () {
+                self.loadingMore = false;
+            });
     };
 
     TokenPicker.prototype.bind = function () {
         var self = this;
-        var doSearch = debounceTP(function (q) { self.search(q); }, 200);
+        var doSearch = debounceTP(function (q) {
+            self.search(q);
+        }, 200);
 
-        self.inputEl.addEventListener('focus', function () { self.search(self.inputEl.value); });
-        self.inputEl.addEventListener('input', function () { doSearch(self.inputEl.value); });
+        self.inputEl.addEventListener('focus', function () {
+            self.search(self.inputEl.value);
+        });
+        self.inputEl.addEventListener('input', function () {
+            doSearch(self.inputEl.value);
+        });
 
         self.dropEl.addEventListener('mousedown', function (e) {
             // mousedown so we prevent the blur before the click registers
@@ -815,21 +872,30 @@
             if (rm) self.remove(rm.dataset.id);
         });
 
-        self.fieldEl.addEventListener('click', function () { self.inputEl.focus(); });
+        self.fieldEl.addEventListener('click', function () {
+            self.inputEl.focus();
+        });
 
         self.inputEl.addEventListener('blur', function () {
-            setTimeout(function () { self.closeDrop(); }, 150);
+            setTimeout(function () {
+                self.closeDrop();
+            }, 150);
         });
 
         self.inputEl.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') { self.closeDrop(); self.inputEl.blur(); }
+            if (e.key === 'Escape') {
+                self.closeDrop();
+                self.inputEl.blur();
+            }
             if (e.key === 'Backspace' && self.inputEl.value === '' && self.selected.length) {
                 self.remove(self.selected[self.selected.length - 1].id);
             }
         });
     };
 
-    document.querySelectorAll('.token-picker').forEach(function (el) { new TokenPicker(el); });
+    document.querySelectorAll('.token-picker').forEach(function (el) {
+        new TokenPicker(el);
+    });
 })();
 
 // Profile dropdown
@@ -837,7 +903,9 @@
     var btn = document.getElementById('profileBtn');
     var dropdown = document.getElementById('profileDropdown');
 
-    if (!btn || !dropdown) { return; }
+    if (!btn || !dropdown) {
+        return;
+    }
 
     btn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -856,14 +924,18 @@
     var btn = document.getElementById('sidebarUserBtn');
     var actions = document.getElementById('sidebarUserActions');
 
-    if (!btn || !actions) { return; }
+    if (!btn || !actions) {
+        return;
+    }
 
     btn.addEventListener('click', function () {
         actions.classList.toggle('open');
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') { actions.classList.remove('open'); }
+        if (e.key === 'Escape') {
+            actions.classList.remove('open');
+        }
     });
 })();
 
@@ -872,13 +944,19 @@
     var burger = document.getElementById('burgerBtn');
     var overlay = document.getElementById('sidebarOverlay');
 
-    if (!burger) { return; }
+    if (!burger) {
+        return;
+    }
 
-    function close() { document.body.classList.remove('sidebar-open'); }
+    function close() {
+        document.body.classList.remove('sidebar-open');
+    }
 
     burger.addEventListener('click', function () {
         document.body.classList.toggle('sidebar-open');
     });
 
-    if (overlay) { overlay.addEventListener('click', close); }
+    if (overlay) {
+        overlay.addEventListener('click', close);
+    }
 })();

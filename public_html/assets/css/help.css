@@ -53,7 +53,9 @@
     font-weight: 700;
     text-align: center;
     text-decoration: none;
-    transition: background .1s, color .1s;
+    transition:
+        background 0.1s,
+        color 0.1s;
 }
 
 .help-lang-pill:hover {
@@ -92,7 +94,7 @@
     padding: 0 4px;
     font-size: 10.5px;
     font-weight: 700;
-    letter-spacing: .07em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--color-neutral);
 }
@@ -113,7 +115,9 @@
     font-weight: 500;
     color: var(--color-text);
     text-decoration: none;
-    transition: background .1s, color .1s;
+    transition:
+        background 0.1s,
+        color 0.1s;
     position: relative;
 }
 
@@ -132,7 +136,9 @@
     border-radius: 50%;
     background: var(--color-neutral-200);
     flex-shrink: 0;
-    transition: background .15s, transform .15s;
+    transition:
+        background 0.15s,
+        transform 0.15s;
 }
 
 .help-toc-item.is-active .help-toc-dot {
@@ -181,11 +187,11 @@
 }
 
 .help-toc-item--indigo.is-active .help-toc-dot {
-    background: #2563EB;
+    background: #2563eb;
 }
 
 .help-toc-item--indigo.is-active {
-    color: #1D4ED8;
+    color: #1d4ed8;
 }
 
 .help-toc-item--sky.is-active .help-toc-dot {
@@ -234,11 +240,11 @@
     box-shadow: var(--shadow-sm);
     overflow: hidden;
     scroll-margin-top: calc(var(--topbar-height, 56px) + 20px);
-    transition: box-shadow .15s;
+    transition: box-shadow 0.15s;
 }
 
 .help-card:hover {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, .07);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
 }
 
 /* Card header */
@@ -497,7 +503,7 @@
 }
 
 .help-tip--indigo {
-    background: #EBF2FF;
+    background: #ebf2ff;
     color: #3730a3;
 }
 
@@ -556,12 +562,15 @@
     box-shadow: var(--shadow-sm);
     text-decoration: none;
     color: var(--color-text);
-    transition: box-shadow .15s, border-color .15s, transform .12s;
+    transition:
+        box-shadow 0.15s,
+        border-color 0.15s,
+        transform 0.12s;
     align-items: flex-start;
 }
 
 .help-hub-card:hover {
-    box-shadow: 0 4px 18px rgba(0, 0, 0, .09);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.09);
     border-color: var(--color-neutral-300);
     transform: translateY(-2px);
     text-decoration: none;
@@ -910,16 +919,46 @@
     margin-top: 2px;
 }
 
-.help-step--violet::before { background: #ede9fe; color: #7c3aed; }
-.help-step--blue::before   { background: #dbeafe; color: #2563eb; }
-.help-step--green::before  { background: #dcfce7; color: #16a34a; }
-.help-step--amber::before  { background: #fef3c7; color: #d97706; }
-.help-step--teal::before   { background: #ccfbf1; color: #0d9488; }
-.help-step--indigo::before { background: #e0e7ff; color: #4f46e5; }
-.help-step--sky::before    { background: #e0f2fe; color: #0284c7; }
-.help-step--cyan::before   { background: #cffafe; color: #0891b2; }
-.help-step--slate::before  { background: #f1f5f9; color: #475569; }
-.help-step--red::before    { background: #fee2e2; color: #dc2626; }
+.help-step--violet::before {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+.help-step--blue::before {
+    background: #dbeafe;
+    color: #2563eb;
+}
+.help-step--green::before {
+    background: #dcfce7;
+    color: #16a34a;
+}
+.help-step--amber::before {
+    background: #fef3c7;
+    color: #d97706;
+}
+.help-step--teal::before {
+    background: #ccfbf1;
+    color: #0d9488;
+}
+.help-step--indigo::before {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+.help-step--sky::before {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+.help-step--cyan::before {
+    background: #cffafe;
+    color: #0891b2;
+}
+.help-step--slate::before {
+    background: #f1f5f9;
+    color: #475569;
+}
+.help-step--red::before {
+    background: #fee2e2;
+    color: #dc2626;
+}
 
 /* Callout box (tip / info) */
 .help-callout {
@@ -950,22 +989,52 @@
     font-weight: 600;
 }
 
-.help-callout--violet { background: #f5f3ff; color: #5b21b6; }
-.help-callout--blue   { background: #eff6ff; color: #1e40af; }
-.help-callout--green  { background: #f0fdf4; color: #166534; }
-.help-callout--amber  { background: #fffbeb; color: #92400e; }
-.help-callout--teal   { background: #f0fdfa; color: #134e4a; }
-.help-callout--indigo { background: #EBF2FF; color: #3730a3; }
-.help-callout--sky    { background: #f0f9ff; color: #075985; }
-.help-callout--cyan   { background: #ecfeff; color: #164e63; }
-.help-callout--slate  { background: #f8fafc; color: #334155; }
-.help-callout--red    { background: #fef2f2; color: #991b1b; }
+.help-callout--violet {
+    background: #f5f3ff;
+    color: #5b21b6;
+}
+.help-callout--blue {
+    background: #eff6ff;
+    color: #1e40af;
+}
+.help-callout--green {
+    background: #f0fdf4;
+    color: #166534;
+}
+.help-callout--amber {
+    background: #fffbeb;
+    color: #92400e;
+}
+.help-callout--teal {
+    background: #f0fdfa;
+    color: #134e4a;
+}
+.help-callout--indigo {
+    background: #ebf2ff;
+    color: #3730a3;
+}
+.help-callout--sky {
+    background: #f0f9ff;
+    color: #075985;
+}
+.help-callout--cyan {
+    background: #ecfeff;
+    color: #164e63;
+}
+.help-callout--slate {
+    background: #f8fafc;
+    color: #334155;
+}
+.help-callout--red {
+    background: #fef2f2;
+    color: #991b1b;
+}
 
 /* Sub-label inside a card body (lighter than api-label) */
 .help-sub-label {
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-neutral);
     margin: 18px 0 8px;
@@ -974,7 +1043,6 @@
 .help-sub-label:first-child {
     margin-top: 0;
 }
-
 
 /* ── Technical guide — code block ───────────────────────────────── */
 
@@ -1011,7 +1079,7 @@
     text-align: left;
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: .05em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--color-neutral);
     padding: 6px 10px;
