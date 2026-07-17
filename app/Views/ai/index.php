@@ -29,8 +29,7 @@
                 <?= thSort('full_name', t('common.name'), $sort, $dir, '/ai') ?>
                 <?= thSort('email', t('common.email'), $sort, $dir, '/ai') ?>
                 <?= thSort('domain', t('ai.domain'), $sort, $dir, '/ai') ?>
-                <th><?= t('common.status') ?></th>
-                <?= thSort('created_at', t('common.created'), $sort, $dir, '/ai') ?>
+                <th class="col-ai-company"><?= t('contacts.company') ?></th>
                 <th class="col-actions"><?= t('common.actions') ?></th>
             </tr>
         </thead>
@@ -52,22 +51,24 @@
                             <?php endif; ?>
                         </span>
                     </td>
-                    <td>
-                        <?php if ($contact['email_status'] === 'valid'): ?>
-                            <span class="badge-active"><?= t('common.valid') ?></span>
-                        <?php elseif ($contact['email_status'] === 'invalid'): ?>
-                            <span class="badge-inactive"><?= t('common.invalid') ?></span>
-                        <?php else: ?>
-                            <span class="col-muted">-</span>
-                        <?php endif; ?>
+                    <td class="col-ai-company">
+                        <input type="text"
+                            class="ai-company-input"
+                            data-contact-id="<?= (int) $contact['id'] ?>"
+                            data-domain="<?= htmlspecialchars($contact['domain'], ENT_QUOTES, 'UTF-8') ?>"
+                            placeholder="<?= t('ai.company_placeholder') ?>"
+                            autocomplete="off"
+                            spellcheck="false">
                     </td>
-                    <td><?= htmlspecialchars(date('d/m/Y', strtotime($contact['created_at'])), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="col-actions">
                         <div class="action-links">
-                            <a class="action-btn action-edit" href="<?= htmlspecialchars(Auth::url('/contacts/edit?id=' . (int) $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
-                                <i class="ph ph-pencil"></i>
-                                <span class="tooltip-text"><?= t('common.edit') ?></span>
-                            </a>
+                            <button type="button"
+                                class="action-btn ai-process-btn"
+                                data-contact-id="<?= (int) $contact['id'] ?>"
+                                data-domain="<?= htmlspecialchars($contact['domain'], ENT_QUOTES, 'UTF-8') ?>">
+                                <i class="ph ph-sparkle"></i>
+                                <span class="tooltip-text"><?= t('ai.process') ?></span>
+                            </button>
                         </div>
                     </td>
                 </tr>

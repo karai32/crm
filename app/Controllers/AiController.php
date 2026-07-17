@@ -20,7 +20,7 @@ class AiController
             exit;
         }
 
-        $sort = $this->sortParam(['id', 'full_name', 'email', 'domain', 'domain_contacts', 'created_at'], 'domain');
+        $sort = $this->sortParam(['id', 'full_name', 'email', 'domain', 'domain_contacts'], 'domain');
         $dir  = $this->dirParam('asc');
 
         $total = $this->ai->countMissingCompany();

@@ -39,7 +39,6 @@ class AiRepository
             'email'           => 'contacts.email',
             'domain'          => 'domain',
             'domain_contacts' => 'domain_contacts',
-            'created_at'      => 'contacts.created_at',
         ];
         $orderCol = $allowed[$sort] ?? 'domain';
         $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
@@ -51,8 +50,6 @@ class AiRepository
                 contacts.id,
                 contacts.full_name,
                 contacts.email,
-                contacts.email_status,
-                contacts.created_at,
                 SUBSTRING_INDEX(contacts.email, '@', -1) AS domain,
                 domains.contacts_count AS domain_contacts
             FROM contacts

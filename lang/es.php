@@ -28,6 +28,8 @@ return [
     'ai.stat_contacts' => 'Contactos sin empresa',
     'ai.stat_domains'  => 'Dominios únicos',
     'ai.domain'        => 'Dominio',
+    'ai.process'       => 'Buscar nombre de empresa',
+    'ai.company_placeholder' => 'La respuesta de la IA aparecerá aquí...',
     'ai.no_found'      => 'No hay contactos pendientes: todos los emails corporativos ya tienen empresa.',
 
     // ── Topbar ─────────────────────────────────────────────────────────────────
