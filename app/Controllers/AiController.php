@@ -29,6 +29,7 @@ class AiController
         View::render('ai/index', [
             'title'        => Lang::get('ai.title'),
             'styles'       => ['settings.css', 'ai.css'],
+            'scripts'      => ['ai.js'],
             'contacts'     => $this->ai->paginateMissingCompany($page, $perPage, $sort, $dir),
             'domainsTotal' => $this->ai->countMissingCompanyDomains(),
             'total'        => $total,

@@ -47,7 +47,7 @@ class ContactController
         View::render('contacts/index', [
             'title'                      => Lang::get('contacts.title'),
             'styles'                     => ['contacts.css'],
-            'scripts'                    => ['list-page.js', 'contacts.js'],
+            'scripts'                    => ['list-page.js'],
             'contacts'                   => $contacts,
             'contactTags'                => $this->entityTags->tagsForEntities('contact', $contactIds),
             'contactClients'             => $this->contacts->clientsForContacts($contactIds),
@@ -131,7 +131,6 @@ class ContactController
         View::render('contacts/show', [
             'title'                 => Lang::get('contacts.details_title'),
             'styles'                => ['contacts.css'],
-            'scripts'               => ['contacts.js'],
             'contact'               => $contact,
             'tags'                  => $this->entityTags->tagsForEntity('contact', (int) $contact['id']),
             'clients'               => $this->contacts->clientsForContact((int) $contact['id']),

@@ -18,7 +18,9 @@
     </div>
 </div>
 
-<div class="settings-table-card">
+<div class="settings-table-card" id="aiCompaniesTable"
+    data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/contacts/gemini-company-test'), ENT_QUOTES, 'UTF-8') ?>"
+    data-csrf-token="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
     <?php if (empty($contacts)): ?>
         <p class="table-empty-state"><?= t('ai.no_found') ?></p>
     <?php else: ?>

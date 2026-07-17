@@ -75,3 +75,14 @@
 .ai-company-input::placeholder {
     color: var(--color-neutral-300);
 }
+
+/* Spinner while a row is being processed */
+.ai-spin {
+    display: inline-block;
+    animation: ai-rotate 0.8s linear infinite;
+}
+
+@keyframes ai-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
