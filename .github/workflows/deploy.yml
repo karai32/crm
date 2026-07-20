@@ -39,13 +39,11 @@ jobs:
             --exclude-glob database/ \
             --exclude-glob node_modules/ \
             --exclude-glob vendor/ \
+            --exclude-glob config/app.php \
             --exclude-glob config/database.php \
             --exclude-glob config/mail.php \
             --exclude-glob config/gemini.php \
-            --exclude-glob storage/logs/ \
-            --exclude-glob storage/exports/ \
-            --exclude-glob storage/imports/ \
-            --exclude-glob storage/*.log \
+            --exclude-glob storage/ \
             ./ "$SFTP_TARGET/"
           bye
           EOF
@@ -83,13 +81,11 @@ jobs:
             --exclude-glob database/ \
             --exclude-glob node_modules/ \
             --exclude-glob vendor/ \
+            --exclude-glob config/app.php \
             --exclude-glob config/database.php \
             --exclude-glob config/mail.php \
             --exclude-glob config/gemini.php \
-            --exclude-glob storage/logs/ \
-            --exclude-glob storage/exports/ \
-            --exclude-glob storage/imports/ \
-            --exclude-glob storage/*.log \
+            --exclude-glob storage/ \
             ./ "$SFTP_TARGET/"
           bye
           EOF
