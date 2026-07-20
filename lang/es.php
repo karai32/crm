@@ -29,7 +29,9 @@ return [
     'ai.stat_domains'  => 'Dominios únicos',
     'ai.domain'        => 'Dominio',
     'ai.process'       => 'Buscar nombre de empresa',
+    'ai.apply'         => 'Guardar nombre de empresa',
     'ai.company_placeholder' => 'La respuesta de la IA aparecerá aquí...',
+    'ai.company_empty' => 'El nombre de la empresa no puede estar vacío',
     'ai.no_found'      => 'No hay contactos pendientes: todos los emails corporativos ya tienen empresa.',
 
     // ── Topbar ─────────────────────────────────────────────────────────────────

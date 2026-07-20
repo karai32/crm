@@ -331,6 +331,13 @@ class ContactRepository
             ->execute(['is_corporate' => $isCorporate, 'status' => $status, 'id' => $id]);
     }
 
+    public function updateCompany(int $id, string $company): void
+    {
+        $pdo = Database::connect();
+        $pdo->prepare('UPDATE contacts SET company = :company WHERE id = :id')
+            ->execute(['company' => $company, 'id' => $id]);
+    }
+
     private function buildFilterSql(array $filters): array
     {
         $where = [];

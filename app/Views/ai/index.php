@@ -20,7 +20,9 @@
 
 <div class="settings-table-card" id="aiCompaniesTable"
     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/contacts/gemini-company'), ENT_QUOTES, 'UTF-8') ?>"
-    data-csrf-token="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
+    data-apply-endpoint="<?= htmlspecialchars(Auth::url('/ajax/contacts/company'), ENT_QUOTES, 'UTF-8') ?>"
+    data-csrf-token="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>"
+    data-empty-error="<?= htmlspecialchars(t('ai.company_empty'), ENT_QUOTES, 'UTF-8') ?>">
     <?php if (empty($contacts)): ?>
         <p class="table-empty-state"><?= t('ai.no_found') ?></p>
     <?php else: ?>
@@ -70,6 +72,12 @@
                                 data-domain="<?= htmlspecialchars($contact['domain'], ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-sparkle"></i>
                                 <span class="tooltip-text"><?= t('ai.process') ?></span>
+                            </button>
+                            <button type="button"
+                                class="action-btn action-apply ai-apply-btn"
+                                data-contact-id="<?= (int) $contact['id'] ?>">
+                                <i class="ph ph-check"></i>
+                                <span class="tooltip-text"><?= t('ai.apply') ?></span>
                             </button>
                         </div>
                     </td>

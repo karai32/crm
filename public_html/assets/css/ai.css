@@ -86,6 +86,24 @@
     color: var(--color-neutral-300);
 }
 
+.ai-company-input.is-invalid {
+    border-color: #dc2626;
+    animation: ai-shake 0.3s;
+}
+
+.ai-company-input.is-saved {
+    border-color: #16a34a;
+}
+
+@keyframes ai-shake {
+    25% {
+        transform: translateX(-4px);
+    }
+    75% {
+        transform: translateX(4px);
+    }
+}
+
 /* Spinner while a row is being processed */
 .ai-spin {
     display: inline-block;

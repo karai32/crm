@@ -29,7 +29,9 @@ return [
     'ai.stat_domains'  => 'Unique domains',
     'ai.domain'        => 'Domain',
     'ai.process'       => 'Find company name',
+    'ai.apply'         => 'Save company name',
     'ai.company_placeholder' => 'AI answer will appear here...',
+    'ai.company_empty' => 'Company name cannot be empty',
     'ai.no_found'      => 'No pending contacts — every corporate email already has a company name.',
 
     // ── Topbar ─────────────────────────────────────────────────────────────────

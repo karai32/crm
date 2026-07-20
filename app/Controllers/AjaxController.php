@@ -332,6 +332,31 @@ class AjaxController
         ]);
     }
 
+    public function saveContactCompany(): void
+    {
+        if (!$this->guard()) {
+            return;
+        }
+
+        $contactId = (int) ($_POST['contact_id'] ?? 0);
+        $company = trim((string) ($_POST['company'] ?? ''));
+
+        if ($company === '') {
+            $this->json(['error' => Lang::get('ai.company_empty')], 422);
+            return;
+        }
+
+        $contact = $this->contacts->find($contactId);
+        if ($contact === null) {
+            $this->json(['error' => 'Contact not found'], 404);
+            return;
+        }
+
+        $this->contacts->updateCompany($contactId, $company);
+
+        $this->json(['company' => $company]);
+    }
+
     private function geminiApiKey(): string
     {
         $environmentKey = getenv('GEMINI_API_KEY');
