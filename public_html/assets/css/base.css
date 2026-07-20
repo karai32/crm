@@ -1053,6 +1053,15 @@ body.sidebar-open .sidebar-overlay {
     background: #f2d9df;
 }
 
+.action-ai {
+    background: #fae0ff;
+    color: #ec25ff;
+}
+
+.action-ai:hover {
+    background: #f6c6ff;
+}
+
 .btn-icon-edit {
     background: var(--color-accent);
     color: #fff;

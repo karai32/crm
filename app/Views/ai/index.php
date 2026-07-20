@@ -40,18 +40,18 @@
                 <tr>
                     <td class="col-id"><?= (int) $contact['id'] ?></td>
                     <td class="col-name">
-                        <a class="col-row-link" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . (int) $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
+                        <a class="col-row-link" target="_blank" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . (int) $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
                             <?= htmlspecialchars($contact['full_name'], ENT_QUOTES, 'UTF-8') ?>
                         </a>
                     </td>
                     <td><?= htmlspecialchars($contact['email'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
-                        <span class="ai-domain-pill">
+                        <a class="ai-domain-pill" target="_blank" href="<?= 'https://' . htmlspecialchars($contact['domain'], ENT_QUOTES, 'UTF-8'); ?>">
                             <?= htmlspecialchars($contact['domain'], ENT_QUOTES, 'UTF-8') ?>
                             <?php if ((int) $contact['domain_contacts'] > 1): ?>
                                 <span class="ai-domain-count">&times;<?= (int) $contact['domain_contacts'] ?></span>
                             <?php endif; ?>
-                        </span>
+                        </a>
                     </td>
                     <td class="col-ai-company">
                         <input type="text"
@@ -65,7 +65,7 @@
                     <td class="col-actions">
                         <div class="action-links">
                             <button type="button"
-                                class="action-btn ai-process-btn"
+                                class="action-btn action-ai ai-process-btn"
                                 data-contact-id="<?= (int) $contact['id'] ?>"
                                 data-domain="<?= htmlspecialchars($contact['domain'], ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="ph ph-sparkle"></i>
