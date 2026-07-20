@@ -135,9 +135,9 @@
                     <?php if ($canUseAi): ?>
                         <div class="sidebar-section-label"><span class="nav-label"><?= t('nav.section_ai') ?></span></div>
                         <a href="<?= htmlspecialchars(Auth::url('/ai'), ENT_QUOTES, 'UTF-8') ?>"
-                            class="nav-item <?= $isActive('/ai') ?>" title="<?= t('nav.ai_companies') ?>">
+                            class="nav-item <?= $isActive('/ai') ?>" title="<?= t('nav.ai_tools') ?>">
                             <span class="nav-icon"><i class="ph ph-sparkle"></i></span>
-                            <span class="nav-label"><?= t('nav.ai_companies') ?></span>
+                            <span class="nav-label"><?= t('nav.ai_tools') ?></span>
                         </a>
                     <?php endif; ?>
 

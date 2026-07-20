@@ -19,7 +19,7 @@ return [
     'nav.section_settings' => 'Configuración',
     'nav.section_admin'    => 'Administración',
     'nav.section_ai'       => 'IA',
-    'nav.ai_companies'     => 'Empresas',
+    'nav.ai_tools'         => 'Herramientas de IA',
     'nav.subtitle'         => 'CRM de relaciones con clientes',
 
     // ── IA ─────────────────────────────────────────────────────────────────────

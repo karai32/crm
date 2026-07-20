@@ -19,7 +19,7 @@ return [
     'nav.section_settings' => 'Settings',
     'nav.section_admin'    => 'Admin',
     'nav.section_ai'       => 'AI',
-    'nav.ai_companies'     => 'Companies',
+    'nav.ai_tools'         => 'AI tools',
     'nav.subtitle'         => 'Client relationship CRM',
 
     // ── AI ─────────────────────────────────────────────────────────────────────
