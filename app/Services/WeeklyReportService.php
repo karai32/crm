@@ -159,7 +159,7 @@ class WeeklyReportService
             foreach ($tc as $r) {
                 $rows .= '<tr>'
                     . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">' . $this->e($r['commercial_name']) . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;text-align:center;font-weight:700;color:#1e40af"><a href="' . htmlspecialchars($this->contactsUrl($data, (int) $r['client_id']), ENT_QUOTES, 'UTF-8') . '">' . (int) $r['new_contacts_count'] . '</a></td>'
+                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;text-align:center;font-weight:700;color:#1e40af"><a style="text-decoration:none;" href="' . htmlspecialchars($this->contactsUrl($data, (int) $r['client_id']), ENT_QUOTES, 'UTF-8') . '">' . (int) $r['new_contacts_count'] . '</a></td>'
                     . '</tr>';
             }
             $body .= $this->buildSection(
