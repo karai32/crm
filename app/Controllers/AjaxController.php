@@ -229,7 +229,7 @@ class AjaxController
         }
     }
 
-    public function geminiCompanyTest(): void
+    public function geminiCompany(): void
     {
         if (!$this->guard()) {
             return;
@@ -261,11 +261,29 @@ class AjaxController
         }
 
         $website = 'https://' . $domain;
+        $prompt = <<<PROMPT
+            You are given an email domain: {$domain}
+            The website to explore is: {$website}
+
+            If the domain looks like it has a small typo (for example a wrong top-level domain
+            such as ".con" instead of ".com", ".ogr" instead of ".org", a missing or duplicated
+            letter, etc.), try the corrected domain(s) as well before giving up.
+
+            Explore the site (original or corrected) and determine the official name of the
+            company it belongs to.
+
+            Respond with ONLY one of the following, and nothing else:
+            - The official company name, if you can confidently determine it.
+            - The exact word "none", if the site is unreachable, unrelated, parked, or you
+              cannot confidently determine a company name.
+
+            Do not make up information. Do not add explanations, punctuation, or extra text.
+            PROMPT;
+
         $payload = [
             'contents' => [[
                 'parts' => [[
-                    'text' => "Explore {$website} and determine the official name of the company. "
-                        . "Answer briefly: ONLY company name. Don't make up information.",
+                    'text' => $prompt,
                 ]],
             ]],
             'tools' => [['url_context' => (object) []]],

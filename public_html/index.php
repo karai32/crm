@@ -230,7 +230,7 @@ $router->get('/ajax/sectors/search', [$ajaxController, 'sectorsSearch']);
 $router->get('/ajax/icons/search', [$ajaxController, 'iconsSearch']);
 $router->get('/ajax/custom-field/values', [$ajaxController, 'customFieldValues']);
 $router->post('/ajax/contacts/inspect-email-batch', [$ajaxController, 'inspectEmailBatch']);
-$router->post('/ajax/contacts/gemini-company-test', [$ajaxController, 'geminiCompanyTest']);
+$router->post('/ajax/contacts/gemini-company', [$ajaxController, 'geminiCompany']);
 
 try {
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
