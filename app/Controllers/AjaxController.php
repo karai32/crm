@@ -357,6 +357,25 @@ class AjaxController
         $this->json(['company' => $company]);
     }
 
+    public function skipContactCompany(): void
+    {
+        if (!$this->guard()) {
+            return;
+        }
+
+        $contactId = (int) ($_POST['contact_id'] ?? 0);
+
+        $contact = $this->contacts->find($contactId);
+        if ($contact === null) {
+            $this->json(['error' => 'Contact not found'], 404);
+            return;
+        }
+
+        $this->contacts->markCompanyReviewed($contactId);
+
+        $this->json(['skipped' => true]);
+    }
+
     private function geminiApiKey(): string
     {
         $environmentKey = getenv('GEMINI_API_KEY');

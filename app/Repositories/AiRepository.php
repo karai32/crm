@@ -2,12 +2,13 @@
 
 class AiRepository
 {
-    // Contacts eligible for AI company lookup: corporate email, no company name.
+    // Contacts eligible for AI company lookup: corporate email, no company name, not yet reviewed.
     private const MISSING_COMPANY_WHERE = "
         contacts.is_corporate_email = 1
         AND TRIM(contacts.company) = ''
         AND contacts.email IS NOT NULL
         AND contacts.email LIKE '%@%'
+        AND contacts.company_change_date IS NULL
     ";
 
     // int

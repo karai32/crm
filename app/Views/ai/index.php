@@ -21,8 +21,10 @@
 <div class="settings-table-card" id="aiCompaniesTable"
     data-endpoint="<?= htmlspecialchars(Auth::url('/ajax/contacts/gemini-company'), ENT_QUOTES, 'UTF-8') ?>"
     data-apply-endpoint="<?= htmlspecialchars(Auth::url('/ajax/contacts/company'), ENT_QUOTES, 'UTF-8') ?>"
+    data-skip-endpoint="<?= htmlspecialchars(Auth::url('/ajax/contacts/company/skip'), ENT_QUOTES, 'UTF-8') ?>"
     data-csrf-token="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>"
-    data-empty-error="<?= htmlspecialchars(t('ai.company_empty'), ENT_QUOTES, 'UTF-8') ?>">
+    data-empty-error="<?= htmlspecialchars(t('ai.company_empty'), ENT_QUOTES, 'UTF-8') ?>"
+    data-empty-message="<?= htmlspecialchars(t('ai.no_found'), ENT_QUOTES, 'UTF-8') ?>">
     <?php if (empty($contacts)): ?>
         <p class="table-empty-state"><?= t('ai.no_found') ?></p>
     <?php else: ?>
@@ -39,7 +41,7 @@
         </thead>
         <tbody>
             <?php foreach ($contacts as $contact): ?>
-                <tr>
+                <tr data-row-id="<?= (int) $contact['id'] ?>" data-row-domain="<?= htmlspecialchars($contact['domain'], ENT_QUOTES, 'UTF-8') ?>">
                     <td class="col-id"><?= (int) $contact['id'] ?></td>
                     <td class="col-name">
                         <a class="col-row-link" target="_blank" href="<?= htmlspecialchars(Auth::url('/contacts/show?id=' . (int) $contact['id']), ENT_QUOTES, 'UTF-8') ?>">
@@ -78,6 +80,12 @@
                                 data-contact-id="<?= (int) $contact['id'] ?>">
                                 <i class="ph ph-check"></i>
                                 <span class="tooltip-text"><?= t('ai.apply') ?></span>
+                            </button>
+                            <button type="button"
+                                class="action-btn action-warn ai-skip-btn"
+                                data-contact-id="<?= (int) $contact['id'] ?>">
+                                <i class="ph ph-x"></i>
+                                <span class="tooltip-text"><?= t('ai.skip') ?></span>
                             </button>
                         </div>
                     </td>

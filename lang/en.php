@@ -30,6 +30,7 @@ return [
     'ai.domain'        => 'Domain',
     'ai.process'       => 'Find company name',
     'ai.apply'         => 'Save company name',
+    'ai.skip'          => 'Mark as not found (remove from list)',
     'ai.company_placeholder' => 'AI answer will appear here...',
     'ai.company_empty' => 'Company name cannot be empty',
     'ai.no_found'      => 'No pending contacts — every corporate email already has a company name.',

@@ -334,8 +334,15 @@ class ContactRepository
     public function updateCompany(int $id, string $company): void
     {
         $pdo = Database::connect();
-        $pdo->prepare('UPDATE contacts SET company = :company WHERE id = :id')
+        $pdo->prepare('UPDATE contacts SET company = :company, company_change_date = NOW() WHERE id = :id')
             ->execute(['company' => $company, 'id' => $id]);
+    }
+
+    public function markCompanyReviewed(int $id): void
+    {
+        $pdo = Database::connect();
+        $pdo->prepare('UPDATE contacts SET company_change_date = NOW() WHERE id = :id')
+            ->execute(['id' => $id]);
     }
 
     private function buildFilterSql(array $filters): array

@@ -232,6 +232,7 @@ $router->get('/ajax/custom-field/values', [$ajaxController, 'customFieldValues']
 $router->post('/ajax/contacts/inspect-email-batch', [$ajaxController, 'inspectEmailBatch']);
 $router->post('/ajax/contacts/gemini-company', [$ajaxController, 'geminiCompany']);
 $router->post('/ajax/contacts/company', [$ajaxController, 'saveContactCompany']);
+$router->post('/ajax/contacts/company/skip', [$ajaxController, 'skipContactCompany']);
 
 try {
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';

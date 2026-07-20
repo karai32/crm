@@ -128,6 +128,7 @@ CREATE TABLE contacts (
     email_status ENUM('valid','invalid','unknown') NULL DEFAULT NULL,
     phone VARCHAR(60) NULL,
     company VARCHAR(255) NOT NULL DEFAULT '',
+    company_change_date DATETIME NULL DEFAULT NULL,
     created_by INT UNSIGNED NULL,
     updated_by INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
