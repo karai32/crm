@@ -10,20 +10,27 @@ class WeeklyReportService
         return rtrim($config['base_url'], '/');
     }
 
-    private function contactsUrl(array $data): string
+    private function dateRangeParams(array $data): array
     {
-        return $this->baseUrl() . '/contacts?' . http_build_query([
+        return [
             'created_from' => date('Y-m-d', strtotime($data['period_from'])),
             'created_to'   => date('Y-m-d', strtotime($data['period_to'])),
-        ]);
+        ];
+    }
+
+    private function contactsUrl(array $data, ?int $clientId = null): string
+    {
+        $params = $this->dateRangeParams($data);
+        if ($clientId !== null) {
+            $params['client_id'] = $clientId;
+        }
+
+        return $this->baseUrl() . '/contacts?' . http_build_query($params);
     }
 
     private function clientsUrl(array $data): string
     {
-        return $this->baseUrl() . '/clients?' . http_build_query([
-            'created_from' => date('Y-m-d', strtotime($data['period_from'])),
-            'created_to'   => date('Y-m-d', strtotime($data['period_to'])),
-        ]);
+        return $this->baseUrl() . '/clients?' . http_build_query($this->dateRangeParams($data));
     }
 
     public function collect(string $from = ''): array
@@ -46,6 +53,7 @@ class WeeklyReportService
         ];
     }
 
+    // array<{full_name, email, company, created_at}>
     private function queryNewContacts(PDO $pdo, string $from, string $to): array
     {
         $stmt = $pdo->prepare("
@@ -62,10 +70,11 @@ class WeeklyReportService
         return $stmt->fetchAll();
     }
 
+    // array<{client_id, commercial_name, new_contacts_count}>
     private function queryTopClients(PDO $pdo, string $from, string $to): array
     {
         $stmt = $pdo->prepare('
-            SELECT c.commercial_name, COUNT(cc.contact_id) AS new_contacts_count
+            SELECT c.id AS client_id, c.commercial_name, COUNT(cc.contact_id) AS new_contacts_count
             FROM clients c
             INNER JOIN client_contacts cc ON cc.client_id = c.id
             INNER JOIN contacts ct        ON ct.id = cc.contact_id
@@ -78,6 +87,7 @@ class WeeklyReportService
         return $stmt->fetchAll();
     }
 
+    // array<{commercial_name, legal_name, created_at}>
     private function queryNewClients(PDO $pdo, string $from, string $to): array
     {
         $stmt = $pdo->prepare('
@@ -90,6 +100,7 @@ class WeeklyReportService
         return $stmt->fetchAll();
     }
 
+    // array<{commercial_name, is_web_connected_date}>
     private function queryWebConnected(PDO $pdo, string $from, string $to): array
     {
         $stmt = $pdo->prepare('
@@ -104,6 +115,7 @@ class WeeklyReportService
         return $stmt->fetchAll();
     }
 
+    // array<{commercial_name, is_active_date}>
     private function queryDeactivated(PDO $pdo, string $from, string $to): array
     {
         $stmt = $pdo->prepare('
@@ -147,7 +159,7 @@ class WeeklyReportService
             foreach ($tc as $r) {
                 $rows .= '<tr>'
                     . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">' . $this->e($r['commercial_name']) . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;text-align:center;font-weight:700;color:#1e40af">' . (int) $r['new_contacts_count'] . '</td>'
+                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;text-align:center;font-weight:700;color:#1e40af"><a href="' . htmlspecialchars($this->contactsUrl($data, (int) $r['client_id']), ENT_QUOTES, 'UTF-8') . '">' . (int) $r['new_contacts_count'] . '</a></td>'
                     . '</tr>';
             }
             $body .= $this->buildSection(

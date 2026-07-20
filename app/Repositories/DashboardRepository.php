@@ -2,26 +2,31 @@
 
 class DashboardRepository
 {
+    // int
     public function countContacts(): int
     {
         return $this->countTable('contacts');
     }
 
+    // int
     public function countClients(): int
     {
         return $this->countTable('clients');
     }
 
+    // int
     public function countSectors(): int
     {
         return $this->countTable('sectors');
     }
 
+    // int
     public function countTags(): int
     {
         return $this->countTable('tags');
     }
 
+    // array<{id, full_name, email, phone, company, created_at}>
     public function latestContacts(int $limit = 25): array
     {
         $pdo = Database::connect();
@@ -40,6 +45,7 @@ class DashboardRepository
         return $statement->fetchAll();
     }
 
+    // array<{id, commercial_name, sector_name, contacts_count}>
     public function clientsWithMostContacts(int $limit = 10): array
     {
         $pdo = Database::connect();
@@ -63,6 +69,7 @@ class DashboardRepository
         return $statement->fetchAll();
     }
 
+    // array<{sector_name, clients_count}>
     public function clientsBySector(int $limit = 20): array
     {
         $pdo = Database::connect();
@@ -83,6 +90,7 @@ class DashboardRepository
         return $statement->fetchAll();
     }
 
+    // int
     private function countTable(string $table): int
     {
         $pdo = Database::connect();

@@ -2,6 +2,7 @@
 
 class CustomFieldRepository
 {
+    // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}>
     public function all(string $sort = 'entity_type', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
@@ -19,6 +20,7 @@ class CustomFieldRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function count(): int
     {
         $pdo  = Database::connect();
@@ -28,6 +30,7 @@ class CustomFieldRepository
         return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
+    // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}>
     public function paginate(int $page, int $perPage, string $sort = 'entity_type', string $dir = 'asc'): array
     {
         $pdo     = Database::connect();
@@ -44,6 +47,7 @@ class CustomFieldRepository
         return $stmt->fetchAll();
     }
 
+    // ?{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}
     public function find(int $id): ?array
     {
         $pdo = Database::connect();
@@ -54,6 +58,7 @@ class CustomFieldRepository
         return $field ?: null;
     }
 
+    // ?{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}
     public function findByEntityAndSlug(string $entityType, string $slug): ?array
     {
         $pdo = Database::connect();
@@ -131,6 +136,7 @@ class CustomFieldRepository
         }
     }
 
+    // array<{id, field_id, value, label, sort_order, created_at}>
     public function optionsForField(int $fieldId): array
     {
         $pdo = Database::connect();
@@ -140,6 +146,7 @@ class CustomFieldRepository
         return $statement->fetchAll();
     }
 
+    // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at, options}>
     public function fieldsForEntity(string $entityType): array
     {
         $pdo = Database::connect();
@@ -156,6 +163,7 @@ class CustomFieldRepository
         return $fields;
     }
 
+    // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at, options}>
     public function filterableFieldsForEntity(string $entityType): array
     {
         $pdo = Database::connect();
@@ -177,6 +185,7 @@ class CustomFieldRepository
         return $fields;
     }
 
+    // array<{id, name}>
     public function distinctTextValues(int $fieldId, string $query = '', int $limit = 20, int $offset = 0): array
     {
         $pdo = Database::connect();
@@ -203,6 +212,7 @@ class CustomFieldRepository
         );
     }
 
+    // array<field_id, {id, field_id, entity_type, entity_id, value_text, value_number, value_date, value_bool, created_at, updated_at}>
     public function valuesForEntity(string $entityType, int $entityId): array
     {
         $pdo = Database::connect();

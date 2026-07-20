@@ -7,6 +7,7 @@ class EntityTagRepository
         'client'  => ['table' => 'client_tags', 'column' => 'client_id'],
     ];
 
+    // array<entity_id, array<{entity_id, id, name, color}>>
     public function tagsForEntities(string $entityType, array $entityIds): array
     {
         $entityIds = IdList::normalize($entityIds);
@@ -33,6 +34,7 @@ class EntityTagRepository
         return $result;
     }
 
+    // array<{entity_id, id, name, color}>
     public function tagsForEntity(string $entityType, int $entityId): array
     {
         return $this->tagsForEntities($entityType, [$entityId])[$entityId] ?? [];

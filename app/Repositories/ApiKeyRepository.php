@@ -2,6 +2,7 @@
 
 class ApiKeyRepository
 {
+    // array<{id, name, client_id, scopes, is_active, last_used_at, created_at}>
     public function all(string $sort = 'created_at', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
@@ -22,6 +23,7 @@ class ApiKeyRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function count(): int
     {
         $pdo  = Database::connect();
@@ -31,6 +33,7 @@ class ApiKeyRepository
         return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
+    // array<{id, name, client_id, scopes, is_active, last_used_at, created_at}>
     public function paginate(int $page, int $perPage, string $sort = 'created_at', string $dir = 'desc'): array
     {
         $pdo     = Database::connect();
@@ -52,6 +55,7 @@ class ApiKeyRepository
         return $stmt->fetchAll();
     }
 
+    // ?{id, name, client_id, secret_hash, scopes, is_active, last_used_at, revoked_at, created_at, updated_at}
     public function findActiveByClientId(string $clientId): ?array
     {
         $pdo = Database::connect();
@@ -138,6 +142,7 @@ class ApiKeyRepository
         $statement->execute(['id' => $id]);
     }
 
+    // array<{id, api_key_id, request_id, method, path, response_status, error_code, items_count, ip_address, duration_ms, request_body, response_body, origin, created_at, key_name, key_client_id}>
     public function pageLogs(int $page, int $perPage, array $filters = []): array
     {
         $pdo = Database::connect();
@@ -164,6 +169,7 @@ class ApiKeyRepository
         return $stmt->fetchAll();
     }
 
+    // int
     public function countLogs(array $filters = []): int
     {
         $pdo = Database::connect();

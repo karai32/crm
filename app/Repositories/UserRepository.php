@@ -2,6 +2,7 @@
 
 class UserRepository
 {
+    // array<{id, name, email, is_active, last_login_at, created_at, role, role_label}>
     public function all(string $sort = 'id', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
@@ -28,6 +29,7 @@ class UserRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function count(): int
     {
         $pdo  = Database::connect();
@@ -37,6 +39,7 @@ class UserRepository
         return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
+    // array<{id, name, email, is_active, last_login_at, created_at, role, role_label}>
     public function paginate(int $page, int $perPage, string $sort = 'id', string $dir = 'asc'): array
     {
         $pdo     = Database::connect();
@@ -65,6 +68,7 @@ class UserRepository
         return $stmt->fetchAll();
     }
 
+    // array<{id, name, label, created_at}>
     public function allRoles(): array
     {
         $pdo = Database::connect();
@@ -75,6 +79,7 @@ class UserRepository
         return $statement->fetchAll();
     }
 
+    // ?{id, role_id, name, email, password_hash, is_active, last_login_at, created_at, updated_at, role}
     public function find(int $id): ?array
     {
         $pdo = Database::connect();
@@ -94,6 +99,7 @@ class UserRepository
         return $user ?: null;
     }
 
+    // ?{id, role_id, name, email, password_hash, is_active, last_login_at, created_at, updated_at, role}
     public function findByEmail(string $email): ?array
     {
         $pdo = Database::connect();
@@ -113,6 +119,7 @@ class UserRepository
         return $user ?: null;
     }
 
+    // ?{id, name, label, created_at}
     public function findRoleByName(string $name): ?array
     {
         $pdo = Database::connect();
@@ -124,6 +131,7 @@ class UserRepository
         return $role ?: null;
     }
 
+    // array<permission_key, bool>
     public function permissionsForUser(int $userId): array
     {
         $pdo = Database::connect();

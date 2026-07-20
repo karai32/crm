@@ -2,6 +2,7 @@
 
 class TagRepository
 {
+    // array<{id, name, slug, color, created_at, updated_at}>
     public function first(int $limit = 50): array
     {
         $statement = Database::connect()->prepare('SELECT * FROM tags ORDER BY name ASC LIMIT :limit');
@@ -11,6 +12,7 @@ class TagRepository
         return $statement->fetchAll();
     }
 
+    // array<{id, name, slug, color, created_at, updated_at}>
     public function all(string $sort = 'name', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
@@ -25,6 +27,7 @@ class TagRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function count(): int
     {
         $pdo  = Database::connect();
@@ -34,6 +37,7 @@ class TagRepository
         return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
+    // array<{id, name, slug, color, created_at, updated_at}>
     public function paginate(int $page, int $perPage, string $sort = 'name', string $dir = 'asc'): array
     {
         $pdo      = Database::connect();
@@ -50,6 +54,7 @@ class TagRepository
         return $stmt->fetchAll();
     }
 
+    // array<{id, name, slug, color, created_at, updated_at}>
     public function filter(string $name = ''): array
     {
         $pdo = Database::connect();
@@ -67,6 +72,7 @@ class TagRepository
         return $statement->fetchAll();
     }
 
+    // ?{id, name, slug, color, created_at, updated_at}
     public function find(int $id): ?array
     {
         $pdo = Database::connect();
@@ -78,6 +84,7 @@ class TagRepository
         return $tag ?: null;
     }
 
+    // ?{id, name, slug, color, created_at, updated_at}
     public function findByName(string $name): ?array
     {
         $pdo = Database::connect();
@@ -89,6 +96,7 @@ class TagRepository
         return $tag ?: null;
     }
 
+    // array<{id, name, slug, color}>
     public function search(string $query, int $limit = 20, int $offset = 0): array
     {
         $pdo = Database::connect();

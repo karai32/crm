@@ -178,6 +178,7 @@ class Auth
 
         try {
             $pdo  = Database::connect();
+            // $user: ?{id, role_id, name, email, password_hash, is_active, last_login_at, created_at, updated_at, role}
             $stmt = $pdo->prepare('
                 SELECT users.*, roles.name AS role
                 FROM users
@@ -203,6 +204,7 @@ class Auth
         self::login($user);
     }
 
+    // array<permission_key, bool>
     private static function userPermissions(): array
     {
         static $cache = [];

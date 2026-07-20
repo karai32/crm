@@ -4,6 +4,7 @@ class SettingsRepository
 {
     private static array $cache = [];
 
+    // string (preference_value), or $default if not set
     public function get(int $userId, string $key, mixed $default = null): mixed
     {
         if (isset(self::$cache[$userId][$key])) {
@@ -38,6 +39,7 @@ class SettingsRepository
         self::$cache[$userId][$key] = (string) $value;
     }
 
+    // array<preference_key, preference_value>
     public function all(int $userId): array
     {
         $pdo  = Database::connect();
@@ -58,6 +60,7 @@ class SettingsRepository
         return $result;
     }
 
+    // int
     public static function perPage(): int
     {
         $user   = Auth::user();

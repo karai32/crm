@@ -2,6 +2,7 @@
 
 class ImportRepository
 {
+    // array<{id, user_id, original_filename, stored_filename, file_type, entity_type, status, total_rows, imported_rows, skipped_rows, error_rows, field_mapping, started_at, finished_at, created_at, user_name}>
     public function allBatches(string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
@@ -26,6 +27,7 @@ class ImportRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function countBatches(): int
     {
         $pdo  = Database::connect();
@@ -35,6 +37,7 @@ class ImportRepository
         return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
+    // array<{id, user_id, original_filename, stored_filename, file_type, entity_type, status, total_rows, imported_rows, skipped_rows, error_rows, field_mapping, started_at, finished_at, created_at, user_name}>
     public function paginateBatches(int $page, int $perPage, string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo     = Database::connect();
@@ -89,6 +92,7 @@ class ImportRepository
         return (int) $pdo->lastInsertId();
     }
 
+    // ?{id, user_id, original_filename, stored_filename, file_type, entity_type, status, total_rows, imported_rows, skipped_rows, error_rows, field_mapping, started_at, finished_at, created_at}
     public function findBatch(int $id): ?array
     {
         $pdo = Database::connect();
@@ -100,6 +104,7 @@ class ImportRepository
         return $batch ?: null;
     }
 
+    // array<{id, import_batch_id, import_row_id, row_number, error_message, created_at, raw_data}>
     public function errorsForBatch(int $batchId): array
     {
         $pdo = Database::connect();

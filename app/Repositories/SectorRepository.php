@@ -2,6 +2,7 @@
 
 class SectorRepository
 {
+    // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function all(string $sort = 'name', string $dir = 'asc'): array
     {
         $pdo = Database::connect();
@@ -19,6 +20,7 @@ class SectorRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function count(): int
     {
         $pdo  = Database::connect();
@@ -28,6 +30,7 @@ class SectorRepository
         return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
+    // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function paginate(int $page, int $perPage, string $sort = 'name', string $dir = 'asc'): array
     {
         $pdo      = Database::connect();
@@ -47,6 +50,7 @@ class SectorRepository
         return $stmt->fetchAll();
     }
 
+    // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function active(): array
     {
         $pdo = Database::connect();
@@ -57,6 +61,7 @@ class SectorRepository
         return $statement->fetchAll();
     }
 
+    // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function filter(string $name = '', mixed $isActive = ''): array
     {
         $pdo = Database::connect();
@@ -81,6 +86,7 @@ class SectorRepository
         return $statement->fetchAll();
     }
 
+    // ?{id, name, slug, icon, is_active, created_at, updated_at}
     public function find(int $id): ?array
     {
         $pdo = Database::connect();
@@ -92,6 +98,7 @@ class SectorRepository
         return $sector ?: null;
     }
 
+    // ?{id, name, slug, icon, is_active, created_at, updated_at}
     public function findByName(string $name): ?array
     {
         $pdo = Database::connect();
@@ -103,6 +110,7 @@ class SectorRepository
         return $sector ?: null;
     }
 
+    // array<{id, name, slug, icon, is_active}>
     public function search(string $query, int $limit = 50): array
     {
         $pdo = Database::connect();
@@ -172,6 +180,7 @@ class SectorRepository
         $statement->execute(['id' => $id]);
     }
 
+    // int
     public function clientsCount(int $id): int
     {
         $pdo = Database::connect();

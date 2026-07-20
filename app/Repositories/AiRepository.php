@@ -10,6 +10,7 @@ class AiRepository
         AND contacts.email LIKE '%@%'
     ";
 
+    // int
     public function countMissingCompany(): int
     {
         $pdo = Database::connect();
@@ -18,6 +19,7 @@ class AiRepository
         return (int) $statement->fetchColumn();
     }
 
+    // int
     public function countMissingCompanyDomains(): int
     {
         $pdo = Database::connect();
@@ -28,6 +30,7 @@ class AiRepository
         return (int) $statement->fetchColumn();
     }
 
+    // array<{id, full_name, email, domain, domain_contacts}>
     public function paginateMissingCompany(int $page, int $perPage, string $sort = 'domain', string $dir = 'asc'): array
     {
         $pdo = Database::connect();

@@ -2,6 +2,7 @@
 
 class ClientRepository
 {
+    // array<{id, commercial_name, legal_name, city, province, country, is_web_connected, is_active, created_at, updated_at, sector_id, sector_name, sector_icon}>
     public function paginate(int $page, int $perPage, array $filters = [], string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
@@ -45,6 +46,7 @@ class ClientRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function countAll(array $filters = []): int
     {
         $pdo = Database::connect();
@@ -60,6 +62,7 @@ class ClientRepository
         return (int) ($row['total'] ?? 0);
     }
 
+    // ?{id, sector_id, commercial_name, legal_name, cif, address, postal_code, city, province, country, website, notes, is_web_connected, is_web_connected_date, is_active, is_active_date, created_by, updated_by, created_at, updated_at, sector_name}
     public function find(int $id): ?array
     {
         $pdo = Database::connect();
@@ -79,6 +82,7 @@ class ClientRepository
         return $client ?: null;
     }
 
+    // ?{id, sector_id, commercial_name, legal_name, cif, address, postal_code, city, province, country, website, notes, is_web_connected, is_web_connected_date, is_active, is_active_date, created_by, updated_by, created_at, updated_at}
     public function findByCommercialName(string $name): ?array
     {
         $pdo = Database::connect();
@@ -90,6 +94,7 @@ class ClientRepository
         return $client ?: null;
     }
 
+    // array<{id, name}>
     public function distinctFieldValues(string $field, string $query = '', int $limit = 20, int $offset = 0): array
     {
         static $allowed = ['country', 'province', 'city'];
@@ -121,6 +126,7 @@ class ClientRepository
         );
     }
 
+    // array<{id, commercial_name, legal_name}>
     public function search(string $query, int $limit = 20, int $offset = 0): array
     {
         $pdo = Database::connect();
@@ -223,6 +229,7 @@ class ClientRepository
         $statement->execute($ids);
     }
 
+    // array<{id, full_name, email, is_corporate_email, email_status, phone, company, created_by, updated_by, created_at, updated_at, relation_label, is_primary}>
     public function contactsForClient(int $clientId): array
     {
         $pdo = Database::connect();

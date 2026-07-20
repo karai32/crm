@@ -54,6 +54,7 @@ class ExportRepository
         $statement->execute(['id' => $id, 'status' => 'failed']);
     }
 
+    // int
     public function count(): int
     {
         $pdo  = Database::connect();
@@ -63,6 +64,7 @@ class ExportRepository
         return (int) ($stmt->fetch()['total'] ?? 0);
     }
 
+    // array<{id, user_id, file_type, entity_type, stored_filename, filters, selected_fields, total_rows, status, created_at, finished_at, user_name}>
     public function paginate(int $page, int $perPage, string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo     = Database::connect();
@@ -89,6 +91,7 @@ class ExportRepository
         return $stmt->fetchAll();
     }
 
+    // array<{id, user_id, file_type, entity_type, stored_filename, filters, selected_fields, total_rows, status, created_at, finished_at, user_name}>
     public function recentExports(int $limit = 15, string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();

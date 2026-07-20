@@ -2,6 +2,7 @@
 
 class ContactRepository
 {
+    // array<{id, full_name, email, phone, created_at, is_corporate_email, email_status}>
     public function paginate(int $page, int $perPage, array $filters = [], string $sort = 'id', string $dir = 'desc'): array
     {
         $pdo = Database::connect();
@@ -37,6 +38,7 @@ class ContactRepository
         return $statement->fetchAll();
     }
 
+    // int
     public function countAll(array $filters = []): int
     {
         $pdo = Database::connect();
@@ -52,6 +54,7 @@ class ContactRepository
         return (int) ($row['total'] ?? 0);
     }
 
+    // ?{id, full_name, email, is_corporate_email, email_status, phone, company, created_by, updated_by, created_at, updated_at}
     public function find(int $id): ?array
     {
         $pdo = Database::connect();
@@ -63,6 +66,7 @@ class ContactRepository
         return $contact ?: null;
     }
 
+    // ?{id, full_name, email, is_corporate_email, email_status, phone, company, created_by, updated_by, created_at, updated_at}
     public function findByName(string $name): ?array
     {
         $pdo = Database::connect();
@@ -78,6 +82,7 @@ class ContactRepository
         return $contact ?: null;
     }
 
+    // bool
     public function emailExists(string $email): bool
     {
         $pdo = Database::connect();
@@ -88,6 +93,7 @@ class ContactRepository
         return (bool) $statement->fetch();
     }
 
+    // bool
     public function emailTakenByOther(string $email, int $excludeId): bool
     {
         $pdo = Database::connect();
@@ -98,6 +104,7 @@ class ContactRepository
         return (bool) $statement->fetch();
     }
 
+    // array<{id, full_name, email, phone}>
     public function search(string $query, int $limit = 10): array
     {
         $pdo = Database::connect();
@@ -200,6 +207,7 @@ class ContactRepository
         }
     }
 
+    // array<contact_id, array<{contact_id, id, commercial_name, sector_icon, sector_name}>>
     public function clientsForContacts(array $contactIds): array
     {
         if (empty($contactIds)) {
@@ -227,6 +235,7 @@ class ContactRepository
         return $result;
     }
 
+    // array<{id, commercial_name, legal_name}>
     public function firstClients(int $limit = 50): array
     {
         $pdo = Database::connect();
@@ -243,6 +252,7 @@ class ContactRepository
         return $statement->fetchAll();
     }
 
+    // array<{id, name}>
     public function allSectors(): array
     {
         $pdo = Database::connect();
@@ -253,6 +263,7 @@ class ContactRepository
         return $statement->fetchAll();
     }
 
+    // array<{id, sector_id, commercial_name, legal_name, cif, address, postal_code, city, province, country, website, notes, is_web_connected, is_web_connected_date, is_active, is_active_date, created_by, updated_by, created_at, updated_at, relation_label, is_primary}>
     public function clientsForContact(int $contactId): array
     {
         $pdo = Database::connect();
@@ -295,6 +306,7 @@ class ContactRepository
         }
     }
 
+    // int
     public function countUninspected(): int
     {
         $pdo  = Database::connect();
@@ -302,6 +314,7 @@ class ContactRepository
         return (int) $stmt->fetchColumn();
     }
 
+    // array<{id, email}>
     public function uninspectedBatch(int $limit): array
     {
         $pdo  = Database::connect();
