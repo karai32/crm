@@ -383,6 +383,7 @@ return [
     // ── Auth (extended) ────────────────────────────────────────────────────────
     'auth.login_title'         => 'Login',
     'auth.invalid_credentials' => 'Invalid email or password.',
+    'auth.too_many_attempts'   => 'Too many failed attempts. Try again in :minutes minute(s).',
     'auth.invalid_code'        => 'Invalid or expired verification code.',
     'auth.please_wait'         => 'Please wait before requesting another code.',
     'auth.code_resent'         => 'A new verification code has been sent.',

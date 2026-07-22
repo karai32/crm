@@ -13,6 +13,7 @@
 /storage/exports/
 /storage/imports/
 /storage/*.log
+/storage/login_throttle.json
 
 # Local editor / FTP settings
 .vscode/sftp.json

@@ -10,6 +10,22 @@ ini_set('session.gc_maxlifetime', 30 * 24 * 3600);
 session_start();
 unset($_sessionPath);
 
+// Baseline security headers. script-src/style-src need 'unsafe-inline' because
+// the views still rely on inline onclick="" handlers and style="" attributes.
+header('X-Frame-Options: SAMEORIGIN');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header("Content-Security-Policy: default-src 'self'; "
+    . "script-src 'self' 'unsafe-inline'; "
+    . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+    . "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+    . "img-src 'self' data:; "
+    . "connect-src 'self'; "
+    . "object-src 'none'; "
+    . "base-uri 'self'; "
+    . "form-action 'self'; "
+    . "frame-ancestors 'self';");
+
 function logApplicationError(string $message): void
 {
     error_log($message);
@@ -45,6 +61,7 @@ require_once __DIR__ . '/../app/Core/View.php';
 require_once __DIR__ . '/../app/Core/Database.php';
 require_once __DIR__ . '/../app/Core/Auth.php';
 require_once __DIR__ . '/../app/Core/Csrf.php';
+require_once __DIR__ . '/../app/Core/LoginThrottle.php';
 require_once __DIR__ . '/../app/Repositories/UserRepository.php';
 require_once __DIR__ . '/../app/Repositories/DashboardRepository.php';
 require_once __DIR__ . '/../app/Repositories/SectorRepository.php';

@@ -383,6 +383,7 @@ return [
     // ── Auth (extended) ────────────────────────────────────────────────────────
     'auth.login_title'         => 'Inicio de sesión',
     'auth.invalid_credentials' => 'Email o contraseña incorrectos.',
+    'auth.too_many_attempts'   => 'Demasiados intentos fallidos. Vuelve a intentarlo en :minutes minuto(s).',
     'auth.invalid_code'        => 'Código de verificación inválido o caducado.',
     'auth.please_wait'         => 'Espera antes de solicitar otro código.',
     'auth.code_resent'         => 'Se ha enviado un nuevo código de verificación.',

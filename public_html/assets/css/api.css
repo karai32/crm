@@ -1,5 +1,18 @@
 ﻿/* ── API Reference ───────────────────────────────────────────────────── */
 
+/* Colours reused across method/status badges, the "new credentials" banner
+   and the active API-key badge. */
+:root {
+    --api-green-bg: #dcfce7;
+    --api-green-text: #15803d;
+    --api-green-text-strong: #166534;
+    --api-green-border: #86efac;
+    --api-amber-bg: #fef3c7;
+    --api-amber-text: #b45309;
+    --api-red-bg: #fee2e2;
+    --api-red-text: #b91c1c;
+}
+
 /* Method badges */
 .api-method {
     display: inline-flex;
@@ -16,8 +29,8 @@
 }
 
 .api-method--get {
-    background: #dcfce7;
-    color: #15803d;
+    background: var(--api-green-bg);
+    color: var(--api-green-text);
 }
 
 .api-method--post {
@@ -26,13 +39,13 @@
 }
 
 .api-method--patch {
-    background: #fef3c7;
-    color: #b45309;
+    background: var(--api-amber-bg);
+    color: var(--api-amber-text);
 }
 
 .api-method--delete {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--api-red-bg);
+    color: var(--api-red-text);
 }
 
 /* Endpoint rows */
@@ -364,7 +377,7 @@
     gap: 14px;
     align-items: flex-start;
     background: var(--color-alert-bg);
-    border: 1px solid #86efac;
+    border: 1px solid var(--api-green-border);
     border-radius: var(--radius-lg);
     padding: 16px 20px;
     margin-bottom: 20px;
@@ -378,13 +391,13 @@
 .api-new-credentials-title {
     font-size: 14px;
     font-weight: 700;
-    color: #166534;
+    color: var(--api-green-text-strong);
     margin-bottom: 3px;
 }
 
 .api-new-credentials-subtitle {
     font-size: 12.5px;
-    color: #15803d;
+    color: var(--api-green-text);
     margin-bottom: 12px;
 }
 
@@ -397,12 +410,12 @@
 
 .api-new-credentials-label {
     font-size: 12px;
-    color: #166534;
+    color: var(--api-green-text-strong);
 }
 
 .api-new-credentials-code {
-    background: #dcfce7;
-    border: 1px solid #86efac;
+    background: var(--api-green-bg);
+    border: 1px solid var(--api-green-border);
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 12.5px;
@@ -413,9 +426,9 @@
 .api-new-credentials-copy {
     padding: 6px 14px;
     border-radius: 6px;
-    border: 1px solid #86efac;
-    background: #dcfce7;
-    color: #166534;
+    border: 1px solid var(--api-green-border);
+    background: var(--api-green-bg);
+    color: var(--api-green-text-strong);
     font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
@@ -527,8 +540,8 @@
 /* API keys table: active badge */
 .tag-badge.api-badge-active {
     background: var(--color-alert-bg);
-    border-color: #86efac;
-    color: #166534;
+    border-color: var(--api-green-border);
+    color: var(--api-green-text-strong);
 }
 
 /* API keys table: revoked badge */
@@ -806,8 +819,8 @@
 .api-log-error-code {
     font-family: var(--font-mono, monospace);
     font-size: 11.5px;
-    color: #b91c1c;
-    background: #fee2e2;
+    color: var(--api-red-text);
+    background: var(--api-red-bg);
     padding: 1px 5px;
     border-radius: 3px;
 }
@@ -833,18 +846,18 @@
 }
 
 .api-status--ok {
-    background: #dcfce7;
-    color: #15803d;
+    background: var(--api-green-bg);
+    color: var(--api-green-text);
 }
 
 .api-status--warn {
-    background: #fef3c7;
-    color: #b45309;
+    background: var(--api-amber-bg);
+    color: var(--api-amber-text);
 }
 
 .api-status--err {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--api-red-bg);
+    color: var(--api-red-text);
 }
 
 /* Pagination */

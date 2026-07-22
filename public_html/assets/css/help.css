@@ -1,5 +1,47 @@
 ﻿/* ── Help Centre ────────────────────────────────────────────────────── */
 
+/* Colour palette shared by the icon/check/step badges (--card-icon, --check,
+   --step) and by the tip callouts (--tip, a deeper shade of the same hues). */
+:root {
+    --badge-violet-bg: #ede9fe;
+    --badge-violet-text: #7c3aed;
+    --badge-blue-bg: #dbeafe;
+    --badge-green-bg: #dcfce7;
+    --badge-green-text: #16a34a;
+    --badge-amber-bg: #fef3c7;
+    --badge-amber-text: #d97706;
+    --badge-teal-bg: #ccfbf1;
+    --badge-teal-text: #0d9488;
+    --badge-indigo-bg: #e0e7ff;
+    --badge-indigo-text: #4f46e5;
+    --badge-sky-bg: #e0f2fe;
+    --badge-sky-text: #0284c7;
+    --badge-cyan-bg: #cffafe;
+    --badge-cyan-text: #0891b2;
+    --badge-slate-bg: #f1f5f9;
+    --badge-slate-text: #475569;
+    --badge-red-bg: #fee2e2;
+    --badge-red-text: #dc2626;
+
+    --tip-violet-bg: #f5f3ff;
+    --tip-violet-text: #5b21b6;
+    --tip-blue-bg: #eff6ff;
+    --tip-blue-text: #1e40af;
+    --tip-green-text: #166534;
+    --tip-amber-bg: #fffbeb;
+    --tip-amber-text: #92400e;
+    --tip-teal-bg: #f0fdfa;
+    --tip-teal-text: #134e4a;
+    --tip-indigo-text: #3730a3;
+    --tip-sky-bg: #f0f9ff;
+    --tip-sky-text: #075985;
+    --tip-cyan-bg: #ecfeff;
+    --tip-cyan-text: #164e63;
+    --tip-slate-bg: #f8fafc;
+    --tip-slate-text: #334155;
+    --tip-red-text: #991b1b;
+}
+
 /* Hero header */
 .help-hero {
     display: flex;
@@ -215,7 +257,7 @@
 }
 
 .help-toc-item--slate.is-active {
-    color: #334155;
+    color: var(--tip-slate-text);
 }
 
 .help-toc-item--red.is-active .help-toc-dot {
@@ -278,53 +320,53 @@
 
 /* Icon colour variants */
 .help-card-icon--violet {
-    background: #ede9fe;
-    color: #7c3aed;
+    background: var(--badge-violet-bg);
+    color: var(--badge-violet-text);
 }
 
 .help-card-icon--blue {
-    background: #dbeafe;
+    background: var(--badge-blue-bg);
     color: var(--color-accent);
 }
 
 .help-card-icon--green {
-    background: #dcfce7;
-    color: #16a34a;
+    background: var(--badge-green-bg);
+    color: var(--badge-green-text);
 }
 
 .help-card-icon--amber {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--badge-amber-bg);
+    color: var(--badge-amber-text);
 }
 
 .help-card-icon--teal {
-    background: #ccfbf1;
-    color: #0d9488;
+    background: var(--badge-teal-bg);
+    color: var(--badge-teal-text);
 }
 
 .help-card-icon--indigo {
-    background: #e0e7ff;
-    color: #4f46e5;
+    background: var(--badge-indigo-bg);
+    color: var(--badge-indigo-text);
 }
 
 .help-card-icon--sky {
-    background: #e0f2fe;
-    color: #0284c7;
+    background: var(--badge-sky-bg);
+    color: var(--badge-sky-text);
 }
 
 .help-card-icon--cyan {
-    background: #cffafe;
-    color: #0891b2;
+    background: var(--badge-cyan-bg);
+    color: var(--badge-cyan-text);
 }
 
 .help-card-icon--slate {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--badge-slate-bg);
+    color: var(--badge-slate-text);
 }
 
 .help-card-icon--red {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--badge-red-bg);
+    color: var(--badge-red-text);
 }
 
 .help-card-titles {
@@ -388,53 +430,53 @@
 
 /* Check colours */
 .help-check--violet {
-    background: #ede9fe;
-    color: #7c3aed;
+    background: var(--badge-violet-bg);
+    color: var(--badge-violet-text);
 }
 
 .help-check--blue {
-    background: #dbeafe;
+    background: var(--badge-blue-bg);
     color: var(--color-accent);
 }
 
 .help-check--green {
-    background: #dcfce7;
-    color: #16a34a;
+    background: var(--badge-green-bg);
+    color: var(--badge-green-text);
 }
 
 .help-check--amber {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--badge-amber-bg);
+    color: var(--badge-amber-text);
 }
 
 .help-check--teal {
-    background: #ccfbf1;
-    color: #0d9488;
+    background: var(--badge-teal-bg);
+    color: var(--badge-teal-text);
 }
 
 .help-check--indigo {
-    background: #e0e7ff;
-    color: #4f46e5;
+    background: var(--badge-indigo-bg);
+    color: var(--badge-indigo-text);
 }
 
 .help-check--sky {
-    background: #e0f2fe;
-    color: #0284c7;
+    background: var(--badge-sky-bg);
+    color: var(--badge-sky-text);
 }
 
 .help-check--cyan {
-    background: #cffafe;
-    color: #0891b2;
+    background: var(--badge-cyan-bg);
+    color: var(--badge-cyan-text);
 }
 
 .help-check--slate {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--badge-slate-bg);
+    color: var(--badge-slate-text);
 }
 
 .help-check--red {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--badge-red-bg);
+    color: var(--badge-red-text);
 }
 
 .help-list-item strong {
@@ -478,53 +520,53 @@
 
 /* Tip colour variants */
 .help-tip--violet {
-    background: #f5f3ff;
-    color: #5b21b6;
+    background: var(--tip-violet-bg);
+    color: var(--tip-violet-text);
 }
 
 .help-tip--blue {
-    background: #eff6ff;
-    color: #1e40af;
+    background: var(--tip-blue-bg);
+    color: var(--tip-blue-text);
 }
 
 .help-tip--green {
     background: var(--color-alert-bg);
-    color: #166534;
+    color: var(--tip-green-text);
 }
 
 .help-tip--amber {
-    background: #fffbeb;
-    color: #92400e;
+    background: var(--tip-amber-bg);
+    color: var(--tip-amber-text);
 }
 
 .help-tip--teal {
-    background: #f0fdfa;
-    color: #134e4a;
+    background: var(--tip-teal-bg);
+    color: var(--tip-teal-text);
 }
 
 .help-tip--indigo {
     background: var(--color-accent-bg);
-    color: #3730a3;
+    color: var(--tip-indigo-text);
 }
 
 .help-tip--sky {
-    background: #f0f9ff;
-    color: #075985;
+    background: var(--tip-sky-bg);
+    color: var(--tip-sky-text);
 }
 
 .help-tip--cyan {
-    background: #ecfeff;
-    color: #164e63;
+    background: var(--tip-cyan-bg);
+    color: var(--tip-cyan-text);
 }
 
 .help-tip--slate {
-    background: #f8fafc;
-    color: #334155;
+    background: var(--tip-slate-bg);
+    color: var(--tip-slate-text);
 }
 
 .help-tip--red {
     background: var(--color-danger-bg);
-    color: #991b1b;
+    color: var(--tip-red-text);
 }
 
 /* ── Help hub (card grid index) ─────────────────────────────────────── */
@@ -920,44 +962,44 @@
 }
 
 .help-step--violet::before {
-    background: #ede9fe;
-    color: #7c3aed;
+    background: var(--badge-violet-bg);
+    color: var(--badge-violet-text);
 }
 .help-step--blue::before {
-    background: #dbeafe;
+    background: var(--badge-blue-bg);
     color: var(--color-accent);
 }
 .help-step--green::before {
-    background: #dcfce7;
-    color: #16a34a;
+    background: var(--badge-green-bg);
+    color: var(--badge-green-text);
 }
 .help-step--amber::before {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--badge-amber-bg);
+    color: var(--badge-amber-text);
 }
 .help-step--teal::before {
-    background: #ccfbf1;
-    color: #0d9488;
+    background: var(--badge-teal-bg);
+    color: var(--badge-teal-text);
 }
 .help-step--indigo::before {
-    background: #e0e7ff;
-    color: #4f46e5;
+    background: var(--badge-indigo-bg);
+    color: var(--badge-indigo-text);
 }
 .help-step--sky::before {
-    background: #e0f2fe;
-    color: #0284c7;
+    background: var(--badge-sky-bg);
+    color: var(--badge-sky-text);
 }
 .help-step--cyan::before {
-    background: #cffafe;
-    color: #0891b2;
+    background: var(--badge-cyan-bg);
+    color: var(--badge-cyan-text);
 }
 .help-step--slate::before {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--badge-slate-bg);
+    color: var(--badge-slate-text);
 }
 .help-step--red::before {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--badge-red-bg);
+    color: var(--badge-red-text);
 }
 
 /* Callout box (tip / info) */
@@ -990,44 +1032,44 @@
 }
 
 .help-callout--violet {
-    background: #f5f3ff;
-    color: #5b21b6;
+    background: var(--tip-violet-bg);
+    color: var(--tip-violet-text);
 }
 .help-callout--blue {
-    background: #eff6ff;
-    color: #1e40af;
+    background: var(--tip-blue-bg);
+    color: var(--tip-blue-text);
 }
 .help-callout--green {
     background: var(--color-alert-bg);
-    color: #166534;
+    color: var(--tip-green-text);
 }
 .help-callout--amber {
-    background: #fffbeb;
-    color: #92400e;
+    background: var(--tip-amber-bg);
+    color: var(--tip-amber-text);
 }
 .help-callout--teal {
-    background: #f0fdfa;
-    color: #134e4a;
+    background: var(--tip-teal-bg);
+    color: var(--tip-teal-text);
 }
 .help-callout--indigo {
     background: var(--color-accent-bg);
-    color: #3730a3;
+    color: var(--tip-indigo-text);
 }
 .help-callout--sky {
-    background: #f0f9ff;
-    color: #075985;
+    background: var(--tip-sky-bg);
+    color: var(--tip-sky-text);
 }
 .help-callout--cyan {
-    background: #ecfeff;
-    color: #164e63;
+    background: var(--tip-cyan-bg);
+    color: var(--tip-cyan-text);
 }
 .help-callout--slate {
-    background: #f8fafc;
-    color: #334155;
+    background: var(--tip-slate-bg);
+    color: var(--tip-slate-text);
 }
 .help-callout--red {
     background: var(--color-danger-bg);
-    color: #991b1b;
+    color: var(--tip-red-text);
 }
 
 /* Sub-label inside a card body (lighter than api-label) */

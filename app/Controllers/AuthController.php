@@ -28,9 +28,22 @@ class AuthController
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
+        if (LoginThrottle::isLocked($email)) {
+            $minutes = (int) ceil(LoginThrottle::secondsRemaining($email) / 60);
+
+            View::render('auth/login', [
+                'title' => Lang::get('auth.login_title'),
+                'error' => Lang::get('auth.too_many_attempts', ['minutes' => max(1, $minutes)]),
+                'email' => $email,
+            ], 'auth');
+            return;
+        }
+
         $user = $this->authService->attemptLogin($email, $password);
 
         if ($user === null) {
+            LoginThrottle::recordFailure($email);
+
             View::render('auth/login', [
                 'title' => Lang::get('auth.login_title'),
                 'error' => Lang::get('auth.invalid_credentials'),
@@ -38,6 +51,8 @@ class AuthController
             ], 'auth');
             return;
         }
+
+        LoginThrottle::clear($email);
 
         // 2FA temporarily disabled — skip email verification
         // if (!$this->twoFactorService->start($user)) {
