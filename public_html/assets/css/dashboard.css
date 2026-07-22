@@ -200,7 +200,7 @@ a.stat-card:hover {
     visibility: hidden;
     white-space: nowrap;
     background-color: #1e293b;
-    color: #fff;
+    color: var(--color-white);
     text-align: center;
     border-radius: 5px;
     padding: 4px 8px;
@@ -328,7 +328,7 @@ a.stat-card:hover {
     justify-content: center;
     font-size: 12px;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-white);
     flex-shrink: 0;
     letter-spacing: 0.02em;
 }

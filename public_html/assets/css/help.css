@@ -65,7 +65,7 @@
 
 .help-lang-pill.active {
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
 }
 
 /* Layout */
@@ -187,7 +187,7 @@
 }
 
 .help-toc-item--indigo.is-active .help-toc-dot {
-    background: #2563eb;
+    background: var(--color-accent);
 }
 
 .help-toc-item--indigo.is-active {
@@ -211,7 +211,7 @@
 }
 
 .help-toc-item--slate.is-active .help-toc-dot {
-    background: #64748b;
+    background: var(--color-neutral);
 }
 
 .help-toc-item--slate.is-active {
@@ -219,7 +219,7 @@
 }
 
 .help-toc-item--red.is-active .help-toc-dot {
-    background: #ef4444;
+    background: var(--color-danger);
 }
 
 .help-toc-item--red.is-active {
@@ -284,7 +284,7 @@
 
 .help-card-icon--blue {
     background: #dbeafe;
-    color: #2563eb;
+    color: var(--color-accent);
 }
 
 .help-card-icon--green {
@@ -394,7 +394,7 @@
 
 .help-check--blue {
     background: #dbeafe;
-    color: #2563eb;
+    color: var(--color-accent);
 }
 
 .help-check--green {
@@ -488,7 +488,7 @@
 }
 
 .help-tip--green {
-    background: #f0fdf4;
+    background: var(--color-alert-bg);
     color: #166534;
 }
 
@@ -503,7 +503,7 @@
 }
 
 .help-tip--indigo {
-    background: #ebf2ff;
+    background: var(--color-accent-bg);
     color: #3730a3;
 }
 
@@ -523,7 +523,7 @@
 }
 
 .help-tip--red {
-    background: #fef2f2;
+    background: var(--color-danger-bg);
     color: #991b1b;
 }
 
@@ -925,7 +925,7 @@
 }
 .help-step--blue::before {
     background: #dbeafe;
-    color: #2563eb;
+    color: var(--color-accent);
 }
 .help-step--green::before {
     background: #dcfce7;
@@ -998,7 +998,7 @@
     color: #1e40af;
 }
 .help-callout--green {
-    background: #f0fdf4;
+    background: var(--color-alert-bg);
     color: #166534;
 }
 .help-callout--amber {
@@ -1010,7 +1010,7 @@
     color: #134e4a;
 }
 .help-callout--indigo {
-    background: #ebf2ff;
+    background: var(--color-accent-bg);
     color: #3730a3;
 }
 .help-callout--sky {
@@ -1026,7 +1026,7 @@
     color: #334155;
 }
 .help-callout--red {
-    background: #fef2f2;
+    background: var(--color-danger-bg);
     color: #991b1b;
 }
 

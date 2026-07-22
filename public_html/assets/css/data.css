@@ -369,7 +369,7 @@
 }
 
 .export-entity-clients {
-    background: #d1fae5;
+    background: var(--color-success-bg);
     color: #065f46;
 }
 

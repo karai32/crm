@@ -102,7 +102,7 @@ h3 {
 /* --- Sidebar ------------------------------------------ */
 .sidebar {
     width: var(--sidebar-collapsed);
-    background: #ffffff;
+    background: var(--color-white);
     border-right: 1px solid var(--color-neutral-200);
     display: flex;
     flex-direction: column;
@@ -150,13 +150,13 @@ h3 {
 .sidebar-logo svg {
     width: 20px;
     height: 20px;
-    color: #fff;
+    color: var(--color-white);
 }
 
 .sidebar-logo i {
     font-size: 20px;
     line-height: 1;
-    color: #fff;
+    color: var(--color-white);
 }
 
 .sidebar-brand-text {
@@ -244,14 +244,14 @@ h3 {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
-    color: #6b7280;
+    color: var(--color-text-muted);
     transition: color 0.15s;
 }
 
 .nav-item i {
     font-size: 20px;
     line-height: 1;
-    color: #6b7280;
+    color: var(--color-text-muted);
     transition: color 0.15s;
 }
 
@@ -360,7 +360,7 @@ h3 {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
-    color: #6b7280;
+    color: var(--color-text-muted);
     transition: color 0.15s;
 }
 
@@ -383,7 +383,7 @@ h3 {
 }
 
 .sidebar-user-action--danger:hover {
-    background: #fef2f2;
+    background: var(--color-danger-bg);
     color: var(--color-danger);
 }
 
@@ -392,7 +392,7 @@ h3 {
     height: 42px;
     border-radius: var(--radius-sm);
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
     font-size: 12.5px;
     font-weight: 600;
     display: flex;
@@ -444,7 +444,7 @@ h3 {
 /* --- Topbar ------------------------------------------- */
 .topbar {
     height: var(--topbar-height);
-    background: #eceff1;
+    background: var(--color-bg);
     border-bottom: 1px solid #d8dde0;
     display: flex;
     align-items: center;
@@ -649,7 +649,7 @@ h3 {
     height: 36px;
     border-radius: var(--radius-sm);
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
     font-size: 12.5px;
     font-weight: 600;
     display: flex;
@@ -768,7 +768,7 @@ h3 {
 }
 
 .profile-dropdown-item--danger:hover {
-    background: #fef2f2;
+    background: var(--color-danger-bg);
 }
 
 /* --- Sidebar Overlay (mobile) ------------------------- */
@@ -841,7 +841,7 @@ body.sidebar-open .sidebar-overlay {
 
 .btn-primary {
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
 }
 
 .btn-primary:hover {
@@ -860,7 +860,7 @@ body.sidebar-open .sidebar-overlay {
 
 .btn-green {
     background: var(--color-success);
-    color: #fff;
+    color: var(--color-white);
 }
 
 .btn-green:hover {
@@ -879,7 +879,7 @@ body.sidebar-open .sidebar-overlay {
 
 .btn-danger {
     background: var(--color-danger);
-    color: #fff;
+    color: var(--color-white);
 }
 
 .btn-danger:hover {
@@ -957,7 +957,7 @@ body.sidebar-open .sidebar-overlay {
     visibility: hidden;
     white-space: nowrap;
     background-color: #1e293b;
-    color: #fff;
+    color: var(--color-white);
     text-align: center;
     border-radius: 5px;
     padding: 4px 8px;
@@ -1018,8 +1018,8 @@ body.sidebar-open .sidebar-overlay {
 }
 
 .action-view {
-    background: #ebf2ff;
-    color: #2563eb;
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
 }
 
 .action-view:hover {
@@ -1073,12 +1073,12 @@ body.sidebar-open .sidebar-overlay {
 
 .btn-icon-edit {
     background: var(--color-accent);
-    color: #fff;
+    color: var(--color-white);
 }
 
 .btn-icon-delete {
     background: var(--color-danger);
-    color: #fff;
+    color: var(--color-white);
 }
 
 /* --- Alerts ------------------------------------------- */
@@ -1302,7 +1302,7 @@ textarea {
     padding: 0 5px;
     border-radius: 20px;
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
     font-size: 11px;
     font-weight: 700;
     line-height: 1;
@@ -1682,7 +1682,7 @@ textarea {
     flex-shrink: 0;
     border: 1.5px solid var(--color-neutral-300);
     border-radius: 4px;
-    background: #fff;
+    background: var(--color-white);
     cursor: pointer;
     position: relative;
     transition:
@@ -1708,7 +1708,7 @@ textarea {
     top: 1px;
     width: 5px;
     height: 9px;
-    border: 2px solid #fff;
+    border: 2px solid var(--color-white);
     border-top: none;
     border-left: none;
     transform: rotate(45deg);
@@ -1721,7 +1721,7 @@ textarea {
     top: 5px;
     width: 8px;
     height: 2px;
-    background: #fff;
+    background: var(--color-white);
     border-radius: 1px;
 }
 
@@ -1857,7 +1857,7 @@ tbody tr:hover td {
 
 .page-btn.active {
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
     border-color: var(--color-ink);
 }
 
@@ -1938,7 +1938,7 @@ tbody tr:hover td {
     height: 38px;
     border-radius: var(--radius-sm);
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1953,7 +1953,7 @@ tbody tr:hover td {
 .auth-logo i {
     font-size: 21px;
     line-height: 1;
-    color: #fff;
+    color: var(--color-white);
 }
 
 .auth-brand-title,
@@ -2484,7 +2484,7 @@ tbody tr:hover td {
     color: #854d0e;
 }
 .status-client {
-    background: #d1fae5;
+    background: var(--color-success-bg);
     color: #065f46;
 }
 .status-partner {
@@ -2669,7 +2669,7 @@ tbody tr:hover td {
     width: 15px;
     height: 15px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--color-white);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
     transition: transform 0.2s;
 }

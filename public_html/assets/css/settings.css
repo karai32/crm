@@ -129,7 +129,7 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
-    background: #d1fae5;
+    background: var(--color-success-bg);
     color: #065f46;
 }
 
@@ -270,7 +270,7 @@ input[type='color'].color-picker-input {
 .inspect-bar-fill {
     height: 100%;
     width: 0;
-    background: var(--color-accent, #2563eb);
+    background: var(--color-accent);
     border-radius: 3px;
     transition: width 0.3s ease;
 }
@@ -366,11 +366,11 @@ input[type='color'].color-picker-input {
 }
 
 .badge-contact {
-    background: #ebf2ff;
+    background: var(--color-accent-bg);
     color: #1d4ed8;
 }
 .badge-client {
-    background: #d1fae5;
+    background: var(--color-success-bg);
     color: #065f46;
 }
 
@@ -485,14 +485,14 @@ input[type='color'].color-picker-input {
 .permission-icon-clients-edit,
 .permission-icon-clients-delete {
     background: var(--color-success-bg);
-    color: #059669;
+    color: var(--color-success);
     border-color: #a7f3d0;
 }
 
 .permission-icon-exports-use,
 .permission-icon-imports-manage {
     background: #eff6ff;
-    color: #2563eb;
+    color: var(--color-accent);
     border-color: #bfdbfe;
 }
 
@@ -828,13 +828,13 @@ input[type='color'].color-picker-input {
 }
 
 .settings-notice--success {
-    background: #f0fdf4;
+    background: var(--color-alert-bg);
     color: #166534;
     border: 1px solid #bbf7d0;
 }
 
 .settings-notice--error {
-    background: #fef2f2;
+    background: var(--color-danger-bg);
     color: #991b1b;
     border: 1px solid #fecaca;
 }

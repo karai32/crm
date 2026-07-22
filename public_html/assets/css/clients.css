@@ -121,7 +121,7 @@
     height: 50px;
     border-radius: 10px;
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
     font-size: 22px;
     display: flex;
     align-items: center;
@@ -413,7 +413,7 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
-    background: #d1fae5;
+    background: var(--color-success-bg);
     color: #065f46;
     white-space: nowrap;
 }

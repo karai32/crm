@@ -176,7 +176,7 @@
 /* Code blocks */
 .api-code {
     background: #1a202c;
-    color: #e2e8f0;
+    color: var(--color-neutral-200);
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     padding: 14px 16px;
     font-size: 12px;
@@ -224,7 +224,7 @@
 
 .api-code-copy:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: #e2e8f0;
+    color: var(--color-neutral-200);
 }
 
 /* Syntax hint colours */
@@ -244,7 +244,7 @@
 
 /* number / bool */
 .cc {
-    color: #64748b;
+    color: var(--color-neutral);
 }
 
 /* comment */
@@ -363,7 +363,7 @@
     display: flex;
     gap: 14px;
     align-items: flex-start;
-    background: #f0fdf4;
+    background: var(--color-alert-bg);
     border: 1px solid #86efac;
     border-radius: var(--radius-lg);
     padding: 16px 20px;
@@ -526,7 +526,7 @@
 
 /* API keys table: active badge */
 .tag-badge.api-badge-active {
-    background: #f0fdf4;
+    background: var(--color-alert-bg);
     border-color: #86efac;
     color: #166534;
 }
@@ -621,7 +621,7 @@
     flex: 1;
     max-width: 220px;
     color: var(--color-text);
-    background: #fff;
+    background: var(--color-white);
 }
 
 .api-key-inline-input:focus {
@@ -633,7 +633,7 @@
     padding: 4px 11px;
     cursor: pointer;
     background: var(--color-ink);
-    color: #fff;
+    color: var(--color-white);
     border: 0;
     border-radius: var(--radius-sm);
     white-space: nowrap;
@@ -642,7 +642,7 @@
 
 .api-key-inline-save:hover {
     background: var(--color-ink-hover);
-    color: #fff;
+    color: var(--color-white);
 }
 
 .api-key-inline-cancel {
