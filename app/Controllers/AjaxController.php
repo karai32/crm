@@ -527,8 +527,9 @@ class AjaxController
         $sectorId = $client['sector_id'];
         if ($sectorName !== '') {
             $sectorId = null;
+            $sectorNameLower = $this->lower($sectorName);
             foreach ($this->sectors->active() as $sector) {
-                if (mb_strtolower($sector['name']) === mb_strtolower($sectorName)) {
+                if ($this->lower($sector['name']) === $sectorNameLower) {
                     $sectorId = (int) $sector['id'];
                     break;
                 }
@@ -547,6 +548,11 @@ class AjaxController
         $this->clients->update($clientId, $data);
 
         $this->json(['website' => $website, 'sector' => $sectorName]);
+    }
+
+    private function lower(string $value): string
+    {
+        return function_exists('mb_strtolower') ? mb_strtolower($value) : strtolower($value);
     }
 
     private function geminiApiKey(): string

@@ -246,9 +246,15 @@
             body: body.toString(),
         })
             .then(function (response) {
-                return response.json().then(function (data) {
+                return response.text().then(function (text) {
+                    var data;
+                    try {
+                        data = text ? JSON.parse(text) : {};
+                    } catch (parseError) {
+                        throw new Error('Server error ' + response.status + ' (non-JSON response) — see console');
+                    }
                     if (!response.ok) {
-                        throw new Error(data.error || 'Save failed');
+                        throw new Error(data.error || 'Save failed (' + response.status + ')');
                     }
                     return data;
                 });
@@ -263,6 +269,7 @@
             .catch(function (error) {
                 websiteInput.classList.add('is-invalid');
                 websiteInput.placeholder = error.message;
+                console.error('[AI clients] #' + clientId + ' save failed:', error.message);
             })
             .finally(function () {
                 btn.disabled = false;
