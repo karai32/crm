@@ -97,16 +97,30 @@
                 if (sectorInput && data.sector) {
                     sectorInput.value = data.sector;
                 }
+                logResult(clientId, data);
             })
             .catch(function (error) {
                 if (websiteInput) {
                     websiteInput.placeholder = error.message;
                 }
+                console.error('[AI clients] #' + clientId + ' request failed:', error.message);
             })
             .finally(function () {
                 btn.disabled = false;
                 icon.className = 'ph ph-sparkle';
             });
+    }
+
+    function logResult(clientId, data) {
+        var row = card.querySelector('tr[data-row-id="' + clientId + '"]');
+        var nameEl = row && row.querySelector('.col-name');
+        var name = nameEl ? nameEl.textContent.trim() : '';
+        var found = !!(data.website || data.sector);
+
+        console.log(
+            '[AI clients] #' + clientId + ' ' + name + ' — ' + (found ? 'found' : 'nothing found'),
+            { website: data.website || null, sector: data.sector || null, answer: data.answer || null }
+        );
     }
 
     function waitForAutoSlot() {
