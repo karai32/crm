@@ -4,6 +4,16 @@
         <h1><?= t('ai.title') ?></h1>
         <span class="count-label"><?= t('ai.subtitle') ?></span>
     </div>
+    <?php if (!empty($contacts)): ?>
+        <div class="page-actions">
+            <button type="button" class="btn btn-primary" id="aiAutoBtn"
+                data-label-start="<?= htmlspecialchars(t('ai.auto_start'), ENT_QUOTES, 'UTF-8') ?>"
+                data-label-stop="<?= htmlspecialchars(t('ai.auto_stop'), ENT_QUOTES, 'UTF-8') ?>">
+                <i class="ph ph-play"></i>
+                <span class="ai-auto-label"><?= t('ai.auto_start') ?></span>
+            </button>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Summary -->

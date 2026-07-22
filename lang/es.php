@@ -31,6 +31,8 @@ return [
     'ai.process'       => 'Buscar nombre de empresa',
     'ai.apply'         => 'Guardar nombre de empresa',
     'ai.skip'          => 'Marcar como no encontrado (quitar de la lista)',
+    'ai.auto_start'    => 'Auto',
+    'ai.auto_stop'     => 'Detener',
     'ai.company_placeholder' => 'La respuesta de la IA aparecerá aquí...',
     'ai.company_empty' => 'El nombre de la empresa no puede estar vacío',
     'ai.no_found'      => 'No hay contactos pendientes: todos los emails corporativos ya tienen empresa.',
