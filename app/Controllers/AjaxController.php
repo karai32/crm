@@ -376,6 +376,179 @@ class AjaxController
         $this->json(['skipped' => true]);
     }
 
+    public function geminiClientEnrich(): void
+    {
+        if (!$this->guard()) {
+            return;
+        }
+
+        $client = $this->clients->find((int) ($_POST['client_id'] ?? 0));
+        if ($client === null) {
+            $this->json(['error' => 'Client not found'], 404);
+            return;
+        }
+
+        $apiKey = $this->geminiApiKey();
+        if ($apiKey === '') {
+            $this->json(['error' => 'Gemini API key is not configured'], 500);
+            return;
+        }
+
+        if (!function_exists('curl_init')) {
+            $this->json(['error' => 'PHP cURL extension is not installed'], 500);
+            return;
+        }
+
+        $csvPath = dirname(__DIR__, 2) . '/storage/ai/client_websites.csv';
+        $csvContent = is_file($csvPath) ? file_get_contents($csvPath) : '';
+
+        $sectorNames = array_map(fn ($sector) => $sector['name'], $this->sectors->active());
+        $sectorList = implode(', ', $sectorNames);
+
+        $commercialName = (string) $client['commercial_name'];
+        $legalName = (string) ($client['legal_name'] ?? '');
+
+        $prompt = <<<PROMPT
+            You are helping enrich a CRM client record with a website and a business sector.
+
+            Client commercial name: {$commercialName}
+            Client legal name: {$legalName}
+
+            Below is a CSV list of "Company name","Website URL" pairs. It does not cover every
+            client, and names in it may not match the client name above exactly (typos,
+            abbreviations, extra words, missing accents, different legal form). Use your best
+            judgement to find the row that most likely refers to the same company as the client
+            above.
+
+            CSV:
+            {$csvContent}
+
+            Step 1: Find the CSV row that most likely belongs to this client, if any.
+            Step 2: If you found a plausible URL, visit it (you have a URL-fetching tool) and
+            confirm it looks like a real, reachable site for this kind of company. Then decide
+            which business sector it belongs to. Prefer choosing one of these existing sectors,
+            reusing its EXACT spelling, if one of them fits: {$sectorList}
+            If none of them fit well, invent a short, appropriate sector name yourself.
+
+            Respond with EXACTLY two lines and nothing else:
+            URL: <the confirmed website URL, or NONE if no plausible match / unreachable>
+            SECTOR: <the sector name, or NONE if you could not determine one>
+            PROMPT;
+
+        $payload = [
+            'contents' => [[
+                'parts' => [[
+                    'text' => $prompt,
+                ]],
+            ]],
+            'tools' => [['url_context' => (object) []]],
+        ];
+
+        $curl = curl_init('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent');
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'x-goog-api-key: ' . $apiKey,
+            ],
+            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 90,
+        ]);
+
+        $responseBody = curl_exec($curl);
+        $curlError = curl_error($curl);
+        $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+        curl_close($curl);
+
+        if ($responseBody === false) {
+            $this->json(['error' => 'Gemini connection failed: ' . $curlError], 502);
+            return;
+        }
+
+        $response = json_decode($responseBody, true);
+        if (!is_array($response)) {
+            $this->json(['error' => 'Gemini returned invalid JSON'], 502);
+            return;
+        }
+
+        if ($status < 200 || $status >= 300) {
+            $message = $response['error']['message'] ?? 'Gemini API request failed';
+            $this->json(['error' => $message, 'gemini_response' => $response], 502);
+            return;
+        }
+
+        $answer = (string) ($response['candidates'][0]['content']['parts'][0]['text'] ?? '');
+
+        $website = '';
+        $sector = '';
+        if (preg_match('/URL:\s*(.+)/i', $answer, $urlMatch)) {
+            $website = trim($urlMatch[1]);
+        }
+        if (preg_match('/SECTOR:\s*(.+)/i', $answer, $sectorMatch)) {
+            $sector = trim($sectorMatch[1]);
+        }
+        if (strcasecmp($website, 'NONE') === 0) {
+            $website = '';
+        }
+        if (strcasecmp($sector, 'NONE') === 0) {
+            $sector = '';
+        }
+
+        $this->json([
+            'website' => $website,
+            'sector' => $sector,
+            'answer' => $answer,
+        ]);
+    }
+
+    public function saveClientEnrichment(): void
+    {
+        if (!$this->guard()) {
+            return;
+        }
+
+        $clientId = (int) ($_POST['client_id'] ?? 0);
+        $website = trim((string) ($_POST['website'] ?? ''));
+        $sectorName = trim((string) ($_POST['sector'] ?? ''));
+
+        if ($website === '' && $sectorName === '') {
+            $this->json(['error' => Lang::get('ai.clients_empty')], 422);
+            return;
+        }
+
+        $client = $this->clients->find($clientId);
+        if ($client === null) {
+            $this->json(['error' => 'Client not found'], 404);
+            return;
+        }
+
+        $sectorId = $client['sector_id'];
+        if ($sectorName !== '') {
+            $sectorId = null;
+            foreach ($this->sectors->active() as $sector) {
+                if (mb_strtolower($sector['name']) === mb_strtolower($sectorName)) {
+                    $sectorId = (int) $sector['id'];
+                    break;
+                }
+            }
+            if ($sectorId === null) {
+                $sectorId = $this->sectors->create($sectorName);
+            }
+        } else {
+            $sectorId = null;
+        }
+
+        $data = $client;
+        $data['website'] = $website !== '' ? $website : null;
+        $data['sector_id'] = $sectorId;
+
+        $this->clients->update($clientId, $data);
+
+        $this->json(['website' => $website, 'sector' => $sectorName]);
+    }
+
     private function geminiApiKey(): string
     {
         $environmentKey = getenv('GEMINI_API_KEY');

@@ -193,6 +193,7 @@ $router->post('/api-keys/sync-scopes', [$apiKeyController, 'syncScopes']);
 $router->post('/api-keys/delete', [$apiKeyController, 'delete']);
 $router->get('/api-logs', [$apiKeyController, 'logs']);
 $router->get('/ai', [$aiController, 'index']);
+$router->get('/ai/clients', [$aiController, 'clients']);
 $router->get('/settings', [$settingsController, 'index']);
 $router->post('/settings/update', [$settingsController, 'update']);
 $router->post('/settings/send-report', [$settingsController, 'sendReport']);
@@ -233,6 +234,8 @@ $router->post('/ajax/contacts/inspect-email-batch', [$ajaxController, 'inspectEm
 $router->post('/ajax/contacts/gemini-company', [$ajaxController, 'geminiCompany']);
 $router->post('/ajax/contacts/company', [$ajaxController, 'saveContactCompany']);
 $router->post('/ajax/contacts/company/skip', [$ajaxController, 'skipContactCompany']);
+$router->post('/ajax/clients/gemini-enrich', [$ajaxController, 'geminiClientEnrich']);
+$router->post('/ajax/clients/enrich', [$ajaxController, 'saveClientEnrichment']);
 
 try {
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
