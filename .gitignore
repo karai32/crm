@@ -12,7 +12,6 @@
 /storage/logs/
 /storage/exports/
 /storage/imports/
-/storage/ai/
 /storage/*.log
 
 # Local editor / FTP settings

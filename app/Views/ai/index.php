@@ -16,18 +16,6 @@
     <?php endif; ?>
 </div>
 
-<!-- Entity tabs -->
-<div class="data-tabs">
-    <a href="<?= htmlspecialchars(Auth::url('/ai'), ENT_QUOTES, 'UTF-8') ?>" class="data-tab active">
-        <i class="ph ph-sparkle"></i>
-        <?= t('ai.title') ?>
-    </a>
-    <a href="<?= htmlspecialchars(Auth::url('/ai/clients'), ENT_QUOTES, 'UTF-8') ?>" class="data-tab">
-        <i class="ph ph-buildings"></i>
-        <?= t('ai.clients_title') ?>
-    </a>
-</div>
-
 <!-- Summary -->
 <div class="ai-stats">
     <div class="ai-stat-card">
