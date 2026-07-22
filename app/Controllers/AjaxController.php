@@ -524,28 +524,42 @@ class AjaxController
             return;
         }
 
-        $sectorId = $client['sector_id'];
-        if ($sectorName !== '') {
+        try {
             $sectorId = null;
-            $sectorNameLower = $this->lower($sectorName);
-            foreach ($this->sectors->active() as $sector) {
-                if ($this->lower($sector['name']) === $sectorNameLower) {
-                    $sectorId = (int) $sector['id'];
-                    break;
+            if ($sectorName !== '') {
+                $sectorNameLower = $this->lower($sectorName);
+                foreach ($this->sectors->active() as $sector) {
+                    if ($this->lower($sector['name']) === $sectorNameLower) {
+                        $sectorId = (int) $sector['id'];
+                        break;
+                    }
+                }
+                if ($sectorId === null) {
+                    $sectorId = $this->sectors->create($sectorName);
                 }
             }
-            if ($sectorId === null) {
-                $sectorId = $this->sectors->create($sectorName);
-            }
-        } else {
-            $sectorId = null;
+
+            $data = [
+                'commercial_name'  => $client['commercial_name'],
+                'legal_name'       => $client['legal_name'],
+                'cif'              => $client['cif'],
+                'address'          => $client['address'],
+                'postal_code'      => $client['postal_code'],
+                'city'             => $client['city'],
+                'province'         => $client['province'],
+                'country'          => $client['country'],
+                'sector_id'        => $sectorId,
+                'website'          => $website !== '' ? $website : null,
+                'notes'            => $client['notes'],
+                'is_web_connected' => (int) $client['is_web_connected'],
+                'is_active'        => (int) $client['is_active'],
+            ];
+
+            $this->clients->update($clientId, $data);
+        } catch (Throwable $exception) {
+            $this->json(['error' => $exception->getMessage()], 500);
+            return;
         }
-
-        $data = $client;
-        $data['website'] = $website !== '' ? $website : null;
-        $data['sector_id'] = $sectorId;
-
-        $this->clients->update($clientId, $data);
 
         $this->json(['website' => $website, 'sector' => $sectorName]);
     }
