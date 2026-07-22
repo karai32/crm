@@ -426,9 +426,24 @@ class AjaxController
             Step 1: Find the CSV row that most likely belongs to this client, if any.
             Step 2: If you found a plausible URL, visit it (you have a URL-fetching tool) and
             confirm it looks like a real, reachable site for this kind of company. Then decide
-            which business sector it belongs to. Prefer choosing one of these existing sectors,
-            reusing its EXACT spelling, if one of them fits: {$sectorList}
-            If none of them fit well, invent a short, appropriate sector name yourself.
+            which business sector it belongs to.
+
+            Here is the CRM's existing list of sectors: {$sectorList}
+
+            Sector rules:
+            - Think first about what the company's PRIMARY business actually is (what it sells
+              or does day to day), not a loosely related theme, an industry it merely serves, or
+              a vague high-level category.
+            - Only reuse one of the existing sectors above if it is a precise, confident match for
+              that primary business — reuse its EXACT spelling in that case.
+            - Do NOT force-fit a company into a nearby-but-wrong existing sector just because the
+              list has no exact match. For example, a sports club or sports equipment shop is
+              "Sports", not "Health"; a bar or nightclub is "Nightlife", not "Food"; a law firm is
+              "Consulting and Legal", not "Institution".
+            - If none of the existing sectors is a precise match, do not hesitate: invent a short,
+              specific new sector name yourself (2-3 words, same style as the existing list, e.g.
+              "Sports", "Pet Grooming", "Marketing Agency"). A new precise sector is always better
+              than reusing an approximate existing one.
 
             Respond with EXACTLY two lines and nothing else:
             URL: <the confirmed website URL, or NONE if no plausible match / unreachable>
