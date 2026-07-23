@@ -309,6 +309,43 @@
     margin-bottom: 0;
 }
 
+.help-code-example {
+    margin: 18px 0 4px;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--radius-sm);
+}
+
+.help-code-example-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 12px;
+    color: var(--color-text-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.help-code-example-title i {
+    font-size: 14px;
+}
+
+.help-code-example pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    color: #1f2937;
+    font: 12.5px/1.65 Consolas, "SFMono-Regular", "Liberation Mono", monospace;
+    tab-size: 4;
+    white-space: pre;
+}
+
+.help-code-example code {
+    font: inherit;
+}
+
 .help-technical-index {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

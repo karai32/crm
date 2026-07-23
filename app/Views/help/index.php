@@ -121,6 +121,15 @@ $isTechnical = $page['id'] === 'technical';
                                 <?php foreach ($section['paragraphs'] as $paragraph): ?>
                                     <p><?= htmlspecialchars($paragraph, ENT_QUOTES, 'UTF-8') ?></p>
                                 <?php endforeach; ?>
+                                <?php foreach (($section['examples'] ?? []) as $example): ?>
+                                    <div class="help-code-example">
+                                        <div class="help-code-example-title">
+                                            <i class="ph ph-code" aria-hidden="true"></i>
+                                            <span><?= htmlspecialchars($example['title'] ?? 'Пример', ENT_QUOTES, 'UTF-8') ?></span>
+                                        </div>
+                                        <pre><code><?= htmlspecialchars($example['code'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></pre>
+                                    </div>
+                                <?php endforeach; ?>
                             <?php endif; ?>
                         </section>
                     <?php endforeach; ?>
