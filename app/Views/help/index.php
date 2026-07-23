@@ -9,14 +9,13 @@ $isTechnical = $page['id'] === 'technical';
 ?>
 
 <div class="help-center" data-help-center>
-    <header class="help-center-header">
-        <div class="help-center-header-copy">
-            <span class="help-center-kicker"><?= htmlspecialchars($copy['center_label'], ENT_QUOTES, 'UTF-8') ?></span>
+    <header class="page-header settings-header help-page-header">
+        <div>
             <h1><?= htmlspecialchars($copy['center_title'], ENT_QUOTES, 'UTF-8') ?></h1>
-            <p><?= htmlspecialchars($copy['center_intro'], ENT_QUOTES, 'UTF-8') ?></p>
+            <span class="count-label"><?= htmlspecialchars($copy['center_intro'], ENT_QUOTES, 'UTF-8') ?></span>
         </div>
 
-        <label class="help-center-search">
+        <label class="help-page-search">
             <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
             <span class="sr-only"><?= htmlspecialchars($copy['search_placeholder'], ENT_QUOTES, 'UTF-8') ?></span>
             <input
@@ -25,7 +24,6 @@ $isTechnical = $page['id'] === 'technical';
                 autocomplete="off"
                 data-help-search
             >
-            <kbd>/</kbd>
         </label>
     </header>
 
@@ -154,20 +152,5 @@ $isTechnical = $page['id'] === 'technical';
             </nav>
         </main>
 
-        <aside class="help-article-outline">
-            <span><?= htmlspecialchars($copy['on_this_page'], ENT_QUOTES, 'UTF-8') ?></span>
-            <nav>
-                <?php foreach ($page['sections'] as $index => $section): ?>
-                    <a
-                        href="#<?= htmlspecialchars($section['id'], ENT_QUOTES, 'UTF-8') ?>"
-                        class="<?= $index === 0 ? 'is-active' : '' ?>"
-                        data-help-outline-link
-                        data-section="<?= htmlspecialchars($section['id'], ENT_QUOTES, 'UTF-8') ?>"
-                    >
-                        <?= htmlspecialchars($section['title'], ENT_QUOTES, 'UTF-8') ?>
-                    </a>
-                <?php endforeach; ?>
-            </nav>
-        </aside>
     </div>
 </div>

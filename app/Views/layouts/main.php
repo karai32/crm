@@ -18,7 +18,12 @@
 
     <?php
     $currentPath = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
-    $isActive = function (string $segment) use ($currentPath): string {
+    $isHelpPath = str_contains($currentPath, '/help');
+    $isActive = function (string $segment) use ($currentPath, $isHelpPath): string {
+        if ($isHelpPath) {
+            return '';
+        }
+
         return str_contains($currentPath, $segment) ? 'active' : '';
     };
 
