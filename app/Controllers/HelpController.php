@@ -21,13 +21,7 @@ class HelpController
             'technical-guide' => 'technical',
         ];
 
-        $topic = $aliases[$topic] ?? $topic;
-        if ($topic === 'technical') {
-            Auth::redirect('/help/technical/server');
-            return;
-        }
-
-        $this->renderTopic($topic);
+        $this->renderTopic($aliases[$topic] ?? $topic);
     }
 
     public function technicalPage(): void
@@ -50,7 +44,12 @@ class HelpController
         }
 
         $page = $navigation[$activeIndex];
-        $page['sections'] = $this->articleSections($topic, $page, $copy['article']);
+        if ($topic === 'technical') {
+            $page['is_technical'] = true;
+            $page['sections'] = [];
+        } else {
+            $page['sections'] = $this->articleSections($topic, $page, $copy['article']);
+        }
 
         View::render('help/index', [
             'title' => $page['title'] . ' — ' . $copy['center_title'],
@@ -771,9 +770,489 @@ CURL,
                 'technical_pages' => [
                     'server' => [
                         'title' => 'Сервер',
-                        'description' => '',
-                        'icon' => 'ph-code',
-                        'sections' => [],
+                        'description' => 'Полная подготовка сервера, установка зависимостей и запуск ContactCore в рабочем окружении.',
+                        'icon' => 'ph-arrow-elbow-down-right',
+                        'sections' => [
+                            [
+                                'id' => 'server-stack',
+                                'title' => 'Состав сервера и обязательные версии',
+                                'paragraphs' => [
+                                    'Ниже описана установка на чистый сервер Ubuntu 24.04 LTS с Nginx, PHP-FPM и MySQL. Другой современный Linux также подходит, если в нём установлен PHP нужной версии, однако названия пакетов и пути к конфигурации могут отличаться. Для рабочего окружения рекомендуется 64-разрядная система, два ядра процессора, 2 ГБ оперативной памяти и отдельное дисковое пространство для базы, журналов и загружаемых файлов. Для небольшой базы достаточно 20 ГБ, но фактический объём следует рассчитывать по количеству контактов, импортов и сроку хранения резервных копий.',
+                                    'Приложению требуется PHP 8.3 или новее. В точке входа Composer-зависимости намеренно не подключаются на более старой версии PHP. PHP должен быть установлен одновременно для FPM, который обслуживает сайт, и для CLI, который запускает служебные команды и еженедельный отчёт. Обе среды должны использовать одну основную версию PHP и одинаковый набор расширений.',
+                                    'База данных должна поддерживать InnoDB, utf8mb4, внешние ключи, JSON-поля и FULLTEXT-индексы. Рекомендуется MySQL 8.0 или новее либо актуальная поддерживаемая версия MariaDB. Веб-сервер должен передавать все неизвестные маршруты в public_html/index.php, принимать методы GET, POST, PATCH и DELETE, обслуживать HTTPS и разрешать загрузку CSV/XLSX.',
+                                ],
+                            ],
+                            [
+                                'id' => 'server-base-system',
+                                'title' => 'Подготовка операционной системы, DNS и сети',
+                                'paragraphs' => [
+                                    'До установки приложения создайте отдельную учётную запись для развёртывания, обновите систему и настройте вход по SSH-ключу. Корень сайта должен указывать только на каталог public_html, поэтому config, vendor, storage, database и исходный код приложения не должны отдаваться веб-сервером напрямую.',
+                                    'Создайте DNS-запись A для домена CRM, указывающую на IPv4-адрес сервера; при использовании IPv6 добавьте AAAA. До выпуска сертификата проверьте, что домен уже открывается с этого сервера. Во входящем направлении нужны только SSH, HTTP и HTTPS. MySQL не следует публиковать в интернете, если база находится на том же сервере.',
+                                    'Серверу нужны исходящие соединения: DNS по UDP/TCP 53 для проверки MX-записей почты, HTTPS по TCP 443 для Gemini и обновления Composer, а также порт SMTP-провайдера — обычно 465 для SMTPS или 587 для STARTTLS. Клиентским браузерам необходим доступ к cdn.jsdelivr.net, откуда сейчас загружаются Phosphor Icons.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Базовая подготовка Ubuntu/Debian',
+                                        'code' => <<<'BASH'
+sudo apt update
+sudo apt full-upgrade -y
+sudo timedatectl set-timezone Europe/Madrid
+
+sudo apt install -y nginx mysql-server cron unzip curl ca-certificates openssl ufw
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-php',
+                                'title' => 'PHP и системные расширения',
+                                'paragraphs' => [
+                                    'Обязательны PHP-FPM, PHP CLI и расширения pdo_mysql, curl, mbstring, fileinfo, dom, simplexml, xml, xmlreader, xmlwriter, zip, zlib, gd, iconv, ctype, filter и hash. OpenSSL нужен для защищённого SMTP и HTTPS. Расширения ctype, filter, hash, iconv, fileinfo, zlib и OpenSSL обычно входят в базовые пакеты PHP, но их наличие всё равно следует проверить.',
+                                    'cURL используется для запросов к Gemini, PDO MySQL — для базы данных, fileinfo — для проверки типа импортируемого файла, а XML/ZIP/GD/mbstring требуются PhpSpreadsheet для чтения и создания XLSX. Функции checkdnsrr, set_time_limit, random_bytes, password_hash, flock и работа с файлами не должны быть отключены директивой disable_functions.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Установка PHP 8.3 и расширений',
+                                        'code' => <<<'BASH'
+sudo apt install -y \
+  php8.3-fpm php8.3-cli php8.3-mysql php8.3-curl \
+  php8.3-mbstring php8.3-xml php8.3-zip php8.3-gd
+
+php8.3 --version
+php8.3 -m | grep -E 'curl|dom|fileinfo|gd|mbstring|PDO|pdo_mysql|SimpleXML|xmlreader|xmlwriter|zip'
+sudo systemctl enable --now php8.3-fpm nginx mysql cron
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-deploy',
+                                'title' => 'Размещение проекта, Composer и npm',
+                                'paragraphs' => [
+                                    'Разместите весь проект, а не только public_html, например в /var/www/contactcore. Публичным каталогом останется /var/www/contactcore/public_html. Исходный код можно получить из закрытого репозитория или загрузить архивом; каталог .git на рабочем сервере не обязателен.',
+                                    'PHP-библиотеки устанавливаются из composer.lock командой composer install. Она добавляет PHPMailer, PhpSpreadsheet и их зависимости в vendor. На сервере следует использовать установку без пакетов разработки и с оптимизированным автозагрузчиком. Не выполняйте composer update во время обычного развёртывания: эта команда меняет зафиксированные версии библиотек.',
+                                    'npm install выполнять не нужно. В проекте нет package.json, сборщика и Node.js-зависимостей: CSS и JavaScript уже находятся в public_html/assets и отдаются как готовые файлы. Node.js и npm можно вообще не устанавливать.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Установка Composer и зависимостей проекта',
+                                        'code' => <<<'BASH'
+sudo apt install -y composer
+sudo mkdir -p /var/www/contactcore
+sudo chown -R deploy:www-data /var/www/contactcore
+
+# Скопируйте содержимое проекта в /var/www/contactcore, затем:
+cd /var/www/contactcore
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+composer check-platform-reqs --no-dev
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-database',
+                                'title' => 'Создание и настройка базы данных',
+                                'paragraphs' => [
+                                    'Создайте отдельную базу и отдельного пользователя MySQL только для ContactCore. Используйте utf8mb4. Приложению нужны права чтения и изменения данных, создания индексов и работы с таблицами. Не используйте учётную запись root в config/database.php и не открывайте порт 3306 наружу без отдельной необходимости.',
+                                    'Файл database/schema.sql предназначен для первой установки. В его начале указаны база crm и команды DROP TABLE. Поэтому имя базы в config/database.php должно совпадать с именем в схеме, либо первые команды файла нужно изменить до импорта. Никогда не запускайте этот файл повторно над рабочей базой: он удалит существующие данные. Отдельного механизма миграций в проекте сейчас нет.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'База и пользователь приложения',
+                                        'code' => <<<'SQL'
+sudo mysql
+
+CREATE DATABASE crm
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+CREATE USER 'contactcore'@'localhost'
+  IDENTIFIED BY 'REPLACE_WITH_A_LONG_RANDOM_PASSWORD';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON crm.*
+  TO 'contactcore'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+SQL,
+                                    ],
+                                    [
+                                        'title' => 'Первичное применение схемы',
+                                        'code' => <<<'BASH'
+cd /var/www/contactcore
+sudo mysql < database/schema.sql
+mysql -u contactcore -p crm -e "SHOW TABLES;"
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-config',
+                                'title' => 'Файлы конфигурации и секреты',
+                                'paragraphs' => [
+                                    'Скопируйте четыре файла с суффиксом .example.php в рабочие файлы без .example. Реальные файлы уже исключены из Git и не должны попадать в репозиторий, архивы для публичной раздачи или журналы. Доступ на чтение нужен пользователю PHP-FPM и пользователю, от которого запускается cron.',
+                                    'В database.php задаются хост, имя базы, пользователь, пароль и charset. В app.php параметр base_url должен содержать внешний HTTPS-адрес без завершающего слеша; он используется для ссылок в еженедельном отчёте. В mail.php задаются отправитель и SMTP. Значение smtp_secure = ssl означает SMTPS, обычно порт 465; любое другое используемое приложением значение включает STARTTLS, обычно порт 587.',
+                                    'В gemini.php хранится ключ Google Gemini. Он необходим только для ИИ-поиска компании по корпоративной почте; остальная CRM может работать без вызова этой функции. SMTP сейчас нужен прежде всего для еженедельных отчётов. Код двухфакторного входа в приложении присутствует, но его обязательный вызов временно отключён.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Создание рабочих конфигураций',
+                                        'code' => <<<'BASH'
+cd /var/www/contactcore
+cp config/app.example.php config/app.php
+cp config/database.example.php config/database.php
+cp config/mail.example.php config/mail.php
+cp config/gemini.example.php config/gemini.php
+
+sudo chown root:www-data config/*.php
+sudo chmod 640 config/*.php
+BASH,
+                                    ],
+                                    [
+                                        'title' => 'Минимальный config/app.php',
+                                        'code' => <<<'PHP'
+<?php
+
+return [
+    'base_url' => 'https://crm.example.com',
+];
+PHP,
+                                    ],
+                                    [
+                                        'title' => 'config/database.php',
+                                        'code' => <<<'PHP'
+<?php
+
+return [
+    'host'     => 'localhost',
+    'database' => 'crm',
+    'user'     => 'contactcore',
+    'password' => 'REPLACE_WITH_DATABASE_PASSWORD',
+    'charset'  => 'utf8mb4',
+];
+PHP,
+                                    ],
+                                    [
+                                        'title' => 'config/mail.php',
+                                        'code' => <<<'PHP'
+<?php
+
+return [
+    'from_email'    => 'no-reply@example.com',
+    'from_name'     => 'ContactCore',
+    'smtp_host'     => 'smtp.example.com',
+    'smtp_port'     => 465,
+    'smtp_username' => 'no-reply@example.com',
+    'smtp_password' => 'REPLACE_WITH_SMTP_PASSWORD',
+    'smtp_secure'   => 'ssl',
+];
+PHP,
+                                    ],
+                                    [
+                                        'title' => 'config/gemini.php',
+                                        'code' => <<<'PHP'
+<?php
+
+return [
+    'api_key' => 'REPLACE_WITH_GEMINI_API_KEY',
+];
+PHP,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-storage',
+                                'title' => 'Каталоги, владелец и права доступа',
+                                'paragraphs' => [
+                                    'PHP должен иметь право записи в storage. Там создаются сессии, токены «Запомнить меня», ограничитель попыток входа, загруженные файлы импорта и app.log. Кроме того, пользователь PHP-FPM должен иметь доступ к системному временному каталогу, куда PHP сначала принимает загружаемые файлы. Каталог storage находится вне public_html и не должен быть доступен по URL. Остальной код приложения следует оставить только для чтения веб-пользователю.',
+                                    'Не выдавайте всему проекту права 777. Для типовой установки владельцем кода может быть пользователь deploy, группой — www-data, а запись разрешается только группе в storage. setgid на каталоге storage сохраняет группу www-data у новых подкаталогов и файлов.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Безопасные права для приложения',
+                                        'code' => <<<'BASH'
+cd /var/www/contactcore
+sudo chown -R deploy:www-data .
+sudo find . -type d -exec chmod 750 {} \;
+sudo find . -type f -exec chmod 640 {} \;
+
+sudo mkdir -p storage/sessions storage/remember storage/imports
+sudo chown -R deploy:www-data storage
+sudo find storage -type d -exec chmod 2770 {} \;
+sudo find storage -type f -exec chmod 660 {} \;
+
+sudo chown root:www-data config/*.php
+sudo chmod 640 config/*.php
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-php-config',
+                                'title' => 'Настройки PHP-FPM и лимиты',
+                                'paragraphs' => [
+                                    'Импорт XLSX может потреблять заметно больше памяти, чем размер самого файла. Для обычной установки разумная отправная точка — memory_limit 512M, upload_max_filesize 25M и post_max_size 32M. post_max_size должен быть больше upload_max_filesize, а лимит Nginx — не меньше обоих. Если предполагаются особенно большие файлы, лимиты следует увеличивать вместе и контролировать память сервера.',
+                                    'Обработка импорта выполняется синхронно и внутри приложения снимает PHP-лимит времени, поэтому fastcgi_read_timeout Nginx должен быть достаточно большим. В рабочем окружении выключите display_errors, включите log_errors, установите часовой пояс и безопасные параметры сессионных cookie. Изменения нужны в конфигурации FPM; для cron проверьте также отдельный php.ini CLI.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => '/etc/php/8.3/fpm/conf.d/99-contactcore.ini',
+                                        'code' => <<<'INI'
+date.timezone = Europe/Madrid
+memory_limit = 512M
+upload_max_filesize = 25M
+post_max_size = 32M
+max_execution_time = 300
+max_input_time = 300
+max_input_vars = 3000
+
+display_errors = Off
+log_errors = On
+expose_php = Off
+
+session.cookie_httponly = 1
+session.cookie_secure = 1
+session.cookie_samesite = Lax
+session.use_strict_mode = 1
+INI,
+                                    ],
+                                    [
+                                        'title' => 'Применение и проверка настроек',
+                                        'code' => <<<'BASH'
+sudo cp /etc/php/8.3/fpm/conf.d/99-contactcore.ini \
+  /etc/php/8.3/cli/conf.d/99-contactcore.ini
+sudo php-fpm8.3 -t
+sudo systemctl restart php8.3-fpm
+php8.3 --ini
+php8.3 -r "echo ini_get('memory_limit'), PHP_EOL;"
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-nginx',
+                                'title' => 'Настройка Nginx и маршрутизации',
+                                'paragraphs' => [
+                                    'Document root должен быть равен public_html. Правило try_files направляет виртуальные маршруты вроде /contacts, /help/technical/server и /api/v1/contacts в index.php, но оставляет CSS, JavaScript, шаблоны импорта и favicon обычными статическими файлами. Без этого правила будут работать только запросы к самому index.php.',
+                                    'Конфигурация должна передавать PHP только реально существующему index.php, разрешать все HTTP-методы API и не добавлять Basic Auth поверх /api, если внешние формы обращаются к нему напрямую. Для API-аутентификации приложение использует собственные ключи. Заголовки безопасности приложение добавляет само, но HSTS лучше включить на уровне Nginx после настройки HTTPS.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => '/etc/nginx/sites-available/contactcore',
+                                        'code' => <<<'NGINX'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name crm.example.com;
+
+    root /var/www/contactcore/public_html;
+    index index.php;
+    charset utf-8;
+    client_max_body_size 32m;
+
+    access_log /var/log/nginx/contactcore.access.log;
+    error_log  /var/log/nginx/contactcore.error.log;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_read_timeout 300s;
+    }
+
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+}
+NGINX,
+                                    ],
+                                    [
+                                        'title' => 'Включение сайта',
+                                        'code' => <<<'BASH'
+sudo ln -s /etc/nginx/sites-available/contactcore \
+  /etc/nginx/sites-enabled/contactcore
+sudo rm /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-tls',
+                                'title' => 'HTTPS и сертификат',
+                                'paragraphs' => [
+                                    'Рабочую CRM следует открывать только по HTTPS: через неё передаются пароли, контакты и ключи API. После того как DNS указывает на сервер и HTTP-конфигурация отвечает, выпустите сертификат. Certbot может сам добавить HTTPS-сервер и перенаправление с HTTP.',
+                                    'После успешного выпуска включите HSTS только для домена, который уже стабильно работает по HTTPS. Не включайте preload и includeSubDomains без понимания последствий. Убедитесь, что config/app.php также содержит адрес с https://.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Сертификат Let’s Encrypt',
+                                        'code' => <<<'BASH'
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d crm.example.com --redirect
+sudo certbot renew --dry-run
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-first-admin',
+                                'title' => 'Создание первого администратора',
+                                'paragraphs' => [
+                                    'Схема создаёт роли admin и user, но не создаёт учётную запись. До первого входа сформируйте хеш пароля через PHP и добавьте администратора непосредственно в базу. Не записывайте открытый пароль в SQL-файл и не используйте показанное ниже значение-заглушку.',
+                                    'После входа остальных пользователей следует создавать через раздел «Пользователи». Первый пароль передайте администратору по защищённому каналу и замените, если он был доступен кому-либо ещё.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Хеширование пароля и добавление администратора',
+                                        'code' => <<<'BASH'
+php8.3 -r "echo password_hash('REPLACE_WITH_STRONG_PASSWORD', PASSWORD_DEFAULT), PHP_EOL;"
+
+mysql -u contactcore -p crm
+
+INSERT INTO users (role_id, name, email, password_hash, is_active)
+SELECT id, 'Administrator', 'admin@example.com',
+       'PASTE_GENERATED_HASH_HERE', 1
+FROM roles
+WHERE name = 'admin';
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-cron',
+                                'title' => 'Cron для еженедельных отчётов',
+                                'paragraphs' => [
+                                    'Скрипт bin/weekly-report.php собирает данные за последние семь дней и отправляет отчёт всем активным пользователям с ролью admin. Он использует config/database.php, config/mail.php и config/app.php. Запуск должен выполняться от пользователя www-data либо другого пользователя, который может читать конфигурацию, подключаться к базе и писать в storage.',
+                                    'Сначала обязательно запустите команду вручную и убедитесь, что она заканчивается строкой с количеством отправленных писем и без ошибок в storage/app.log. Затем создайте системную cron-задачу. Пример ниже запускает отчёт каждый понедельник в 08:00 по часовому поясу сервера. Если сервер использует другой часовой пояс, измените расписание или настройте его через timedatectl.',
+                                    'Cron использует PHP CLI, поэтому для него также должны быть установлены vendor-зависимости и расширение pdo_mysql. При смене версии PHP обновите путь к исполняемому файлу в cron. Не вызывайте скрипт через HTTP и не размещайте bin в public_html.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Ручная проверка отчёта',
+                                        'code' => <<<'BASH'
+cd /var/www/contactcore
+sudo -u www-data /usr/bin/php8.3 bin/weekly-report.php
+tail -n 50 storage/app.log
+BASH,
+                                    ],
+                                    [
+                                        'title' => '/etc/cron.d/contactcore-weekly-report',
+                                        'code' => <<<'CRON'
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+0 8 * * 1 www-data cd /var/www/contactcore && /usr/bin/php8.3 bin/weekly-report.php >> storage/weekly-report-cron.log 2>&1
+CRON,
+                                    ],
+                                    [
+                                        'title' => 'Установка и контроль cron-задачи',
+                                        'code' => <<<'BASH'
+sudo chown root:root /etc/cron.d/contactcore-weekly-report
+sudo chmod 644 /etc/cron.d/contactcore-weekly-report
+sudo systemctl restart cron
+sudo journalctl -u cron --since today --no-pager
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-integrations',
+                                'title' => 'SMTP, Gemini и DNS-проверка почты',
+                                'paragraphs' => [
+                                    'Для SMTP разрешите исходящее соединение к smtp_host и выбранному порту. Адрес from_email должен быть разрешён провайдером, а у домена желательно настроить SPF, DKIM и DMARC. Ошибки PHPMailer записываются в storage/app.log. Проверить отправку можно ручным запуском еженедельного отчёта или кнопкой отправки отчёта в настройках администратора.',
+                                    'Для ИИ-инструмента сервер должен разрешать HTTPS-запросы к generativelanguage.googleapis.com, иметь рабочие корневые сертификаты и расширение cURL. Ключ Gemini хранится только в config/gemini.php. Не добавляйте его в JavaScript, URL, Git или журнал ошибок.',
+                                    'Проверка адресов электронной почты использует системный DNS-резолвер и функцию checkdnsrr для MX-записи домена. Если сервер, контейнер или firewall блокирует DNS, валидные адреса могут получать ошибочный результат. Проверка MX не требует открывать SMTP-соединение к почтовому ящику.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Проверка внешних соединений',
+                                        'code' => <<<'BASH'
+curl -I https://generativelanguage.googleapis.com/
+php8.3 -r "var_dump(checkdnsrr('gmail.com', 'MX'));"
+openssl s_client -connect smtp.example.com:465 -servername smtp.example.com </dev/null
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-verification',
+                                'title' => 'Проверка после установки',
+                                'paragraphs' => [
+                                    'До передачи системы пользователям проверьте конфигурацию из командной строки, затем откройте страницу входа и войдите первым администратором. Создайте тестового клиента и контакт, загрузите небольшой CSV и XLSX, выполните экспорт, проверьте сохранение сессии и выход из системы.',
+                                    'Отдельно проверьте API через HTTPS: запрос без ключа должен вернуть 401, а запрос с тестовым ключом и нужным scope — успешный JSON. Проверьте большой импорт в пределах настроенных лимитов, ручную отправку отчёта, поиск компании через Gemini и MX-проверку почты. После испытаний удалите тестовые записи и отзовите тестовый API-ключ.',
+                                    'Если сервер отвечает 404 на все страницы, кроме главной, проблема обычно в try_files. Ошибка 502 означает, что Nginx не может подключиться к PHP-FPM или указан неверный сокет. Ошибка 500 диагностируется по storage/app.log, журналу PHP-FPM и /var/log/nginx/contactcore.error.log. Ошибка загрузки файла часто связана с несовпадающими лимитами Nginx и PHP либо с правами storage.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Техническая проверка',
+                                        'code' => <<<'BASH'
+cd /var/www/contactcore
+composer check-platform-reqs --no-dev
+php8.3 -l public_html/index.php
+sudo nginx -t
+sudo php-fpm8.3 -t
+sudo systemctl --no-pager --full status nginx php8.3-fpm mysql cron
+curl -I https://crm.example.com/login
+tail -n 100 storage/app.log
+BASH,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'id' => 'server-maintenance',
+                                'title' => 'Резервные копии, обновления и наблюдение',
+                                'paragraphs' => [
+                                    'Резервная копия должна включать базу MySQL, рабочие файлы config и необходимые данные storage, прежде всего исходные файлы импортов, если их требуется хранить. Копии следует шифровать, выносить на другой сервер или объектное хранилище и регулярно проверять восстановление. Сессии и временные токены обычно восстанавливать не требуется.',
+                                    'Перед обновлением сделайте резервную копию базы и конфигурации. Разверните новый код, выполните composer install по существующему composer.lock, повторно проверьте platform requirements и перезапустите PHP-FPM. Не применяйте database/schema.sql как обновление. Если будущая версия получит отдельные миграции, выполнять нужно именно их инструкции.',
+                                    'Контролируйте свободное место, срок действия TLS-сертификата, состояние Nginx/PHP-FPM/MySQL/cron, рост storage/app.log и журнал еженедельного отчёта. Настройте ротацию журналов и оповещения об ответах 5xx. Периодически обновляйте ОС и Composer-зависимости сначала в тестовом окружении, а не непосредственно на рабочей CRM.',
+                                ],
+                                'examples' => [
+                                    [
+                                        'title' => 'Ручная резервная копия базы',
+                                        'code' => <<<'BASH'
+sudo install -d -m 700 /var/backups/contactcore
+mysqldump --single-transaction --quick --routines --triggers \
+  -u contactcore -p crm | gzip \
+  > /var/backups/contactcore/crm-$(date +%F-%H%M).sql.gz
+BASH,
+                                    ],
+                                    [
+                                        'title' => 'Типовое обновление кода',
+                                        'code' => <<<'BASH'
+cd /var/www/contactcore
+# Сначала разместите проверенную новую версию кода.
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+composer check-platform-reqs --no-dev
+sudo systemctl restart php8.3-fpm
+sudo nginx -t && sudo systemctl reload nginx
+BASH,
+                                    ],
+                                    [
+                                        'title' => '/etc/logrotate.d/contactcore',
+                                        'code' => <<<'CONF'
+/var/www/contactcore/storage/*.log {
+    weekly
+    rotate 12
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    create 0660 deploy www-data
+}
+CONF,
+                                    ],
+                                ],
+                            ],
+                        ],
                     ],
                 ],
             ],
@@ -815,7 +1294,7 @@ CURL,
                     'server' => [
                         'title' => 'Server',
                         'description' => '',
-                        'icon' => 'ph-code',
+                        'icon' => 'ph-arrow-elbow-down-right',
                         'sections' => [],
                     ],
                 ],
@@ -858,7 +1337,7 @@ CURL,
                     'server' => [
                         'title' => 'Servidor',
                         'description' => '',
-                        'icon' => 'ph-code',
+                        'icon' => 'ph-arrow-elbow-down-right',
                         'sections' => [],
                     ],
                 ],

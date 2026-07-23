@@ -1,20 +1,12 @@
 <?php
 $isTechnical = !empty($page['is_technical']);
 $technicalId = $page['technical_id'] ?? null;
-$technicalParent = null;
-foreach ($navigation as $navigationItem) {
-    if ($navigationItem['id'] === 'technical') {
-        $technicalParent = $navigationItem;
-        break;
-    }
-}
-$firstTechnicalId = $technicalParent['children'][0]['id'] ?? 'server';
-$topicUrl = static function (string $id) use ($firstTechnicalId): string {
+$topicUrl = static function (string $id): string {
     if ($id === 'start') {
         return Auth::url('/help');
     }
     if ($id === 'technical') {
-        return Auth::url('/help/technical/' . $firstTechnicalId);
+        return Auth::url('/help/technical');
     }
     return Auth::url('/help/' . $id);
 };
