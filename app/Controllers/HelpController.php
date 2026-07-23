@@ -158,7 +158,7 @@ class HelpController
 
     private function copy(): array
     {
-        return [
+        $copy = [
             'ru' => [
                 'center_label' => 'База знаний',
                 'center_title' => 'Справочный центр',
@@ -799,6 +799,8 @@ sudo apt full-upgrade -y
 sudo timedatectl set-timezone Europe/Madrid
 
 sudo apt install -y nginx mysql-server cron unzip curl ca-certificates openssl ufw
+sudo adduser deploy
+sudo usermod -aG www-data deploy
 sudo ufw allow OpenSSH
 sudo ufw allow 'Nginx Full'
 sudo ufw enable
@@ -1297,6 +1299,12 @@ CONF,
                         'icon' => 'ph-arrow-elbow-down-right',
                         'sections' => [],
                     ],
+                    'installation' => [
+                        'title' => 'Installation',
+                        'description' => '',
+                        'icon' => 'ph-arrow-elbow-down-right',
+                        'sections' => [],
+                    ],
                 ],
             ],
             'es' => [
@@ -1340,8 +1348,66 @@ CONF,
                         'icon' => 'ph-arrow-elbow-down-right',
                         'sections' => [],
                     ],
+                    'installation' => [
+                        'title' => 'Instalación',
+                        'description' => '',
+                        'icon' => 'ph-arrow-elbow-down-right',
+                        'sections' => [],
+                    ],
                 ],
             ],
         ];
+
+        // The deployment material is authored in one ordered list and then
+        // presented as two consecutive pages: infrastructure first, application second.
+        $deploymentSections = $copy['ru']['technical_pages']['server']['sections'];
+        $serverSectionIds = [
+            'server-stack',
+            'server-base-system',
+            'server-php',
+            'server-php-config',
+            'server-nginx',
+            'server-tls',
+        ];
+
+        $serverSections = array_values(array_filter(
+            $deploymentSections,
+            static fn (array $section): bool => in_array($section['id'], $serverSectionIds, true)
+        ));
+        $installationSections = array_values(array_filter(
+            $deploymentSections,
+            static fn (array $section): bool => !in_array($section['id'], $serverSectionIds, true)
+        ));
+
+        foreach ($installationSections as &$section) {
+            $section['id'] = preg_replace('/^server-/', 'installation-', $section['id']);
+        }
+        unset($section);
+
+        array_unshift($installationSections, [
+            'id' => 'installation-overview',
+            'title' => 'Перед установкой',
+            'paragraphs' => [
+                'Эта инструкция продолжает раздел «Сервер». Перед началом должны быть готовы домен, HTTPS-сервер с Nginx, PHP-FPM 8.3 или новее, MySQL, Composer и все перечисленные PHP-расширения. Пользователь deploy должен иметь возможность размещать код, а www-data — запускать приложение и записывать рабочие данные в storage.',
+                'Установка выполняется последовательно: разместить код и зависимости, создать базу, заполнить конфигурацию, настроить права, создать первого администратора, проверить внешние сервисы и cron, затем пройти итоговую проверку. Команды ниже используют каталог /var/www/contactcore, базу crm, пользователя deploy и группу www-data; при другой структуре все пути и имена нужно менять согласованно.',
+            ],
+        ]);
+
+        $copy['ru']['technical_pages'] = [
+            'server' => [
+                'title' => 'Сервер',
+                'description' => 'Подготовка операционной системы, PHP-FPM, Nginx, сети и HTTPS для работы ContactCore.',
+                'icon' => 'ph-arrow-elbow-down-right',
+                'sections' => $serverSections,
+            ],
+            'installation' => [
+                'title' => 'Установка',
+                'description' => 'Установка ContactCore, подготовка базы и конфигурации, первый запуск и проверка платформы.',
+                'icon' => 'ph-arrow-elbow-down-right',
+                'sections' => $installationSections,
+            ],
+        ];
+
+        return $copy;
     }
 }
