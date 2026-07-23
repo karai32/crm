@@ -8,10 +8,28 @@
 
     var search = root.querySelector('[data-help-search]');
     var sectionLinks = Array.from(root.querySelectorAll('[data-help-section-link]'));
+    var searchItems = Array.from(root.querySelectorAll('[data-help-search-item]'));
     var emptyState = root.querySelector('[data-help-search-empty]');
     var mobileTrigger = root.querySelector('[data-help-mobile-trigger]');
     var mobileClose = root.querySelector('[data-help-mobile-close]');
     var mobileBackdrop = root.querySelector('[data-help-mobile-backdrop]');
+    var technicalGroup = root.querySelector('[data-help-technical-group]');
+    var technicalToggle = root.querySelector('[data-help-technical-toggle]');
+    var technicalMenu = root.querySelector('[data-help-technical-menu]');
+
+    function setTechnicalMenuOpen(open) {
+        if (!technicalToggle || !technicalMenu) {
+            return;
+        }
+        technicalToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        technicalMenu.hidden = !open;
+    }
+
+    if (technicalToggle) {
+        technicalToggle.addEventListener('click', function () {
+            setTechnicalMenuOpen(technicalToggle.getAttribute('aria-expanded') !== 'true');
+        });
+    }
 
     function setNavigationOpen(open) {
         document.body.classList.toggle('help-navigation-open', open);
@@ -52,14 +70,22 @@
         var query = search.value.trim().toLocaleLowerCase();
         var visibleCount = 0;
 
-        sectionLinks.forEach(function (link) {
-            var searchText = (link.dataset.searchText || '').toLocaleLowerCase();
+        searchItems.forEach(function (item) {
+            var searchText = (item.dataset.searchText || '').toLocaleLowerCase();
             var matches = query === '' || searchText.includes(query);
-            link.hidden = !matches;
+            item.hidden = !matches;
             if (matches) {
                 visibleCount += 1;
             }
         });
+
+        if (technicalGroup) {
+            if (query !== '' && !technicalGroup.hidden) {
+                setTechnicalMenuOpen(true);
+            } else if (query === '') {
+                setTechnicalMenuOpen(technicalGroup.classList.contains('is-active'));
+            }
+        }
 
         if (emptyState) {
             emptyState.hidden = visibleCount !== 0;

@@ -200,6 +200,7 @@ $router->post('/users/update', [$userController, 'update']);
 $router->post('/users/delete', [$userController, 'delete']);
 $router->post('/users/purge', [$userController, 'purge']);
 $router->get('/help', [$helpController, 'index']);
+$router->get('/help/technical/{section}', [$helpController, 'technicalPage']);
 $router->get('/help/{topic}', [$helpController, 'show']);
 $router->get('/api-keys', [$apiKeyController, 'index']);
 $router->post('/api-keys/store', [$apiKeyController, 'store']);

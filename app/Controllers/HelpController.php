@@ -21,7 +21,18 @@ class HelpController
             'technical-guide' => 'technical',
         ];
 
-        $this->renderTopic($aliases[$topic] ?? $topic);
+        $topic = $aliases[$topic] ?? $topic;
+        if ($topic === 'technical') {
+            Auth::redirect('/help/technical/server');
+            return;
+        }
+
+        $this->renderTopic($topic);
+    }
+
+    public function technicalPage(): void
+    {
+        $this->renderTechnicalPage(trim((string) ($_GET['section'] ?? ''), '/'));
     }
 
     private function renderTopic(string $topic): void
@@ -30,7 +41,7 @@ class HelpController
 
         $locale = in_array(Lang::locale(), ['ru', 'es', 'en'], true) ? Lang::locale() : 'en';
         $copy = $this->copy()[$locale];
-        $navigation = $copy['navigation'];
+        $navigation = $this->navigation($copy);
         $activeIndex = array_search($topic, array_column($navigation, 'id'), true);
 
         if ($activeIndex === false) {
@@ -39,9 +50,7 @@ class HelpController
         }
 
         $page = $navigation[$activeIndex];
-        $page['sections'] = $topic === 'technical'
-            ? $copy['technical_sections']
-            : $this->articleSections($topic, $page, $copy['article']);
+        $page['sections'] = $this->articleSections($topic, $page, $copy['article']);
 
         View::render('help/index', [
             'title' => $page['title'] . ' — ' . $copy['center_title'],
@@ -53,6 +62,69 @@ class HelpController
             'activeIndex' => $activeIndex,
             'page' => $page,
         ]);
+    }
+
+    private function renderTechnicalPage(string $section): void
+    {
+        Auth::requireLogin();
+
+        $locale = in_array(Lang::locale(), ['ru', 'es', 'en'], true) ? Lang::locale() : 'en';
+        $copy = $this->copy()[$locale];
+        $pages = $copy['technical_pages'] ?? [];
+
+        if (!isset($pages[$section])) {
+            $firstSection = array_key_first($pages);
+            Auth::redirect($firstSection === null ? '/help' : '/help/technical/' . $firstSection);
+            return;
+        }
+
+        $navigation = $this->navigation($copy);
+        $activeIndex = array_search('technical', array_column($navigation, 'id'), true);
+        if ($activeIndex === false) {
+            Auth::redirect('/help');
+            return;
+        }
+
+        $page = $pages[$section];
+        $page['id'] = 'technical';
+        $page['technical_id'] = $section;
+        $page['is_technical'] = true;
+        $page['sections'] = $page['sections'] ?? [];
+
+        View::render('help/index', [
+            'title' => $page['title'] . ' — ' . $copy['center_title'],
+            'styles' => ['help.css'],
+            'scripts' => ['help.js'],
+            'locale' => $locale,
+            'copy' => $copy,
+            'navigation' => $navigation,
+            'activeIndex' => $activeIndex,
+            'page' => $page,
+        ]);
+    }
+
+    private function navigation(array $copy): array
+    {
+        $navigation = $copy['navigation'];
+        $children = [];
+
+        foreach (($copy['technical_pages'] ?? []) as $id => $page) {
+            $children[] = [
+                'id' => $id,
+                'title' => $page['title'],
+                'description' => $page['description'] ?? '',
+                'icon' => $page['icon'] ?? 'ph-code',
+            ];
+        }
+
+        foreach ($navigation as $index => $item) {
+            if ($item['id'] === 'technical') {
+                $navigation[$index]['children'] = $children;
+                break;
+            }
+        }
+
+        return $navigation;
     }
 
     private function articleSections(string $topic, array $page, array $article): array
@@ -696,13 +768,13 @@ CURL,
                         'api' => ['Назначение API', 'Аутентификация и запросы', 'Ресурсы и ответы'],
                     ],
                 ],
-                'technical_sections' => [
-                    ['id' => 'platform', 'title' => 'Обзор платформы', 'description' => 'Назначение системы, используемые технологии и ключевые архитектурные решения.'],
-                    ['id' => 'architecture', 'title' => 'Архитектура приложения', 'description' => 'Слои приложения, структура каталогов, маршрутизация и жизненный цикл HTTP-запроса.'],
-                    ['id' => 'database', 'title' => 'База данных', 'description' => 'Модель данных, связи между сущностями, индексы и правила изменения схемы.'],
-                    ['id' => 'security', 'title' => 'Аутентификация и безопасность', 'description' => 'Сессии, права доступа, CSRF, API-ключи и защита конфиденциальных данных.'],
-                    ['id' => 'configuration', 'title' => 'Конфигурация и интеграции', 'description' => 'Настройка базы данных, почты, Gemini, API и фоновых задач.'],
-                    ['id' => 'deployment', 'title' => 'Развёртывание и обслуживание', 'description' => 'Требования окружения, установка, журналы, диагностика и регулярное обслуживание.'],
+                'technical_pages' => [
+                    'server' => [
+                        'title' => 'Сервер',
+                        'description' => '',
+                        'icon' => 'ph-code',
+                        'sections' => [],
+                    ],
                 ],
             ],
             'en' => [
@@ -739,13 +811,13 @@ CURL,
                     'default_headings' => ['About this section', 'Core workflow', 'Important details'],
                     'headings' => [],
                 ],
-                'technical_sections' => [
-                    ['id' => 'platform', 'title' => 'Platform overview', 'description' => 'System purpose, technology stack and key architectural decisions.'],
-                    ['id' => 'architecture', 'title' => 'Application architecture', 'description' => 'Application layers, directory structure, routing and the HTTP request lifecycle.'],
-                    ['id' => 'database', 'title' => 'Database', 'description' => 'Data model, entity relationships, indexes and schema change rules.'],
-                    ['id' => 'security', 'title' => 'Authentication and security', 'description' => 'Sessions, access control, CSRF, API keys and confidential data protection.'],
-                    ['id' => 'configuration', 'title' => 'Configuration and integrations', 'description' => 'Database, mail, Gemini, API and scheduled task configuration.'],
-                    ['id' => 'deployment', 'title' => 'Deployment and operations', 'description' => 'Environment requirements, installation, logs, diagnostics and maintenance.'],
+                'technical_pages' => [
+                    'server' => [
+                        'title' => 'Server',
+                        'description' => '',
+                        'icon' => 'ph-code',
+                        'sections' => [],
+                    ],
                 ],
             ],
             'es' => [
@@ -782,13 +854,13 @@ CURL,
                     'default_headings' => ['Acerca de esta sección', 'Flujo de trabajo', 'Detalles importantes'],
                     'headings' => [],
                 ],
-                'technical_sections' => [
-                    ['id' => 'platform', 'title' => 'Resumen de la plataforma', 'description' => 'Propósito del sistema, tecnologías y decisiones arquitectónicas principales.'],
-                    ['id' => 'architecture', 'title' => 'Arquitectura de la aplicación', 'description' => 'Capas, estructura de directorios, rutas y ciclo de una petición HTTP.'],
-                    ['id' => 'database', 'title' => 'Base de datos', 'description' => 'Modelo de datos, relaciones, índices y reglas de cambio del esquema.'],
-                    ['id' => 'security', 'title' => 'Autenticación y seguridad', 'description' => 'Sesiones, control de acceso, CSRF, claves API y protección de datos.'],
-                    ['id' => 'configuration', 'title' => 'Configuración e integraciones', 'description' => 'Configuración de base de datos, correo, Gemini, API y tareas programadas.'],
-                    ['id' => 'deployment', 'title' => 'Despliegue y operación', 'description' => 'Requisitos, instalación, registros, diagnóstico y mantenimiento.'],
+                'technical_pages' => [
+                    'server' => [
+                        'title' => 'Servidor',
+                        'description' => '',
+                        'icon' => 'ph-code',
+                        'sections' => [],
+                    ],
                 ],
             ],
         ];
