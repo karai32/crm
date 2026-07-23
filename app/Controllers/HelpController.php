@@ -4,384 +4,223 @@ class HelpController
 {
     public function index(): void
     {
-        Auth::requireLogin();
-
-        $content = $this->content()[$this->locale()];
-
-        $cards = [];
-
-        foreach ($content['sections'] as $section) {
-            if (!$this->canViewTopic($section['id'])) {
-                continue;
-            }
-            $cards[] = [
-                'id'      => $section['id'],
-                'icon'    => $section['icon'],
-                'title'   => $section['title'],
-                'summary' => $section['summary'],
-            ];
-        }
-
-        if ($this->canViewTopic('api')) {
-            $cards[] = [
-                'id'      => 'api',
-                'icon'    => 'key',
-                'title'   => 'API Reference',
-                'summary' => $content['api_summary'],
-            ];
-        }
-
-        if ($this->canViewTopic('technical-guide')) {
-            $cards[] = [
-                'id'      => 'technical-guide',
-                'icon'    => 'code',
-                'title'   => $content['technical_guide_title'],
-                'summary' => $content['technical_guide_summary'],
-            ];
-        }
-
-        View::render('help/index', [
-            'title'   => $content['page_title'],
-            'styles'  => ['help.css'],
-            'content' => $content,
-            'cards'   => $cards,
-        ]);
+        $this->renderTopic('start');
     }
 
     public function show(): void
     {
+        $topic = trim((string) ($_GET['topic'] ?? ''), '/');
+
+        $aliases = [
+            'getting-started' => 'start',
+            'tags-sectors' => 'sectors-tags',
+            'imports' => 'import-export',
+            'exports' => 'import-export',
+            'ai' => 'ai-tools',
+            'users-roles' => 'users-settings',
+            'technical-guide' => 'technical',
+        ];
+
+        $this->renderTopic($aliases[$topic] ?? $topic);
+    }
+
+    private function renderTopic(string $topic): void
+    {
         Auth::requireLogin();
 
-        $topic  = (string) ($_GET['topic'] ?? '');
-        $locale = $this->locale();
+        $locale = in_array(Lang::locale(), ['ru', 'es', 'en'], true) ? Lang::locale() : 'en';
+        $copy = $this->copy()[$locale];
+        $navigation = $copy['navigation'];
+        $activeIndex = array_search($topic, array_column($navigation, 'id'), true);
 
-        if (!$this->canViewTopic($topic)) {
+        if ($activeIndex === false) {
             Auth::redirect('/help');
             return;
         }
 
-        if ($topic === 'api') {
-            View::render('help/api', [
-                'title'   => 'API Reference',
-                'styles'  => ['help.css', 'api.css'],
-                'scripts' => ['help.js'],
-                'locale'  => $locale,
-            ]);
-            return;
-        }
+        $page = $navigation[$activeIndex];
+        $page['sections'] = $topic === 'technical'
+            ? $copy['technical_sections']
+            : $this->articleSections($topic, $page, $copy['article']);
 
-        if ($topic === 'technical-guide') {
-            View::render('help/technical-guide', [
-                'title'   => 'Platform Technical Guide',
-                'styles'  => ['help.css'],
-                'scripts' => ['help.js'],
-                'locale'  => $locale,
-            ]);
-            return;
-        }
-
-        foreach ($this->content()[$locale]['sections'] as $section) {
-            if ($section['id'] === $topic) {
-                View::render('help/show', [
-                    'title'   => $section['title'],
-                    'styles'  => ['help.css'],
-                    'locale'  => $locale,
-                    'section' => $section,
-                ]);
-                return;
-            }
-        }
-
-        Auth::redirect('/help');
+        View::render('help/index', [
+            'title' => $page['title'] . ' — ' . $copy['center_title'],
+            'styles' => ['help.css'],
+            'scripts' => ['help.js'],
+            'locale' => $locale,
+            'copy' => $copy,
+            'navigation' => $navigation,
+            'activeIndex' => $activeIndex,
+            'page' => $page,
+        ]);
     }
 
-    /**
-     * Role-based visibility: a topic is hidden when it documents features
-     * the current user cannot access. Mirrors the checks used by each
-     * module's controller (Auth::can / Auth::requireAdmin).
-     */
-    private function canViewTopic(string $topic): bool
+    private function articleSections(string $topic, array $page, array $article): array
     {
-        return match ($topic) {
-            'tags-sectors'  => Auth::can('tags.manage') || Auth::can('sectors.manage'),
-            'custom-fields' => Auth::can('custom_fields.manage'),
-            'imports'       => Auth::can('imports.manage'),
-            'exports'       => Auth::can('exports.use'),
-            'users-roles',
-            'api',
-            'technical-guide' => Auth::isAdmin(),
-            default           => true,
-        };
-    }
+        $headings = $article['headings'][$topic] ?? $article['default_headings'];
 
-    // Help content follows the global UI language (Settings). It exists in
-    // Spanish and English; other UI locales fall back to English.
-    private function locale(): string
-    {
-        return Lang::locale() === 'es' ? 'es' : 'en';
-    }
-
-    private function content(): array
-    {
         return [
-
-            // ── Spanish ────────────────────────────────────────────────────
-            'es' => [
-                'page_title' => 'Centro de ayuda',
-                'title'      => 'Centro de ayuda',
-                'intro'      => 'Referencia rapida de los modulos del CRM.',
-
-                'api_summary'             => 'API REST: autenticacion con claves y scopes; endpoints de contactos, clientes, sectores y tags.',
-                'technical_guide_title'   => 'Guia tecnica de la plataforma',
-                'technical_guide_summary' => 'Arquitectura, esquema de base de datos, modelo de seguridad y despliegue. Solo en ingles.',
-
-                'sections' => [
-                    [
-                        'id'      => 'getting-started',
-                        'icon'    => 'map',
-                        'title'   => 'Primeros pasos',
-                        'summary' => 'Estructura de la interfaz, busqueda global y cuenta.',
-                        'items'   => [
-                            'El <strong>menu lateral</strong> muestra los modulos disponibles; las secciones sin permiso se ocultan.',
-                            'La <strong>busqueda global</strong> de la barra superior localiza contactos y clientes por nombre, email o empresa mientras escribes.',
-                            'El <strong>Dashboard</strong> muestra los totales de contactos, clientes, sectores y tags.',
-                            '<strong>"Recordarme"</strong> en el login mantiene la sesion 30 dias.',
-                            'Con la <strong>verificacion en dos pasos</strong> activada, tras el login se envia un codigo de un solo uso por email.',
-                            'El idioma de la interfaz se cambia en <strong>Ajustes</strong>; el centro de ayuda lo sigue automaticamente.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'contacts',
-                        'icon'    => 'person',
-                        'title'   => 'Contactos',
-                        'summary' => 'Fichas de personas: campos, clientes vinculados, tags y acciones en bloque.',
-                        'items'   => [
-                            'Campos: <strong>nombre completo</strong> (obligatorio), email, telefono y empresa.',
-                            'Un contacto puede vincularse a <strong>varios clientes</strong> desde su ficha.',
-                            'Los <strong>tags</strong> marcan el estado (Lead, Client, Hot, Cold...); se aplican en la ficha o en bloque desde el listado.',
-                            'Acciones en bloque sobre la seleccion: anadir/quitar tags, vincular a cliente, eliminar.',
-                            'Filtros por nombre, email, tag, cliente, sector, fechas y campos personalizados filtrables.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'clients',
-                        'icon'    => 'building',
-                        'title'   => 'Clientes',
-                        'summary' => 'Fichas de empresas: campos, sector y contactos vinculados.',
-                        'items'   => [
-                            'Campos: <strong>nombre comercial</strong> (obligatorio), razon social, CIF/NIF, direccion, codigo postal, ciudad, provincia, pais, web y notas.',
-                            'Un cliente agrupa <strong>varios contactos</strong>; un contacto puede pertenecer a varios clientes.',
-                            'El <strong>sector</strong> clasifica el cliente por industria y funciona como filtro.',
-                            'Tags y acciones en bloque funcionan igual que en contactos.',
-                            'Los <strong>campos personalizados</strong> de clientes son independientes de los de contactos.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'tags-sectors',
-                        'icon'    => 'tag',
-                        'title'   => 'Tags y sectores',
-                        'summary' => 'Clasificacion: tags de colores para contactos y clientes, sectores para clientes.',
-                        'items'   => [
-                            'Un tag tiene <strong>nombre y color</strong>, visibles en listados y fichas.',
-                            'Los tags se aplican a contactos y clientes, de forma individual o en bloque.',
-                            'Los <strong>sectores</strong> solo se asignan a clientes y los agrupan por industria.',
-                            'Eliminar un tag lo quita de todas las fichas; un sector en uso se <strong>desactiva</strong> en lugar de eliminarse.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'custom-fields',
-                        'icon'    => 'sliders',
-                        'title'   => 'Campos personalizados',
-                        'summary' => 'Campos adicionales en contactos y clientes, sin tocar codigo.',
-                        'items'   => [
-                            'Tipos: <strong>text, textarea, number, date, email, url, select, checkbox</strong>.',
-                            'Se definen por separado para <strong>contactos</strong> y <strong>clientes</strong>.',
-                            'Los campos <strong>select</strong> usan una lista cerrada de opciones; cada campo admite un valor por defecto.',
-                            'Los campos <strong>"Filterable"</strong> aparecen en el panel de filtros avanzados del listado.',
-                            'Durante una importacion, las columnas sin mapear pueden <strong>crearse automaticamente</strong> como campos personalizados.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'imports',
-                        'icon'    => 'upload',
-                        'title'   => 'Importacion',
-                        'summary' => 'Carga de contactos o clientes desde CSV/XLSX.',
-                        'items'   => [
-                            'Formatos: <strong>CSV y XLSX</strong>; la primera fila debe contener los encabezados.',
-                            'Flujo: <strong>subir → previsualizar → mapear columnas → procesar</strong>.',
-                            'Para contactos la columna <strong>full_name</strong> es obligatoria; las filas con email ya existente se omiten.',
-                            'Cada fila y cada error quedan registrados; el historial muestra importadas / omitidas / con error por lote.',
-                            'Descarga las <strong>plantillas</strong> con los encabezados correctos desde Exports.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'exports',
-                        'icon'    => 'download',
-                        'title'   => 'Exportacion',
-                        'summary' => 'Descarga de contactos o clientes en CSV o XLSX.',
-                        'items'   => [
-                            'Elige la entidad (<strong>contactos / clientes</strong>) y el formato (<strong>CSV / XLSX</strong>).',
-                            'Seleccion de campos por grupos: datos basicos, datos relacionados (tags, clientes, sector) y campos personalizados.',
-                            'El <strong>historial</strong> muestra las exportaciones con fecha, entidad y numero de filas.',
-                            'Las <strong>plantillas de importacion</strong> tambien se descargan desde esta pagina.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'search-filters',
-                        'icon'    => 'search',
-                        'title'   => 'Busqueda y filtros',
-                        'summary' => 'Busqueda global, filtros del listado y filtros avanzados.',
-                        'items'   => [
-                            'La <strong>busqueda global</strong> (barra superior) da resultados instantaneos de contactos y clientes.',
-                            'El boton <strong>Filters</strong> abre el panel; los filtros activos aparecen como chips y se quitan uno a uno.',
-                            'Filtros avanzados: cliente vinculado, sector, pais, fechas de creacion/edicion y campos personalizados filtrables.',
-                            'Los filtros se conservan en la <strong>URL</strong>: puedes guardar o compartir una vista filtrada.',
-                            '<strong>"Reset all"</strong> limpia todos los filtros.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'users-roles',
-                        'icon'    => 'users',
-                        'title'   => 'Usuarios y permisos',
-                        'summary' => 'Roles, permisos por usuario y gestion de cuentas.',
-                        'items'   => [
-                            'Dos roles: <strong>Administrador</strong> (acceso total) y <strong>Usuario</strong> (permisos configurables).',
-                            'Permisos por usuario: crear/editar/eliminar contactos y clientes, importar, exportar, gestionar tags, sectores y campos personalizados.',
-                            'Un permiso sin configuracion explicita esta <strong>permitido por defecto</strong>; para restringir, desmarcalo.',
-                            '<strong>Desactivar</strong> un usuario revoca el acceso pero conserva el historial; un usuario desactivado puede eliminarse definitivamente.',
-                            'Se gestionan en <strong>Users</strong> (solo administradores).',
-                        ],
-                    ],
+            [
+                'id' => 'overview',
+                'title' => $headings[0],
+                'paragraphs' => [
+                    $page['description'],
+                    $article['overview'],
                 ],
             ],
+            [
+                'id' => 'workflow',
+                'title' => $headings[1],
+                'paragraphs' => [$article['workflow']],
+            ],
+            [
+                'id' => 'details',
+                'title' => $headings[2],
+                'paragraphs' => [$article['details']],
+            ],
+        ];
+    }
 
-            // ── English ────────────────────────────────────────────────────
+    private function copy(): array
+    {
+        return [
+            'ru' => [
+                'center_label' => 'База знаний',
+                'center_title' => 'Справочный центр',
+                'center_intro' => 'Руководство по работе с ContactCore и техническая документация платформы.',
+                'search_placeholder' => 'Найти раздел',
+                'search_empty' => 'Разделы не найдены',
+                'navigation_label' => 'Разделы справки',
+                'on_this_page' => 'На этой странице',
+                'article_label' => 'Руководство',
+                'technical_label' => 'Техническая документация',
+                'updated_label' => 'Документация ContactCore',
+                'previous_label' => 'Предыдущий раздел',
+                'next_label' => 'Следующий раздел',
+                'open_navigation' => 'Открыть разделы',
+                'close_navigation' => 'Закрыть разделы',
+                'navigation' => [
+                    ['id' => 'start', 'title' => 'Начало', 'description' => 'Знакомство с системой, навигацией и основным рабочим процессом.', 'icon' => 'ph-house-line'],
+                    ['id' => 'clients', 'title' => 'Клиенты', 'description' => 'Работа с организациями, их реквизитами и связанными данными.', 'icon' => 'ph-buildings'],
+                    ['id' => 'contacts', 'title' => 'Контакты', 'description' => 'Работа с людьми, контактными данными и связями с клиентами.', 'icon' => 'ph-address-book'],
+                    ['id' => 'sectors-tags', 'title' => 'Сектора и теги', 'description' => 'Классификация записей с помощью отраслей и гибких меток.', 'icon' => 'ph-tag'],
+                    ['id' => 'custom-fields', 'title' => 'Пользовательские поля', 'description' => 'Расширение карточек клиентов и контактов собственными полями.', 'icon' => 'ph-sliders-horizontal'],
+                    ['id' => 'import-export', 'title' => 'Импорт и экспорт', 'description' => 'Загрузка, проверка и выгрузка данных в CSV и XLSX.', 'icon' => 'ph-arrows-down-up'],
+                    ['id' => 'ai-tools', 'title' => 'ИИ-инструменты', 'description' => 'Автоматическое определение компаний и контроль результатов ИИ.', 'icon' => 'ph-sparkle'],
+                    ['id' => 'users-settings', 'title' => 'Пользователи и настройки', 'description' => 'Учётные записи, параметры интерфейса и управление системой.', 'icon' => 'ph-users-three'],
+                    ['id' => 'api', 'title' => 'API', 'description' => 'Подключение внешних систем к данным и операциям ContactCore.', 'icon' => 'ph-plugs-connected'],
+                    ['id' => 'technical', 'title' => 'Техническая документация', 'description' => 'Архитектура, безопасность, конфигурация и эксплуатация платформы.', 'icon' => 'ph-code'],
+                ],
+                'article' => [
+                    'overview' => 'В статье последовательно объясняется назначение раздела и место его данных в общей структуре CRM.',
+                    'workflow' => 'Работа рассматривается как связный процесс: от открытия раздела и поиска нужной записи до сохранения результата и проверки связанных данных.',
+                    'details' => 'Отдельное внимание уделяется ограничениям, связанным возможностям и ситуациям, в которых выбранный инструмент используется наиболее эффективно.',
+                    'default_headings' => ['О разделе', 'Основной порядок работы', 'Важные особенности'],
+                    'headings' => [
+                        'start' => ['О системе', 'Как устроена работа', 'Как пользоваться справкой'],
+                        'clients' => ['Что такое клиент', 'Работа с карточкой клиента', 'Связанные данные'],
+                        'contacts' => ['Что такое контакт', 'Работа с карточкой контакта', 'Связи и классификация'],
+                        'sectors-tags' => ['Принципы классификации', 'Сектора', 'Теги'],
+                        'custom-fields' => ['Назначение полей', 'Создание и настройка', 'Хранение и использование значений'],
+                        'import-export' => ['Обмен данными', 'Импорт', 'Экспорт'],
+                        'ai-tools' => ['Назначение ИИ-инструментов', 'Подготовка и обработка данных', 'Проверка результата'],
+                        'users-settings' => ['Учётные записи', 'Настройки пользователя', 'Администрирование'],
+                        'api' => ['Назначение API', 'Аутентификация и запросы', 'Ресурсы и ответы'],
+                    ],
+                ],
+                'technical_sections' => [
+                    ['id' => 'platform', 'title' => 'Обзор платформы', 'description' => 'Назначение системы, используемые технологии и ключевые архитектурные решения.'],
+                    ['id' => 'architecture', 'title' => 'Архитектура приложения', 'description' => 'Слои приложения, структура каталогов, маршрутизация и жизненный цикл HTTP-запроса.'],
+                    ['id' => 'database', 'title' => 'База данных', 'description' => 'Модель данных, связи между сущностями, индексы и правила изменения схемы.'],
+                    ['id' => 'security', 'title' => 'Аутентификация и безопасность', 'description' => 'Сессии, права доступа, CSRF, API-ключи и защита конфиденциальных данных.'],
+                    ['id' => 'configuration', 'title' => 'Конфигурация и интеграции', 'description' => 'Настройка базы данных, почты, Gemini, API и фоновых задач.'],
+                    ['id' => 'deployment', 'title' => 'Развёртывание и обслуживание', 'description' => 'Требования окружения, установка, журналы, диагностика и регулярное обслуживание.'],
+                ],
+            ],
             'en' => [
-                'page_title' => 'Help Center',
-                'title'      => 'Help Center',
-                'intro'      => 'Quick reference for the CRM modules.',
-
-                'api_summary'             => 'REST API: key-based authentication with scopes; endpoints for contacts, clients, sectors and tags.',
-                'technical_guide_title'   => 'Platform Technical Guide',
-                'technical_guide_summary' => 'Architecture, database schema, security model and deployment. English only.',
-
-                'sections' => [
-                    [
-                        'id'      => 'getting-started',
-                        'icon'    => 'map',
-                        'title'   => 'Getting started',
-                        'summary' => 'Interface layout, global search and account basics.',
-                        'items'   => [
-                            'The <strong>sidebar</strong> lists the modules available to you; sections you have no permission for are hidden.',
-                            'The <strong>global search</strong> in the topbar finds contacts and clients by name, email or company as you type.',
-                            'The <strong>Dashboard</strong> shows current totals for contacts, clients, sectors and tags.',
-                            '<strong>"Remember me"</strong> at login keeps the session for 30 days.',
-                            'With <strong>two-factor authentication</strong> enabled, a one-time code is emailed after login.',
-                            'The interface language is set in <strong>Settings</strong>; the Help Center follows it.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'contacts',
-                        'icon'    => 'person',
-                        'title'   => 'Contacts',
-                        'summary' => 'Records for people: fields, linked clients, tags and bulk actions.',
-                        'items'   => [
-                            'Fields: <strong>full name</strong> (required), email, phone and company.',
-                            'A contact can be linked to <strong>any number of clients</strong> from its record.',
-                            '<strong>Tags</strong> track status (Lead, Client, Hot, Cold...); apply them on the record or in bulk from the list.',
-                            'Bulk actions on the list selection: add/remove tags, link to a client, delete.',
-                            'Filters cover name, email, tag, client, sector, dates and filterable custom fields.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'clients',
-                        'icon'    => 'building',
-                        'title'   => 'Clients',
-                        'summary' => 'Records for companies: fields, sector and linked contacts.',
-                        'items'   => [
-                            'Fields: <strong>commercial name</strong> (required), legal name, CIF/NIF, address, postal code, city, province, country, website and notes.',
-                            'A client groups <strong>any number of contacts</strong>; a contact can belong to several clients.',
-                            'The <strong>sector</strong> classifies the client by industry and is available as a filter.',
-                            'Tags and bulk actions work exactly as in contacts.',
-                            'Client <strong>custom fields</strong> are independent from contact custom fields.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'tags-sectors',
-                        'icon'    => 'tag',
-                        'title'   => 'Tags and sectors',
-                        'summary' => 'Classification: coloured tags for contacts and clients, sectors for clients.',
-                        'items'   => [
-                            'A tag has a <strong>name and colour</strong>, shown in lists and records.',
-                            'Tags apply to both contacts and clients — individually or in bulk.',
-                            '<strong>Sectors</strong> apply to clients only and group them by industry.',
-                            'Deleting a tag removes it from every record; a sector in use is <strong>deactivated</strong> instead of deleted.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'custom-fields',
-                        'icon'    => 'sliders',
-                        'title'   => 'Custom fields',
-                        'summary' => 'Extra fields on contact and client records, defined without code changes.',
-                        'items'   => [
-                            'Types: <strong>text, textarea, number, date, email, url, select, checkbox</strong>.',
-                            'Fields are defined separately for <strong>contacts</strong> and for <strong>clients</strong>.',
-                            '<strong>Select</strong> fields use a fixed option list; a default value can be set per field.',
-                            'Fields marked <strong>"Filterable"</strong> appear in the advanced filter panel of the list.',
-                            'During an import, unmapped columns can be <strong>created automatically</strong> as custom fields.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'imports',
-                        'icon'    => 'upload',
-                        'title'   => 'Imports',
-                        'summary' => 'Loading contacts or clients from CSV/XLSX files.',
-                        'items'   => [
-                            'Formats: <strong>CSV and XLSX</strong>; the first row must contain column headers.',
-                            'Flow: <strong>upload → preview → map columns → process</strong>.',
-                            'For contacts the <strong>full_name</strong> column is required; rows whose email already exists are skipped.',
-                            'Every row and every error is logged; the history shows imported / skipped / failed counts per batch.',
-                            'Download ready-made <strong>templates</strong> with correct headers from the Exports page.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'exports',
-                        'icon'    => 'download',
-                        'title'   => 'Exports',
-                        'summary' => 'Downloading contacts or clients as CSV or XLSX.',
-                        'items'   => [
-                            'Choose the entity (<strong>contacts / clients</strong>) and the format (<strong>CSV / XLSX</strong>).',
-                            'Select fields by group: basic info, related data (tags, linked clients, sector) and custom fields.',
-                            'The <strong>history</strong> lists past exports with date, entity and row count.',
-                            '<strong>Import templates</strong> are downloaded from this page as well.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'search-filters',
-                        'icon'    => 'search',
-                        'title'   => 'Search and filters',
-                        'summary' => 'Global search, list filters and advanced filters.',
-                        'items'   => [
-                            '<strong>Global search</strong> (topbar): instant results across contacts and clients.',
-                            'The <strong>Filters</strong> button opens the panel; active filters appear as chips and can be removed one by one.',
-                            'Advanced filters: linked client, sector, country, creation/update dates and filterable custom fields.',
-                            'Filters are kept in the <strong>URL</strong>, so a filtered view can be bookmarked or shared.',
-                            '<strong>"Reset all"</strong> clears every active filter.',
-                        ],
-                    ],
-                    [
-                        'id'      => 'users-roles',
-                        'icon'    => 'users',
-                        'title'   => 'Users and permissions',
-                        'summary' => 'Roles, per-user permissions and account management.',
-                        'items'   => [
-                            'Two roles: <strong>Administrator</strong> (full access) and <strong>User</strong> (configurable permissions).',
-                            'Per-user permissions: create/edit/delete contacts and clients, import, export, manage tags, sectors and custom fields.',
-                            'A permission without an explicit setting is <strong>allowed by default</strong>; deny it explicitly to restrict.',
-                            '<strong>Deactivating</strong> a user revokes access but keeps history; a deactivated user can then be permanently deleted.',
-                            'Managed in <strong>Users</strong> (administrators only).',
-                        ],
-                    ],
+                'center_label' => 'Knowledge base',
+                'center_title' => 'Help Center',
+                'center_intro' => 'Guidance for working with ContactCore and technical platform documentation.',
+                'search_placeholder' => 'Find a section',
+                'search_empty' => 'No sections found',
+                'navigation_label' => 'Help sections',
+                'on_this_page' => 'On this page',
+                'article_label' => 'Guide',
+                'technical_label' => 'Technical documentation',
+                'updated_label' => 'ContactCore documentation',
+                'previous_label' => 'Previous section',
+                'next_label' => 'Next section',
+                'open_navigation' => 'Open sections',
+                'close_navigation' => 'Close sections',
+                'navigation' => [
+                    ['id' => 'start', 'title' => 'Getting started', 'description' => 'An introduction to the system, navigation and core workflow.', 'icon' => 'ph-house-line'],
+                    ['id' => 'clients', 'title' => 'Clients', 'description' => 'Organizations, company details and related records.', 'icon' => 'ph-buildings'],
+                    ['id' => 'contacts', 'title' => 'Contacts', 'description' => 'People, contact details and their links to clients.', 'icon' => 'ph-address-book'],
+                    ['id' => 'sectors-tags', 'title' => 'Sectors and tags', 'description' => 'Classifying records with industries and flexible labels.', 'icon' => 'ph-tag'],
+                    ['id' => 'custom-fields', 'title' => 'Custom fields', 'description' => 'Extending client and contact records with your own fields.', 'icon' => 'ph-sliders-horizontal'],
+                    ['id' => 'import-export', 'title' => 'Import and export', 'description' => 'Loading, validating and exporting CSV and XLSX data.', 'icon' => 'ph-arrows-down-up'],
+                    ['id' => 'ai-tools', 'title' => 'AI tools', 'description' => 'Automated company discovery and review of AI results.', 'icon' => 'ph-sparkle'],
+                    ['id' => 'users-settings', 'title' => 'Users and settings', 'description' => 'Accounts, interface preferences and system management.', 'icon' => 'ph-users-three'],
+                    ['id' => 'api', 'title' => 'API', 'description' => 'Connecting external systems to ContactCore data and operations.', 'icon' => 'ph-plugs-connected'],
+                    ['id' => 'technical', 'title' => 'Technical documentation', 'description' => 'Architecture, security, configuration and platform operations.', 'icon' => 'ph-code'],
+                ],
+                'article' => [
+                    'overview' => 'The article explains the purpose of this area and how its data fits into the wider CRM.',
+                    'workflow' => 'The workflow is presented from opening the section and finding a record through saving the result and reviewing related data.',
+                    'details' => 'Additional notes cover constraints, connected features and the situations where this part of the system is most useful.',
+                    'default_headings' => ['About this section', 'Core workflow', 'Important details'],
+                    'headings' => [],
+                ],
+                'technical_sections' => [
+                    ['id' => 'platform', 'title' => 'Platform overview', 'description' => 'System purpose, technology stack and key architectural decisions.'],
+                    ['id' => 'architecture', 'title' => 'Application architecture', 'description' => 'Application layers, directory structure, routing and the HTTP request lifecycle.'],
+                    ['id' => 'database', 'title' => 'Database', 'description' => 'Data model, entity relationships, indexes and schema change rules.'],
+                    ['id' => 'security', 'title' => 'Authentication and security', 'description' => 'Sessions, access control, CSRF, API keys and confidential data protection.'],
+                    ['id' => 'configuration', 'title' => 'Configuration and integrations', 'description' => 'Database, mail, Gemini, API and scheduled task configuration.'],
+                    ['id' => 'deployment', 'title' => 'Deployment and operations', 'description' => 'Environment requirements, installation, logs, diagnostics and maintenance.'],
+                ],
+            ],
+            'es' => [
+                'center_label' => 'Base de conocimiento',
+                'center_title' => 'Centro de ayuda',
+                'center_intro' => 'Guía de uso de ContactCore y documentación técnica de la plataforma.',
+                'search_placeholder' => 'Buscar una sección',
+                'search_empty' => 'No se encontraron secciones',
+                'navigation_label' => 'Secciones de ayuda',
+                'on_this_page' => 'En esta página',
+                'article_label' => 'Guía',
+                'technical_label' => 'Documentación técnica',
+                'updated_label' => 'Documentación de ContactCore',
+                'previous_label' => 'Sección anterior',
+                'next_label' => 'Sección siguiente',
+                'open_navigation' => 'Abrir secciones',
+                'close_navigation' => 'Cerrar secciones',
+                'navigation' => [
+                    ['id' => 'start', 'title' => 'Primeros pasos', 'description' => 'Introducción al sistema, la navegación y el flujo de trabajo principal.', 'icon' => 'ph-house-line'],
+                    ['id' => 'clients', 'title' => 'Clientes', 'description' => 'Organizaciones, datos de empresa y registros relacionados.', 'icon' => 'ph-buildings'],
+                    ['id' => 'contacts', 'title' => 'Contactos', 'description' => 'Personas, datos de contacto y sus relaciones con clientes.', 'icon' => 'ph-address-book'],
+                    ['id' => 'sectors-tags', 'title' => 'Sectores y tags', 'description' => 'Clasificación mediante industrias y etiquetas flexibles.', 'icon' => 'ph-tag'],
+                    ['id' => 'custom-fields', 'title' => 'Campos personalizados', 'description' => 'Ampliación de clientes y contactos con campos propios.', 'icon' => 'ph-sliders-horizontal'],
+                    ['id' => 'import-export', 'title' => 'Importación y exportación', 'description' => 'Carga, validación y exportación de datos CSV y XLSX.', 'icon' => 'ph-arrows-down-up'],
+                    ['id' => 'ai-tools', 'title' => 'Herramientas de IA', 'description' => 'Detección automática de empresas y revisión de resultados.', 'icon' => 'ph-sparkle'],
+                    ['id' => 'users-settings', 'title' => 'Usuarios y ajustes', 'description' => 'Cuentas, preferencias de interfaz y gestión del sistema.', 'icon' => 'ph-users-three'],
+                    ['id' => 'api', 'title' => 'API', 'description' => 'Conexión de sistemas externos con los datos y operaciones de ContactCore.', 'icon' => 'ph-plugs-connected'],
+                    ['id' => 'technical', 'title' => 'Documentación técnica', 'description' => 'Arquitectura, seguridad, configuración y operación de la plataforma.', 'icon' => 'ph-code'],
+                ],
+                'article' => [
+                    'overview' => 'El artículo explica la finalidad del área y cómo encajan sus datos en el conjunto del CRM.',
+                    'workflow' => 'El flujo se presenta desde la apertura de la sección y la búsqueda de un registro hasta el guardado y la revisión de datos relacionados.',
+                    'details' => 'Las notas adicionales cubren limitaciones, funciones relacionadas y los casos en que esta parte del sistema resulta más útil.',
+                    'default_headings' => ['Acerca de esta sección', 'Flujo de trabajo', 'Detalles importantes'],
+                    'headings' => [],
+                ],
+                'technical_sections' => [
+                    ['id' => 'platform', 'title' => 'Resumen de la plataforma', 'description' => 'Propósito del sistema, tecnologías y decisiones arquitectónicas principales.'],
+                    ['id' => 'architecture', 'title' => 'Arquitectura de la aplicación', 'description' => 'Capas, estructura de directorios, rutas y ciclo de una petición HTTP.'],
+                    ['id' => 'database', 'title' => 'Base de datos', 'description' => 'Modelo de datos, relaciones, índices y reglas de cambio del esquema.'],
+                    ['id' => 'security', 'title' => 'Autenticación y seguridad', 'description' => 'Sesiones, control de acceso, CSRF, claves API y protección de datos.'],
+                    ['id' => 'configuration', 'title' => 'Configuración e integraciones', 'description' => 'Configuración de base de datos, correo, Gemini, API y tareas programadas.'],
+                    ['id' => 'deployment', 'title' => 'Despliegue y operación', 'description' => 'Requisitos, instalación, registros, diagnóstico y mantenimiento.'],
                 ],
             ],
         ];

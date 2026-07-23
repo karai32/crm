@@ -1,39 +1,173 @@
 <?php
-$icons = [
-    'map'      => 'ph ph-map-trifold',
-    'person'   => 'ph ph-user',
-    'building' => 'ph ph-buildings',
-    'tag'      => 'ph ph-tag',
-    'sliders'  => 'ph ph-sliders-horizontal',
-    'upload'   => 'ph ph-upload-simple',
-    'download' => 'ph ph-download-simple',
-    'search'   => 'ph ph-magnifying-glass',
-    'users'    => 'ph ph-users',
-    'key'      => 'ph ph-key',
-    'code'     => 'ph ph-code',
-];
+$topicUrl = static function (string $id): string {
+    return Auth::url($id === 'start' ? '/help' : '/help/' . $id);
+};
+
+$previous = $activeIndex > 0 ? $navigation[$activeIndex - 1] : null;
+$next = $activeIndex < count($navigation) - 1 ? $navigation[$activeIndex + 1] : null;
+$isTechnical = $page['id'] === 'technical';
 ?>
 
-<div class="help-hub-hero">
-    <h1><?= htmlspecialchars($content['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></h1>
-    <p><?= htmlspecialchars($content['intro'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
-</div>
+<div class="help-center" data-help-center>
+    <header class="help-center-header">
+        <div class="help-center-header-copy">
+            <span class="help-center-kicker"><?= htmlspecialchars($copy['center_label'], ENT_QUOTES, 'UTF-8') ?></span>
+            <h1><?= htmlspecialchars($copy['center_title'], ENT_QUOTES, 'UTF-8') ?></h1>
+            <p><?= htmlspecialchars($copy['center_intro'], ENT_QUOTES, 'UTF-8') ?></p>
+        </div>
 
-<div class="help-hub-grid">
-    <?php foreach ($cards as $card):
-        $iconClass = $icons[$card['icon']] ?? '';
-        $url = htmlspecialchars(Auth::url('/help/' . $card['id']), ENT_QUOTES, 'UTF-8');
-    ?>
-    <a href="<?= $url ?>" class="help-hub-card">
-        <div class="help-hub-card-icon help-card-icon--slate">
-            <?php if ($iconClass): ?>
-            <i class="<?= htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') ?>"></i>
-            <?php endif; ?>
-        </div>
-        <div class="help-hub-card-body">
-            <div class="help-hub-card-title"><?= htmlspecialchars($card['title'], ENT_QUOTES, 'UTF-8') ?></div>
-            <p class="help-hub-card-summary"><?= htmlspecialchars($card['summary'], ENT_QUOTES, 'UTF-8') ?></p>
-        </div>
-    </a>
-    <?php endforeach; ?>
+        <label class="help-center-search">
+            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            <span class="sr-only"><?= htmlspecialchars($copy['search_placeholder'], ENT_QUOTES, 'UTF-8') ?></span>
+            <input
+                type="search"
+                placeholder="<?= htmlspecialchars($copy['search_placeholder'], ENT_QUOTES, 'UTF-8') ?>"
+                autocomplete="off"
+                data-help-search
+            >
+            <kbd>/</kbd>
+        </label>
+    </header>
+
+    <button
+        class="help-mobile-trigger"
+        type="button"
+        aria-expanded="false"
+        aria-controls="helpSectionNavigation"
+        data-help-mobile-trigger
+    >
+        <span>
+            <i class="ph <?= htmlspecialchars($page['icon'], ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true"></i>
+            <?= htmlspecialchars($page['title'], ENT_QUOTES, 'UTF-8') ?>
+        </span>
+        <i class="ph ph-caret-down" aria-hidden="true"></i>
+    </button>
+
+    <div class="help-center-layout">
+        <aside class="help-section-navigation" id="helpSectionNavigation" data-help-navigation>
+            <div class="help-section-navigation-head">
+                <span><?= htmlspecialchars($copy['navigation_label'], ENT_QUOTES, 'UTF-8') ?></span>
+                <button type="button" data-help-mobile-close aria-label="<?= htmlspecialchars($copy['close_navigation'], ENT_QUOTES, 'UTF-8') ?>">
+                    <i class="ph ph-x" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <nav aria-label="<?= htmlspecialchars($copy['navigation_label'], ENT_QUOTES, 'UTF-8') ?>">
+                <?php foreach ($navigation as $item):
+                    $isActive = $item['id'] === $page['id'];
+                ?>
+                    <a
+                        href="<?= htmlspecialchars($topicUrl($item['id']), ENT_QUOTES, 'UTF-8') ?>"
+                        class="help-section-link<?= $isActive ? ' is-active' : '' ?>"
+                        data-help-section-link
+                        data-search-text="<?= htmlspecialchars($item['title'] . ' ' . $item['description'], ENT_QUOTES, 'UTF-8') ?>"
+                        <?= $isActive ? 'aria-current="page"' : '' ?>
+                    >
+                        <span class="help-section-link-icon">
+                            <i class="ph <?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true"></i>
+                        </span>
+                        <span class="help-section-link-copy">
+                            <strong><?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?></strong>
+                            <small><?= htmlspecialchars($item['description'], ENT_QUOTES, 'UTF-8') ?></small>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+
+            <p class="help-search-empty" data-help-search-empty hidden>
+                <?= htmlspecialchars($copy['search_empty'], ENT_QUOTES, 'UTF-8') ?>
+            </p>
+
+            <div class="help-section-navigation-foot">
+                <i class="ph ph-book-open-text" aria-hidden="true"></i>
+                <span><?= htmlspecialchars($copy['updated_label'], ENT_QUOTES, 'UTF-8') ?></span>
+            </div>
+        </aside>
+
+        <div class="help-mobile-backdrop" data-help-mobile-backdrop></div>
+
+        <main class="help-article">
+            <article>
+                <header class="help-article-header">
+                    <div class="help-article-context">
+                        <span><?= htmlspecialchars($isTechnical ? $copy['technical_label'] : $copy['article_label'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <span aria-hidden="true">/</span>
+                        <span><?= htmlspecialchars($page['title'], ENT_QUOTES, 'UTF-8') ?></span>
+                    </div>
+                    <h1><?= htmlspecialchars($page['title'], ENT_QUOTES, 'UTF-8') ?></h1>
+                    <p><?= htmlspecialchars($page['description'], ENT_QUOTES, 'UTF-8') ?></p>
+                </header>
+
+                <?php if ($isTechnical): ?>
+                    <nav class="help-technical-index" aria-label="<?= htmlspecialchars($copy['on_this_page'], ENT_QUOTES, 'UTF-8') ?>">
+                        <?php foreach ($page['sections'] as $index => $section): ?>
+                            <a href="#<?= htmlspecialchars($section['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                <span class="help-technical-number"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span>
+                                <span>
+                                    <strong><?= htmlspecialchars($section['title'], ENT_QUOTES, 'UTF-8') ?></strong>
+                                    <small><?= htmlspecialchars($section['description'], ENT_QUOTES, 'UTF-8') ?></small>
+                                </span>
+                                <i class="ph ph-arrow-down-right" aria-hidden="true"></i>
+                            </a>
+                        <?php endforeach; ?>
+                    </nav>
+                <?php endif; ?>
+
+                <div class="help-article-body">
+                    <?php foreach ($page['sections'] as $section): ?>
+                        <section id="<?= htmlspecialchars($section['id'], ENT_QUOTES, 'UTF-8') ?>" data-help-article-section>
+                            <h2><?= htmlspecialchars($section['title'], ENT_QUOTES, 'UTF-8') ?></h2>
+                            <?php if ($isTechnical): ?>
+                                <p><?= htmlspecialchars($section['description'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <?php else: ?>
+                                <?php foreach ($section['paragraphs'] as $paragraph): ?>
+                                    <p><?= htmlspecialchars($paragraph, ENT_QUOTES, 'UTF-8') ?></p>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </section>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+
+            <nav class="help-article-pagination" aria-label="<?= htmlspecialchars($copy['navigation_label'], ENT_QUOTES, 'UTF-8') ?>">
+                <?php if ($previous): ?>
+                    <a href="<?= htmlspecialchars($topicUrl($previous['id']), ENT_QUOTES, 'UTF-8') ?>" class="help-pagination-link help-pagination-link--previous">
+                        <i class="ph ph-arrow-left" aria-hidden="true"></i>
+                        <span>
+                            <small><?= htmlspecialchars($copy['previous_label'], ENT_QUOTES, 'UTF-8') ?></small>
+                            <strong><?= htmlspecialchars($previous['title'], ENT_QUOTES, 'UTF-8') ?></strong>
+                        </span>
+                    </a>
+                <?php else: ?>
+                    <span></span>
+                <?php endif; ?>
+
+                <?php if ($next): ?>
+                    <a href="<?= htmlspecialchars($topicUrl($next['id']), ENT_QUOTES, 'UTF-8') ?>" class="help-pagination-link help-pagination-link--next">
+                        <span>
+                            <small><?= htmlspecialchars($copy['next_label'], ENT_QUOTES, 'UTF-8') ?></small>
+                            <strong><?= htmlspecialchars($next['title'], ENT_QUOTES, 'UTF-8') ?></strong>
+                        </span>
+                        <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                    </a>
+                <?php endif; ?>
+            </nav>
+        </main>
+
+        <aside class="help-article-outline">
+            <span><?= htmlspecialchars($copy['on_this_page'], ENT_QUOTES, 'UTF-8') ?></span>
+            <nav>
+                <?php foreach ($page['sections'] as $index => $section): ?>
+                    <a
+                        href="#<?= htmlspecialchars($section['id'], ENT_QUOTES, 'UTF-8') ?>"
+                        class="<?= $index === 0 ? 'is-active' : '' ?>"
+                        data-help-outline-link
+                        data-section="<?= htmlspecialchars($section['id'], ENT_QUOTES, 'UTF-8') ?>"
+                    >
+                        <?= htmlspecialchars($section['title'], ENT_QUOTES, 'UTF-8') ?>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+        </aside>
+    </div>
 </div>
