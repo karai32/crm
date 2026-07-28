@@ -12,9 +12,9 @@ lang/help/
 └── es/
 ```
 
-Each locale has the same public page identifiers and order. `index.php` contains
-the interface copy, the technical-section metadata, and requires the page files
-in menu order.
+Each locale has the same public page identifiers and order. `index.php` is a
+small manifest containing interface copy, page metadata, menu order, and paths
+to article files. Article content is loaded lazily only when that page opens.
 
 Regular help articles live in `pages/<id>.php`. Developer documentation lives
 in `technical/<id>.php`. A page file returns this structure:
@@ -43,7 +43,8 @@ article is the current example of this layout.
 When adding a page:
 
 1. Create the page file in every locale, keeping the same ID.
-2. Add its `require` entry to every locale's `index.php` in the intended order.
+2. Add its metadata and file path to every locale's `index.php` in the intended
+   order.
 3. Keep user-facing prose out of `HelpController`.
 4. Keep section IDs unique within the page and stable after publication.
 5. Run PHP lint for all files under `lang/help` and render the page once to

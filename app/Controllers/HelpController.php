@@ -48,12 +48,13 @@ class HelpController
             $page['is_technical'] = true;
             $page['sections'] = [];
         } else {
-            $page = $content['pages'][$topic] ?? null;
-            if (!is_array($page)) {
+            $definition = $content['pages'][$topic] ?? null;
+            if (!is_array($definition)) {
                 Auth::redirect('/help');
                 return;
             }
 
+            $page = $this->loadPage($definition, $locale, 'pages', $topic);
             $page['id'] = $topic;
             $page['sections'] = $page['sections'] ?? [];
         }
@@ -82,7 +83,7 @@ class HelpController
             return;
         }
 
-        $page = $pages[$section];
+        $page = $this->loadPage($pages[$section], $locale, 'technical', $section);
         $page['id'] = 'technical';
         $page['technical_id'] = $section;
         $page['is_technical'] = true;
@@ -140,33 +141,80 @@ class HelpController
         ];
     }
 
+    private function loadPage(array $definition, string $locale, string $group, string $id): array
+    {
+        $paths = [(string) ($definition['file'] ?? '')];
+
+        if ($locale !== 'en') {
+            $paths[] = dirname(__DIR__, 2) . '/lang/help/en/' . $group . '/' . $id . '.php';
+        }
+
+        foreach (array_unique($paths) as $path) {
+            if ($path === '' || !is_file($path)) {
+                continue;
+            }
+
+            try {
+                $page = require $path;
+            } catch (Throwable $exception) {
+                error_log('Help content error [' . $locale . '/' . $group . '/' . $id . ']: ' . $exception->getMessage());
+                continue;
+            }
+
+            if (
+                is_array($page)
+                && isset($page['title'], $page['description'], $page['icon'], $page['sections'])
+                && is_array($page['sections'])
+            ) {
+                return $page;
+            }
+
+            error_log('Invalid help page structure: ' . $path);
+        }
+
+        throw new RuntimeException('Help page content is unavailable: ' . $locale . '/' . $group . '/' . $id);
+    }
+
     private function localizedContent(): array
     {
-        $locale = in_array(Lang::locale(), ['ru', 'es', 'en'], true)
+        $requestedLocale = in_array(Lang::locale(), ['ru', 'es', 'en'], true)
             ? Lang::locale()
             : 'en';
-        $path = dirname(__DIR__, 2) . '/lang/help/' . $locale . '/index.php';
+        $locales = array_unique([$requestedLocale, 'en']);
 
-        if (!is_file($path)) {
-            $locale = 'en';
-            $path = dirname(__DIR__, 2) . '/lang/help/en/index.php';
+        foreach ($locales as $locale) {
+            $path = dirname(__DIR__, 2) . '/lang/help/' . $locale . '/index.php';
+            if (!is_file($path)) {
+                error_log('Help locale manifest not found: ' . $path);
+                continue;
+            }
+
+            try {
+                $content = require $path;
+            } catch (Throwable $exception) {
+                error_log('Help locale error [' . $locale . ']: ' . $exception->getMessage());
+                continue;
+            }
+
+            if ($this->validContentPackage($content)) {
+                return [$locale, $content];
+            }
+
+            error_log('Invalid help content package for locale: ' . $locale);
         }
 
-        $content = require $path;
+        throw new RuntimeException('No valid help content package is available');
+    }
 
-        if (
-            !is_array($content)
-            || !isset($content['ui'], $content['pages'], $content['technical'])
-            || !is_array($content['ui'])
-            || !is_array($content['pages'])
-            || !is_array($content['technical'])
-            || !isset($content['technical']['meta'], $content['technical']['pages'])
-            || !is_array($content['technical']['meta'])
-            || !is_array($content['technical']['pages'])
-        ) {
-            throw new RuntimeException('Invalid help content package for locale: ' . $locale);
-        }
-
-        return [$locale, $content];
+    private function validContentPackage(mixed $content): bool
+    {
+        return is_array($content)
+            && isset($content['ui'], $content['pages'], $content['technical'])
+            && is_array($content['ui'])
+            && is_array($content['pages'])
+            && is_array($content['technical'])
+            && isset($content['technical']['meta'], $content['technical']['pages'])
+            && is_array($content['technical']['meta'])
+            && is_array($content['technical']['pages']);
     }
 }
