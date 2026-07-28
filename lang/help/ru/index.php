@@ -111,6 +111,12 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/domain-model.php',
 ),
+            'web-interface-ajax' => array (
+  'title' => 'Веб-интерфейс и AJAX',
+  'description' => 'Серверный HTML-интерфейс, клиентские компоненты, AJAX-контракты и интерактивные сценарии.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/web-interface-ajax.php',
+),
         ],
     ],
 ];
