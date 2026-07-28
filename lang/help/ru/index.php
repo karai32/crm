@@ -105,7 +105,12 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/database.php',
 ),
+            'domain-model' => array (
+  'title' => 'Предметная модель',
+  'description' => 'Смысл основных сущностей ContactCore, их связи, состояния и обязательные бизнес-правила.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/domain-model.php',
+),
         ],
     ],
 ];
-
