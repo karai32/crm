@@ -123,6 +123,12 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/api-internals.php',
 ),
+            'import-export' => array (
+  'title' => 'Импорт и экспорт',
+  'description' => 'Загрузка CSV и XLSX, сопоставление полей, построчная обработка и формирование выгрузок.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/import-export.php',
+),
         ],
     ],
 ];
