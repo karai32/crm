@@ -135,6 +135,12 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/authentication-security.php',
 ),
+            'technical-reference' => array (
+  'title' => 'Технический справочник',
+  'description' => 'Быстрый указатель по структуре проекта, конфигурации, маршрутам, типам, статусам, лимитам и служебным командам.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/technical-reference.php',
+),
         ],
     ],
 ];
