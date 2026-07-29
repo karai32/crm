@@ -10,7 +10,7 @@ return [
             'title' => 'Назначение справочника',
             'paragraphs' => [
                 'Этот раздел предназначен для быстрого поиска точного имени, пути или значения во время разработки и сопровождения. Он не заменяет подробные статьи о сервере, установке, структуре кода, базе данных, предметной модели, веб-интерфейсе, API, импорте и безопасности. Здесь собраны их основные контракты в компактном виде.',
-                'Источником истины остаётся исполняемый код и database/schema.sql. Маршруты определяются в public_html/index.php, разрешения — в Auth::permissionDefinitions(), API scopes — в ApiKeyController и AbstractApiController, форматы импорта — в ImportMapping и ImportFileReader, а допустимые значения базы — в ENUM и ограничениях schema.sql. При изменении источника справочник обновляется в том же изменении.',
+                'Источником истины остаётся исполняемый код и database/schema.sql. Маршруты определяются в public_html/index.php, разрешения — в Auth::permissionDefinitions(), API scopes — в ApiController::SCOPES, форматы импорта — в ImportMapping и ImportFileReader, а допустимые значения базы — в ENUM и ограничениях schema.sql. При изменении источника справочник обновляется в том же изменении.',
                 'Особое внимание следует уделять числу сущности. URL и import/export batches используют contacts и clients во множественном числе. custom_fields, custom_field_values и EntityTagRepository используют contact и client в единственном. Эти значения не взаимозаменяемы.',
             ],
             'examples' => [
@@ -20,8 +20,8 @@ return [
 Routes                 public_html/index.php
 Database contract      database/schema.sql + database/migrations/*.sql
 Permissions            app/Core/Auth.php
-API authentication     app/Services/ApiAuthenticator.php
-API protocol           app/Controllers/Api/AbstractApiController.php
+API authentication     app/Services/Api/ApiAuthenticator.php
+API protocol/scopes    app/Controllers/Api/ApiController.php
 API resource rules     app/Services/Api/*ApiService.php
 Import fields/types    app/Services/Import/ImportMapping.php
 Help navigation        lang/help/{locale}/index.php
@@ -240,9 +240,9 @@ CODE,
             'id' => 'reference-api-routes',
             'title' => 'Маршруты и протокол API',
             'paragraphs' => [
-                'Публичная версия API находится под /api/v1 и включает resources contacts, clients, sectors и tags. Каждый ресурс имеет одинаковую CRUD-поверхность. Collection GET требует resource:read; POST, PATCH и DELETE требуют resource:write. Write-scope также удовлетворяет read-проверке этого же ресурса.',
+                'Публичная версия API находится под /api/v1 и включает resources contacts и clients. Каждый ресурс имеет одинаковую CRUD-поверхность. Collection GET требует resource:read; POST, PATCH и DELETE требуют resource:write. Write-scope также удовлетворяет read-проверке этого же ресурса. Сектора и теги передаются внутри этих ресурсов без самостоятельных endpoint’ов.',
                 'Authorization использует HTTP Basic с client_id как username и secret как password. Тела POST и PATCH — JSON. POST принимает один объект или массив до 100 элементов и возвращает 207 Multi-Status с результатом каждой позиции, даже для одного объекта. PATCH принимает один непустой объект. Каждый ответ получает 24-символьный hex X-Request-Id и записывается в api_logs.',
-                'Contacts и clients поддерживают page по умолчанию 1 и per_page по умолчанию 25, от 1 до 100. Collections sectors и tags сейчас возвращаются без пагинации. Подробные поля и поведение связей находятся в разделах «API» и «Внутреннее устройство API».',
+                'Contacts и clients поддерживают page по умолчанию 1 и per_page по умолчанию 25, от 1 до 100. Подробные поля и поведение связей находятся в разделах «API» и «Внутреннее устройство API».',
             ],
             'examples' => [
                 [
@@ -254,7 +254,7 @@ POST    /api/v1/{resource}       {resource}:write
 PATCH   /api/v1/{resource}/{id}  {resource}:write
 DELETE  /api/v1/{resource}/{id}  {resource}:write
 
-resource = contacts | clients | sectors | tags
+resource = contacts | clients
 CODE,
                 ],
             ],
@@ -264,7 +264,7 @@ CODE,
             'title' => 'Роли, разрешения и scopes',
             'paragraphs' => [
                 'Роли базы: admin и user. Для известных ключей admin обходит индивидуальные разрешения; неизвестный ключ всегда запрещён. user использует строки user_permissions по fail-closed правилу. users.manage не является настраиваемым ключом: управление пользователями ограничено политикой auth = admin. Чтение контактов и клиентов требует auth = user, но не отдельного read permission.',
-                'API scopes не связаны с пользовательскими разрешениями и принадлежат api_key. Их восемь: read/write для четырёх ресурсов. Нельзя передавать значение permission в scope или наоборот. Изменение набора ресурсов требует обновить создание ключа, syncScopes, представление ключей и проверки контроллера.',
+                'API scopes не связаны с пользовательскими разрешениями и принадлежат api_key. Их четыре: read/write для contacts и clients. Нельзя передавать значение permission в scope или наоборот. Актуальный набор централизован в ApiController::SCOPES и используется созданием ключа, syncScopes и представлением.',
             ],
             'examples' => [
                 [
@@ -288,8 +288,6 @@ CODE,
                     'code' => <<<'CODE'
 contacts:read     contacts:write
 clients:read      clients:write
-sectors:read      sectors:write
-tags:read         tags:write
 CODE,
                 ],
             ],

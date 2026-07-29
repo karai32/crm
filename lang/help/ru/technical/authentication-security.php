@@ -283,7 +283,7 @@ CODE,
             'title' => 'Аутентификация API',
             'paragraphs' => [
                 'API-ключ создаётся администратором. client_id содержит префикс crm_ и 16 случайных байт, secret — 32 случайных байта. Открытый secret показывается только один раз через session flash; в api_keys сохраняется SHA-256. ApiAuthenticator получает Basic credentials из PHP_AUTH_USER/PHP_AUTH_PW либо Authorization, ищет активный client_id, хеширует предоставленный secret и сравнивает через hash_equals().',
-                'После аутентификации AbstractApiController требует scope вида resource:read или resource:write. Отзыв ключа устанавливает is_active=0 и revoked_at, включение возвращает ключ с тем же secret. last_used_at обновляется не чаще одного раза в пять минут. API не использует браузерную сессию и освобождён от CSRF, поэтому HTTPS является обязательным: Basic — это кодирование, а не шифрование.',
+                'После аутентификации ApiController требует scope contacts:read/write или clients:read/write. Отзыв ключа устанавливает is_active=0 и revoked_at, включение возвращает ключ с тем же secret. last_used_at обновляется не чаще одного раза в пять минут. API не использует браузерную сессию и освобождён от CSRF, поэтому HTTPS является обязательным: Basic — это кодирование, а не шифрование.',
                 'Встроенного rate limiter, срока действия ключа, ограничения по IP/origin и автоматической ротации нет. Журнал API содержит тела запросов и ответов, где могут находиться персональные данные. Подробный жизненный цикл, scopes и формат ошибок описаны в разделе «Внутреннее устройство API»; здесь важно не смешивать API-key с remember-token или session-cookie.',
             ],
             'examples' => [

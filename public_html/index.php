@@ -107,20 +107,12 @@ require_once __DIR__ . '/../app/Controllers/AiController.php';
 require_once __DIR__ . '/../app/Repositories/ApiKeyRepository.php';
 require_once __DIR__ . '/../app/Repositories/SettingsRepository.php';
 require_once __DIR__ . '/../app/Controllers/SettingsController.php';
-require_once __DIR__ . '/../app/Services/ApiAuthenticator.php';
+require_once __DIR__ . '/../app/Services/Api/ApiAuthenticator.php';
 require_once __DIR__ . '/../app/Controllers/ApiKeyController.php';
-require_once __DIR__ . '/../app/Controllers/Api/ApiException.php';
-require_once __DIR__ . '/../app/Controllers/Api/ApiResult.php';
-require_once __DIR__ . '/../app/Controllers/Api/AbstractApiController.php';
+require_once __DIR__ . '/../app/Controllers/Api/ApiController.php';
 require_once __DIR__ . '/../app/Services/Api/AbstractApiService.php';
 require_once __DIR__ . '/../app/Services/Api/ContactApiService.php';
 require_once __DIR__ . '/../app/Services/Api/ClientApiService.php';
-require_once __DIR__ . '/../app/Services/Api/SectorApiService.php';
-require_once __DIR__ . '/../app/Services/Api/TagApiService.php';
-require_once __DIR__ . '/../app/Controllers/Api/ContactApiController.php';
-require_once __DIR__ . '/../app/Controllers/Api/ClientApiController.php';
-require_once __DIR__ . '/../app/Controllers/Api/SectorApiController.php';
-require_once __DIR__ . '/../app/Controllers/Api/TagApiController.php';
 
 $router = new Router();
 $authController = new AuthController();
@@ -138,10 +130,10 @@ $helpController   = new HelpController();
 $aiController     = new AiController();
 $apiKeyController    = new ApiKeyController();
 $settingsController  = new SettingsController();
-$contactApiController = new ContactApiController();
-$clientApiController  = new ClientApiController();
-$sectorApiController  = new SectorApiController();
-$tagApiController     = new TagApiController();
+$apiControllers = [
+    'contacts' => new ApiController('contacts', new ContactApiService()),
+    'clients' => new ApiController('clients', new ClientApiService()),
+];
 
 $publicPolicy = ['auth' => 'public'];
 $apiPolicy = ['auth' => 'public', 'response' => 'json'];
@@ -242,26 +234,16 @@ $router->post('/lang/switch', function () {
     Auth::redirect($_POST['redirect'] ?? '/');
 }, $publicPolicy);
 // Session policy is public; /api/v1 authenticates client_id, secret and scopes in its own API layer.
-$router->post('/api/v1/contacts', [$contactApiController, 'create'], $apiPolicy);
-$router->get('/api/v1/contacts', [$contactApiController, 'index'], $apiPolicy);
-$router->get('/api/v1/contacts/{id}', [$contactApiController, 'show'], $apiPolicy);
-$router->patch('/api/v1/contacts/{id}', [$contactApiController, 'update'], $apiPolicy);
-$router->delete('/api/v1/contacts/{id}', [$contactApiController, 'destroy'], $apiPolicy);
-$router->post('/api/v1/clients', [$clientApiController, 'create'], $apiPolicy);
-$router->get('/api/v1/clients', [$clientApiController, 'index'], $apiPolicy);
-$router->get('/api/v1/clients/{id}', [$clientApiController, 'show'], $apiPolicy);
-$router->patch('/api/v1/clients/{id}', [$clientApiController, 'update'], $apiPolicy);
-$router->delete('/api/v1/clients/{id}', [$clientApiController, 'destroy'], $apiPolicy);
-$router->post('/api/v1/sectors', [$sectorApiController, 'create'], $apiPolicy);
-$router->get('/api/v1/sectors', [$sectorApiController, 'index'], $apiPolicy);
-$router->get('/api/v1/sectors/{id}', [$sectorApiController, 'show'], $apiPolicy);
-$router->patch('/api/v1/sectors/{id}', [$sectorApiController, 'update'], $apiPolicy);
-$router->delete('/api/v1/sectors/{id}', [$sectorApiController, 'destroy'], $apiPolicy);
-$router->post('/api/v1/tags', [$tagApiController, 'create'], $apiPolicy);
-$router->get('/api/v1/tags', [$tagApiController, 'index'], $apiPolicy);
-$router->get('/api/v1/tags/{id}', [$tagApiController, 'show'], $apiPolicy);
-$router->patch('/api/v1/tags/{id}', [$tagApiController, 'update'], $apiPolicy);
-$router->delete('/api/v1/tags/{id}', [$tagApiController, 'destroy'], $apiPolicy);
+foreach ($apiControllers as $resource => $controller) {
+    $collectionPath = '/api/v1/' . $resource;
+    $itemPath = $collectionPath . '/{id}';
+
+    $router->get($collectionPath, [$controller, 'index'], $apiPolicy);
+    $router->get($itemPath, [$controller, 'show'], $apiPolicy);
+    $router->post($collectionPath, [$controller, 'create'], $apiPolicy);
+    $router->patch($itemPath, [$controller, 'update'], $apiPolicy);
+    $router->delete($itemPath, [$controller, 'destroy'], $apiPolicy);
+}
 $router->get('/ajax/global-search', [$ajaxController, 'globalSearch'], $jsonAuthenticatedPolicy);
 $router->get('/ajax/clients/search', [$ajaxController, 'clientsSearch'], $jsonAuthenticatedPolicy);
 $router->get('/ajax/clients/field', [$ajaxController, 'clientFieldValues'], $jsonAuthenticatedPolicy);

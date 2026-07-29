@@ -13,7 +13,7 @@ abstract class AbstractApiService
         $this->entityTags = new EntityTagRepository();
     }
 
-    // The uniform CRUD surface AbstractApiController dispatches to.
+    // The uniform CRUD surface ApiController dispatches to.
     abstract public function index(array $query): ApiResult;
 
     abstract public function show(int $id): ApiResult;

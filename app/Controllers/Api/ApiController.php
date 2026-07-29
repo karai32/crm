@@ -1,50 +1,68 @@
 <?php
 
-abstract class AbstractApiController
+final class ApiController
 {
+    public const SCOPES = [
+        'contacts:write',
+        'contacts:read',
+        'clients:write',
+        'clients:read',
+    ];
+
     private ApiKeyRepository $apiKeys;
     private ApiAuthenticator $authenticator;
+    private string $resource;
     private AbstractApiService $service;
     private string $rawInput = '';
 
-    public function __construct()
+    public function __construct(string $resource, AbstractApiService $service)
     {
+        if (!in_array($resource . ':read', self::SCOPES, true)) {
+            throw new InvalidArgumentException('Unsupported API resource.');
+        }
+
         $this->apiKeys = new ApiKeyRepository();
         $this->authenticator = new ApiAuthenticator($this->apiKeys);
-        $this->service = $this->makeService();
+        $this->resource = $resource;
+        $this->service = $service;
     }
-
-    // Resource segment used in scopes and paths, e.g. 'contacts'.
-    abstract protected function resource(): string;
-
-    abstract protected function makeService(): AbstractApiService;
 
     public function index(): void
     {
-        $this->handle($this->resource() . ':read', '/api/v1/' . $this->resource(), fn (): ApiResult => $this->service->index($_GET));
+        $this->handle($this->resource . ':read', $this->collectionPath(), fn (): ApiResult => $this->service->index($_GET));
     }
 
     public function show(): void
     {
-        $this->handle($this->resource() . ':read', '/api/v1/' . $this->resource() . '/{id}', fn (): ApiResult => $this->service->show($this->routeId()));
+        $this->handle($this->resource . ':read', $this->itemPath(), fn (): ApiResult => $this->service->show($this->routeId()));
     }
 
     public function create(): void
     {
-        $this->handle($this->resource() . ':write', '/api/v1/' . $this->resource(), fn (): ApiResult => $this->service->createBatch($this->jsonBatch()));
+        $this->handle($this->resource . ':write', $this->collectionPath(), fn (): ApiResult => $this->service->createBatch($this->jsonBatch()));
     }
 
     public function update(): void
     {
-        $this->handle($this->resource() . ':write', '/api/v1/' . $this->resource() . '/{id}', fn (): ApiResult => $this->service->update($this->routeId(), $this->jsonObject()));
+        $this->handle($this->resource . ':write', $this->itemPath(), fn (): ApiResult => $this->service->update($this->routeId(), $this->jsonObject()));
     }
 
     public function destroy(): void
     {
-        $this->handle($this->resource() . ':write', '/api/v1/' . $this->resource() . '/{id}', fn (): ApiResult => $this->service->destroy($this->routeId()));
+        $this->handle($this->resource . ':write', $this->itemPath(), fn (): ApiResult => $this->service->destroy($this->routeId()));
     }
 
-    protected function handle(string $scope, string $path, callable $action): void
+    private function collectionPath(): string
+    {
+        return '/api/v1/' . $this->resource;
+    }
+
+    private function itemPath(): string
+    {
+        return $this->collectionPath() . '/{id}';
+    }
+
+    private function handle(string $scope, string $path, callable $action): void
     {
         $startedAt = microtime(true);
         $this->rawInput = trim((string) file_get_contents('php://input'));
@@ -104,7 +122,7 @@ abstract class AbstractApiController
         $this->finish((int) $apiKey['id'], $path, $requestId, $startedAt, $result);
     }
 
-    protected function jsonObject(): array
+    private function jsonObject(): array
     {
         $body = $this->decodeJson('{');
 
@@ -115,7 +133,7 @@ abstract class AbstractApiController
         return $body;
     }
 
-    protected function jsonBatch(int $limit = 100): array
+    private function jsonBatch(int $limit = 100): array
     {
         $rawBody = $this->rawInput;
 
@@ -147,7 +165,7 @@ abstract class AbstractApiController
         return $body;
     }
 
-    protected function routeId(): int
+    private function routeId(): int
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
@@ -256,5 +274,42 @@ abstract class AbstractApiController
         }
 
         return ['success' => false, 'error' => $error];
+    }
+}
+
+final class ApiResult
+{
+    public function __construct(
+        public int $status,
+        public array $data,
+        public ?int $itemsCount = null
+    ) {
+    }
+}
+
+final class ApiException extends RuntimeException
+{
+    public function __construct(
+        private int $status,
+        private string $errorCode,
+        string $message,
+        private array $details = []
+    ) {
+        parent::__construct($message);
+    }
+
+    public function status(): int
+    {
+        return $this->status;
+    }
+
+    public function errorCode(): string
+    {
+        return $this->errorCode;
+    }
+
+    public function details(): array
+    {
+        return $this->details;
     }
 }

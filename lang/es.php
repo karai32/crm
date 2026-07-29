@@ -468,7 +468,7 @@ return [
     'api.existing_integrations'    => 'Integraciones existentes',
     'api.last_used'                => 'Último uso',
     'api.disabled'                 => 'Deshabilitado',
-    'api.grant_scopes_confirm'     => '¿Otorgar a esta integración todos los permisos actuales?',
+    'api.grant_scopes_confirm'     => '¿Sustituir los permisos de esta integración por el conjunto actual?',
     'api.sync_scopes'              => 'Sincronizar permisos',
     'api.disable_confirm'          => '¿Deshabilitar esta integración? Se puede volver a habilitar más tarde.',
     'api.disable'                  => 'Deshabilitar',

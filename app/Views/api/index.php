@@ -58,7 +58,7 @@ $basicAuth = $clientId . ':' . $secret;
                 <button class="btn btn-primary api-submit-btn" type="submit"><?= t('api.create_credentials_btn') ?></button>
             </div>
             <div class="api-scopes-row">
-                <?php foreach (['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'] as $scope): ?>
+                <?php foreach ($scopes as $scope): ?>
                 <span class="api-scope"><?= htmlspecialchars($scope, ENT_QUOTES, 'UTF-8') ?></span>
                 <?php endforeach; ?>
             </div>
@@ -88,9 +88,12 @@ $basicAuth = $clientId . ':' . $secret;
                     $isActive  = (int) $key['is_active'] === 1;
                     $keyName   = htmlspecialchars($key['name'], ENT_QUOTES, 'UTF-8');
                     $keyNameJs = htmlspecialchars(json_encode($key['name']), ENT_QUOTES, 'UTF-8');
-                    $fullScopes = ['contacts:write','contacts:read','clients:write','clients:read','sectors:write','sectors:read','tags:write','tags:read'];
                     $keyScopes  = json_decode($key['scopes'] ?? '[]', true) ?: [];
-                    $needsSync  = $isActive && count(array_diff($fullScopes, $keyScopes)) > 0;
+                    $needsSync  = $isActive && (
+                        count($keyScopes) !== count($scopes)
+                        || array_diff($scopes, $keyScopes) !== []
+                        || array_diff($keyScopes, $scopes) !== []
+                    );
                     ?>
                     <tr>
                         <td class="col-key-name">

@@ -27,6 +27,7 @@ class ApiKeyController
             'scripts'        => ['api-keys.js'],
             'apiKeys'        => $this->apiKeys->paginate($page, $perPage, $sort, $dir),
             'newCredentials' => $newCredentials,
+            'scopes'         => ApiController::SCOPES,
             'sort'           => $sort,
             'dir'            => $dir,
             'page'           => $page,
@@ -49,7 +50,7 @@ class ApiKeyController
         $clientId   = 'crm_' . bin2hex(random_bytes(16));
         $secret     = bin2hex(random_bytes(32));
         $secretHash = hash('sha256', $secret);
-        $scopes     = ['contacts:write', 'contacts:read', 'clients:write', 'clients:read', 'sectors:write', 'sectors:read', 'tags:write', 'tags:read'];
+        $scopes     = ApiController::SCOPES;
 
         $this->apiKeys->create($name, $clientId, $secretHash, $scopes);
 
@@ -96,12 +97,7 @@ class ApiKeyController
     {
         $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
-            $this->apiKeys->updateScopes($id, [
-                'contacts:write', 'contacts:read',
-                'clients:write',  'clients:read',
-                'sectors:write',  'sectors:read',
-                'tags:write',     'tags:read',
-            ]);
+            $this->apiKeys->updateScopes($id, ApiController::SCOPES);
         }
 
         Auth::redirect('/api-keys');

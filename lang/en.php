@@ -468,7 +468,7 @@ return [
     'api.existing_integrations'    => 'Existing integrations',
     'api.last_used'                => 'Last used',
     'api.disabled'                 => 'Disabled',
-    'api.grant_scopes_confirm'     => 'Grant this integration all current scopes?',
+    'api.grant_scopes_confirm'     => 'Replace this integration\'s scopes with the current set?',
     'api.sync_scopes'              => 'Sync scopes',
     'api.disable_confirm'          => 'Disable this integration? It can be re-enabled later.',
     'api.disable'                  => 'Disable',
