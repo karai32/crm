@@ -117,6 +117,12 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/web-interface-ajax.php',
 ),
+            'api-internals' => array (
+  'title' => 'Внутреннее устройство API',
+  'description' => 'Маршрутизация, аутентификация, scopes, сервисы ресурсов, транзакции и журналирование API.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/api-internals.php',
+),
         ],
     ],
 ];
