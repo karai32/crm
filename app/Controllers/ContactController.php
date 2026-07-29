@@ -9,6 +9,7 @@ class ContactController
     private ClientRepository $clients;
     private TagRepository $tags;
     private EntityTagRepository $entityTags;
+    private ContactWriteService $contactWriter;
 
     public function __construct()
     {
@@ -17,6 +18,11 @@ class ContactController
         $this->clients = new ClientRepository();
         $this->tags = new TagRepository();
         $this->entityTags = new EntityTagRepository();
+        $this->contactWriter = new ContactWriteService(
+            $this->contacts,
+            $this->entityTags,
+            $this->customFields
+        );
     }
 
     public function index(): void
@@ -111,10 +117,13 @@ class ContactController
         }
 
         $data = array_merge($data, EmailInspector::inspect($data['email']));
-        $id = $this->contacts->create($data);
-        $this->entityTags->sync('contact', $id, $tagIds);
-        $this->contacts->syncClients($id, $clientIds);
-        $this->customFields->saveValues('contact', $id, $customFields, $customValues, true);
+        $id = $this->contactWriter->create(
+            data: $data,
+            tagIds: $tagIds,
+            clientIds: $clientIds,
+            customFields: $customFields,
+            customValues: $customValues
+        );
         Auth::redirect('/contacts/show?id=' . $id);
     }
 
@@ -210,10 +219,14 @@ class ContactController
         $data = array_merge($data, $data['email'] !== null && $manualEmailState !== null
             ? $manualEmailState
             : EmailInspector::inspect($data['email']));
-        $this->contacts->update($id, $data);
-        $this->entityTags->sync('contact', $id, $tagIds);
-        $this->contacts->syncClients($id, $clientIds);
-        $this->customFields->saveValues('contact', $id, $customFields, $customValues);
+        $this->contactWriter->update(
+            id: $id,
+            changes: $data,
+            tagIds: $tagIds,
+            clientIds: $clientIds,
+            customFields: $customFields,
+            customValues: $customValues
+        );
         Auth::redirect('/contacts/show?id=' . $id);
     }
 

@@ -9,6 +9,7 @@ class ClientController
     private CustomFieldRepository $customFields;
     private TagRepository $tags;
     private EntityTagRepository $entityTags;
+    private ClientWriteService $clientWriter;
 
     public function __construct()
     {
@@ -17,6 +18,11 @@ class ClientController
         $this->customFields = new CustomFieldRepository();
         $this->tags = new TagRepository();
         $this->entityTags = new EntityTagRepository();
+        $this->clientWriter = new ClientWriteService(
+            $this->clients,
+            $this->entityTags,
+            $this->customFields
+        );
     }
 
     public function index(): void
@@ -93,9 +99,12 @@ class ClientController
             return;
         }
 
-        $id = $this->clients->create($data);
-        $this->entityTags->sync('client', $id, $tagIds);
-        $this->customFields->saveValues('client', $id, $customFields, $customValues, true);
+        $id = $this->clientWriter->create(
+            data: $data,
+            tagIds: $tagIds,
+            customFields: $customFields,
+            customValues: $customValues
+        );
         Auth::redirect('/clients/show?id=' . $id);
     }
 
@@ -180,9 +189,13 @@ class ClientController
             return;
         }
 
-        $this->clients->update($id, $data);
-        $this->entityTags->sync('client', $id, $tagIds);
-        $this->customFields->saveValues('client', $id, $customFields, $customValues);
+        $this->clientWriter->update(
+            id: $id,
+            changes: $data,
+            tagIds: $tagIds,
+            customFields: $customFields,
+            customValues: $customValues
+        );
         Auth::redirect('/clients/show?id=' . $id);
     }
 

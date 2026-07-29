@@ -152,6 +152,8 @@ class ClientRepository
     public function create(array $data): int
     {
         $pdo = Database::connect();
+        $data['is_web_connected'] = (int) (bool) ($data['is_web_connected'] ?? false);
+        $data['is_active'] = (int) (bool) ($data['is_active'] ?? true);
 
         $sql = "
             INSERT INTO clients (
@@ -174,6 +176,9 @@ class ClientRepository
         $pdo     = Database::connect();
         $current = $this->find($id);
         $now     = date('Y-m-d H:i:s');
+
+        $data['is_web_connected'] = (int) (bool) ($data['is_web_connected'] ?? ($current['is_web_connected'] ?? false));
+        $data['is_active'] = (int) (bool) ($data['is_active'] ?? ($current['is_active'] ?? true));
 
         $data['is_web_connected_date'] = ($current && (int) ($data['is_web_connected'] ?? $current['is_web_connected']) !== (int) $current['is_web_connected'])
             ? $now : null;

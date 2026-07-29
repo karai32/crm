@@ -34,31 +34,19 @@ abstract class AbstractApiService
                 continue;
             }
 
-            $pdo = Database::connect();
             try {
-                $pdo->beginTransaction();
-                $data = $processor($item);
-                $pdo->commit();
+                $data = Database::transaction(fn (): array => $processor($item));
                 $results[] = ['index' => $index, 'success' => true, 'data' => $data];
             } catch (ApiException $exception) {
-                if ($pdo->inTransaction()) {
-                    $pdo->rollBack();
-                }
                 $details = $exception->details() ?: [$exception->getMessage()];
                 $results[] = $this->batchError($index, $exception->errorCode(), $details);
             } catch (PDOException $exception) {
-                if ($pdo->inTransaction()) {
-                    $pdo->rollBack();
-                }
                 $code = (string) $exception->getCode() === '23000' ? 'conflict' : 'server_error';
                 $message = $code === 'conflict'
                     ? 'A record with these values already exists'
                     : 'Unable to process item';
                 $results[] = $this->batchError($index, $code, [$message]);
             } catch (Throwable $exception) {
-                if ($pdo->inTransaction()) {
-                    $pdo->rollBack();
-                }
                 error_log('API batch item failed: ' . $exception->getMessage());
                 $results[] = $this->batchError($index, 'server_error', ['Unable to process item']);
             }
@@ -77,7 +65,13 @@ abstract class AbstractApiService
         ], count($results));
     }
 
-    protected function saveCustomFields(string $entityType, int $entityId, array $input, bool $applyDefaults = false): void
+    /**
+     * Converts the API slug => value object into the repository field/value
+     * contract consumed by the shared write services.
+     *
+     * @return array{0: array, 1: array}
+     */
+    protected function customFieldWriteData(string $entityType, array $input, bool $applyDefaults = false): array
     {
         $fields = [];
         $values = [];
@@ -108,9 +102,7 @@ abstract class AbstractApiService
             }
         }
 
-        if ($fields !== []) {
-            $this->customFields->saveValues($entityType, $entityId, $fields, $values);
-        }
+        return [$fields, $values];
     }
 
     protected function customFieldData(string $entityType, int $entityId): array

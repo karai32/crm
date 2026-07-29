@@ -130,8 +130,6 @@ class ImportManager
         $imported = 0;
         $skipped = 0;
         $errors = 0;
-        $pdo = Database::connect();
-
         try {
             foreach ($this->reader->rows($this->path($batch['stored_filename']), $batch['file_type']) as $item) {
                 $total++;
@@ -139,22 +137,24 @@ class ImportManager
                 $rowNumber = (int) $item['row_number'];
 
                 try {
-                    $pdo->beginTransaction();
-                    $mapped = $this->mapping->mapRow($row, $mapping);
-                    $processor->process($mapped, $row, $mapping, $customFields);
-                    $pdo->commit();
+                    Database::transaction(function () use (
+                        $processor,
+                        $row,
+                        $mapping,
+                        $customFields
+                    ): void {
+                        $mapped = $this->mapping->mapRow($row, $mapping);
+                        $processor->process($mapped, $row, $mapping, $customFields);
+                    });
                     $imported++;
                 } catch (ImportRowException $exception) {
-                    if ($pdo->inTransaction()) {
-                        $pdo->rollBack();
-                    }
+                    // A failed transaction may have rolled back ids held by a
+                    // processor cache, so rebuild the processor for the next row.
+                    $processor = $this->processor($entityType);
                     $status = $exception->rowStatus();
                     $status === 'skipped' ? $skipped++ : $errors++;
                     $this->imports->recordIssue($batchId, $rowNumber, $row, $status, $exception->getMessage());
                 } catch (Throwable $exception) {
-                    if ($pdo->inTransaction()) {
-                        $pdo->rollBack();
-                    }
                     $processor = $this->processor($entityType);
                     $errors++;
                     error_log("Import row {$rowNumber} failed: " . $exception->getMessage());
@@ -170,9 +170,6 @@ class ImportManager
 
             $this->imports->finishBatch($batchId, $total, $imported, $skipped, $errors);
         } catch (Throwable $exception) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
             $this->imports->failBatch($batchId, $total, $imported, $skipped, $errors + 1);
             $this->imports->createError($batchId, null, null, 'Import failed: ' . $exception->getMessage());
             return $this->result($this->imports->findBatch($batchId) ?? $batch, true, 'Import failed.');

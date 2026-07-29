@@ -91,7 +91,7 @@ app/
   Core/                 Router, View, Database, Auth, Csrf, helpers
   Helpers/              global view helpers
   Repositories/         SQL access
-  Services/             application logic
+  Services/             application logic and shared entity writers
   Views/                PHP templates and layouts
 bin/                    CLI entry points
 config/                 local configuration and secrets

@@ -27,4 +27,35 @@ class Database
 
         return $pdo;
     }
+
+    /**
+     * Executes a unit of work in a transaction. When the caller already owns a
+     * transaction (API batch or import row), the callback joins it instead of
+     * trying to start a nested PDO transaction.
+     */
+    public static function transaction(callable $callback): mixed
+    {
+        $pdo = self::connect();
+        $ownsTransaction = !$pdo->inTransaction();
+
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        }
+
+        try {
+            $result = $callback();
+
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
+
+            return $result;
+        } catch (Throwable $exception) {
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $exception;
+        }
+    }
 }

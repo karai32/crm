@@ -4,12 +4,20 @@ class ContactApiService extends AbstractApiService
 {
     private ContactRepository $contacts;
     private ClientRepository $clients;
+    private ContactWriteService $contactWriter;
+    private ClientWriteService $clientWriter;
 
     public function __construct()
     {
         parent::__construct();
         $this->contacts = new ContactRepository();
         $this->clients = new ClientRepository();
+        $this->contactWriter = new ContactWriteService(
+            $this->contacts,
+            $this->entityTags,
+            $this->customFields
+        );
+        $this->clientWriter = new ClientWriteService($this->clients);
     }
 
     public function createBatch(array $items): ApiResult
@@ -73,7 +81,7 @@ class ContactApiService extends AbstractApiService
 
     public function update(int $id, array $body): ApiResult
     {
-        $contact = $this->requireRecord($this->contacts->find($id), 'contact');
+        $this->requireRecord($this->contacts->find($id), 'contact');
         $body = $this->expandCustomFieldKeys($body);
         $errors = [];
 
@@ -94,62 +102,55 @@ class ContactApiService extends AbstractApiService
             throw new ApiException(422, 'validation_error', 'Contact validation failed', $errors);
         }
 
-        $updated = [
-            'full_name'          => $contact['full_name'],
-            'email'              => $contact['email'],
-            'phone'              => $contact['phone'],
-            'company'            => $contact['company'],
-            'is_corporate_email' => $contact['is_corporate_email'] ?? null,
-            'email_status'       => $contact['email_status'] ?? null,
-        ];
+        $changes = [];
 
         foreach (['full_name', 'email', 'phone', 'company'] as $field) {
             if (!array_key_exists($field, $body)) {
                 continue;
             }
-            $updated[$field] = $field === 'full_name'
+            $changes[$field] = $field === 'full_name'
                 ? trim((string) ($body[$field] ?? ''))
                 : ($field === 'company'
                     ? trim((string) ($body[$field] ?? ''))
                     : $this->nullableString($body[$field]));
         }
-        $updated['full_name'] = $updated['full_name'] ?: $contact['full_name'];
 
         if (array_key_exists('email', $body)) {
-            $inspection = EmailInspector::inspect($updated['email']);
-            $updated['is_corporate_email'] = $inspection['is_corporate_email'];
-            $updated['email_status']       = $inspection['email_status'];
+            $inspection = EmailInspector::inspect($changes['email']);
+            $changes['is_corporate_email'] = $inspection['is_corporate_email'];
+            $changes['email_status']       = $inspection['email_status'];
         }
 
-        $pdo = Database::connect();
-        $pdo->beginTransaction();
-        try {
-            $this->contacts->update($id, $updated);
+        if (array_key_exists('custom_fields', $body) && !is_array($body['custom_fields'])) {
+            throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
+        }
 
+        Database::transaction(function () use ($id, $changes, $body): void {
+            $tagIds = null;
             if (array_key_exists('tags', $body)) {
                 [$tagIds] = $this->resolveTagIds($this->splitNames($body['tags']));
-                $this->entityTags->sync('contact', $id, $tagIds);
             }
 
+            $clientIds = null;
             if (array_key_exists('clients', $body)) {
                 [$clientIds] = $this->resolveClientIds($this->splitNames($body['clients']));
-                $this->contacts->syncClients($id, $clientIds);
             }
 
+            $customFields = null;
+            $customValues = [];
             if (array_key_exists('custom_fields', $body)) {
-                if (!is_array($body['custom_fields'])) {
-                    throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
-                }
-                $this->saveCustomFields('contact', $id, $body['custom_fields']);
+                [$customFields, $customValues] = $this->customFieldWriteData('contact', $body['custom_fields']);
             }
 
-            $pdo->commit();
-        } catch (Throwable $exception) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            throw $exception;
-        }
+            $this->contactWriter->update(
+                id: $id,
+                changes: $changes,
+                tagIds: $tagIds,
+                clientIds: $clientIds,
+                customFields: $customFields,
+                customValues: $customValues
+            );
+        });
 
         return new ApiResult(200, ['success' => true, 'data' => $this->detail($id)], 1);
     }
@@ -185,31 +186,35 @@ class ContactApiService extends AbstractApiService
         if ($email !== '' && $this->contacts->emailExists($email)) {
             throw new ApiException(409, 'duplicate_contact', 'Contact with this email already exists');
         }
+        if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
+            throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
+        }
 
         // "tags"/"clients" accept a single name, a comma-separated string, or a JSON array.
         [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
         [$clientIds, $clientCreated] = $this->resolveClientIds($this->splitNames($item['clients'] ?? null));
 
         $inspection = EmailInspector::inspect($email === '' ? null : $email);
-        $contactId = $this->contacts->create([
-            'full_name'          => $fullName,
-            'email'              => $email === '' ? null : $email,
-            'phone'              => $this->nullableString($item['phone'] ?? null),
-            'company'            => trim((string) ($item['company'] ?? '')),
-            'is_corporate_email' => $inspection['is_corporate_email'],
-            'email_status'       => $inspection['email_status'],
-        ]);
-
-        if ($tagIds !== []) {
-            $this->entityTags->sync('contact', $contactId, $tagIds);
-        }
-        if ($clientIds !== []) {
-            $this->contacts->syncClients($contactId, $clientIds);
-        }
-        if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
-            throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
-        }
-        $this->saveCustomFields('contact', $contactId, is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [], true);
+        [$customFields, $customValues] = $this->customFieldWriteData(
+            'contact',
+            is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [],
+            true
+        );
+        $contactId = $this->contactWriter->create(
+            data: [
+                'full_name'          => $fullName,
+                'email'              => $email === '' ? null : $email,
+                'phone'              => $this->nullableString($item['phone'] ?? null),
+                'company'            => trim((string) ($item['company'] ?? '')),
+                'is_corporate_email' => $inspection['is_corporate_email'],
+                'email_status'       => $inspection['email_status'],
+            ],
+            tagIds: $tagIds,
+            clientIds: $clientIds,
+            customFields: $customFields,
+            customValues: $customValues,
+            applyCustomFieldDefaults: false
+        );
 
         return [
             'contact_id' => $contactId,
@@ -258,18 +263,8 @@ class ContactApiService extends AbstractApiService
 
     private function createBlankClient(string $name): int
     {
-        return $this->clients->create([
+        return $this->clientWriter->create([
             'commercial_name' => $name,
-            'legal_name' => null,
-            'cif' => null,
-            'address' => null,
-            'postal_code' => null,
-            'city' => null,
-            'province' => null,
-            'country' => null,
-            'sector_id' => null,
-            'website' => null,
-            'notes' => null,
         ]);
     }
 

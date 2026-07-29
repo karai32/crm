@@ -3,6 +3,8 @@
 class ContactImportProcessor extends AbstractImportProcessor
 {
     private ClientRepository $clients;
+    private ContactWriteService $contactWriter;
+    private ClientWriteService $clientWriter;
     private array $clientCache = [];
     private array $emailCache = [];
 
@@ -10,6 +12,12 @@ class ContactImportProcessor extends AbstractImportProcessor
     {
         parent::__construct();
         $this->clients = new ClientRepository();
+        $this->contactWriter = new ContactWriteService(
+            $this->contacts,
+            $this->entityTags,
+            $this->customFields
+        );
+        $this->clientWriter = new ClientWriteService($this->clients);
     }
 
     public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): void
@@ -34,25 +42,31 @@ class ContactImportProcessor extends AbstractImportProcessor
             'company' => trim((string) ($mapped['company'] ?? '')),
         ];
         $data = array_merge($data, EmailInspector::inspect($data['email'], false));
-        $contactId = $this->contacts->create($data);
 
         $clientId = $this->clientId(
             (string) ($mapped['client'] ?? ''),
             (string) ($mapped['sector'] ?? '')
         );
         $tagIds = $this->tagIds((string) ($mapped['tags'] ?? ''));
+        [$customFields, $customValues] = $this->customFieldWriteData(
+            'contact',
+            $raw,
+            $mapping,
+            $customFieldTypes
+        );
+        $contactId = $this->contactWriter->create(
+            data: $data,
+            tagIds: $tagIds,
+            clientIds: $clientId === null ? [] : [$clientId],
+            customFields: $customFields,
+            customValues: $customValues,
+            applyCustomFieldDefaults: false
+        );
 
-        if ($clientId !== null) {
-            $this->contacts->syncClients($contactId, [$clientId]);
-        }
-        if ($tagIds !== []) {
-            $this->entityTags->sync('contact', $contactId, $tagIds);
-            if ($clientId !== null) {
-                $this->entityTags->add('client', [$clientId], $tagIds);
-            }
+        if ($tagIds !== [] && $clientId !== null) {
+            $this->entityTags->add('client', [$clientId], $tagIds);
         }
 
-        $this->saveCustomFields('contact', $contactId, $raw, $mapping, $customFieldTypes);
         if ($email !== '') {
             $this->emailCache[$this->lower($email)] = true;
         }
@@ -85,20 +99,9 @@ class ContactImportProcessor extends AbstractImportProcessor
             return $this->clientCache[$key] = (int) $client['id'];
         }
 
-        return $this->clientCache[$key] = $this->clients->create([
+        return $this->clientCache[$key] = $this->clientWriter->create([
             'commercial_name' => $name,
-            'legal_name' => null,
-            'cif' => null,
-            'address' => null,
-            'postal_code' => null,
-            'city' => null,
-            'province' => null,
-            'country' => null,
             'sector_id' => $this->sectorId($sector),
-            'website' => null,
-            'notes' => null,
-            'is_web_connected' => 0,
-            'is_active' => 1,
         ]);
     }
 

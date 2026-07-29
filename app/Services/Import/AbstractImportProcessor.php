@@ -81,13 +81,13 @@ abstract class AbstractImportProcessor
         return $this->sectorCache[$key];
     }
 
-    protected function saveCustomFields(
+    /** @return array{0: array, 1: array} */
+    protected function customFieldWriteData(
         string $entity,
-        int $entityId,
         array $raw,
         array $mapping,
         array $types
-    ): void {
+    ): array {
         $fields = [];
         $values = [];
 
@@ -105,9 +105,7 @@ abstract class AbstractImportProcessor
                 : $value;
         }
 
-        if ($fields !== []) {
-            $this->customFields->saveValues($entity, $entityId, $fields, $values);
-        }
+        return [$fields, $values];
     }
 
     protected function nullable(mixed $value): ?string

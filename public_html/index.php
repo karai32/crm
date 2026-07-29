@@ -75,6 +75,8 @@ require_once __DIR__ . '/../app/Repositories/AiRepository.php';
 require_once __DIR__ . '/../app/Repositories/ImportRepository.php';
 require_once __DIR__ . '/../app/Services/AuthService.php';
 require_once __DIR__ . '/../app/Services/EmailInspector.php';
+require_once __DIR__ . '/../app/Services/ContactWriteService.php';
+require_once __DIR__ . '/../app/Services/ClientWriteService.php';
 require_once __DIR__ . '/../app/Services/PhosphorIconCatalog.php';
 require_once __DIR__ . '/../app/Services/ExportService.php';
 require_once __DIR__ . '/../app/Services/Export/ExportWriter.php';

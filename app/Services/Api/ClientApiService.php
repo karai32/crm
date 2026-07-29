@@ -4,12 +4,18 @@ class ClientApiService extends AbstractApiService
 {
     private ClientRepository $clients;
     private SectorRepository $sectors;
+    private ClientWriteService $clientWriter;
 
     public function __construct()
     {
         parent::__construct();
         $this->clients = new ClientRepository();
         $this->sectors = new SectorRepository();
+        $this->clientWriter = new ClientWriteService(
+            $this->clients,
+            $this->entityTags,
+            $this->customFields
+        );
     }
 
     public function createBatch(array $items): ApiResult
@@ -71,59 +77,48 @@ class ClientApiService extends AbstractApiService
 
     public function update(int $id, array $body): ApiResult
     {
-        $client = $this->requireRecord($this->clients->find($id), 'client');
+        $this->requireRecord($this->clients->find($id), 'client');
         $body = $this->expandCustomFieldKeys($body);
         if (array_key_exists('commercial_name', $body) && trim((string) ($body['commercial_name'] ?? '')) === '') {
             throw new ApiException(422, 'validation_error', 'commercial_name cannot be empty');
         }
 
-        $sectorId = $client['sector_id'];
-        if (array_key_exists('sector', $body)) {
-            [$sectorId] = $this->resolveSectorId((string) ($body['sector'] ?? ''));
-        }
-
-        $updated = [
-            'commercial_name' => $client['commercial_name'],
-            'legal_name' => $client['legal_name'],
-            'cif' => $client['cif'],
-            'address' => $client['address'],
-            'postal_code' => $client['postal_code'],
-            'city' => $client['city'],
-            'province' => $client['province'],
-            'country' => $client['country'],
-            'sector_id' => $sectorId,
-            'website' => $client['website'],
-            'notes' => $client['notes'],
-        ];
+        $changes = [];
 
         foreach (['commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes'] as $field) {
             if (array_key_exists($field, $body)) {
-                $updated[$field] = $this->nullableString($body[$field]);
+                $changes[$field] = $this->nullableString($body[$field]);
             }
         }
-        $updated['commercial_name'] ??= $client['commercial_name'];
 
-        $pdo = Database::connect();
-        $pdo->beginTransaction();
-        try {
-            $this->clients->update($id, $updated);
+        if (array_key_exists('custom_fields', $body) && !is_array($body['custom_fields'])) {
+            throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
+        }
+
+        Database::transaction(function () use ($id, $changes, $body): void {
+            if (array_key_exists('sector', $body)) {
+                [$changes['sector_id']] = $this->resolveSectorId((string) ($body['sector'] ?? ''));
+            }
+
+            $tagIds = null;
             if (array_key_exists('tags', $body)) {
                 [$tagIds] = $this->resolveTagIds($this->splitNames($body['tags']));
-                $this->entityTags->sync('client', $id, $tagIds);
             }
+
+            $customFields = null;
+            $customValues = [];
             if (array_key_exists('custom_fields', $body)) {
-                if (!is_array($body['custom_fields'])) {
-                    throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
-                }
-                $this->saveCustomFields('client', $id, $body['custom_fields']);
+                [$customFields, $customValues] = $this->customFieldWriteData('client', $body['custom_fields']);
             }
-            $pdo->commit();
-        } catch (Throwable $exception) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            throw $exception;
-        }
+
+            $this->clientWriter->update(
+                id: $id,
+                changes: $changes,
+                tagIds: $tagIds,
+                customFields: $customFields,
+                customValues: $customValues
+            );
+        });
 
         return new ApiResult(200, ['success' => true, 'data' => $this->detail($id)], 1);
     }
@@ -143,32 +138,37 @@ class ClientApiService extends AbstractApiService
         if ($commercialName === '') {
             throw new ApiException(422, 'validation_error', 'Client validation failed', ['commercial_name is required']);
         }
-
-        [$sectorId, $sectorCreated] = $this->resolveSectorId((string) ($item['sector'] ?? ''));
-
-        $clientId = $this->clients->create([
-            'commercial_name' => $commercialName,
-            'legal_name' => $this->nullableString($item['legal_name'] ?? null),
-            'cif' => $this->nullableString($item['cif'] ?? null),
-            'address' => $this->nullableString($item['address'] ?? null),
-            'postal_code' => $this->nullableString($item['postal_code'] ?? null),
-            'city' => $this->nullableString($item['city'] ?? null),
-            'province' => $this->nullableString($item['province'] ?? null),
-            'country' => $this->nullableString($item['country'] ?? null),
-            'sector_id' => $sectorId,
-            'website' => $this->nullableString($item['website'] ?? null),
-            'notes' => $this->nullableString($item['notes'] ?? null),
-        ]);
-
-        [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
-        if ($tagIds !== []) {
-            $this->entityTags->sync('client', $clientId, $tagIds);
-        }
-
         if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
             throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
         }
-        $this->saveCustomFields('client', $clientId, is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [], true);
+
+        [$sectorId, $sectorCreated] = $this->resolveSectorId((string) ($item['sector'] ?? ''));
+
+        [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
+        [$customFields, $customValues] = $this->customFieldWriteData(
+            'client',
+            is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [],
+            true
+        );
+        $clientId = $this->clientWriter->create(
+            data: [
+                'commercial_name' => $commercialName,
+                'legal_name' => $this->nullableString($item['legal_name'] ?? null),
+                'cif' => $this->nullableString($item['cif'] ?? null),
+                'address' => $this->nullableString($item['address'] ?? null),
+                'postal_code' => $this->nullableString($item['postal_code'] ?? null),
+                'city' => $this->nullableString($item['city'] ?? null),
+                'province' => $this->nullableString($item['province'] ?? null),
+                'country' => $this->nullableString($item['country'] ?? null),
+                'sector_id' => $sectorId,
+                'website' => $this->nullableString($item['website'] ?? null),
+                'notes' => $this->nullableString($item['notes'] ?? null),
+            ],
+            tagIds: $tagIds,
+            customFields: $customFields,
+            customValues: $customValues,
+            applyCustomFieldDefaults: false
+        );
 
         return ['client_id' => $clientId, 'tag_created' => $tagCreated, 'sector_created' => $sectorCreated];
     }
