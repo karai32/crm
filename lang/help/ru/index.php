@@ -129,6 +129,12 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/import-export.php',
 ),
+            'authentication-security' => array (
+  'title' => 'Авторизация и безопасность',
+  'description' => 'Вход, сессии, remember-me, разрешения, CSRF, API-ключи и защитные границы приложения.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/authentication-security.php',
+),
         ],
     ],
 ];
