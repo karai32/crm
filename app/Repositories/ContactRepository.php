@@ -88,7 +88,7 @@ class ContactRepository
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('SELECT id FROM contacts WHERE email = :email LIMIT 1');
-        $statement->execute(['email' => $email]);
+        $statement->execute(['email' => trim($email)]);
 
         return (bool) $statement->fetch();
     }
@@ -99,7 +99,7 @@ class ContactRepository
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('SELECT id FROM contacts WHERE email = :email AND id != :id LIMIT 1');
-        $statement->execute(['email' => $email, 'id' => $excludeId]);
+        $statement->execute(['email' => trim($email), 'id' => $excludeId]);
 
         return (bool) $statement->fetch();
     }

@@ -58,4 +58,16 @@ class Database
             throw $exception;
         }
     }
+
+    public static function isIntegrityViolation(Throwable $exception): bool
+    {
+        return $exception instanceof PDOException
+            && (string) $exception->getCode() === '23000';
+    }
+
+    public static function violatesConstraint(PDOException $exception, string $constraint): bool
+    {
+        return self::isIntegrityViolation($exception)
+            && str_contains(strtolower($exception->getMessage()), strtolower($constraint));
+    }
 }

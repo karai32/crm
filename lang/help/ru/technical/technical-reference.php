@@ -507,8 +507,9 @@ find app config bin lang public_html -name '*.php' -print0 | xargs -0 -n1 php8.3
 # Только для чистой базы: schema.sql содержит DROP TABLE
 mysql -u crm_user -p crm < database/schema.sql
 
-# Для существующей базы: применить ещё не выполненную миграцию один раз
+# Для существующей базы: применить ещё не выполненные миграции по порядку
 mysql -u crm_user -p crm < database/migrations/20260729_fail_closed_permissions.sql
+mysql -u crm_user -p crm < database/migrations/20260729_enforce_database_constraints.sql
 
 sudo -u www-data /usr/bin/php8.3 bin/weekly-report.php
 tail -n 50 storage/app.log

@@ -270,8 +270,13 @@ try {
     $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
 } catch (PDOException $exception) {
     logApplicationError('Database error: ' . $exception->getMessage());
-    http_response_code(500);
-    echo 'A database error occurred. Please try again later.';
+    if (Database::isIntegrityViolation($exception)) {
+        http_response_code(409);
+        echo 'The requested change conflicts with existing or related data.';
+    } else {
+        http_response_code(500);
+        echo 'A database error occurred. Please try again later.';
+    }
 } catch (Throwable $exception) {
     logApplicationError('Application error: ' . $exception->getMessage());
     http_response_code(500);

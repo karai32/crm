@@ -372,11 +372,13 @@ return [
 
     // ── Contacts (extended) ────────────────────────────────────────────────────
     'contacts.name_required'      => 'Полное имя обязательно.',
+    'contacts.email_already_used' => 'Контакт с таким email уже существует.',
     'contacts.invalid_email_mx'   => 'Недействительный email (нет записи MX)',
     'contacts.no_clients_linked'  => 'Клиенты не привязаны.',
 
     // ── Clients (extended) ─────────────────────────────────────────────────────
     'clients.name_required' => 'Коммерческое название обязательно.',
+    'clients.name_already_used' => 'Клиент с таким коммерческим названием уже существует.',
     'clients.n_total'       => 'Всего: :n',
     'clients.web_col'       => 'Web',
 

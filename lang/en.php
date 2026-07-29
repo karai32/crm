@@ -372,11 +372,13 @@ return [
 
     // ── Contacts (extended) ────────────────────────────────────────────────────
     'contacts.name_required'      => 'Full name is required.',
+    'contacts.email_already_used' => 'A contact with this email already exists.',
     'contacts.invalid_email_mx'   => 'Invalid email (no MX record)',
     'contacts.no_clients_linked'  => 'No clients linked.',
 
     // ── Clients (extended) ─────────────────────────────────────────────────────
     'clients.name_required' => 'Commercial name is required.',
+    'clients.name_already_used' => 'A client with this commercial name already exists.',
     'clients.n_total'       => ':n total',
     'clients.web_col'       => 'Web',
 

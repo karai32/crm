@@ -82,6 +82,10 @@ class ClientApiService extends AbstractApiService
         if (array_key_exists('commercial_name', $body) && trim((string) ($body['commercial_name'] ?? '')) === '') {
             throw new ApiException(422, 'validation_error', 'commercial_name cannot be empty');
         }
+        if (array_key_exists('commercial_name', $body)
+            && $this->clients->commercialNameTakenByOther((string) $body['commercial_name'], $id)) {
+            throw new ApiException(409, 'duplicate_client', 'Client with this commercial_name already exists');
+        }
 
         $changes = [];
 
@@ -137,6 +141,9 @@ class ClientApiService extends AbstractApiService
         $commercialName = trim((string) ($item['commercial_name'] ?? ''));
         if ($commercialName === '') {
             throw new ApiException(422, 'validation_error', 'Client validation failed', ['commercial_name is required']);
+        }
+        if ($this->clients->findByCommercialName($commercialName) !== null) {
+            throw new ApiException(409, 'duplicate_client', 'Client with this commercial_name already exists');
         }
         if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
             throw new ApiException(422, 'validation_error', 'custom_fields must be an object');

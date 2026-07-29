@@ -41,7 +41,7 @@ abstract class AbstractApiService
                 $details = $exception->details() ?: [$exception->getMessage()];
                 $results[] = $this->batchError($index, $exception->errorCode(), $details);
             } catch (PDOException $exception) {
-                $code = (string) $exception->getCode() === '23000' ? 'conflict' : 'server_error';
+                $code = Database::isIntegrityViolation($exception) ? 'conflict' : 'server_error';
                 $message = $code === 'conflict'
                     ? 'A record with these values already exists'
                     : 'Unable to process item';

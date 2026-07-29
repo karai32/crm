@@ -78,7 +78,14 @@ class ClientController
         $customFields = $this->customFields->fieldsForEntity('client');
         $customValues = $_POST['custom_fields'] ?? [];
 
+        $error = null;
         if ($data['commercial_name'] === '') {
+            $error = Lang::get('clients.name_required');
+        } elseif ($this->clients->findByCommercialName($data['commercial_name']) !== null) {
+            $error = Lang::get('clients.name_already_used');
+        }
+
+        if ($error !== null) {
             View::render('clients/create', [
                 'title'        => Lang::get('clients.create_title'),
                 'styles'       => ['clients.css'],
@@ -88,7 +95,7 @@ class ClientController
                 'selectedTagIds' => $tagIds,
                 'customFields' => $customFields,
                 'customValues' => $customValues,
-                'error'        => Lang::get('clients.name_required'),
+                'error'        => $error,
             ]);
             return;
         }
@@ -160,7 +167,14 @@ class ClientController
         $customFields = $this->customFields->fieldsForEntity('client');
         $customValues = $_POST['custom_fields'] ?? [];
 
+        $error = null;
         if ($data['commercial_name'] === '') {
+            $error = Lang::get('clients.name_required');
+        } elseif ($this->clients->commercialNameTakenByOther($data['commercial_name'], $id)) {
+            $error = Lang::get('clients.name_already_used');
+        }
+
+        if ($error !== null) {
             $data['id'] = $id;
 
             View::render('clients/edit', [
@@ -172,7 +186,7 @@ class ClientController
                 'selectedTagIds' => $tagIds,
                 'customFields' => $customFields,
                 'customValues' => $customValues,
-                'error'        => Lang::get('clients.name_required'),
+                'error'        => $error,
             ]);
             return;
         }

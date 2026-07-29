@@ -1,5 +1,5 @@
 -- CRM database schema
--- MySQL / MariaDB, InnoDB, utf8mb4
+-- MySQL 8.0.16+ / MariaDB with enforced CHECK constraints, InnoDB, utf8mb4
 
 CREATE DATABASE IF NOT EXISTS crm
   CHARACTER SET utf8mb4
@@ -37,7 +37,9 @@ CREATE TABLE roles (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     label VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_roles_name_normalized CHECK (OCTET_LENGTH(name) = OCTET_LENGTH(TRIM(name)) AND CHAR_LENGTH(name) > 0),
+    CONSTRAINT chk_roles_label_normalized CHECK (OCTET_LENGTH(label) = OCTET_LENGTH(TRIM(label)) AND CHAR_LENGTH(label) > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE users (
@@ -50,6 +52,11 @@ CREATE TABLE users (
     last_login_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_users_name_normalized CHECK (OCTET_LENGTH(name) = OCTET_LENGTH(TRIM(name)) AND CHAR_LENGTH(name) > 0),
+    CONSTRAINT chk_users_email_normalized CHECK (
+        OCTET_LENGTH(email) = OCTET_LENGTH(TRIM(email)) AND CHAR_LENGTH(email) > 0
+    ),
+    CONSTRAINT chk_users_is_active CHECK (is_active IN (0, 1)),
     CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     INDEX idx_users_role_id (role_id),
     INDEX idx_users_is_active (is_active)
@@ -61,6 +68,10 @@ CREATE TABLE user_permissions (
     is_allowed TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_user_permissions_key_normalized CHECK (
+        OCTET_LENGTH(permission_key) = OCTET_LENGTH(TRIM(permission_key)) AND CHAR_LENGTH(permission_key) > 0
+    ),
+    CONSTRAINT chk_user_permissions_is_allowed CHECK (is_allowed IN (0, 1)),
     PRIMARY KEY (user_id, permission_key),
     CONSTRAINT fk_user_permissions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     INDEX idx_user_permissions_key (permission_key),
@@ -75,6 +86,8 @@ CREATE TABLE sectors (
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_sectors_name_normalized CHECK (OCTET_LENGTH(name) = OCTET_LENGTH(TRIM(name)) AND CHAR_LENGTH(name) > 0),
+    CONSTRAINT chk_sectors_is_active CHECK (is_active IN (0, 1)),
     INDEX idx_sectors_is_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -84,7 +97,8 @@ CREATE TABLE tags (
     slug VARCHAR(130) NULL UNIQUE,
     color VARCHAR(20) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_tags_name_normalized CHECK (OCTET_LENGTH(name) = OCTET_LENGTH(TRIM(name)) AND CHAR_LENGTH(name) > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE clients (
@@ -108,11 +122,16 @@ CREATE TABLE clients (
     updated_by INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_clients_commercial_name_normalized CHECK (
+        OCTET_LENGTH(commercial_name) = OCTET_LENGTH(TRIM(commercial_name)) AND CHAR_LENGTH(commercial_name) > 0
+    ),
+    CONSTRAINT chk_clients_is_web_connected CHECK (is_web_connected IN (0, 1)),
+    CONSTRAINT chk_clients_is_active CHECK (is_active IN (0, 1)),
     CONSTRAINT fk_clients_sector FOREIGN KEY (sector_id) REFERENCES sectors(id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_clients_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_clients_updated_by FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_clients_sector_id (sector_id),
-    INDEX idx_clients_commercial_name (commercial_name),
+    UNIQUE KEY uq_clients_commercial_name (commercial_name),
     INDEX idx_clients_legal_name (legal_name),
     INDEX idx_clients_cif (cif),
     INDEX idx_clients_city (city),
@@ -133,10 +152,19 @@ CREATE TABLE contacts (
     updated_by INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_contacts_full_name_normalized CHECK (
+        OCTET_LENGTH(full_name) = OCTET_LENGTH(TRIM(full_name)) AND CHAR_LENGTH(full_name) > 0
+    ),
+    CONSTRAINT chk_contacts_email_normalized CHECK (
+        email IS NULL OR (OCTET_LENGTH(email) = OCTET_LENGTH(TRIM(email)) AND CHAR_LENGTH(email) > 0)
+    ),
+    CONSTRAINT chk_contacts_is_corporate_email CHECK (
+        is_corporate_email IS NULL OR is_corporate_email IN (0, 1)
+    ),
     CONSTRAINT fk_contacts_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_contacts_updated_by FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_contacts_full_name (full_name),
-    INDEX idx_contacts_email (email),
+    UNIQUE KEY uq_contacts_email (email),
     INDEX idx_contacts_is_corporate (is_corporate_email),
     INDEX idx_contacts_email_status (email_status),
     INDEX idx_contacts_phone (phone),
@@ -172,6 +200,7 @@ CREATE TABLE client_contacts (
     relation_label VARCHAR(150) NULL,
     is_primary TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_client_contacts_is_primary CHECK (is_primary IN (0, 1)),
     PRIMARY KEY (client_id, contact_id),
     CONSTRAINT fk_client_contacts_client FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_client_contacts_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -191,6 +220,10 @@ CREATE TABLE custom_fields (
     sort_order INT UNSIGNED NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_custom_fields_name_normalized CHECK (OCTET_LENGTH(name) = OCTET_LENGTH(TRIM(name)) AND CHAR_LENGTH(name) > 0),
+    CONSTRAINT chk_custom_fields_slug_normalized CHECK (OCTET_LENGTH(slug) = OCTET_LENGTH(TRIM(slug)) AND CHAR_LENGTH(slug) > 0),
+    CONSTRAINT chk_custom_fields_is_required CHECK (is_required IN (0, 1)),
+    CONSTRAINT chk_custom_fields_is_filterable CHECK (is_filterable IN (0, 1)),
     UNIQUE KEY uq_custom_fields_entity_slug (entity_type, slug),
     INDEX idx_custom_fields_entity_type (entity_type),
     INDEX idx_custom_fields_field_type (field_type),
@@ -220,6 +253,13 @@ CREATE TABLE custom_field_values (
     value_bool TINYINT(1) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_custom_field_values_bool CHECK (value_bool IS NULL OR value_bool IN (0, 1)),
+    CONSTRAINT chk_custom_field_values_single_type CHECK (
+        (value_text IS NOT NULL)
+        + (value_number IS NOT NULL)
+        + (value_date IS NOT NULL)
+        + (value_bool IS NOT NULL) <= 1
+    ),
     CONSTRAINT fk_custom_field_values_field FOREIGN KEY (field_id) REFERENCES custom_fields(id) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE KEY uq_custom_field_value (field_id, entity_type, entity_id),
     INDEX idx_custom_field_values_entity (entity_type, entity_id),
@@ -332,6 +372,11 @@ CREATE TABLE api_keys (
     revoked_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_api_keys_name_normalized CHECK (OCTET_LENGTH(name) = OCTET_LENGTH(TRIM(name)) AND CHAR_LENGTH(name) > 0),
+    CONSTRAINT chk_api_keys_client_id_normalized CHECK (
+        OCTET_LENGTH(client_id) = OCTET_LENGTH(TRIM(client_id)) AND CHAR_LENGTH(client_id) > 0
+    ),
+    CONSTRAINT chk_api_keys_is_active CHECK (is_active IN (0, 1)),
     INDEX idx_api_keys_is_active (is_active),
     INDEX idx_api_keys_last_used_at (last_used_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

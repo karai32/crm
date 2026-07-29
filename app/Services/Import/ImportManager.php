@@ -154,6 +154,35 @@ class ImportManager
                     $status = $exception->rowStatus();
                     $status === 'skipped' ? $skipped++ : $errors++;
                     $this->imports->recordIssue($batchId, $rowNumber, $row, $status, $exception->getMessage());
+                } catch (PDOException $exception) {
+                    $processor = $this->processor($entityType);
+                    error_log("Import row {$rowNumber} database error: " . $exception->getMessage());
+
+                    if (Database::violatesConstraint($exception, 'uq_contacts_email')) {
+                        $skipped++;
+                        $this->imports->recordIssue(
+                            $batchId,
+                            $rowNumber,
+                            $row,
+                            'skipped',
+                            'A contact with this email already exists.'
+                        );
+                    } elseif (Database::violatesConstraint($exception, 'uq_clients_commercial_name')) {
+                        $skipped++;
+                        $this->imports->recordIssue(
+                            $batchId,
+                            $rowNumber,
+                            $row,
+                            'skipped',
+                            'A client with this commercial name already exists.'
+                        );
+                    } else {
+                        $errors++;
+                        $message = Database::isIntegrityViolation($exception)
+                            ? 'The row conflicts with existing or related data.'
+                            : 'Unable to import this row because of a database error.';
+                        $this->imports->recordIssue($batchId, $rowNumber, $row, 'error', $message);
+                    }
                 } catch (Throwable $exception) {
                     $processor = $this->processor($entityType);
                     $errors++;

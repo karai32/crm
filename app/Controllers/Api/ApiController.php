@@ -108,7 +108,7 @@ final class ApiController
             );
             $result = new ApiResult($exception->status(), $error);
         } catch (PDOException $exception) {
-            if ((string) $exception->getCode() === '23000') {
+            if (Database::isIntegrityViolation($exception)) {
                 $result = new ApiResult(409, $this->error('conflict', 'A record with these values already exists'));
             } else {
                 error_log('API database error [' . $requestId . ']: ' . $exception->getMessage());

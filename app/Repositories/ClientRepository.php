@@ -88,10 +88,24 @@ class ClientRepository
         $pdo = Database::connect();
 
         $statement = $pdo->prepare('SELECT * FROM clients WHERE commercial_name = :name LIMIT 1');
-        $statement->execute(['name' => $name]);
+        $statement->execute(['name' => trim($name)]);
         $client = $statement->fetch();
 
         return $client ?: null;
+    }
+
+    public function commercialNameTakenByOther(string $name, int $excludeId): bool
+    {
+        $pdo = Database::connect();
+        $statement = $pdo->prepare('
+            SELECT id
+            FROM clients
+            WHERE commercial_name = :name AND id != :id
+            LIMIT 1
+        ');
+        $statement->execute(['name' => trim($name), 'id' => $excludeId]);
+
+        return (bool) $statement->fetch();
     }
 
     // array<{id, name}>

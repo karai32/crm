@@ -94,7 +94,14 @@ class ContactController
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
+        $error = null;
         if ($data['full_name'] === '') {
+            $error = Lang::get('contacts.name_required');
+        } elseif ($data['email'] !== null && $this->contacts->emailExists($data['email'])) {
+            $error = Lang::get('contacts.email_already_used');
+        }
+
+        if ($error !== null) {
             View::render('contacts/create', [
                 'title'            => Lang::get('contacts.create_title'),
                 'styles'           => ['contacts.css'],
@@ -105,7 +112,7 @@ class ContactController
                 'selectedClientIds' => $clientIds,
                 'customFields'     => $customFields,
                 'customValues'     => $customValues,
-                'error'            => Lang::get('contacts.name_required'),
+                'error'            => $error,
             ]);
             return;
         }
@@ -182,7 +189,14 @@ class ContactController
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
+        $error = null;
         if ($data['full_name'] === '') {
+            $error = Lang::get('contacts.name_required');
+        } elseif ($data['email'] !== null && $this->contacts->emailTakenByOther($data['email'], $id)) {
+            $error = Lang::get('contacts.email_already_used');
+        }
+
+        if ($error !== null) {
             $data['id'] = $id;
 
             if ($manualEmailState !== null) {
@@ -199,7 +213,7 @@ class ContactController
                 'selectedClientIds' => $clientIds,
                 'customFields'     => $customFields,
                 'customValues'     => $customValues,
-                'error'            => Lang::get('contacts.name_required'),
+                'error'            => $error,
             ]);
             return;
         }
