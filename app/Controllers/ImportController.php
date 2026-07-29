@@ -15,16 +15,12 @@ class ImportController
 
     public function index(): void
     {
-        Auth::requirePermission('imports.manage');
-
         $previewId = (int) ($_GET['id'] ?? 0);
         $this->renderIndex($previewId > 0 ? $this->manager->preview($previewId) : null);
     }
 
     public function storeUpload(): void
     {
-        Auth::requirePermission('imports.manage');
-
         $user = Auth::user();
         $result = $this->manager->upload(
             $_FILES['csv_file'] ?? [],
@@ -76,8 +72,6 @@ class ImportController
 
     public function errors(): void
     {
-        Auth::requirePermission('imports.manage');
-
         $batchId = (int) ($_GET['id'] ?? 0);
         $batch = $this->imports->findBatch($batchId);
 
@@ -97,8 +91,6 @@ class ImportController
 
     public function process(): void
     {
-        Auth::requirePermission('imports.manage');
-
         $result = $this->manager->process(
             (int) ($_POST['id'] ?? 0),
             $_POST['mapping'] ?? [],

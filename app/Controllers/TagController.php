@@ -13,8 +13,6 @@ class TagController
 
     public function index(): void
     {
-        Auth::requirePermission('tags.manage');
-
         $sort  = $this->sortParam(['name', 'slug'], 'name');
         $dir   = $this->dirParam('asc');
         $total = $this->tags->count();
@@ -35,8 +33,6 @@ class TagController
 
     public function create(): void
     {
-        Auth::requirePermission('tags.manage');
-
         View::render('tags/create', [
             'title'   => Lang::get('tags.create_title'),
             'styles'  => ['settings.css'],
@@ -47,8 +43,6 @@ class TagController
 
     public function store(): void
     {
-        Auth::requirePermission('tags.manage');
-
         $name = trim($_POST['name'] ?? '');
         $color = $this->cleanColor($_POST['color'] ?? '');
 
@@ -69,8 +63,6 @@ class TagController
 
     public function edit(): void
     {
-        Auth::requirePermission('tags.manage');
-
         $id = (int) ($_GET['id'] ?? 0);
         $tag = $this->tags->find($id);
 
@@ -91,8 +83,6 @@ class TagController
 
     public function update(): void
     {
-        Auth::requirePermission('tags.manage');
-
         $id = (int) ($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $color = $this->cleanColor($_POST['color'] ?? '');
@@ -125,8 +115,6 @@ class TagController
 
     public function delete(): void
     {
-        Auth::requirePermission('tags.manage');
-
         $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {

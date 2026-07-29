@@ -18,7 +18,7 @@ return [
                     'title' => 'Основные источники истины',
                     'code' => <<<'CODE'
 Routes                 public_html/index.php
-Database contract      database/schema.sql
+Database contract      database/schema.sql + database/migrations/*.sql
 Permissions            app/Core/Auth.php
 API authentication     app/Services/ApiAuthenticator.php
 API protocol           app/Controllers/Api/AbstractApiController.php
@@ -95,7 +95,7 @@ app/
   Views/                PHP templates and layouts
 bin/                    CLI entry points
 config/                 local configuration and secrets
-database/               schema.sql
+database/               schema.sql and manual migrations
 lang/                   UI and help translations
 public_html/            document root and static assets
 storage/                runtime state and private files
@@ -160,8 +160,8 @@ CODE,
             'id' => 'reference-web-routes',
             'title' => 'Маршруты веб-интерфейса',
             'paragraphs' => [
-                'HTML-маршруты используют GET для чтения и форм, POST для изменений. Идентификаторы старых HTML-страниц передаются query-параметром id, а не сегментом пути. Router не имеет middleware: Auth-проверка выполняется внутри action. Все browser POST, включая login, проходят глобальную CSRF-проверку.',
-                'CRUD контактов и клиентов следует одинаковому шаблону index/create/store/edit/update/show/delete плюс bulk-action. Сектора, теги и пользовательские поля не имеют show и bulk-action. Импорт и экспорт являются отдельными workflow. Пользователи, API-ключи и API-журналы доступны только администратору.',
+                'HTML-маршруты используют GET для чтения и форм, POST для изменений. Идентификаторы старых HTML-страниц передаются query-параметром id, а не сегментом пути. Router применяет policy до вызова action: auth = user/admin либо permission с известным ключом. Все browser POST, включая login, проходят глобальную CSRF-проверку.',
+                'CRUD контактов и клиентов следует одинаковому шаблону index/create/store/edit/update/show/delete плюс bulk-action. Сектора, теги и пользовательские поля не имеют show и bulk-action. Импорт и экспорт являются отдельными workflow. Пользователи, API-ключи, API-журналы и ИИ-инструменты доступны только администратору.',
             ],
             'examples' => [
                 [
@@ -213,8 +213,8 @@ CODE,
             'id' => 'reference-ajax-routes',
             'title' => 'Маршруты внутреннего AJAX',
             'paragraphs' => [
-                'Внутренние endpoints имеют префикс /ajax и возвращают JSON. GET используется для поисковых списков и не требует CSRF, но требует сессию через AjaxController::guard(). POST изменяет данные либо запускает обработку и дополнительно проверяется глобальным CSRF до Router.',
-                'Типовой поиск принимает q и иногда page, возвращая items и has_more. Значения id приводятся к int. Новый AJAX-action должен зарегистрировать маршрут, выполнить guard с нужным разрешением, проверить входные данные и завершить ответ через json(), чтобы получить корректный Content-Type и статус.',
+                'Внутренние endpoints имеют префикс /ajax и возвращают JSON. GET используется для поисковых списков и не требует CSRF, но защищается политикой маршрута. POST изменяет данные либо запускает обработку и дополнительно проверяется глобальным CSRF до Router.',
+                'Типовой поиск принимает q и иногда page, возвращая items и has_more. Значения id приводятся к int. Новый AJAX-action должен зарегистрировать маршрут с auth или permission и response = json, проверить входные данные и завершить ответ через json(), чтобы получить корректный Content-Type и статус.',
             ],
             'examples' => [
                 [
@@ -228,10 +228,10 @@ GET  /ajax/sectors/search
 GET  /ajax/icons/search
 GET  /ajax/custom-field/values
 
-POST /ajax/contacts/inspect-email-batch
-POST /ajax/contacts/gemini-company
-POST /ajax/contacts/company
-POST /ajax/contacts/company/skip
+POST /ajax/contacts/inspect-email-batch  admin
+POST /ajax/contacts/gemini-company      admin
+POST /ajax/contacts/company             admin
+POST /ajax/contacts/company/skip        admin
 CODE,
                 ],
             ],
@@ -263,7 +263,7 @@ CODE,
             'id' => 'reference-access-keys',
             'title' => 'Роли, разрешения и scopes',
             'paragraphs' => [
-                'Роли базы: admin и user. admin обходит индивидуальные разрешения. user использует строки user_permissions. users.manage не является настраиваемым ключом: управление пользователями реализовано через requireAdmin(). Чтение контактов и клиентов требует login, но не отдельного read permission.',
+                'Роли базы: admin и user. Для известных ключей admin обходит индивидуальные разрешения; неизвестный ключ всегда запрещён. user использует строки user_permissions по fail-closed правилу. users.manage не является настраиваемым ключом: управление пользователями ограничено политикой auth = admin. Чтение контактов и клиентов требует auth = user, но не отдельного read permission.',
                 'API scopes не связаны с пользовательскими разрешениями и принадлежат api_key. Их восемь: read/write для четырёх ресурсов. Нельзя передавать значение permission в scope или наоборот. Изменение набора ресурсов требует обновить создание ключа, syncScopes, представление ключей и проверки контроллера.',
             ],
             'examples' => [
@@ -508,6 +508,9 @@ find app config bin lang public_html -name '*.php' -print0 | xargs -0 -n1 php8.3
 
 # Только для чистой базы: schema.sql содержит DROP TABLE
 mysql -u crm_user -p crm < database/schema.sql
+
+# Для существующей базы: применить ещё не выполненную миграцию один раз
+mysql -u crm_user -p crm < database/migrations/20260729_fail_closed_permissions.sql
 
 sudo -u www-data /usr/bin/php8.3 bin/weekly-report.php
 tail -n 50 storage/app.log

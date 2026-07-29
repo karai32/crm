@@ -98,8 +98,8 @@ vendor/                зависимости Composer',
   → Nginx: /index.php
   → session_start() и Lang::load()
   → Router::dispatch(\'GET\', \'/clients/show?id=42\')
+  → Router проверяет policy: auth = user
   → ClientController::show()
-  → Auth::requireLogin()
   → ClientRepository::find(42)
   → View::render(\'clients/show\', $data)
   → app/Views/layouts/main.php
@@ -114,8 +114,8 @@ vendor/                зависимости Composer',
       'paragraphs' => 
       array (
         0 => 'Composer автоматически загружает только сторонние библиотеки. Собственные классы пока не используют namespaces и PSR-4: каждый новый PHP-файл нужно добавить через require_once в public_html/index.php до создания объекта, который от него зависит. Порядок подключения важен для наследования и type declarations.',
-        1 => 'После подключений точка входа вручную создаёт экземпляры контроллеров и связывает HTTP-метод и путь с callable. Router поддерживает GET, POST, PATCH и DELETE, точные маршруты и параметры {name}. Автоматического поиска контроллера по URL нет.',
-        2 => 'Сначала регистрируйте более конкретные маршруты, затем общие параметризованные. Для формирования внутренних ссылок используйте Auth::url(), иначе установка приложения в подкаталоге может сломаться.',
+        1 => 'После подключений точка входа вручную создаёт экземпляры контроллеров и связывает HTTP-метод и путь с callable. Router поддерживает GET, POST, PATCH и DELETE, точные маршруты и параметры {name}. Третьим аргументом маршрут принимает политику доступа: auth, permission и формат отказа response. Автоматического поиска контроллера по URL нет.',
+        2 => 'Сначала регистрируйте более конкретные маршруты, затем общие параметризованные. Каждый маршрут обязан получить policy: auth = public для сознательно открытой точки, auth = user/admin либо permission для защищённой. Router отвергнет регистрацию без политики. Для формирования внутренних ссылок используйте Auth::url(), иначе установка приложения в подкаталоге может сломаться.',
       ),
       'examples' => 
       array (
@@ -128,10 +128,16 @@ require_once __DIR__ . \'/../app/Controllers/ProjectController.php\';
 
 $projectController = new ProjectController();
 
-$router->get(\'/projects\', [$projectController, \'index\']);
-$router->get(\'/projects/create\', [$projectController, \'create\']);
-$router->post(\'/projects/store\', [$projectController, \'store\']);
-$router->get(\'/projects/{id}\', [$projectController, \'show\']);',
+// Сначала добавьте projects.manage в Auth::permissionDefinitions().
+
+$router->get(\'/projects\', [$projectController, \'index\'], [\'auth\' => \'user\']);
+$router->get(\'/projects/create\', [$projectController, \'create\'], [
+    \'permission\' => \'projects.manage\',
+]);
+$router->post(\'/projects/store\', [$projectController, \'store\'], [
+    \'permission\' => \'projects.manage\',
+]);
+$router->get(\'/projects/{id}\', [$projectController, \'show\'], [\'auth\' => \'user\']);',
         ),
       ),
     ),
@@ -141,7 +147,7 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\']);',
       'title' => 'Контроллеры',
       'paragraphs' => 
       array (
-        0 => 'Контроллер является адаптером между HTTP и кодом приложения. В начале публичного метода он проверяет вход, роль или разрешение, затем читает $_GET, $_POST либо $_FILES, приводит простые значения к ожидаемым типам, вызывает репозиторий или сервис и выбирает ответ: HTML, redirect, JSON или код ошибки.',
+        0 => 'Контроллер является адаптером между HTTP и кодом приложения. Router проверяет вход, роль или разрешение до вызова публичного метода. Контроллер читает $_GET, $_POST либо $_FILES, приводит простые значения к ожидаемым типам, вызывает репозиторий или сервис и выбирает ответ: HTML, redirect, JSON или код ошибки.',
         1 => 'Контроллеру допустимо координировать сценарий и выполнять простую валидацию формы. Сложные правила, повторно используемые операции и транзакции лучше выносить в сервис. SQL, HTML-разметка и прямое чтение конфигурационных файлов в контроллер добавлять не следует.',
         2 => 'После успешного POST обычно используется Post/Redirect/Get: данные сохраняются и выполняется Auth::redirect(). Это защищает от повторной отправки формы при обновлении страницы. При ошибке контроллер повторно рендерит форму с введёнными значениями и понятным сообщением.',
       ),
@@ -152,8 +158,6 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\']);',
           'title' => 'Типовая операция создания',
           'code' => 'public function store(): void
 {
-    Auth::requirePermission(\'projects.manage\');
-
     $name = trim($_POST[\'name\'] ?? \'\');
     if ($name === \'\') {
         View::render(\'projects/create\', [
@@ -274,7 +278,7 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\']);',
       'title' => 'Авторизация и границы безопасности',
       'paragraphs' => 
       array (
-        0 => 'Auth хранит минимальные данные вошедшего пользователя в сессии и предоставляет requireLogin(), requireAdmin() и requirePermission(). Администратор получает все права. Для обычного пользователя Auth загружает индивидуальные настройки из user_permissions. Проверка должна выполняться в каждом серверном обработчике, а скрытый пункт меню является только элементом интерфейса и не заменяет контроль доступа.',
+        0 => 'Auth хранит минимальные данные вошедшего пользователя в сессии, восстанавливает remember-login и вычисляет разрешения. Router централизованно применяет политику каждого веб- и AJAX-маршрута до вызова обработчика. Администратор получает все известные права; неизвестный ключ, отсутствующая строка и ошибка загрузки запрещают действие. Скрытый пункт меню является только элементом интерфейса и не заменяет policy.',
         1 => 'CSRF-токен хранится в сессии. Точка входа централизованно проверяет обычные POST-запросы, поэтому каждая такая форма должна добавлять Csrf::field(). API исключён из CSRF-проверки, потому что использует HTTP Basic с client_id и secret, scopes и собственный журнал запросов.',
         2 => 'Данные из $_GET, $_POST, $_FILES, JSON и заголовков всегда считаются недоверенными. Их нужно нормализовать, проверять по allowlist и только затем передавать дальше. Экранирование выполняется при HTML-выводе, а не при сохранении в базу.',
       ),
@@ -283,14 +287,18 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\']);',
         0 => 
         array (
           'title' => 'Выбор уровня доступа',
-          'code' => 'Auth::requireLogin();                         // любой вошедший пользователь
-Auth::requireAdmin();                         // только роль admin
-Auth::requirePermission(\'contacts.edit\');    // конкретная операция
+          'code' => '$router->get(\'/dashboard\', [$dashboardController, \'index\'], [
+    \'auth\' => \'user\',
+]);
 
-if (!Auth::can(\'exports.use\')) {
-    http_response_code(403);
-    return;
-}',
+$router->post(\'/contacts/update\', [$contactController, \'update\'], [
+    \'permission\' => \'contacts.edit\',
+]);
+
+$router->post(\'/ajax/admin-task\', [$ajaxController, \'adminTask\'], [
+    \'auth\' => \'admin\',
+    \'response\' => \'json\',
+]);',
         ),
       ),
     ),

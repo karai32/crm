@@ -27,8 +27,6 @@ class ClientController
 
     public function index(): void
     {
-        Auth::requireLogin();
-
         $filters = $this->filtersFromRequest();
         $sort    = $this->sortParam(['id', 'commercial_name', 'legal_name', 'sector_name', 'city', 'country', 'created_at', 'is_active'], 'commercial_name');
         $dir     = $this->dirParam('asc');
@@ -60,8 +58,6 @@ class ClientController
 
     public function create(): void
     {
-        Auth::requirePermission('clients.create');
-
         View::render('clients/create', [
             'title'        => Lang::get('clients.create_title'),
             'styles'       => ['clients.css'],
@@ -77,8 +73,6 @@ class ClientController
 
     public function store(): void
     {
-        Auth::requirePermission('clients.create');
-
         $data = $this->clientDataFromRequest();
         $tagIds = $this->idsFromPost('tag_ids');
         $customFields = $this->customFields->fieldsForEntity('client');
@@ -110,8 +104,6 @@ class ClientController
 
     public function show(): void
     {
-        Auth::requireLogin();
-
         $client = $this->findClientOrFail((int) ($_GET['id'] ?? 0));
 
         if ($client === null) {
@@ -133,8 +125,6 @@ class ClientController
 
     public function edit(): void
     {
-        Auth::requirePermission('clients.edit');
-
         $client = $this->findClientOrFail((int) ($_GET['id'] ?? 0));
 
         if ($client === null) {
@@ -158,8 +148,6 @@ class ClientController
 
     public function update(): void
     {
-        Auth::requirePermission('clients.edit');
-
         $id = (int) ($_POST['id'] ?? 0);
         $client = $this->findClientOrFail($id);
 
@@ -201,8 +189,6 @@ class ClientController
 
     public function delete(): void
     {
-        Auth::requirePermission('clients.delete');
-
         $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {
@@ -214,23 +200,18 @@ class ClientController
 
     public function bulkAction(): void
     {
-        Auth::requireLogin();
-
         $clientIds = $this->idsFromPost('client_ids');
         $action = $_POST['bulk_action'] ?? '';
 
         if (!empty($clientIds)) {
             if ($action === 'delete') {
-                Auth::requirePermission('clients.delete');
                 $this->clients->deleteMultiple($clientIds);
             } elseif ($action === 'remove_tags') {
-                Auth::requirePermission('clients.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->entityTags->remove('client', $clientIds, $tagIds);
                 }
             } else {
-                Auth::requirePermission('clients.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->entityTags->add('client', $clientIds, $tagIds);

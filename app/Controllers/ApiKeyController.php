@@ -13,8 +13,6 @@ class ApiKeyController
 
     public function index(): void
     {
-        Auth::requireAdmin();
-
         $newCredentials = $_SESSION['new_api_credentials'] ?? null;
         unset($_SESSION['new_api_credentials']);
 
@@ -42,8 +40,6 @@ class ApiKeyController
 
     public function store(): void
     {
-        Auth::requireAdmin();
-
         $name = trim($_POST['name'] ?? '');
 
         if ($name === '') {
@@ -66,8 +62,6 @@ class ApiKeyController
 
     public function rename(): void
     {
-        Auth::requireAdmin();
-
         $id   = (int) ($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
 
@@ -80,8 +74,6 @@ class ApiKeyController
 
     public function revoke(): void
     {
-        Auth::requireAdmin();
-
         $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->revoke($id);
@@ -92,8 +84,6 @@ class ApiKeyController
 
     public function enable(): void
     {
-        Auth::requireAdmin();
-
         $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->enable($id);
@@ -104,8 +94,6 @@ class ApiKeyController
 
     public function syncScopes(): void
     {
-        Auth::requireAdmin();
-
         $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->updateScopes($id, [
@@ -121,8 +109,6 @@ class ApiKeyController
 
     public function delete(): void
     {
-        Auth::requireAdmin();
-
         $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->apiKeys->delete($id);
@@ -133,8 +119,6 @@ class ApiKeyController
 
     public function logs(): void
     {
-        Auth::requireAdmin();
-
         $filters = [
             'key_id'    => (int) ($_GET['key_id'] ?? 0),
             'method'    => trim($_GET['method'] ?? ''),

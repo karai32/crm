@@ -101,12 +101,12 @@ return [
             'paragraphs' => [
                 'AJAX-маршруты зарегистрированы в public_html/index.php и обслуживаются AjaxController. Это внутренний интерфейс для браузера, работающий с сессионной авторизацией. Его не следует смешивать с публичным /api/v1: у API отдельная аутентификация, scopes, контроллеры, формат ответа и журналирование.',
                 'Поисковые GET-маршруты ничего не изменяют. global-search объединяет контакты и клиентов; clients/search и tags/search поддерживают page и has_more; clients/field возвращает уникальные значения стандартного поля; custom-field/values — уникальные текстовые значения пользовательского поля. Поиск секторов и иконок требует sectors.manage.',
-                'POST-маршруты выполняют пакетную проверку email и операции ИИ: определение компании, сохранение результата и пропуск строки. Все они проходят глобальную CSRF-проверку. inspectEmailBatch требует входа напрямую, остальные методы используют guard(). Сейчас AI-обработчики проверяют только наличие сессии, хотя сама страница /ai доступна администратору; если ИИ должен оставаться административным инструментом, разрешение необходимо проверять и в AJAX-методах.',
+                'POST-маршруты выполняют пакетную проверку email и операции ИИ: определение компании, сохранение результата и пропуск строки. Все они проходят глобальную CSRF-проверку. Страница /ai, пакетная проверка email и все три связанных ИИ-обработчика имеют одну политику auth = admin; прямой POST обычного пользователя получает JSON 403.',
             ],
             'examples' => [
                 [
                     'title' => 'Карта внутренних маршрутов',
-                    'code' => "GET  /ajax/global-search\nGET  /ajax/clients/search\nGET  /ajax/clients/field\nGET  /ajax/tags/search\nGET  /ajax/sectors/search          sectors.manage\nGET  /ajax/icons/search            sectors.manage\nGET  /ajax/custom-field/values\n\nPOST /ajax/contacts/inspect-email-batch\nPOST /ajax/contacts/gemini-company\nPOST /ajax/contacts/company\nPOST /ajax/contacts/company/skip",
+                    'code' => "GET  /ajax/global-search\nGET  /ajax/clients/search\nGET  /ajax/clients/field\nGET  /ajax/tags/search\nGET  /ajax/sectors/search          sectors.manage\nGET  /ajax/icons/search            sectors.manage\nGET  /ajax/custom-field/values\n\nPOST /ajax/contacts/inspect-email-batch  admin\nPOST /ajax/contacts/gemini-company      admin\nPOST /ajax/contacts/company             admin\nPOST /ajax/contacts/company/skip        admin",
                 ],
             ],
         ],
@@ -163,14 +163,14 @@ return [
             'id' => 'ajax-security',
             'title' => 'Авторизация, разрешения и CSRF',
             'paragraphs' => [
-                'Каждый AJAX-метод обязан самостоятельно проверять доступ. guard() возвращает JSON 401 при отсутствии сессии и 403 при отсутствии переданного permission. Для административного действия можно применить отдельную проверку Auth::isAdmin() либо расширить guard. Проверка видимости страницы, пункта меню или кнопки не защищает прямой HTTP-запрос.',
+                'Доступ к AJAX задаётся в public_html/index.php политикой маршрута, а Router проверяет её до вызова AjaxController. Для внутренних endpoints указывайте response = json: гость получит JSON 401, пользователь без права — JSON 403. auth = admin ограничивает административные действия, permission проверяет функциональное разрешение. Проверка видимости страницы, пункта меню или кнопки не защищает прямой HTTP-запрос.',
                 'В public_html/index.php любой POST, кроме /api/v1, проверяется через Csrf::validate() до dispatch. Токен создаётся на сессию и передаётся в _csrf_token. GET нельзя использовать для изменения данных, потому что CSRF на него не распространяется. Публичный API исключён из сессионной CSRF-проверки, так как использует собственную подпись запроса.',
                 'CSP разрешает connect-src только self, поэтому браузерный fetch может обращаться к ContactCore, но не к произвольному внешнему домену. Вызов Gemini выполняет серверный PHP через cURL. В CSP пока разрешены unsafe-inline для совместимости с inline onclick и style; новые компоненты не должны увеличивать эту зависимость.',
             ],
             'examples' => [
                 [
-                    'title' => 'Защищённый AJAX-метод',
-                    'code' => "public function projectsSearch(): void\n{\n    if (!\$this->guard('projects.view')) {\n        return;\n    }\n\n    \$query = trim(\$_GET['q'] ?? '');\n    \$items = \$this->projects->search(\$query, 20);\n\n    \$this->json(['items' => \$items]);\n}",
+                    'title' => 'Защищённый AJAX-маршрут и тонкий обработчик',
+                    'code' => "\$router->get('/ajax/contacts/edit-search', [\$ajaxController, 'editableContactsSearch'], [\n    'permission' => 'contacts.edit',\n    'response' => 'json',\n]);\n\npublic function editableContactsSearch(): void\n{\n    \$query = trim(\$_GET['q'] ?? '');\n    \$items = \$this->contacts->search(\$query, 20);\n\n    \$this->json(['items' => \$items]);\n}",
                 ],
             ],
         ],

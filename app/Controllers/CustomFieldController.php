@@ -13,8 +13,6 @@ class CustomFieldController
 
     public function index(): void
     {
-        Auth::requirePermission('custom_fields.manage');
-
         $sort  = $this->sortParam(['entity_type', 'name', 'slug', 'field_type'], 'entity_type');
         $dir   = $this->dirParam();
         $total = $this->customFields->count();
@@ -37,8 +35,6 @@ class CustomFieldController
 
     public function create(): void
     {
-        Auth::requirePermission('custom_fields.manage');
-
         View::render('custom-fields/create', [
             'title'       => Lang::get('cf.create_title'),
             'styles'      => ['settings.css'],
@@ -51,8 +47,6 @@ class CustomFieldController
 
     public function store(): void
     {
-        Auth::requirePermission('custom_fields.manage');
-
         $data = $this->fieldDataFromRequest();
         $options = $this->optionsFromRequest();
 
@@ -74,8 +68,6 @@ class CustomFieldController
 
     public function edit(): void
     {
-        Auth::requirePermission('custom_fields.manage');
-
         $field = $this->customFields->find((int) ($_GET['id'] ?? 0));
 
         if ($field === null) {
@@ -98,8 +90,6 @@ class CustomFieldController
 
     public function update(): void
     {
-        Auth::requirePermission('custom_fields.manage');
-
         $id = (int) ($_POST['id'] ?? 0);
         $field = $this->customFields->find($id);
 
@@ -132,8 +122,6 @@ class CustomFieldController
 
     public function delete(): void
     {
-        Auth::requirePermission('custom_fields.manage');
-
         $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {

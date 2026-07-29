@@ -11,8 +11,6 @@ class SettingsController
 
     public function index(): void
     {
-        Auth::requireLogin();
-
         $user   = Auth::user();
         $userId = (int) ($user['id'] ?? 0);
 
@@ -26,13 +24,6 @@ class SettingsController
 
     public function sendReport(): void
     {
-        Auth::requireLogin();
-
-        if (!Auth::isAdmin()) {
-            http_response_code(403);
-            exit;
-        }
-
         $user    = Auth::user();
         $service = new WeeklyReportService();
         $dayOfWeek = (int) date('N'); // 1=Monday … 7=Sunday
@@ -56,8 +47,6 @@ class SettingsController
 
     public function update(): void
     {
-        Auth::requireLogin();
-
         $user   = Auth::user();
         $userId = (int) ($user['id'] ?? 0);
 

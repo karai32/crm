@@ -13,21 +13,20 @@ class UserController
 
     public function index(): void
     {
-        Auth::requireAdmin();
-
         $sort  = $this->sortParam(['id', 'name', 'role', 'is_active'], 'id');
         $dir   = $this->dirParam();
         $total = $this->users->count();
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
         $users              = $this->users->paginate($page, $perPage, $sort, $dir);
-        $defaultPermissions = $this->defaultPermissions();
+        $deniedPermissions = $this->permissionsWithDefault(false);
+        $allowedPermissions = $this->permissionsWithDefault(true);
 
         foreach ($users as $index => $user) {
             $role = $user['role'] ?? 'user';
             $users[$index]['permissions'] = $role === 'admin'
-                ? $defaultPermissions
-                : array_replace($defaultPermissions, $this->users->permissionsForUser((int) $user['id']));
+                ? $allowedPermissions
+                : array_replace($deniedPermissions, $this->users->permissionsForUser((int) $user['id']));
         }
 
         View::render('users/index', [
@@ -48,7 +47,6 @@ class UserController
 
     public function create(): void
     {
-        Auth::requireAdmin();
         $defaultRole = $this->users->findRoleByName('user');
 
         View::render('users/create', [
@@ -58,15 +56,13 @@ class UserController
             'user'   => ['is_active' => 1, 'role_id' => (int) ($defaultRole['id'] ?? 0)],
             'roles'  => $this->users->allRoles(),
             'permissionDefinitions' => Auth::permissionDefinitions(),
-            'userPermissions' => $this->defaultPermissions(),
+            'userPermissions' => $this->permissionsWithDefault(true),
             'error'  => null,
         ]);
     }
 
     public function store(): void
     {
-        Auth::requireAdmin();
-
         $data = $this->userDataFromRequest();
         $password = $_POST['password'] ?? '';
 
@@ -89,8 +85,6 @@ class UserController
 
     public function edit(): void
     {
-        Auth::requireAdmin();
-
         $user = $this->findUserOrFail((int) ($_GET['id'] ?? 0));
 
         if ($user === null) {
@@ -111,8 +105,6 @@ class UserController
 
     public function update(): void
     {
-        Auth::requireAdmin();
-
         $id = (int) ($_POST['id'] ?? 0);
         $existingUser = $this->findUserOrFail($id);
 
@@ -153,8 +145,6 @@ class UserController
 
     public function delete(): void
     {
-        Auth::requireAdmin();
-
         $id = (int) ($_POST['id'] ?? 0);
         $currentUser = Auth::user();
 
@@ -167,8 +157,6 @@ class UserController
 
     public function purge(): void
     {
-        Auth::requireAdmin();
-
         $id = (int) ($_POST['id'] ?? 0);
         $currentUser = Auth::user();
 
@@ -222,9 +210,9 @@ class UserController
         return $user;
     }
 
-    private function defaultPermissions(): array
+    private function permissionsWithDefault(bool $allowed): array
     {
-        return array_fill_keys(array_keys(Auth::permissionDefinitions()), true);
+        return array_fill_keys(array_keys(Auth::permissionDefinitions()), $allowed);
     }
 
     private function permissionsFromRequest(): array
@@ -242,7 +230,10 @@ class UserController
 
     private function permissionsForEdit(array $user): array
     {
-        return array_replace($this->defaultPermissions(), $this->users->permissionsForUser((int) $user['id']));
+        return array_replace(
+            $this->permissionsWithDefault(false),
+            $this->users->permissionsForUser((int) $user['id'])
+        );
     }
 
     private function permissionsForRole(int $roleId): array

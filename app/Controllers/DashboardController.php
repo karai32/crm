@@ -13,8 +13,6 @@ class DashboardController
 
     public function index(): void
     {
-        Auth::requireLogin();
-
         $latestContacts = $this->dashboardRepository->latestContacts(25);
         $contactIds = array_map('intval', array_column($latestContacts, 'id'));
 

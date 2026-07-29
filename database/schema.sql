@@ -58,7 +58,7 @@ CREATE TABLE users (
 CREATE TABLE user_permissions (
     user_id INT UNSIGNED NOT NULL,
     permission_key VARCHAR(80) NOT NULL,
-    is_allowed TINYINT(1) NOT NULL DEFAULT 1,
+    is_allowed TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, permission_key),

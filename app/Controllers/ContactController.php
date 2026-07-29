@@ -27,8 +27,6 @@ class ContactController
 
     public function index(): void
     {
-        Auth::requireLogin();
-
         $filters = $this->filtersFromRequest();
         $sort    = $this->sortParam(['id', 'full_name', 'email', 'created_at', 'clients'], 'id');
         $dir     = $this->dirParam();
@@ -74,8 +72,6 @@ class ContactController
 
     public function create(): void
     {
-        Auth::requirePermission('contacts.create');
-
         View::render('contacts/create', [
             'title'            => Lang::get('contacts.create_title'),
             'styles'           => ['contacts.css'],
@@ -92,8 +88,6 @@ class ContactController
 
     public function store(): void
     {
-        Auth::requirePermission('contacts.create');
-
         $data = $this->contactDataFromRequest();
         $tagIds = $this->idsFromPost('tag_ids');
         $clientIds = $this->idsFromPost('client_ids');
@@ -129,8 +123,6 @@ class ContactController
 
     public function show(): void
     {
-        Auth::requireLogin();
-
         $contact = $this->findContactOrFail((int) ($_GET['id'] ?? 0));
 
         if ($contact === null) {
@@ -151,8 +143,6 @@ class ContactController
 
     public function edit(): void
     {
-        Auth::requirePermission('contacts.edit');
-
         $contact = $this->findContactOrFail((int) ($_GET['id'] ?? 0));
 
         if ($contact === null) {
@@ -178,8 +168,6 @@ class ContactController
 
     public function update(): void
     {
-        Auth::requirePermission('contacts.edit');
-
         $id = (int) ($_POST['id'] ?? 0);
         $contact = $this->findContactOrFail($id);
 
@@ -232,8 +220,6 @@ class ContactController
 
     public function delete(): void
     {
-        Auth::requirePermission('contacts.delete');
-
         $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {
@@ -245,29 +231,23 @@ class ContactController
 
     public function bulkAction(): void
     {
-        Auth::requireLogin();
-
         $contactIds = $this->idsFromPost('contact_ids');
         $action = $_POST['bulk_action'] ?? '';
 
         if (!empty($contactIds)) {
             if ($action === 'delete') {
-                Auth::requirePermission('contacts.delete');
                 $this->contacts->deleteMultiple($contactIds);
             } elseif ($action === 'link_client') {
-                Auth::requirePermission('contacts.edit');
                 $clientIds = $this->idsFromPost('link_client_ids');
                 if (!empty($clientIds)) {
                     $this->contacts->addClientsToContacts($contactIds, $clientIds);
                 }
             } elseif ($action === 'remove_tags') {
-                Auth::requirePermission('contacts.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->entityTags->remove('contact', $contactIds, $tagIds);
                 }
             } else {
-                Auth::requirePermission('contacts.edit');
                 $tagIds = $this->idsFromPost('tag_ids');
                 if (!empty($tagIds)) {
                     $this->entityTags->add('contact', $contactIds, $tagIds);

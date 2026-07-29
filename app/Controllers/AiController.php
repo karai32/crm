@@ -13,13 +13,6 @@ class AiController
 
     public function index(): void
     {
-        Auth::requireLogin();
-
-        if (!Auth::isAdmin()) {
-            http_response_code(403);
-            exit;
-        }
-
         $sort = $this->sortParam(['id', 'full_name', 'email', 'domain', 'domain_contacts'], 'domain');
         $dir  = $this->dirParam('asc');
 

@@ -64,26 +64,32 @@ class Auth
             return false;
         }
 
+        if (!array_key_exists($permission, self::permissionDefinitions())) {
+            return false;
+        }
+
         if (self::isAdmin()) {
             return true;
         }
 
-        if ($permission === 'users.manage') {
-            return false;
-        }
-
         $permissions = self::userPermissions();
 
-        return array_key_exists($permission, $permissions) ? $permissions[$permission] : true;
+        return $permissions[$permission] ?? false;
+    }
+
+    public static function ensureAuthenticated(): bool
+    {
+        if (!self::check()) {
+            self::tryRememberLogin();
+        }
+
+        return self::check();
     }
 
     public static function requireLogin(): void
     {
-        if (!self::check()) {
-            self::tryRememberLogin();
-            if (!self::check()) {
-                self::redirect('/login');
-            }
+        if (!self::ensureAuthenticated()) {
+            self::redirect('/login');
         }
     }
 
@@ -237,7 +243,9 @@ class Auth
             $cache[$userId] = $permissions;
 
             return $permissions;
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+            error_log('Unable to load user permissions: ' . $exception->getMessage());
+            $cache[$userId] = [];
             return [];
         }
     }

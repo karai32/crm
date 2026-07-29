@@ -15,8 +15,6 @@ class SectorController
 
     public function index(): void
     {
-        Auth::requirePermission('sectors.manage');
-
         $sort  = $this->sortParam(['name', 'slug', 'is_active'], 'name');
         $dir   = $this->dirParam('asc');
         $total = $this->sectors->count();
@@ -37,8 +35,6 @@ class SectorController
 
     public function create(): void
     {
-        Auth::requirePermission('sectors.manage');
-
         View::render('sectors/create', [
             'title'  => Lang::get('sectors.create_title'),
             'styles' => ['settings.css'],
@@ -48,8 +44,6 @@ class SectorController
 
     public function store(): void
     {
-        Auth::requirePermission('sectors.manage');
-
         $name = trim($_POST['name'] ?? '');
 
         if ($name === '') {
@@ -68,8 +62,6 @@ class SectorController
 
     public function edit(): void
     {
-        Auth::requirePermission('sectors.manage');
-
         $id = (int) ($_GET['id'] ?? 0);
         $sector = $this->sectors->find($id);
 
@@ -91,8 +83,6 @@ class SectorController
 
     public function update(): void
     {
-        Auth::requirePermission('sectors.manage');
-
         $id = (int) ($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $iconInput = $_POST['icon'] ?? null;
@@ -129,8 +119,6 @@ class SectorController
 
     public function delete(): void
     {
-        Auth::requirePermission('sectors.manage');
-
         $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {

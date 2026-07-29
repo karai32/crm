@@ -19,10 +19,6 @@ class AjaxController
 
     public function globalSearch(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $query = trim($_GET['q'] ?? '');
 
         if ($query === '') {
@@ -66,10 +62,6 @@ class AjaxController
 
     public function clientsSearch(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $q    = trim($_GET['q'] ?? '');
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
@@ -94,10 +86,6 @@ class AjaxController
 
     public function tagsSearch(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $q    = trim($_GET['q'] ?? '');
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
@@ -119,10 +107,6 @@ class AjaxController
 
     public function sectorsSearch(): void
     {
-        if (!$this->guard('sectors.manage')) {
-            return;
-        }
-
         $query = trim($_GET['q'] ?? '');
         $sectors = $this->sectors->search($query);
 
@@ -139,10 +123,6 @@ class AjaxController
 
     public function iconsSearch(): void
     {
-        if (!$this->guard('sectors.manage')) {
-            return;
-        }
-
         $catalog = new PhosphorIconCatalog();
         $query = trim($_GET['q'] ?? '');
 
@@ -151,10 +131,6 @@ class AjaxController
 
     public function clientFieldValues(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $field = trim($_GET['field'] ?? '');
         $q     = trim($_GET['q'] ?? '');
         $page  = max(1, (int) ($_GET['page'] ?? 1));
@@ -170,10 +146,6 @@ class AjaxController
 
     public function customFieldValues(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $fieldId = (int) ($_GET['field_id'] ?? 0);
         if ($fieldId <= 0) {
             $this->json(['items' => [], 'has_more' => false]);
@@ -194,8 +166,6 @@ class AjaxController
 
     public function inspectEmailBatch(): void
     {
-        Auth::requireLogin();
-
         set_time_limit(120);
 
         try {
@@ -231,10 +201,6 @@ class AjaxController
 
     public function geminiCompany(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $contact = $this->contacts->find((int) ($_POST['contact_id'] ?? 0));
         $email = trim((string) ($contact['email'] ?? ''));
 
@@ -334,10 +300,6 @@ class AjaxController
 
     public function saveContactCompany(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $contactId = (int) ($_POST['contact_id'] ?? 0);
         $company = trim((string) ($_POST['company'] ?? ''));
 
@@ -359,10 +321,6 @@ class AjaxController
 
     public function skipContactCompany(): void
     {
-        if (!$this->guard()) {
-            return;
-        }
-
         $contactId = (int) ($_POST['contact_id'] ?? 0);
 
         $contact = $this->contacts->find($contactId);
@@ -391,23 +349,6 @@ class AjaxController
         $config = require $configPath;
 
         return is_array($config) ? trim((string) ($config['api_key'] ?? '')) : '';
-    }
-
-    // JSON-flavoured auth guard: 401 when unauthenticated, 403 when the
-    // optional permission is missing. Returns true when the request may proceed.
-    private function guard(?string $permission = null): bool
-    {
-        if (!Auth::check()) {
-            $this->json(['error' => 'Unauthenticated'], 401);
-            return false;
-        }
-
-        if ($permission !== null && !Auth::can($permission)) {
-            $this->json(['error' => 'Forbidden'], 403);
-            return false;
-        }
-
-        return true;
     }
 
     private function paginatedItems(string $q, int $page, callable $fetch, int $perPage = 20): array

@@ -17,8 +17,6 @@ class ExportController
 
     public function index(): void
     {
-        Auth::requirePermission('exports.use');
-
         $entity = in_array($_GET['entity'] ?? '', ['contacts', 'clients'], true)
             ? $_GET['entity']
             : 'contacts';
@@ -52,8 +50,6 @@ class ExportController
 
     public function download(): void
     {
-        Auth::requirePermission('exports.use');
-
         $entity = in_array($_POST['entity'] ?? '', ['contacts', 'clients'], true)
             ? $_POST['entity']
             : 'contacts';

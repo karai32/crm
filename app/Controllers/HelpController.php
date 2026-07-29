@@ -31,8 +31,6 @@ class HelpController
 
     private function renderTopic(string $topic): void
     {
-        Auth::requireLogin();
-
         [$locale, $content] = $this->localizedContent();
         $navigation = $this->navigation($content);
         $activeIndex = array_search($topic, array_column($navigation, 'id'), true);
@@ -64,8 +62,6 @@ class HelpController
 
     private function renderTechnicalPage(string $section): void
     {
-        Auth::requireLogin();
-
         [$locale, $content] = $this->localizedContent();
         $pages = $content['technical']['pages'];
 
