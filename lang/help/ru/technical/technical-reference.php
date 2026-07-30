@@ -21,7 +21,7 @@ Routes                 public_html/index.php
 Database contract      database/schema.sql + database/migrations/*.sql
 Permissions            app/Core/Auth.php
 API authentication     app/Services/Api/ApiAuthenticator.php
-API protocol/scopes    app/Controllers/Api/ApiController.php
+API protocol/scopes    app/Controllers/ApiController.php
 API resource rules     app/Services/Api/*ApiService.php
 Import fields/types    app/Services/Import/ImportMapping.php
 Help navigation        lang/help/{locale}/index.php

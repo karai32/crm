@@ -109,7 +109,7 @@ require_once __DIR__ . '/../app/Repositories/SettingsRepository.php';
 require_once __DIR__ . '/../app/Controllers/SettingsController.php';
 require_once __DIR__ . '/../app/Services/Api/ApiAuthenticator.php';
 require_once __DIR__ . '/../app/Controllers/ApiKeyController.php';
-require_once __DIR__ . '/../app/Controllers/Api/ApiController.php';
+require_once __DIR__ . '/../app/Controllers/ApiController.php';
 require_once __DIR__ . '/../app/Services/Api/AbstractApiService.php';
 require_once __DIR__ . '/../app/Services/Api/ContactApiService.php';
 require_once __DIR__ . '/../app/Services/Api/ClientApiService.php';
