@@ -1,165 +1,93 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class SectorRepository
 {
     // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function all(string $sort = 'name', string $dir = 'asc'): array
     {
-        $pdo = Database::connect();
-
-        $allowed  = ['name' => 'name', 'slug' => 'slug', 'is_active' => 'is_active'];
-        $orderCol = $allowed[$sort] ?? 'name';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-        $orderSql = $sort === 'is_active'
-            ? "is_active {$orderDir}, name ASC"
-            : "{$orderCol} {$orderDir}";
-
-        $statement = $pdo->prepare("SELECT * FROM sectors ORDER BY {$orderSql}");
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows($this->ordered($sort, $dir));
     }
 
     // int
     public function count(): int
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM sectors');
-        $stmt->execute();
-
-        return (int) ($stmt->fetch()['total'] ?? 0);
+        return Database::table('sectors')->count();
     }
 
     // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function paginate(int $page, int $perPage, string $sort = 'name', string $dir = 'asc'): array
     {
-        $pdo      = Database::connect();
-        $allowed  = ['name' => 'name', 'slug' => 'slug', 'is_active' => 'is_active'];
-        $orderCol = $allowed[$sort] ?? 'name';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-        $orderSql = $sort === 'is_active'
-            ? "is_active {$orderDir}, name ASC"
-            : "{$orderCol} {$orderDir}";
-        $offset   = ($page - 1) * $perPage;
-
-        $stmt = $pdo->prepare("SELECT * FROM sectors ORDER BY {$orderSql} LIMIT :limit OFFSET :offset");
-        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
-        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->ordered($sort, $dir)
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function active(): array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM sectors WHERE is_active = 1 ORDER BY name ASC');
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('sectors')->where('is_active', 1)->orderBy('name')
+        );
     }
 
     // array<{id, name, slug, icon, is_active, created_at, updated_at}>
     public function filter(string $name = '', mixed $isActive = ''): array
     {
-        $pdo = Database::connect();
-        $where = [];
-        $params = [];
-
-        if ($name !== '') {
-            $where[] = 'name LIKE :name';
-            $params['name'] = '%' . $name . '%';
-        }
-        if ($isActive !== '' && $isActive !== null) {
-            $where[] = 'is_active = :is_active';
-            $params['is_active'] = (int) $isActive;
-        }
-
-        $sql = 'SELECT * FROM sectors'
-            . ($where === [] ? '' : ' WHERE ' . implode(' AND ', $where))
-            . ' ORDER BY is_active DESC, name ASC';
-        $statement = $pdo->prepare($sql);
-        $statement->execute($params);
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('sectors')
+                ->when($name !== '', fn (Builder $query) => $query->where('name', 'like', '%' . $name . '%'))
+                ->when(
+                    $isActive !== '' && $isActive !== null,
+                    fn (Builder $query) => $query->where('is_active', (int) $isActive)
+                )
+                ->orderByDesc('is_active')
+                ->orderBy('name')
+        );
     }
 
     // ?{id, name, slug, icon, is_active, created_at, updated_at}
     public function find(int $id): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM sectors WHERE id = :id LIMIT 1');
-        $statement->execute(['id' => $id]);
-        $sector = $statement->fetch();
-
-        return $sector ?: null;
+        return Database::row(Database::table('sectors')->where('id', $id));
     }
 
     // ?{id, name, slug, icon, is_active, created_at, updated_at}
     public function findByName(string $name): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM sectors WHERE name = :name LIMIT 1');
-        $statement->execute(['name' => $name]);
-        $sector = $statement->fetch();
-
-        return $sector ?: null;
+        return Database::row(Database::table('sectors')->where('name', $name));
     }
 
     // array<{id, name, slug, icon, is_active}>
     public function search(string $query, int $limit = 50): array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            SELECT id, name, slug, icon, is_active
-            FROM sectors
-            WHERE name LIKE :query
-               OR slug LIKE :query
-            ORDER BY is_active DESC, name ASC
-            LIMIT :limit
-        ');
-
-        $statement->bindValue('query', '%' . $query . '%');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('sectors')
+                ->select(['id', 'name', 'slug', 'icon', 'is_active'])
+                ->where(fn (Builder $builder) => $builder
+                    ->where('name', 'like', '%' . $query . '%')
+                    ->orWhere('slug', 'like', '%' . $query . '%'))
+                ->orderByDesc('is_active')
+                ->orderBy('name')
+                ->limit($limit)
+        );
     }
 
     public function create(string $name): int
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            INSERT INTO sectors (name, slug, is_active)
-            VALUES (:name, :slug, 1)
-        ');
-
-        $statement->execute([
+        return Database::table('sectors')->insertGetId([
             'name' => $name,
             'slug' => $this->slug($name),
+            'is_active' => 1,
         ]);
-
-        return (int) $pdo->lastInsertId();
     }
 
     public function update(int $id, string $name, int $isActive, ?string $icon = null): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            UPDATE sectors
-            SET name = :name, slug = :slug, icon = :icon, is_active = :is_active
-            WHERE id = :id
-        ');
-
-        $statement->execute([
-            'id' => $id,
+        Database::table('sectors')->where('id', $id)->update([
             'name' => $name,
             'slug' => $this->slug($name),
             'icon' => $icon,
@@ -174,30 +102,26 @@ class SectorRepository
             return;
         }
 
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('DELETE FROM sectors WHERE id = :id');
-        $statement->execute(['id' => $id]);
+        Database::table('sectors')->where('id', $id)->delete();
     }
 
     // int
     public function clientsCount(int $id): int
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT COUNT(*) AS total FROM clients WHERE sector_id = :id');
-        $statement->execute(['id' => $id]);
-        $row = $statement->fetch();
-
-        return (int) ($row['total'] ?? 0);
+        return Database::table('clients')->where('sector_id', $id)->count();
     }
 
     private function deactivate(int $id): void
     {
-        $pdo = Database::connect();
+        Database::table('sectors')->where('id', $id)->update(['is_active' => 0]);
+    }
 
-        $statement = $pdo->prepare('UPDATE sectors SET is_active = 0 WHERE id = :id');
-        $statement->execute(['id' => $id]);
+    private function ordered(string $sort, string $dir): Builder
+    {
+        $column = in_array($sort, ['name', 'slug', 'is_active'], true) ? $sort : 'name';
+        $query = Database::table('sectors')->orderBy($column, $dir === 'asc' ? 'asc' : 'desc');
+
+        return $column === 'is_active' ? $query->orderBy('name') : $query;
     }
 
     private function slug(string $name): string

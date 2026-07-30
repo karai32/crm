@@ -1,14 +1,12 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class ClientRepository
 {
     // array<{id, commercial_name, legal_name, city, province, country, is_web_connected, is_active, created_at, updated_at, sector_id, sector_name, sector_icon}>
     public function paginate(int $page, int $perPage, array $filters = [], string $sort = 'id', string $dir = 'desc'): array
     {
-        $pdo = Database::connect();
-        $offset = ($page - 1) * $perPage;
-        [$whereSql, $params] = $this->buildFilterSql($filters);
-
         $allowed  = [
             'id'              => 'clients.id',
             'commercial_name' => 'clients.commercial_name',
@@ -19,93 +17,60 @@ class ClientRepository
             'created_at'      => 'clients.created_at',
             'is_active'       => 'clients.is_active',
         ];
-        $orderCol = $allowed[$sort] ?? 'clients.id';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-
-        $sql = "
-            SELECT clients.id, clients.commercial_name, clients.legal_name, clients.city,
-                   clients.province, clients.country, clients.is_web_connected, clients.is_active,
-                   clients.created_at, clients.updated_at, clients.sector_id,
-                   sectors.name AS sector_name,
-                   sectors.icon AS sector_icon
-            FROM clients
-            LEFT JOIN sectors ON sectors.id = clients.sector_id
-            {$whereSql}
-            ORDER BY {$orderCol} {$orderDir}
-            LIMIT :limit OFFSET :offset
-        ";
-
-        $statement = $pdo->prepare($sql);
-        foreach ($params as $name => $value) {
-            $statement->bindValue($name, $value);
-        }
-        $statement->bindValue('limit', $perPage, PDO::PARAM_INT);
-        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            $this->filtered($filters)
+                ->leftJoin('sectors', 'sectors.id', '=', 'clients.sector_id')
+                ->select([
+                    'clients.id',
+                    'clients.commercial_name',
+                    'clients.legal_name',
+                    'clients.city',
+                    'clients.province',
+                    'clients.country',
+                    'clients.is_web_connected',
+                    'clients.is_active',
+                    'clients.created_at',
+                    'clients.updated_at',
+                    'clients.sector_id',
+                    'sectors.name AS sector_name',
+                    'sectors.icon AS sector_icon',
+                ])
+                ->orderBy($allowed[$sort] ?? 'clients.id', $dir === 'asc' ? 'asc' : 'desc')
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     // int
     public function countAll(array $filters = []): int
     {
-        $pdo = Database::connect();
-        [$whereSql, $params] = $this->buildFilterSql($filters);
-
-        $statement = $pdo->prepare("SELECT COUNT(*) AS total FROM clients {$whereSql}");
-        foreach ($params as $name => $value) {
-            $statement->bindValue($name, $value);
-        }
-        $statement->execute();
-        $row = $statement->fetch();
-
-        return (int) ($row['total'] ?? 0);
+        return $this->filtered($filters)->count();
     }
 
     // ?{id, sector_id, commercial_name, legal_name, cif, address, postal_code, city, province, country, website, notes, is_web_connected, is_web_connected_date, is_active, is_active_date, created_by, updated_by, created_at, updated_at, sector_name}
     public function find(int $id): ?array
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT clients.*, sectors.name AS sector_name
-            FROM clients
-            LEFT JOIN sectors ON sectors.id = clients.sector_id
-            WHERE clients.id = :id
-            LIMIT 1
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['id' => $id]);
-        $client = $statement->fetch();
-
-        return $client ?: null;
+        return Database::row(
+            Database::table('clients')
+                ->leftJoin('sectors', 'sectors.id', '=', 'clients.sector_id')
+                ->select('clients.*')
+                ->addSelect('sectors.name AS sector_name')
+                ->where('clients.id', $id)
+        );
     }
 
     // ?{id, sector_id, commercial_name, legal_name, cif, address, postal_code, city, province, country, website, notes, is_web_connected, is_web_connected_date, is_active, is_active_date, created_by, updated_by, created_at, updated_at}
     public function findByCommercialName(string $name): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM clients WHERE commercial_name = :name LIMIT 1');
-        $statement->execute(['name' => trim($name)]);
-        $client = $statement->fetch();
-
-        return $client ?: null;
+        return Database::row(Database::table('clients')->where('commercial_name', trim($name)));
     }
 
     public function commercialNameTakenByOther(string $name, int $excludeId): bool
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            SELECT id
-            FROM clients
-            WHERE commercial_name = :name AND id != :id
-            LIMIT 1
-        ');
-        $statement->execute(['name' => trim($name), 'id' => $excludeId]);
-
-        return (bool) $statement->fetch();
+        return Database::table('clients')
+            ->where('commercial_name', trim($name))
+            ->where('id', '!=', $excludeId)
+            ->exists();
     }
 
     // array<{id, name}>
@@ -116,78 +81,49 @@ class ClientRepository
             return [];
         }
 
-        $pdo = Database::connect();
-        $where = "{$field} IS NOT NULL AND {$field} != ''";
-        $params = [];
-
-        if ($query !== '') {
-            $where .= " AND {$field} LIKE :query";
-            $params[':query'] = '%' . $query . '%';
-        }
-
-        $sql = "SELECT DISTINCT {$field} AS val FROM clients WHERE {$where} ORDER BY {$field} ASC LIMIT :limit OFFSET :offset";
-        $statement = $pdo->prepare($sql);
-        foreach ($params as $k => $v) {
-            $statement->bindValue($k, $v);
-        }
-        $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-
         return array_map(
-            fn ($row) => ['id' => $row['val'], 'name' => $row['val']],
-            $statement->fetchAll()
+            static fn (array $row): array => ['id' => $row['val'], 'name' => $row['val']],
+            Database::rows(
+                Database::table('clients')
+                    ->distinct()
+                    ->select("{$field} AS val")
+                    ->whereNotNull($field)
+                    ->where($field, '!=', '')
+                    ->when($query !== '', fn (Builder $builder) => $builder->where($field, 'like', '%' . $query . '%'))
+                    ->orderBy($field)
+                    ->limit($limit)
+                    ->offset($offset)
+            )
         );
     }
 
     // array<{id, commercial_name, legal_name}>
     public function search(string $query, int $limit = 20, int $offset = 0): array
     {
-        $pdo = Database::connect();
+        $like = '%' . $query . '%';
 
-        $sql = "
-            SELECT id, commercial_name, legal_name
-            FROM clients
-            WHERE commercial_name LIKE :query
-               OR legal_name LIKE :query
-            ORDER BY commercial_name ASC
-            LIMIT :limit OFFSET :offset
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->bindValue('query', '%' . $query . '%');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('clients')
+                ->select(['id', 'commercial_name', 'legal_name'])
+                ->where(fn (Builder $builder) => $builder
+                    ->where('commercial_name', 'like', $like)
+                    ->orWhere('legal_name', 'like', $like))
+                ->orderBy('commercial_name')
+                ->limit($limit)
+                ->offset($offset)
+        );
     }
 
     public function create(array $data): int
     {
-        $pdo = Database::connect();
         $data['is_web_connected'] = (int) (bool) ($data['is_web_connected'] ?? false);
         $data['is_active'] = (int) (bool) ($data['is_active'] ?? true);
 
-        $sql = "
-            INSERT INTO clients (
-                commercial_name, legal_name, cif, address, postal_code, city,
-                province, country, sector_id, website, notes, is_web_connected, is_active
-            ) VALUES (
-                :commercial_name, :legal_name, :cif, :address, :postal_code, :city,
-                :province, :country, :sector_id, :website, :notes, :is_web_connected, :is_active
-            )
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute($data);
-
-        return (int) $pdo->lastInsertId();
+        return Database::table('clients')->insertGetId($data);
     }
 
     public function update(int $id, array $data): void
     {
-        $pdo     = Database::connect();
         $current = $this->find($id);
         $now     = date('Y-m-d H:i:s');
 
@@ -200,38 +136,19 @@ class ClientRepository
         $data['is_active_date'] = ($current && (int) ($data['is_active'] ?? $current['is_active']) !== (int) $current['is_active'])
             ? $now : null;
 
-        $sql = "
-            UPDATE clients
-            SET commercial_name       = :commercial_name,
-                legal_name            = :legal_name,
-                cif                   = :cif,
-                address               = :address,
-                postal_code           = :postal_code,
-                city                  = :city,
-                province              = :province,
-                country               = :country,
-                sector_id             = :sector_id,
-                website               = :website,
-                notes                 = :notes,
-                is_web_connected      = :is_web_connected,
-                is_active             = :is_active,
-                is_web_connected_date = COALESCE(:is_web_connected_date, is_web_connected_date),
-                is_active_date        = COALESCE(:is_active_date, is_active_date)
-            WHERE id = :id
-        ";
+        if ($data['is_web_connected_date'] === null) {
+            unset($data['is_web_connected_date']);
+        }
+        if ($data['is_active_date'] === null) {
+            unset($data['is_active_date']);
+        }
 
-        $data['id'] = $id;
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute($data);
+        Database::table('clients')->where('id', $id)->update($data);
     }
 
     public function delete(int $id): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('DELETE FROM clients WHERE id = :id');
-        $statement->execute(['id' => $id]);
+        Database::table('clients')->where('id', $id)->delete();
     }
 
     public function deleteMultiple(array $ids): void
@@ -242,29 +159,20 @@ class ClientRepository
             return;
         }
 
-        $pdo = Database::connect();
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $statement = $pdo->prepare("DELETE FROM clients WHERE id IN ($placeholders)");
-        $statement->execute($ids);
+        Database::table('clients')->whereIn('id', $ids)->delete();
     }
 
     // array<{id, full_name, email, is_corporate_email, email_status, phone, company, created_by, updated_by, created_at, updated_at, relation_label, is_primary}>
     public function contactsForClient(int $clientId): array
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT contacts.*, client_contacts.relation_label, client_contacts.is_primary
-            FROM contacts
-            INNER JOIN client_contacts ON client_contacts.contact_id = contacts.id
-            WHERE client_contacts.client_id = :client_id
-            ORDER BY contacts.full_name ASC
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['client_id' => $clientId]);
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('contacts')
+                ->join('client_contacts', 'client_contacts.contact_id', '=', 'contacts.id')
+                ->select('contacts.*')
+                ->addSelect(['client_contacts.relation_label', 'client_contacts.is_primary'])
+                ->where('client_contacts.client_id', $clientId)
+                ->orderBy('contacts.full_name')
+        );
     }
 
     public function addContacts(int $clientId, array $contactIds): void
@@ -273,86 +181,58 @@ class ClientRepository
             return;
         }
 
-        $pdo = Database::connect();
-        $insert = $pdo->prepare('
-            INSERT IGNORE INTO client_contacts (client_id, contact_id)
-            VALUES (:client_id, :contact_id)
-        ');
-
-        foreach ($contactIds as $contactId) {
-            $insert->execute([
-                'client_id' => $clientId,
-                'contact_id' => $contactId,
-            ]);
-        }
+        Database::table('client_contacts')->insertOrIgnore(array_map(
+            static fn (int $contactId): array => ['client_id' => $clientId, 'contact_id' => $contactId],
+            $contactIds
+        ));
     }
 
-    private function buildFilterSql(array $filters): array
+    private function filtered(array $filters): Builder
     {
-        $where = [];
-        $params = [];
+        $query = Database::table('clients');
 
         if (isset($filters['is_web_connected']) && $filters['is_web_connected'] !== '') {
-            $where[] = 'clients.is_web_connected = :is_web_connected';
-            $params['is_web_connected'] = (int) $filters['is_web_connected'];
+            $query->where('clients.is_web_connected', (int) $filters['is_web_connected']);
         }
 
         if (isset($filters['is_active']) && $filters['is_active'] !== '') {
-            $where[] = 'clients.is_active = :is_active';
-            $params['is_active'] = (int) $filters['is_active'];
+            $query->where('clients.is_active', (int) $filters['is_active']);
         }
 
         foreach (['commercial_name', 'legal_name', 'city', 'province', 'country', 'address', 'website'] as $field) {
             if (!empty($filters[$field])) {
-                $where[] = "clients.{$field} LIKE :{$field}";
-                $params[$field] = '%' . $filters[$field] . '%';
+                $query->where("clients.{$field}", 'like', '%' . $filters[$field] . '%');
             }
         }
 
         if (!empty($filters['sector_id'])) {
-            $where[] = 'clients.sector_id = :sector_id';
-            $params['sector_id'] = (int) $filters['sector_id'];
+            $query->where('clients.sector_id', (int) $filters['sector_id']);
         }
 
         $tagIds = $this->cleanTagFilterIds($filters);
 
         if (!empty($tagIds)) {
-            $tagPlaceholders = [];
-
-            foreach ($tagIds as $index => $tagId) {
-                $paramName = 'tag_id_' . $index;
-                $tagPlaceholders[] = ':' . $paramName;
-                $params[$paramName] = $tagId;
-            }
-
-            $where[] = '
-                EXISTS (
-                    SELECT 1
-                    FROM client_tags
-                    WHERE client_tags.client_id = clients.id
-                    AND client_tags.tag_id IN (' . implode(',', $tagPlaceholders) . ')
-                )
-            ';
+            $query->whereExists(fn (Builder $tags) => $tags
+                ->selectRaw('1')
+                ->from('client_tags')
+                ->whereColumn('client_tags.client_id', 'clients.id')
+                ->whereIn('client_tags.tag_id', $tagIds));
         }
 
         if (!empty($filters['created_from'])) {
-            $where[] = 'clients.created_at >= :created_from';
-            $params['created_from'] = $filters['created_from'] . ' 00:00:00';
+            $query->where('clients.created_at', '>=', $filters['created_from'] . ' 00:00:00');
         }
 
         if (!empty($filters['created_to'])) {
-            $where[] = 'clients.created_at <= :created_to';
-            $params['created_to'] = $filters['created_to'] . ' 23:59:59';
+            $query->where('clients.created_at', '<=', $filters['created_to'] . ' 23:59:59');
         }
 
         if (!empty($filters['updated_from'])) {
-            $where[] = 'clients.updated_at >= :updated_from';
-            $params['updated_from'] = $filters['updated_from'] . ' 00:00:00';
+            $query->where('clients.updated_at', '>=', $filters['updated_from'] . ' 00:00:00');
         }
 
         if (!empty($filters['updated_to'])) {
-            $where[] = 'clients.updated_at <= :updated_to';
-            $params['updated_to'] = $filters['updated_to'] . ' 23:59:59';
+            $query->where('clients.updated_at', '<=', $filters['updated_to'] . ' 23:59:59');
         }
 
         foreach (($filters['custom_fields'] ?? []) as $fieldId => $value) {
@@ -363,37 +243,21 @@ class ClientRepository
                 continue;
             }
 
-            $fp  = 'custom_field_' . $fieldId;
-            $tp  = 'custom_value_text_' . $fieldId;
-            $np  = 'custom_value_number_' . $fieldId;
-            $dp  = 'custom_value_date_' . $fieldId;
-            $bp  = 'custom_value_bool_' . $fieldId;
-
-            $where[] = "
-                EXISTS (
-                    SELECT 1 FROM custom_field_values
-                    WHERE custom_field_values.entity_type = 'client'
-                    AND custom_field_values.entity_id = clients.id
-                    AND custom_field_values.field_id = :{$fp}
-                    AND (
-                        custom_field_values.value_text LIKE :{$tp}
-                        OR CAST(custom_field_values.value_number AS CHAR) LIKE :{$np}
-                        OR CAST(custom_field_values.value_date AS CHAR) LIKE :{$dp}
-                        OR CAST(custom_field_values.value_bool AS CHAR) LIKE :{$bp}
-                    )
-                )
-            ";
-            $params[$fp] = $fieldId;
-            $params[$tp] = '%' . $value . '%';
-            $params[$np] = '%' . $value . '%';
-            $params[$dp] = '%' . $value . '%';
-            $params[$bp] = '%' . $value . '%';
+            $like = '%' . $value . '%';
+            $query->whereExists(fn (Builder $values) => $values
+                ->selectRaw('1')
+                ->from('custom_field_values')
+                ->where('custom_field_values.entity_type', 'client')
+                ->whereColumn('custom_field_values.entity_id', 'clients.id')
+                ->where('custom_field_values.field_id', $fieldId)
+                ->where(fn (Builder $match) => $match
+                    ->where('custom_field_values.value_text', 'like', $like)
+                    ->orWhereRaw('CAST(custom_field_values.value_number AS CHAR) LIKE ?', [$like])
+                    ->orWhereRaw('CAST(custom_field_values.value_date AS CHAR) LIKE ?', [$like])
+                    ->orWhereRaw('CAST(custom_field_values.value_bool AS CHAR) LIKE ?', [$like])));
         }
 
-        return [
-            empty($where) ? '' : 'WHERE ' . implode(' AND ', $where),
-            $params,
-        ];
+        return $query;
     }
 
     private function cleanTagFilterIds(array $filters): array

@@ -1,68 +1,29 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class ImportRepository
 {
     // array<{id, user_id, original_filename, stored_filename, file_type, entity_type, status, total_rows, imported_rows, skipped_rows, error_rows, field_mapping, started_at, finished_at, created_at, user_name}>
     public function allBatches(string $sort = 'id', string $dir = 'desc'): array
     {
-        $pdo = Database::connect();
-        $allowed = [
-            'id'                => 'import_batches.id',
-            'original_filename' => 'import_batches.original_filename',
-            'entity_type'       => 'import_batches.entity_type',
-            'status'            => 'import_batches.status',
-        ];
-        $orderCol = $allowed[$sort] ?? 'import_batches.id';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-
-        $statement = $pdo->prepare("
-            SELECT import_batches.*, users.name AS user_name
-            FROM import_batches
-            LEFT JOIN users ON users.id = import_batches.user_id
-            ORDER BY {$orderCol} {$orderDir}
-            LIMIT 50
-        ");
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows($this->orderedBatches($sort, $dir)->limit(50));
     }
 
     // int
     public function countBatches(): int
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM import_batches');
-        $stmt->execute();
-
-        return (int) ($stmt->fetch()['total'] ?? 0);
+        return Database::table('import_batches')->count();
     }
 
     // array<{id, user_id, original_filename, stored_filename, file_type, entity_type, status, total_rows, imported_rows, skipped_rows, error_rows, field_mapping, started_at, finished_at, created_at, user_name}>
     public function paginateBatches(int $page, int $perPage, string $sort = 'id', string $dir = 'desc'): array
     {
-        $pdo     = Database::connect();
-        $allowed = [
-            'id'                => 'import_batches.id',
-            'original_filename' => 'import_batches.original_filename',
-            'entity_type'       => 'import_batches.entity_type',
-            'status'            => 'import_batches.status',
-        ];
-        $orderCol = $allowed[$sort] ?? 'import_batches.id';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-        $offset   = ($page - 1) * $perPage;
-
-        $stmt = $pdo->prepare("
-            SELECT import_batches.*, users.name AS user_name
-            FROM import_batches
-            LEFT JOIN users ON users.id = import_batches.user_id
-            ORDER BY {$orderCol} {$orderDir}
-            LIMIT :limit OFFSET :offset
-        ");
-        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
-        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->orderedBatches($sort, $dir)
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     public function createBatch(
@@ -73,14 +34,7 @@ class ImportRepository
         string $entityType
     ): int
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            INSERT INTO import_batches (user_id, original_filename, stored_filename, file_type, entity_type, status)
-            VALUES (:user_id, :original_filename, :stored_filename, :file_type, :entity_type, :status)
-        ');
-
-        $statement->execute([
+        return Database::table('import_batches')->insertGetId([
             'user_id' => $userId,
             'original_filename' => $originalFilename,
             'stored_filename' => $storedFilename,
@@ -88,52 +42,32 @@ class ImportRepository
             'entity_type' => $entityType,
             'status' => 'uploaded',
         ]);
-
-        return (int) $pdo->lastInsertId();
     }
 
     // ?{id, user_id, original_filename, stored_filename, file_type, entity_type, status, total_rows, imported_rows, skipped_rows, error_rows, field_mapping, started_at, finished_at, created_at}
     public function findBatch(int $id): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM import_batches WHERE id = :id LIMIT 1');
-        $statement->execute(['id' => $id]);
-        $batch = $statement->fetch();
-
-        return $batch ?: null;
+        return Database::row(Database::table('import_batches')->where('id', $id));
     }
 
     // array<{id, import_batch_id, import_row_id, row_number, error_message, created_at, raw_data}>
     public function errorsForBatch(int $batchId): array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            SELECT import_errors.*, import_rows.raw_data
-            FROM import_errors
-            LEFT JOIN import_rows ON import_rows.id = import_errors.import_row_id
-            WHERE import_errors.import_batch_id = :batch_id
-            ORDER BY import_errors.`row_number` ASC, import_errors.id ASC
-            LIMIT 500
-        ');
-        $statement->execute(['batch_id' => $batchId]);
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('import_errors')
+                ->leftJoin('import_rows', 'import_rows.id', '=', 'import_errors.import_row_id')
+                ->select('import_errors.*')
+                ->addSelect('import_rows.raw_data')
+                ->where('import_errors.import_batch_id', $batchId)
+                ->orderBy('import_errors.row_number')
+                ->orderBy('import_errors.id')
+                ->limit(500)
+        );
     }
 
     public function markPreviewed(int $id, int $totalRows, array $fieldMapping): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            UPDATE import_batches
-            SET status = :status, total_rows = :total_rows, field_mapping = :field_mapping
-            WHERE id = :id
-        ');
-
-        $statement->execute([
-            'id' => $id,
+        Database::table('import_batches')->where('id', $id)->update([
             'status' => 'previewed',
             'total_rows' => $totalRows,
             'field_mapping' => json_encode($fieldMapping),
@@ -142,16 +76,7 @@ class ImportRepository
 
     public function updateMapping(int $id, int $totalRows, array $fieldMapping): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            UPDATE import_batches
-            SET total_rows = :total_rows, field_mapping = :field_mapping
-            WHERE id = :id
-        ');
-
-        $statement->execute([
-            'id' => $id,
+        Database::table('import_batches')->where('id', $id)->update([
             'total_rows' => $totalRows,
             'field_mapping' => json_encode($fieldMapping),
         ]);
@@ -159,28 +84,19 @@ class ImportRepository
 
     public function claimForProcessing(int $id): bool
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            UPDATE import_batches
-            SET status = :status, started_at = NOW()
-            WHERE id = :id AND status IN (\'uploaded\', \'previewed\')
-        ');
-
-        $statement->execute([
-            'id' => $id,
-            'status' => 'processing',
-        ]);
-
-        return $statement->rowCount() === 1;
+        return Database::table('import_batches')
+            ->where('id', $id)
+            ->whereIn('status', ['uploaded', 'previewed'])
+            ->update([
+                'status' => 'processing',
+                'started_at' => Database::raw('CURRENT_TIMESTAMP'),
+            ]) === 1;
     }
 
     public function clearBatchDetails(int $id): void
     {
-        $pdo = Database::connect();
-
-        $pdo->prepare('DELETE FROM import_errors WHERE import_batch_id = :id')->execute(['id' => $id]);
-        $pdo->prepare('DELETE FROM import_rows WHERE import_batch_id = :id')->execute(['id' => $id]);
+        Database::table('import_errors')->where('import_batch_id', $id)->delete();
+        Database::table('import_rows')->where('import_batch_id', $id)->delete();
     }
 
     public function finishBatch(int $id, int $totalRows, int $importedRows, int $skippedRows, int $errorRows): void
@@ -202,25 +118,13 @@ class ImportRepository
         int $skippedRows,
         int $errorRows
     ): void {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            UPDATE import_batches
-            SET status = :status,
-                total_rows = :total_rows,
-                imported_rows = :imported_rows,
-                skipped_rows = :skipped_rows,
-                error_rows = :error_rows,
-                finished_at = NOW()
-            WHERE id = :id
-        ');
-
-        $statement->execute([
-            'id' => $id,
+        Database::table('import_batches')->where('id', $id)->update([
             'status' => $status,
             'total_rows' => $totalRows,
             'imported_rows' => $importedRows,
             'skipped_rows' => $skippedRows,
             'error_rows' => $errorRows,
+            'finished_at' => Database::raw('CURRENT_TIMESTAMP'),
         ]);
     }
 
@@ -232,35 +136,39 @@ class ImportRepository
         string $message
     ): void
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            INSERT INTO import_rows (import_batch_id, `row_number`, raw_data, status, message)
-            VALUES (:import_batch_id, :row_number, :raw_data, :status, :message)
-        ');
-        $statement->execute([
+        $rowId = Database::table('import_rows')->insertGetId([
             'import_batch_id' => $batchId,
             'row_number' => $rowNumber,
             'raw_data' => json_encode($rawData, JSON_UNESCAPED_UNICODE),
             'status' => $status,
             'message' => $message,
         ]);
-        $this->createError($batchId, (int) $pdo->lastInsertId(), $rowNumber, $message);
+        $this->createError($batchId, $rowId, $rowNumber, $message);
     }
 
     public function createError(int $batchId, ?int $rowId, ?int $rowNumber, string $message): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            INSERT INTO import_errors (import_batch_id, import_row_id, `row_number`, error_message)
-            VALUES (:import_batch_id, :import_row_id, :row_number, :error_message)
-        ');
-
-        $statement->execute([
+        Database::table('import_errors')->insert([
             'import_batch_id' => $batchId,
             'import_row_id' => $rowId,
             'row_number' => $rowNumber,
             'error_message' => $message,
         ]);
+    }
+
+    private function orderedBatches(string $sort, string $dir): Builder
+    {
+        $allowed = [
+            'id' => 'import_batches.id',
+            'original_filename' => 'import_batches.original_filename',
+            'entity_type' => 'import_batches.entity_type',
+            'status' => 'import_batches.status',
+        ];
+
+        return Database::table('import_batches')
+            ->leftJoin('users', 'users.id', '=', 'import_batches.user_id')
+            ->select('import_batches.*')
+            ->addSelect('users.name AS user_name')
+            ->orderBy($allowed[$sort] ?? 'import_batches.id', $dir === 'asc' ? 'asc' : 'desc');
     }
 }

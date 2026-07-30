@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class ExportRepository
 {
     public function start(
@@ -11,17 +13,7 @@ class ExportRepository
         string $fileName
     ): int
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            INSERT INTO export_batches (
-                user_id, entity_type, file_type, stored_filename, filters, selected_fields, status
-            ) VALUES (
-                :user_id, :entity_type, :file_type, :stored_filename, :filters, :selected_fields, :status
-            )
-        ');
-
-        $statement->execute([
+        return Database::table('export_batches')->insertGetId([
             'user_id'         => $userId,
             'entity_type'     => $entityType,
             'file_type'       => $fileType,
@@ -30,89 +22,59 @@ class ExportRepository
             'selected_fields' => json_encode($fields),
             'status'          => 'processing',
         ]);
-
-        return (int) $pdo->lastInsertId();
     }
 
     public function complete(int $id, int $totalRows): void
     {
-        $statement = Database::connect()->prepare('
-            UPDATE export_batches
-            SET status = :status, total_rows = :total_rows, finished_at = NOW()
-            WHERE id = :id
-        ');
-        $statement->execute(['id' => $id, 'status' => 'completed', 'total_rows' => $totalRows]);
+        Database::table('export_batches')->where('id', $id)->update([
+            'status' => 'completed',
+            'total_rows' => $totalRows,
+            'finished_at' => Database::raw('CURRENT_TIMESTAMP'),
+        ]);
     }
 
     public function fail(int $id): void
     {
-        $statement = Database::connect()->prepare('
-            UPDATE export_batches
-            SET status = :status, finished_at = NOW()
-            WHERE id = :id
-        ');
-        $statement->execute(['id' => $id, 'status' => 'failed']);
+        Database::table('export_batches')->where('id', $id)->update([
+            'status' => 'failed',
+            'finished_at' => Database::raw('CURRENT_TIMESTAMP'),
+        ]);
     }
 
     // int
     public function count(): int
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM export_batches');
-        $stmt->execute();
-
-        return (int) ($stmt->fetch()['total'] ?? 0);
+        return Database::table('export_batches')->count();
     }
 
     // array<{id, user_id, file_type, entity_type, stored_filename, filters, selected_fields, total_rows, status, created_at, finished_at, user_name}>
     public function paginate(int $page, int $perPage, string $sort = 'id', string $dir = 'desc'): array
     {
-        $pdo     = Database::connect();
-        $allowed = [
-            'id'              => 'eb.id',
-            'entity_type'     => 'eb.entity_type',
-            'stored_filename' => 'eb.stored_filename',
-        ];
-        $orderCol = $allowed[$sort] ?? 'eb.id';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-        $offset   = ($page - 1) * $perPage;
-
-        $stmt = $pdo->prepare("
-            SELECT eb.*, u.name AS user_name
-            FROM export_batches eb
-            LEFT JOIN users u ON u.id = eb.user_id
-            ORDER BY {$orderCol} {$orderDir}
-            LIMIT :limit OFFSET :offset
-        ");
-        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
-        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->ordered($sort, $dir)
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     // array<{id, user_id, file_type, entity_type, stored_filename, filters, selected_fields, total_rows, status, created_at, finished_at, user_name}>
     public function recentExports(int $limit = 15, string $sort = 'id', string $dir = 'desc'): array
     {
-        $pdo = Database::connect();
+        return Database::rows($this->ordered($sort, $dir)->limit($limit));
+    }
+
+    private function ordered(string $sort, string $dir): Builder
+    {
         $allowed = [
-            'id'              => 'eb.id',
-            'entity_type'     => 'eb.entity_type',
+            'id' => 'eb.id',
+            'entity_type' => 'eb.entity_type',
             'stored_filename' => 'eb.stored_filename',
         ];
-        $orderCol = $allowed[$sort] ?? 'eb.id';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
 
-        $statement = $pdo->prepare("
-            SELECT eb.*, u.name AS user_name
-            FROM export_batches eb
-            LEFT JOIN users u ON u.id = eb.user_id
-            ORDER BY {$orderCol} {$orderDir}
-            LIMIT :limit
-        ");
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::table('export_batches as eb')
+            ->leftJoin('users as u', 'u.id', '=', 'eb.user_id')
+            ->select('eb.*')
+            ->addSelect('u.name AS user_name')
+            ->orderBy($allowed[$sort] ?? 'eb.id', $dir === 'asc' ? 'asc' : 'desc');
     }
 }

@@ -1,234 +1,143 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class CustomFieldRepository
 {
     // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}>
     public function all(string $sort = 'entity_type', string $dir = 'asc'): array
     {
-        $pdo = Database::connect();
-        $allowed = [
-            'entity_type' => 'entity_type',
-            'name'        => 'name',
-            'slug'        => 'slug',
-            'field_type'  => 'field_type',
-        ];
-        $orderCol = $allowed[$sort] ?? 'entity_type';
-        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
-        $statement = $pdo->prepare("SELECT * FROM custom_fields ORDER BY {$orderCol} {$orderDir}");
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows($this->ordered($sort, $dir));
     }
 
     // int
     public function count(): int
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM custom_fields');
-        $stmt->execute();
-
-        return (int) ($stmt->fetch()['total'] ?? 0);
+        return Database::table('custom_fields')->count();
     }
 
     // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}>
     public function paginate(int $page, int $perPage, string $sort = 'entity_type', string $dir = 'asc'): array
     {
-        $pdo     = Database::connect();
-        $allowed = ['entity_type' => 'entity_type', 'name' => 'name', 'slug' => 'slug', 'field_type' => 'field_type'];
-        $orderCol = $allowed[$sort] ?? 'entity_type';
-        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
-        $offset   = ($page - 1) * $perPage;
-
-        $stmt = $pdo->prepare("SELECT * FROM custom_fields ORDER BY {$orderCol} {$orderDir} LIMIT :limit OFFSET :offset");
-        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
-        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->ordered($sort, $dir)
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     // ?{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}
     public function find(int $id): ?array
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('SELECT * FROM custom_fields WHERE id = :id LIMIT 1');
-        $statement->execute(['id' => $id]);
-        $field = $statement->fetch();
-
-        return $field ?: null;
+        return Database::row(Database::table('custom_fields')->where('id', $id));
     }
 
     // ?{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at}
     public function findByEntityAndSlug(string $entityType, string $slug): ?array
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            SELECT *
-            FROM custom_fields
-            WHERE entity_type = :entity_type AND slug = :slug
-            LIMIT 1
-        ');
-        $statement->execute([
-            'entity_type' => $entityType,
-            'slug' => $slug,
-        ]);
-        $field = $statement->fetch();
-
-        return $field ?: null;
+        return Database::row(
+            Database::table('custom_fields')->where('entity_type', $entityType)->where('slug', $slug)
+        );
     }
 
     public function create(array $data): int
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            INSERT INTO custom_fields (entity_type, name, slug, field_type, is_required, is_filterable, sort_order, default_value)
-            VALUES (:entity_type, :name, :slug, :field_type, :is_required, :is_filterable, :sort_order, :default_value)
-        ');
-        $statement->execute($data);
-
-        return (int) $pdo->lastInsertId();
+        return Database::table('custom_fields')->insertGetId($data);
     }
 
     public function update(int $id, array $data): void
     {
-        $pdo = Database::connect();
-        $data['id'] = $id;
-
-        $statement = $pdo->prepare('
-            UPDATE custom_fields
-            SET entity_type = :entity_type,
-                name = :name,
-                slug = :slug,
-                field_type = :field_type,
-                is_required = :is_required,
-                is_filterable = :is_filterable,
-                sort_order = :sort_order,
-                default_value = :default_value
-            WHERE id = :id
-        ');
-        $statement->execute($data);
+        Database::table('custom_fields')->where('id', $id)->update($data);
     }
 
     public function delete(int $id): void
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('DELETE FROM custom_fields WHERE id = :id');
-        $statement->execute(['id' => $id]);
+        Database::table('custom_fields')->where('id', $id)->delete();
     }
 
     public function setOptions(int $fieldId, array $options): void
     {
-        $pdo = Database::connect();
-        $pdo->prepare('DELETE FROM custom_field_options WHERE field_id = :field_id')->execute(['field_id' => $fieldId]);
+        Database::table('custom_field_options')->where('field_id', $fieldId)->delete();
 
-        $insert = $pdo->prepare('
-            INSERT INTO custom_field_options (field_id, value, label, sort_order)
-            VALUES (:field_id, :value, :label, :sort_order)
-        ');
-
-        foreach (array_values($options) as $index => $option) {
-            $insert->execute([
-                'field_id' => $fieldId,
-                'value' => $option,
-                'label' => $option,
-                'sort_order' => $index,
-            ]);
+        if ($options !== []) {
+            Database::table('custom_field_options')->insert(array_map(
+                static fn (string $option, int $index): array => [
+                    'field_id' => $fieldId,
+                    'value' => $option,
+                    'label' => $option,
+                    'sort_order' => $index,
+                ],
+                array_values($options),
+                array_keys(array_values($options))
+            ));
         }
     }
 
     // array<{id, field_id, value, label, sort_order, created_at}>
     public function optionsForField(int $fieldId): array
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('SELECT * FROM custom_field_options WHERE field_id = :field_id ORDER BY sort_order ASC, label ASC');
-        $statement->execute(['field_id' => $fieldId]);
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('custom_field_options')
+                ->where('field_id', $fieldId)
+                ->orderBy('sort_order')
+                ->orderBy('label')
+        );
     }
 
     // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at, options}>
     public function fieldsForEntity(string $entityType): array
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('SELECT * FROM custom_fields WHERE entity_type = :entity_type ORDER BY sort_order ASC, name ASC');
-        $statement->execute(['entity_type' => $entityType]);
-        $fields = $statement->fetchAll();
-
-        foreach ($fields as $index => $field) {
-            $fields[$index]['options'] = $field['field_type'] === 'select'
-                ? $this->optionsForField((int) $field['id'])
-                : [];
-        }
-
-        return $fields;
+        return $this->withOptions(Database::rows(
+            Database::table('custom_fields')
+                ->where('entity_type', $entityType)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+        ));
     }
 
     // array<{id, entity_type, name, slug, field_type, is_required, is_filterable, default_value, sort_order, created_at, updated_at, options}>
     public function filterableFieldsForEntity(string $entityType): array
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            SELECT *
-            FROM custom_fields
-            WHERE entity_type = :entity_type AND is_filterable = 1
-            ORDER BY sort_order ASC, name ASC
-        ');
-        $statement->execute(['entity_type' => $entityType]);
-        $fields = $statement->fetchAll();
-
-        foreach ($fields as $index => $field) {
-            $fields[$index]['options'] = $field['field_type'] === 'select'
-                ? $this->optionsForField((int) $field['id'])
-                : [];
-        }
-
-        return $fields;
+        return $this->withOptions(Database::rows(
+            Database::table('custom_fields')
+                ->where('entity_type', $entityType)
+                ->where('is_filterable', 1)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+        ));
     }
 
     // array<{id, name}>
     public function distinctTextValues(int $fieldId, string $query = '', int $limit = 20, int $offset = 0): array
     {
-        $pdo = Database::connect();
-        $where = 'field_id = :field_id AND value_text IS NOT NULL AND value_text != \'\'';
-        $params = [':field_id' => $fieldId];
-
-        if ($query !== '') {
-            $where .= ' AND value_text LIKE :query';
-            $params[':query'] = '%' . $query . '%';
-        }
-
-        $sql = "SELECT DISTINCT value_text AS val FROM custom_field_values WHERE {$where} ORDER BY value_text ASC LIMIT :limit OFFSET :offset";
-        $statement = $pdo->prepare($sql);
-        foreach ($params as $k => $v) {
-            $statement->bindValue($k, $v);
-        }
-        $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-
         return array_map(
-            fn ($row) => ['id' => $row['val'], 'name' => $row['val']],
-            $statement->fetchAll()
+            static fn (array $row): array => ['id' => $row['val'], 'name' => $row['val']],
+            Database::rows(
+                Database::table('custom_field_values')
+                    ->distinct()
+                    ->select('value_text AS val')
+                    ->where('field_id', $fieldId)
+                    ->whereNotNull('value_text')
+                    ->where('value_text', '!=', '')
+                    ->when($query !== '', fn (Builder $builder) => $builder->where('value_text', 'like', '%' . $query . '%'))
+                    ->orderBy('value_text')
+                    ->limit($limit)
+                    ->offset($offset)
+            )
         );
     }
 
     // array<field_id, {id, field_id, entity_type, entity_id, value_text, value_number, value_date, value_bool, created_at, updated_at}>
     public function valuesForEntity(string $entityType, int $entityId): array
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            SELECT *
-            FROM custom_field_values
-            WHERE entity_type = :entity_type AND entity_id = :entity_id
-        ');
-        $statement->execute([
-            'entity_type' => $entityType,
-            'entity_id' => $entityId,
-        ]);
-
         $values = [];
+        $rows = Database::rows(
+            Database::table('custom_field_values')
+                ->where('entity_type', $entityType)
+                ->where('entity_id', $entityId)
+        );
 
-        foreach ($statement->fetchAll() as $row) {
+        foreach ($rows as $row) {
             $values[(int) $row['field_id']] = $row;
         }
 
@@ -237,22 +146,7 @@ class CustomFieldRepository
 
     public function saveValues(string $entityType, int $entityId, array $fields, array $inputValues, bool $applyDefaults = false): void
     {
-        $pdo = Database::connect();
-
-        $sql = '
-            INSERT INTO custom_field_values (
-                field_id, entity_type, entity_id, value_text, value_number, value_date, value_bool
-            ) VALUES (
-                :field_id, :entity_type, :entity_id, :value_text, :value_number, :value_date, :value_bool
-            )
-            ON DUPLICATE KEY UPDATE
-                value_text = VALUES(value_text),
-                value_number = VALUES(value_number),
-                value_date = VALUES(value_date),
-                value_bool = VALUES(value_bool)
-        ';
-
-        $statement = $pdo->prepare($sql);
+        $rows = [];
 
         foreach ($fields as $field) {
             $fieldId = (int) $field['id'];
@@ -281,7 +175,7 @@ class CustomFieldRepository
                 $valueText = trim((string) $rawValue) === '' ? null : trim((string) $rawValue);
             }
 
-            $statement->execute([
+            $rows[] = [
                 'field_id' => $fieldId,
                 'entity_type' => $entityType,
                 'entity_id' => $entityId,
@@ -289,8 +183,50 @@ class CustomFieldRepository
                 'value_number' => $valueNumber,
                 'value_date' => $valueDate,
                 'value_bool' => $valueBool,
-            ]);
+            ];
         }
+
+        if ($rows !== []) {
+            Database::table('custom_field_values')->upsert(
+                $rows,
+                ['field_id', 'entity_type', 'entity_id'],
+                ['value_text', 'value_number', 'value_date', 'value_bool']
+            );
+        }
+    }
+
+    private function ordered(string $sort, string $dir): Builder
+    {
+        $column = in_array($sort, ['entity_type', 'name', 'slug', 'field_type'], true)
+            ? $sort
+            : 'entity_type';
+
+        return Database::table('custom_fields')->orderBy($column, $dir === 'desc' ? 'desc' : 'asc');
+    }
+
+    private function withOptions(array $fields): array
+    {
+        $selectIds = array_map(
+            static fn (array $field): int => (int) $field['id'],
+            array_filter($fields, static fn (array $field): bool => $field['field_type'] === 'select')
+        );
+        $options = $selectIds === [] ? [] : Database::rows(
+            Database::table('custom_field_options')
+                ->whereIn('field_id', $selectIds)
+                ->orderBy('sort_order')
+                ->orderBy('label')
+        );
+        $byField = [];
+
+        foreach ($options as $option) {
+            $byField[(int) $option['field_id']][] = $option;
+        }
+        foreach ($fields as &$field) {
+            $field['options'] = $byField[(int) $field['id']] ?? [];
+        }
+        unset($field);
+
+        return $fields;
     }
 
     public function displayValue(array $field, ?array $value): string

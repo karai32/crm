@@ -16,18 +16,17 @@ class EntityTagRepository
         }
 
         ['table' => $table, 'column' => $column] = $this->definition($entityType);
-        $placeholders = implode(',', array_fill(0, count($entityIds), '?'));
-        $statement = Database::connect()->prepare("
-            SELECT links.{$column} AS entity_id, tags.id, tags.name, tags.color
-            FROM {$table} links
-            INNER JOIN tags ON tags.id = links.tag_id
-            WHERE links.{$column} IN ({$placeholders})
-            ORDER BY tags.name ASC
-        ");
-        $statement->execute($entityIds);
+        $rows = Database::rows(
+            Database::table("{$table} as links")
+                ->join('tags', 'tags.id', '=', 'links.tag_id')
+                ->selectRaw("links.{$column} AS entity_id")
+                ->addSelect(['tags.id', 'tags.name', 'tags.color'])
+                ->whereIn("links.{$column}", $entityIds)
+                ->orderBy('tags.name')
+        );
 
         $result = [];
-        foreach ($statement->fetchAll() as $row) {
+        foreach ($rows as $row) {
             $result[(int) $row['entity_id']][] = $row;
         }
 
@@ -44,22 +43,16 @@ class EntityTagRepository
     {
         ['table' => $table, 'column' => $column] = $this->definition($entityType);
         $tagIds = IdList::normalize($tagIds);
-        $pdo = Database::connect();
-
-        $delete = $pdo->prepare("DELETE FROM {$table} WHERE {$column} = :entity_id");
-        $delete->execute(['entity_id' => $entityId]);
+        Database::table($table)->where($column, $entityId)->delete();
 
         if ($tagIds === []) {
             return;
         }
 
-        $insert = $pdo->prepare("
-            INSERT INTO {$table} ({$column}, tag_id)
-            VALUES (:entity_id, :tag_id)
-        ");
-        foreach ($tagIds as $tagId) {
-            $insert->execute(['entity_id' => $entityId, 'tag_id' => $tagId]);
-        }
+        Database::table($table)->insert(array_map(
+            static fn (int $tagId): array => [$column => $entityId, 'tag_id' => $tagId],
+            $tagIds
+        ));
     }
 
     public function add(string $entityType, array $entityIds, array $tagIds): void
@@ -71,15 +64,14 @@ class EntityTagRepository
             return;
         }
 
-        $insert = Database::connect()->prepare("
-            INSERT IGNORE INTO {$table} ({$column}, tag_id)
-            VALUES (:entity_id, :tag_id)
-        ");
+        $rows = [];
         foreach ($entityIds as $entityId) {
             foreach ($tagIds as $tagId) {
-                $insert->execute(['entity_id' => $entityId, 'tag_id' => $tagId]);
+                $rows[] = [$column => $entityId, 'tag_id' => $tagId];
             }
         }
+
+        Database::table($table)->insertOrIgnore($rows);
     }
 
     public function remove(string $entityType, array $entityIds, array $tagIds): void
@@ -91,14 +83,10 @@ class EntityTagRepository
             return;
         }
 
-        $entityPlaceholders = implode(',', array_fill(0, count($entityIds), '?'));
-        $tagPlaceholders = implode(',', array_fill(0, count($tagIds), '?'));
-        $statement = Database::connect()->prepare("
-            DELETE FROM {$table}
-            WHERE {$column} IN ({$entityPlaceholders})
-            AND tag_id IN ({$tagPlaceholders})
-        ");
-        $statement->execute(array_merge($entityIds, $tagIds));
+        Database::table($table)
+            ->whereIn($column, $entityIds)
+            ->whereIn('tag_id', $tagIds)
+            ->delete();
     }
 
     private function definition(string $entityType): array

@@ -3,6 +3,7 @@
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Contracts\Database\Query\Expression;
 
 class Database
 {
@@ -21,6 +22,11 @@ class Database
     public static function table(string $table): Builder
     {
         return self::connection()->table($table);
+    }
+
+    public static function raw(mixed $value): Expression
+    {
+        return self::connection()->raw($value);
     }
 
     public static function rows(Builder $query): array

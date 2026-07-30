@@ -11,17 +11,13 @@ class SettingsRepository
             return self::$cache[$userId][$key];
         }
 
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('
-            SELECT preference_value
-            FROM user_preferences
-            WHERE user_id = :user_id AND preference_key = :key
-            LIMIT 1
-        ');
-        $stmt->execute(['user_id' => $userId, 'key' => $key]);
-        $row = $stmt->fetch();
-
-        $value = ($row !== false) ? $row['preference_value'] : $default;
+        $row = Database::row(
+            Database::table('user_preferences')
+                ->select('preference_value')
+                ->where('user_id', $userId)
+                ->where('preference_key', $key)
+        );
+        $value = $row === null ? $default : $row['preference_value'];
         self::$cache[$userId][$key] = $value;
 
         return $value;
@@ -29,12 +25,12 @@ class SettingsRepository
 
     public function set(int $userId, string $key, mixed $value): void
     {
-        $pdo = Database::connect();
-        $pdo->prepare('
-            INSERT INTO user_preferences (user_id, preference_key, preference_value)
-            VALUES (:user_id, :key, :value)
-            ON DUPLICATE KEY UPDATE preference_value = VALUES(preference_value), updated_at = NOW()
-        ')->execute(['user_id' => $userId, 'key' => $key, 'value' => (string) $value]);
+        Database::table('user_preferences')->upsert([[
+            'user_id' => $userId,
+            'preference_key' => $key,
+            'preference_value' => (string) $value,
+            'updated_at' => Database::raw('CURRENT_TIMESTAMP'),
+        ]], ['user_id', 'preference_key'], ['preference_value', 'updated_at']);
 
         self::$cache[$userId][$key] = (string) $value;
     }
@@ -42,19 +38,14 @@ class SettingsRepository
     // array<preference_key, preference_value>
     public function all(int $userId): array
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('
-            SELECT preference_key, preference_value
-            FROM user_preferences
-            WHERE user_id = :user_id
-            ORDER BY preference_key ASC
-        ');
-        $stmt->execute(['user_id' => $userId]);
+        $result = Database::table('user_preferences')
+            ->where('user_id', $userId)
+            ->orderBy('preference_key')
+            ->pluck('preference_value', 'preference_key')
+            ->all();
 
-        $result = [];
-        foreach ($stmt->fetchAll() as $row) {
-            $result[$row['preference_key']]               = $row['preference_value'];
-            self::$cache[$userId][$row['preference_key']] = $row['preference_value'];
+        foreach ($result as $key => $value) {
+            self::$cache[$userId][$key] = $value;
         }
 
         return $result;

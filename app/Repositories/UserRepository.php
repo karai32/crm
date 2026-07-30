@@ -1,151 +1,65 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class UserRepository
 {
     // array<{id, name, email, is_active, last_login_at, created_at, role, role_label}>
     public function all(string $sort = 'id', string $dir = 'asc'): array
     {
-        $pdo = Database::connect();
-        $allowed = [
-            'id'        => 'users.id',
-            'name'      => 'users.name',
-            'role'      => 'roles.name',
-            'is_active' => 'users.is_active',
-        ];
-        $orderCol = $allowed[$sort] ?? 'users.id';
-        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
-
-        $sql = "
-            SELECT users.id, users.name, users.email, users.is_active, users.last_login_at,
-                   users.created_at, roles.name AS role, roles.label AS role_label
-            FROM users
-            INNER JOIN roles ON roles.id = users.role_id
-            ORDER BY {$orderCol} {$orderDir}
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows($this->orderedUsers($sort, $dir));
     }
 
     // int
     public function count(): int
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM users');
-        $stmt->execute();
-
-        return (int) ($stmt->fetch()['total'] ?? 0);
+        return Database::table('users')->count();
     }
 
     // array<{id, name, email, is_active, last_login_at, created_at, role, role_label}>
     public function paginate(int $page, int $perPage, string $sort = 'id', string $dir = 'asc'): array
     {
-        $pdo     = Database::connect();
-        $allowed = [
-            'id'        => 'users.id',
-            'name'      => 'users.name',
-            'role'      => 'roles.name',
-            'is_active' => 'users.is_active',
-        ];
-        $orderCol = $allowed[$sort] ?? 'users.id';
-        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
-        $offset   = ($page - 1) * $perPage;
-
-        $stmt = $pdo->prepare("
-            SELECT users.id, users.name, users.email, users.is_active, users.last_login_at,
-                   users.created_at, roles.name AS role, roles.label AS role_label
-            FROM users
-            INNER JOIN roles ON roles.id = users.role_id
-            ORDER BY {$orderCol} {$orderDir}
-            LIMIT :limit OFFSET :offset
-        ");
-        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
-        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->orderedUsers($sort, $dir)
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     // array<{id, name, label, created_at}>
     public function allRoles(): array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM roles ORDER BY id ASC');
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(Database::table('roles')->orderBy('id'));
     }
 
     // ?{id, role_id, name, email, password_hash, is_active, last_login_at, created_at, updated_at, role}
     public function find(int $id): ?array
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT users.*, roles.name AS role
-            FROM users
-            INNER JOIN roles ON roles.id = users.role_id
-            WHERE users.id = :id
-            LIMIT 1
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['id' => $id]);
-        $user = $statement->fetch();
-
-        return $user ?: null;
+        return Database::row($this->userDetails()->where('users.id', $id));
     }
 
     // ?{id, role_id, name, email, password_hash, is_active, last_login_at, created_at, updated_at, role}
     public function findByEmail(string $email): ?array
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT users.*, roles.name AS role
-            FROM users
-            INNER JOIN roles ON roles.id = users.role_id
-            WHERE users.email = :email
-            LIMIT 1
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['email' => $email]);
-        $user = $statement->fetch();
-
-        return $user ?: null;
+        return Database::row($this->userDetails()->where('users.email', $email));
     }
 
     // ?{id, name, label, created_at}
     public function findRoleByName(string $name): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM roles WHERE name = :name LIMIT 1');
-        $statement->execute(['name' => $name]);
-        $role = $statement->fetch();
-
-        return $role ?: null;
+        return Database::row(Database::table('roles')->where('name', $name));
     }
 
     // array<permission_key, bool>
     public function permissionsForUser(int $userId): array
     {
-        $pdo = Database::connect();
-        $statement = $pdo->prepare('
-            SELECT permission_key, is_allowed
-            FROM user_permissions
-            WHERE user_id = :user_id
-        ');
-        $statement->execute(['user_id' => $userId]);
-
         $permissions = [];
+        $values = Database::table('user_permissions')
+            ->where('user_id', $userId)
+            ->pluck('is_allowed', 'permission_key');
 
-        foreach ($statement->fetchAll() as $row) {
-            $permissions[$row['permission_key']] = (int) $row['is_allowed'] === 1;
+        foreach ($values as $key => $isAllowed) {
+            $permissions[$key] = (int) $isAllowed === 1;
         }
 
         return $permissions;
@@ -153,60 +67,35 @@ class UserRepository
 
     public function savePermissions(int $userId, array $permissions): void
     {
-        $pdo = Database::connect();
-        $pdo->prepare('DELETE FROM user_permissions WHERE user_id = :user_id')->execute(['user_id' => $userId]);
+        Database::table('user_permissions')->where('user_id', $userId)->delete();
 
-        $statement = $pdo->prepare('
-            INSERT INTO user_permissions (user_id, permission_key, is_allowed)
-            VALUES (:user_id, :permission_key, :is_allowed)
-        ');
-
-        foreach ($permissions as $permissionKey => $isAllowed) {
-            $statement->execute([
-                'user_id' => $userId,
-                'permission_key' => $permissionKey,
-                'is_allowed' => $isAllowed ? 1 : 0,
-            ]);
+        if ($permissions !== []) {
+            Database::table('user_permissions')->insert(array_map(
+                static fn (string $permissionKey, bool $isAllowed): array => [
+                    'user_id' => $userId,
+                    'permission_key' => $permissionKey,
+                    'is_allowed' => $isAllowed ? 1 : 0,
+                ],
+                array_keys($permissions),
+                array_values($permissions)
+            ));
         }
     }
 
     public function create(array $data): int
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            INSERT INTO users (role_id, name, email, password_hash, is_active)
-            VALUES (:role_id, :name, :email, :password_hash, :is_active)
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute([
+        return Database::table('users')->insertGetId([
             'role_id' => $data['role_id'],
             'name' => $data['name'],
             'email' => $data['email'],
             'password_hash' => $data['password_hash'],
             'is_active' => $data['is_active'],
         ]);
-
-        return (int) $pdo->lastInsertId();
     }
 
     public function update(int $id, array $data): void
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            UPDATE users
-            SET role_id = :role_id,
-                name = :name,
-                email = :email,
-                is_active = :is_active
-            WHERE id = :id
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute([
-            'id' => $id,
+        Database::table('users')->where('id', $id)->update([
             'role_id' => $data['role_id'],
             'name' => $data['name'],
             'email' => $data['email'],
@@ -216,36 +105,63 @@ class UserRepository
 
     public function updatePassword(int $id, string $passwordHash): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('UPDATE users SET password_hash = :password_hash WHERE id = :id');
-        $statement->execute([
-            'id' => $id,
-            'password_hash' => $passwordHash,
-        ]);
+        Database::table('users')->where('id', $id)->update(['password_hash' => $passwordHash]);
     }
 
     public function deactivate(int $id): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('UPDATE users SET is_active = 0 WHERE id = :id');
-        $statement->execute(['id' => $id]);
+        Database::table('users')->where('id', $id)->update(['is_active' => 0]);
     }
 
     public function purge(int $id): void
     {
-        $pdo = Database::connect();
-
-        $pdo->prepare('DELETE FROM user_permissions WHERE user_id = :id')->execute(['id' => $id]);
-        $pdo->prepare('DELETE FROM users WHERE id = :id')->execute(['id' => $id]);
+        Database::table('user_permissions')->where('user_id', $id)->delete();
+        Database::table('users')->where('id', $id)->delete();
     }
 
     public function updateLastLogin(int $id): void
     {
-        $pdo = Database::connect();
+        Database::table('users')->where('id', $id)->update([
+            'last_login_at' => Database::raw('CURRENT_TIMESTAMP'),
+        ]);
+    }
 
-        $statement = $pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = :id');
-        $statement->execute(['id' => $id]);
+    private function orderedUsers(string $sort, string $dir): Builder
+    {
+        $allowed = [
+            'id' => 'users.id',
+            'name' => 'users.name',
+            'role' => 'roles.name',
+            'is_active' => 'users.is_active',
+        ];
+
+        return $this->users()->orderBy(
+            $allowed[$sort] ?? 'users.id',
+            $dir === 'desc' ? 'desc' : 'asc'
+        );
+    }
+
+    private function users(): Builder
+    {
+        return Database::table('users')
+            ->join('roles', 'roles.id', '=', 'users.role_id')
+            ->select([
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.is_active',
+                'users.last_login_at',
+                'users.created_at',
+                'roles.name AS role',
+                'roles.label AS role_label',
+            ]);
+    }
+
+    private function userDetails(): Builder
+    {
+        return Database::table('users')
+            ->join('roles', 'roles.id', '=', 'users.role_id')
+            ->select('users.*')
+            ->addSelect('roles.name AS role');
     }
 }

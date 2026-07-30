@@ -1,42 +1,27 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\JoinClause;
+
 class AiRepository
 {
-    // Contacts eligible for AI company lookup: corporate email, no company name, not yet reviewed.
-    private const MISSING_COMPANY_WHERE = "
-        contacts.is_corporate_email = 1
-        AND TRIM(contacts.company) = ''
-        AND contacts.email IS NOT NULL
-        AND contacts.email LIKE '%@%'
-        AND contacts.company_change_date IS NULL
-    ";
-
     // int
     public function countMissingCompany(): int
     {
-        $pdo = Database::connect();
-        $statement = $pdo->query('SELECT COUNT(*) FROM contacts WHERE ' . self::MISSING_COMPANY_WHERE);
-
-        return (int) $statement->fetchColumn();
+        return $this->missingCompany(Database::table('contacts'))->count();
     }
 
     // int
     public function countMissingCompanyDomains(): int
     {
-        $pdo = Database::connect();
-        $statement = $pdo->query(
-            "SELECT COUNT(DISTINCT SUBSTRING_INDEX(contacts.email, '@', -1)) FROM contacts WHERE " . self::MISSING_COMPANY_WHERE
-        );
-
-        return (int) $statement->fetchColumn();
+        return $this->missingCompany(Database::table('contacts'))
+            ->distinct()
+            ->count(Database::raw("SUBSTRING_INDEX(contacts.email, '@', -1)"));
     }
 
     // array<{id, full_name, email, domain, domain_contacts}>
     public function paginateMissingCompany(int $page, int $perPage, string $sort = 'domain', string $dir = 'asc'): array
     {
-        $pdo = Database::connect();
-        $offset = ($page - 1) * $perPage;
-
         $allowed = [
             'id'              => 'contacts.id',
             'full_name'       => 'contacts.full_name',
@@ -44,35 +29,38 @@ class AiRepository
             'domain'          => 'domain',
             'domain_contacts' => 'domain_contacts',
         ];
-        $orderCol = $allowed[$sort] ?? 'domain';
-        $orderDir = $dir === 'desc' ? 'DESC' : 'ASC';
+        $domains = $this->missingCompany(Database::table('contacts'))
+            ->selectRaw("SUBSTRING_INDEX(contacts.email, '@', -1) AS domain")
+            ->selectRaw('COUNT(*) AS contacts_count')
+            ->groupByRaw("SUBSTRING_INDEX(contacts.email, '@', -1)");
 
-        $where = self::MISSING_COMPANY_WHERE;
+        $query = Database::table('contacts')
+            ->joinSub($domains, 'domains', fn (JoinClause $join) => $join->on(
+                'domains.domain',
+                '=',
+                Database::raw("SUBSTRING_INDEX(contacts.email, '@', -1)")
+            ))
+            ->select(['contacts.id', 'contacts.full_name', 'contacts.email'])
+            ->selectRaw("SUBSTRING_INDEX(contacts.email, '@', -1) AS domain")
+            ->addSelect('domains.contacts_count AS domain_contacts');
 
-        $sql = "
-            SELECT
-                contacts.id,
-                contacts.full_name,
-                contacts.email,
-                SUBSTRING_INDEX(contacts.email, '@', -1) AS domain,
-                domains.contacts_count AS domain_contacts
-            FROM contacts
-            INNER JOIN (
-                SELECT SUBSTRING_INDEX(email, '@', -1) AS domain, COUNT(*) AS contacts_count
-                FROM contacts
-                WHERE {$where}
-                GROUP BY SUBSTRING_INDEX(email, '@', -1)
-            ) AS domains ON domains.domain = SUBSTRING_INDEX(contacts.email, '@', -1)
-            WHERE {$where}
-            ORDER BY {$orderCol} {$orderDir}, contacts.id ASC
-            LIMIT :limit OFFSET :offset
-        ";
+        return Database::rows(
+            $this->missingCompany($query)
+                ->orderBy($allowed[$sort] ?? 'domain', $dir === 'desc' ? 'desc' : 'asc')
+                ->orderBy('contacts.id')
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
+    }
 
-        $statement = $pdo->prepare($sql);
-        $statement->bindValue('limit', $perPage, PDO::PARAM_INT);
-        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+    // Contacts eligible for AI company lookup: corporate email, no company name, not yet reviewed.
+    private function missingCompany(Builder $query): Builder
+    {
+        return $query
+            ->where('contacts.is_corporate_email', 1)
+            ->whereRaw("TRIM(contacts.company) = ''")
+            ->whereNotNull('contacts.email')
+            ->where('contacts.email', 'like', '%@%')
+            ->whereNull('contacts.company_change_date');
     }
 }

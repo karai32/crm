@@ -1,174 +1,97 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class ContactRepository
 {
     // array<{id, full_name, email, phone, created_at, is_corporate_email, email_status}>
     public function paginate(int $page, int $perPage, array $filters = [], string $sort = 'id', string $dir = 'desc'): array
     {
-        $pdo = Database::connect();
-        $offset = ($page - 1) * $perPage;
-        [$whereSql, $params] = $this->buildFilterSql($filters);
-
         $allowed  = [
             'id'         => 'contacts.id',
             'full_name'  => 'contacts.full_name',
             'email'      => 'contacts.email',
             'created_at' => 'contacts.created_at',
-            'clients'    => '(SELECT MIN(cl.commercial_name) FROM client_contacts cc INNER JOIN clients cl ON cl.id = cc.client_id WHERE cc.contact_id = contacts.id)',
         ];
-        $orderCol = $allowed[$sort] ?? 'contacts.id';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $order = $sort === 'clients'
+            ? Database::table('client_contacts as cc')
+                ->join('clients as cl', 'cl.id', '=', 'cc.client_id')
+                ->whereColumn('cc.contact_id', 'contacts.id')
+                ->selectRaw('MIN(cl.commercial_name)')
+            : ($allowed[$sort] ?? 'contacts.id');
 
-        $sql = "
-            SELECT id, full_name, email, phone, created_at, is_corporate_email, email_status
-            FROM contacts
-            {$whereSql}
-            ORDER BY {$orderCol} {$orderDir}
-            LIMIT :limit OFFSET :offset
-        ";
-
-        $statement = $pdo->prepare($sql);
-        foreach ($params as $name => $value) {
-            $statement->bindValue($name, $value);
-        }
-        $statement->bindValue('limit', $perPage, PDO::PARAM_INT);
-        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            $this->filtered($filters)
+                ->select(['id', 'full_name', 'email', 'phone', 'created_at', 'is_corporate_email', 'email_status'])
+                ->orderBy($order, $dir === 'asc' ? 'asc' : 'desc')
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     // int
     public function countAll(array $filters = []): int
     {
-        $pdo = Database::connect();
-        [$whereSql, $params] = $this->buildFilterSql($filters);
-
-        $statement = $pdo->prepare("SELECT COUNT(*) AS total FROM contacts {$whereSql}");
-        foreach ($params as $name => $value) {
-            $statement->bindValue($name, $value);
-        }
-        $statement->execute();
-        $row = $statement->fetch();
-
-        return (int) ($row['total'] ?? 0);
+        return $this->filtered($filters)->count();
     }
 
     // ?{id, full_name, email, is_corporate_email, email_status, phone, company, created_by, updated_by, created_at, updated_at}
     public function find(int $id): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM contacts WHERE id = :id LIMIT 1');
-        $statement->execute(['id' => $id]);
-        $contact = $statement->fetch();
-
-        return $contact ?: null;
+        return Database::row(Database::table('contacts')->where('id', $id));
     }
 
     // ?{id, full_name, email, is_corporate_email, email_status, phone, company, created_by, updated_by, created_at, updated_at}
     public function findByName(string $name): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare("
-            SELECT * FROM contacts
-            WHERE full_name = :name
-            LIMIT 1
-        ");
-        $statement->execute(['name' => trim($name)]);
-        $contact = $statement->fetch();
-
-        return $contact ?: null;
+        return Database::row(Database::table('contacts')->where('full_name', trim($name)));
     }
 
     // bool
     public function emailExists(string $email): bool
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT id FROM contacts WHERE email = :email LIMIT 1');
-        $statement->execute(['email' => trim($email)]);
-
-        return (bool) $statement->fetch();
+        return Database::table('contacts')->where('email', trim($email))->exists();
     }
 
     // bool
     public function emailTakenByOther(string $email, int $excludeId): bool
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT id FROM contacts WHERE email = :email AND id != :id LIMIT 1');
-        $statement->execute(['email' => trim($email), 'id' => $excludeId]);
-
-        return (bool) $statement->fetch();
+        return Database::table('contacts')
+            ->where('email', trim($email))
+            ->where('id', '!=', $excludeId)
+            ->exists();
     }
 
     // array<{id, full_name, email, phone}>
     public function search(string $query, int $limit = 10): array
     {
-        $pdo = Database::connect();
+        $like = '%' . $query . '%';
 
-        $sql = "
-            SELECT id, full_name, email, phone
-            FROM contacts
-            WHERE full_name LIKE :query
-               OR email LIKE :query
-               OR phone LIKE :query
-            ORDER BY full_name ASC
-            LIMIT :limit
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->bindValue('query', '%' . $query . '%');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('contacts')
+                ->select(['id', 'full_name', 'email', 'phone'])
+                ->where(fn (Builder $builder) => $builder
+                    ->where('full_name', 'like', $like)
+                    ->orWhere('email', 'like', $like)
+                    ->orWhere('phone', 'like', $like))
+                ->orderBy('full_name')
+                ->limit($limit)
+        );
     }
 
     public function create(array $data): int
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            INSERT INTO contacts (full_name, email, phone, company, is_corporate_email, email_status)
-            VALUES (:full_name, :email, :phone, :company, :is_corporate_email, :email_status)
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute($data);
-
-        return (int) $pdo->lastInsertId();
+        return Database::table('contacts')->insertGetId($data);
     }
 
     public function update(int $id, array $data): void
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            UPDATE contacts
-            SET full_name          = :full_name,
-                email              = :email,
-                phone              = :phone,
-                company            = :company,
-                is_corporate_email = :is_corporate_email,
-                email_status       = :email_status
-            WHERE id = :id
-        ";
-
-        $data['id'] = $id;
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute($data);
+        Database::table('contacts')->where('id', $id)->update($data);
     }
 
     public function delete(int $id): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('DELETE FROM contacts WHERE id = :id');
-        $statement->execute(['id' => $id]);
+        Database::table('contacts')->where('id', $id)->delete();
     }
 
     public function deleteMultiple(array $ids): void
@@ -179,10 +102,7 @@ class ContactRepository
             return;
         }
 
-        $pdo = Database::connect();
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $statement = $pdo->prepare("DELETE FROM contacts WHERE id IN ($placeholders)");
-        $statement->execute($ids);
+        Database::table('contacts')->whereIn('id', $ids)->delete();
     }
 
     public function addClientsToContacts(array $contactIds, array $clientIds): void
@@ -194,17 +114,14 @@ class ContactRepository
             return;
         }
 
-        $pdo = Database::connect();
-        $insert = $pdo->prepare('
-            INSERT IGNORE INTO client_contacts (client_id, contact_id)
-            VALUES (:client_id, :contact_id)
-        ');
-
+        $rows = [];
         foreach ($contactIds as $contactId) {
             foreach ($clientIds as $clientId) {
-                $insert->execute(['client_id' => $clientId, 'contact_id' => $contactId]);
+                $rows[] = ['client_id' => $clientId, 'contact_id' => $contactId];
             }
         }
+
+        Database::table('client_contacts')->insertOrIgnore($rows);
     }
 
     // array<contact_id, array<{contact_id, id, commercial_name, sector_icon, sector_name}>>
@@ -214,21 +131,18 @@ class ContactRepository
             return [];
         }
 
-        $pdo = Database::connect();
-        $placeholders = implode(',', array_fill(0, count($contactIds), '?'));
-
-        $statement = $pdo->prepare("
-            SELECT cc.contact_id, cl.id, cl.commercial_name, s.icon AS sector_icon, s.name AS sector_name
-            FROM client_contacts cc
-            INNER JOIN clients cl ON cl.id = cc.client_id
-            LEFT JOIN sectors s ON s.id = cl.sector_id
-            WHERE cc.contact_id IN ($placeholders)
-            ORDER BY cl.commercial_name ASC
-        ");
-        $statement->execute($contactIds);
+        $rows = Database::rows(
+            Database::table('client_contacts as cc')
+                ->join('clients as cl', 'cl.id', '=', 'cc.client_id')
+                ->leftJoin('sectors as s', 's.id', '=', 'cl.sector_id')
+                ->select(['cc.contact_id', 'cl.id', 'cl.commercial_name'])
+                ->addSelect(['s.icon AS sector_icon', 's.name AS sector_name'])
+                ->whereIn('cc.contact_id', $contactIds)
+                ->orderBy('cl.commercial_name')
+        );
 
         $result = [];
-        foreach ($statement->fetchAll() as $row) {
+        foreach ($rows as $row) {
             $result[(int) $row['contact_id']][] = $row;
         }
 
@@ -238,199 +152,141 @@ class ContactRepository
     // array<{id, commercial_name, legal_name}>
     public function firstClients(int $limit = 50): array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            SELECT id, commercial_name, legal_name
-            FROM clients
-            ORDER BY commercial_name ASC
-            LIMIT :limit
-        ');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('clients')
+                ->select(['id', 'commercial_name', 'legal_name'])
+                ->orderBy('commercial_name')
+                ->limit($limit)
+        );
     }
 
     // array<{id, name}>
     public function allSectors(): array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT id, name FROM sectors ORDER BY name ASC');
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(Database::table('sectors')->select(['id', 'name'])->orderBy('name'));
     }
 
     // array<{id, sector_id, commercial_name, legal_name, cif, address, postal_code, city, province, country, website, notes, is_web_connected, is_web_connected_date, is_active, is_active_date, created_by, updated_by, created_at, updated_at, relation_label, is_primary}>
     public function clientsForContact(int $contactId): array
     {
-        $pdo = Database::connect();
-
-        $sql = "
-            SELECT clients.*, client_contacts.relation_label, client_contacts.is_primary
-            FROM clients
-            INNER JOIN client_contacts ON client_contacts.client_id = clients.id
-            WHERE client_contacts.contact_id = :contact_id
-            ORDER BY clients.commercial_name ASC
-        ";
-
-        $statement = $pdo->prepare($sql);
-        $statement->execute(['contact_id' => $contactId]);
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('clients')
+                ->join('client_contacts', 'client_contacts.client_id', '=', 'clients.id')
+                ->select('clients.*')
+                ->addSelect(['client_contacts.relation_label', 'client_contacts.is_primary'])
+                ->where('client_contacts.contact_id', $contactId)
+                ->orderBy('clients.commercial_name')
+        );
     }
 
     public function syncClients(int $contactId, array $clientIds): void
     {
-        $pdo = Database::connect();
-
-        $delete = $pdo->prepare('DELETE FROM client_contacts WHERE contact_id = :contact_id');
-        $delete->execute(['contact_id' => $contactId]);
+        Database::table('client_contacts')->where('contact_id', $contactId)->delete();
 
         if (empty($clientIds)) {
             return;
         }
 
-        $insert = $pdo->prepare('
-            INSERT INTO client_contacts (client_id, contact_id)
-            VALUES (:client_id, :contact_id)
-        ');
-
-        foreach ($clientIds as $clientId) {
-            $insert->execute([
-                'client_id' => $clientId,
-                'contact_id' => $contactId,
-            ]);
-        }
+        Database::table('client_contacts')->insert(array_map(
+            static fn (int $clientId): array => ['client_id' => $clientId, 'contact_id' => $contactId],
+            $clientIds
+        ));
     }
 
     // int
     public function countUninspected(): int
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->query("SELECT COUNT(*) FROM contacts WHERE email IS NOT NULL AND email != '' AND is_corporate_email IS NULL");
-        return (int) $stmt->fetchColumn();
+        return $this->uninspected()->count();
     }
 
     // array<{id, email}>
     public function uninspectedBatch(int $limit): array
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare("SELECT id, email FROM contacts WHERE email IS NOT NULL AND email != '' AND is_corporate_email IS NULL ORDER BY id ASC LIMIT :limit");
-        $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        return Database::rows($this->uninspected()->select(['id', 'email'])->orderBy('id')->limit($limit));
     }
 
     public function updateEmailInspection(int $id, ?int $isCorporate, ?string $status): void
     {
-        $pdo = Database::connect();
-        $pdo->prepare('UPDATE contacts SET is_corporate_email = :is_corporate, email_status = :status WHERE id = :id')
-            ->execute(['is_corporate' => $isCorporate, 'status' => $status, 'id' => $id]);
+        Database::table('contacts')->where('id', $id)->update([
+            'is_corporate_email' => $isCorporate,
+            'email_status' => $status,
+        ]);
     }
 
     public function updateCompany(int $id, string $company): void
     {
-        $pdo = Database::connect();
-        $pdo->prepare('UPDATE contacts SET company = :company, company_change_date = NOW() WHERE id = :id')
-            ->execute(['company' => $company, 'id' => $id]);
+        Database::table('contacts')->where('id', $id)->update([
+            'company' => $company,
+            'company_change_date' => Database::raw('CURRENT_TIMESTAMP'),
+        ]);
     }
 
     public function markCompanyReviewed(int $id): void
     {
-        $pdo = Database::connect();
-        $pdo->prepare('UPDATE contacts SET company_change_date = NOW() WHERE id = :id')
-            ->execute(['id' => $id]);
+        Database::table('contacts')->where('id', $id)->update([
+            'company_change_date' => Database::raw('CURRENT_TIMESTAMP'),
+        ]);
     }
 
-    private function buildFilterSql(array $filters): array
+    private function filtered(array $filters): Builder
     {
-        $where = [];
-        $params = [];
+        $query = Database::table('contacts');
 
         foreach (['full_name', 'email', 'phone'] as $field) {
             if (!empty($filters[$field])) {
-                $where[] = "contacts.{$field} LIKE :{$field}";
-                $params[$field] = '%' . $filters[$field] . '%';
+                $query->where("contacts.{$field}", 'like', '%' . $filters[$field] . '%');
             }
         }
 
         if (!empty($filters['client_id'])) {
-            $where[] = '
-                EXISTS (
-                    SELECT 1
-                    FROM client_contacts
-                    WHERE client_contacts.contact_id = contacts.id
-                    AND client_contacts.client_id = :client_id
-                )
-            ';
-            $params['client_id'] = (int) $filters['client_id'];
+            $query->whereExists(fn (Builder $clients) => $clients
+                ->selectRaw('1')
+                ->from('client_contacts')
+                ->whereColumn('client_contacts.contact_id', 'contacts.id')
+                ->where('client_contacts.client_id', (int) $filters['client_id']));
         }
 
         $tagIds = $this->cleanTagFilterIds($filters);
 
         if (!empty($tagIds)) {
-            $tagPlaceholders = [];
-
-            foreach ($tagIds as $index => $tagId) {
-                $paramName = 'tag_id_' . $index;
-                $tagPlaceholders[] = ':' . $paramName;
-                $params[$paramName] = $tagId;
-            }
-
-            $where[] = '
-                EXISTS (
-                    SELECT 1
-                    FROM contact_tags
-                    WHERE contact_tags.contact_id = contacts.id
-                    AND contact_tags.tag_id IN (' . implode(',', $tagPlaceholders) . ')
-                )
-            ';
+            $query->whereExists(fn (Builder $tags) => $tags
+                ->selectRaw('1')
+                ->from('contact_tags')
+                ->whereColumn('contact_tags.contact_id', 'contacts.id')
+                ->whereIn('contact_tags.tag_id', $tagIds));
         }
 
         if (!empty($filters['sector_id'])) {
-            $where[] = '
-                EXISTS (
-                    SELECT 1
-                    FROM client_contacts
-                    INNER JOIN clients ON clients.id = client_contacts.client_id
-                    WHERE client_contacts.contact_id = contacts.id
-                    AND clients.sector_id = :sector_id
-                )
-            ';
-            $params['sector_id'] = (int) $filters['sector_id'];
+            $query->whereExists(fn (Builder $clients) => $clients
+                ->selectRaw('1')
+                ->from('client_contacts')
+                ->join('clients', 'clients.id', '=', 'client_contacts.client_id')
+                ->whereColumn('client_contacts.contact_id', 'contacts.id')
+                ->where('clients.sector_id', (int) $filters['sector_id']));
         }
 
         if ($filters['is_corporate_email'] !== '' && $filters['is_corporate_email'] !== null) {
-            $where[] = 'contacts.is_corporate_email = :is_corporate_email';
-            $params['is_corporate_email'] = (int) $filters['is_corporate_email'];
+            $query->where('contacts.is_corporate_email', (int) $filters['is_corporate_email']);
         }
 
         if (!empty($filters['email_status'])) {
-            $where[] = 'contacts.email_status = :email_status';
-            $params['email_status'] = $filters['email_status'];
+            $query->where('contacts.email_status', $filters['email_status']);
         }
 
         if (!empty($filters['created_from'])) {
-            $where[] = 'contacts.created_at >= :created_from';
-            $params['created_from'] = $filters['created_from'] . ' 00:00:00';
+            $query->where('contacts.created_at', '>=', $filters['created_from'] . ' 00:00:00');
         }
 
         if (!empty($filters['created_to'])) {
-            $where[] = 'contacts.created_at <= :created_to';
-            $params['created_to'] = $filters['created_to'] . ' 23:59:59';
+            $query->where('contacts.created_at', '<=', $filters['created_to'] . ' 23:59:59');
         }
 
         if (!empty($filters['updated_from'])) {
-            $where[] = 'contacts.updated_at >= :updated_from';
-            $params['updated_from'] = $filters['updated_from'] . ' 00:00:00';
+            $query->where('contacts.updated_at', '>=', $filters['updated_from'] . ' 00:00:00');
         }
 
         if (!empty($filters['updated_to'])) {
-            $where[] = 'contacts.updated_at <= :updated_to';
-            $params['updated_to'] = $filters['updated_to'] . ' 23:59:59';
+            $query->where('contacts.updated_at', '<=', $filters['updated_to'] . ' 23:59:59');
         }
 
         foreach (($filters['custom_fields'] ?? []) as $fieldId => $value) {
@@ -441,38 +297,29 @@ class ContactRepository
                 continue;
             }
 
-            $fieldParam = 'custom_field_' . $fieldId;
-            $textParam = 'custom_value_text_' . $fieldId;
-            $numberParam = 'custom_value_number_' . $fieldId;
-            $dateParam = 'custom_value_date_' . $fieldId;
-            $boolParam = 'custom_value_bool_' . $fieldId;
-
-            $where[] = "
-                EXISTS (
-                    SELECT 1
-                    FROM custom_field_values
-                    WHERE custom_field_values.entity_type = 'contact'
-                    AND custom_field_values.entity_id = contacts.id
-                    AND custom_field_values.field_id = :{$fieldParam}
-                    AND (
-                        custom_field_values.value_text LIKE :{$textParam}
-                        OR CAST(custom_field_values.value_number AS CHAR) LIKE :{$numberParam}
-                        OR CAST(custom_field_values.value_date AS CHAR) LIKE :{$dateParam}
-                        OR CAST(custom_field_values.value_bool AS CHAR) LIKE :{$boolParam}
-                    )
-                )
-            ";
-            $params[$fieldParam] = $fieldId;
-            $params[$textParam] = '%' . $value . '%';
-            $params[$numberParam] = '%' . $value . '%';
-            $params[$dateParam] = '%' . $value . '%';
-            $params[$boolParam] = '%' . $value . '%';
+            $like = '%' . $value . '%';
+            $query->whereExists(fn (Builder $values) => $values
+                ->selectRaw('1')
+                ->from('custom_field_values')
+                ->where('custom_field_values.entity_type', 'contact')
+                ->whereColumn('custom_field_values.entity_id', 'contacts.id')
+                ->where('custom_field_values.field_id', $fieldId)
+                ->where(fn (Builder $match) => $match
+                    ->where('custom_field_values.value_text', 'like', $like)
+                    ->orWhereRaw('CAST(custom_field_values.value_number AS CHAR) LIKE ?', [$like])
+                    ->orWhereRaw('CAST(custom_field_values.value_date AS CHAR) LIKE ?', [$like])
+                    ->orWhereRaw('CAST(custom_field_values.value_bool AS CHAR) LIKE ?', [$like])));
         }
 
-        return [
-            empty($where) ? '' : 'WHERE ' . implode(' AND ', $where),
-            $params,
-        ];
+        return $query;
+    }
+
+    private function uninspected(): Builder
+    {
+        return Database::table('contacts')
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->whereNull('is_corporate_email');
     }
 
     private function cleanTagFilterIds(array $filters): array
