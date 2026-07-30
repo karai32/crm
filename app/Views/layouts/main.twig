@@ -1,0 +1,221 @@
+{% macro item(path, icon, label, currentPath, isHelpPath) %}
+    <a href="{{ url(path) }}"
+        class="nav-item {{ not isHelpPath and path in currentPath ? 'active' : '' }}" title="{{ label }}">
+        <span class="nav-icon"><i class="ph {{ icon }}"></i></span>
+        <span class="nav-label">{{ label }}</span>
+    </a>
+{% endmacro %}
+{% import _self as nav %}
+<!doctype html>
+<html lang="{{ locale }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title|default('ContactCore') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url('/favicon.svg') }}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+    <link rel="stylesheet" href="{{ url('/assets/css/base.css') }}">
+    {% for stylesheet in styles|default([]) %}
+        <link rel="stylesheet" href="{{ url('/assets/css/' ~ stylesheet) }}">
+    {% endfor %}
+</head>
+
+<body>
+
+    {% set currentPath = request_path %}
+    {% set isHelpPath = '/help' in currentPath %}
+    {% set authUser = auth_user %}
+    {% set canManageSectors = can('sectors.manage') %}
+    {% set canManageTags = can('tags.manage') %}
+    {% set canManageCustomFields = can('custom_fields.manage') %}
+    {% set canManageImports = can('imports.manage') %}
+    {% set canUseExports = can('exports.use') %}
+    {% set admin = is_admin() %}
+    {% set showSettingsNav = canManageSectors or canManageTags or canManageCustomFields or canManageImports or canUseExports or admin %}
+    {% set initials = '' %}
+    {% if authUser %}
+        {% set nameParts = authUser.name|default('')|trim|split(' ') %}
+        {% set initials = ((nameParts[0]|default('')|slice(0, 1)) ~ (nameParts[1]|default('')|slice(0, 1)))|upper %}
+    {% endif %}
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="app-shell">
+
+        {% if authUser %}
+            <!-- -- Sidebar --------------------------------------- -->
+            <aside class="sidebar" id="sidebar">
+
+                <a href="{{ url('/dashboard') }}" class="sidebar-brand">
+                    <div class="sidebar-logo">
+                        <i class="ph ph-squares-four"></i>
+                    </div>
+                    <div class="sidebar-brand-text">
+                        <span class="sidebar-title">ContactCore</span>
+                        <span class="sidebar-subtitle">{{ t('nav.subtitle') }}</span>
+                    </div>
+                </a>
+
+                <nav class="sidebar-nav">
+
+                    {{ nav.item('/dashboard', 'ph-house-line', t('nav.dashboard'), currentPath, isHelpPath) }}
+                    {{ nav.item('/contacts', 'ph-address-book', t('nav.contacts'), currentPath, isHelpPath) }}
+                    {{ nav.item('/clients', 'ph-buildings', t('nav.clients'), currentPath, isHelpPath) }}
+
+                    {% if showSettingsNav %}
+
+                        {% if canManageSectors %}
+                            {{ nav.item('/sectors', 'ph-crosshair', t('nav.sectors'), currentPath, isHelpPath) }}
+                        {% endif %}
+
+                        {% if canManageTags %}
+                            {{ nav.item('/tags', 'ph-tag', t('nav.tags'), currentPath, isHelpPath) }}
+                        {% endif %}
+
+                        {% if canManageCustomFields or canManageImports or canUseExports %}
+                            <div class="sidebar-section-label"><span class="nav-label">{{ t('nav.section_settings') }}</span></div>
+                        {% endif %}
+
+                        {{ nav.item('/settings', 'ph-gear', t('nav.settings'), currentPath, isHelpPath) }}
+
+                        {% if canManageCustomFields %}
+                            {{ nav.item('/custom-fields', 'ph-sliders-horizontal', t('nav.custom_fields'), currentPath, isHelpPath) }}
+                        {% endif %}
+
+                        {% if canManageImports %}
+                            {{ nav.item('/imports', 'ph-download-simple', t('nav.imports'), currentPath, isHelpPath) }}
+                        {% endif %}
+
+                        {% if canUseExports %}
+                            {{ nav.item('/exports', 'ph-upload-simple', t('nav.exports'), currentPath, isHelpPath) }}
+                        {% endif %}
+
+                    {% endif %}
+
+                    {% if admin %}
+                        <div class="sidebar-section-label"><span class="nav-label">{{ t('nav.section_ai') }}</span></div>
+                        {{ nav.item('/ai', 'ph-sparkle', t('nav.ai_tools'), currentPath, isHelpPath) }}
+                    {% endif %}
+
+                    {% if admin %}
+                        <div class="sidebar-section-label"><span class="nav-label">{{ t('nav.section_admin') }}</span></div>
+                        {{ nav.item('/users', 'ph-users', t('nav.users'), currentPath, isHelpPath) }}
+                        {{ nav.item('/api-keys', 'ph-key', t('nav.api_keys'), currentPath, isHelpPath) }}
+                    {% endif %}
+
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="sidebar-user-actions" id="sidebarUserActions">
+                        {% if admin %}
+                            <a class="sidebar-user-action" href="{{ url('/users/edit?id=' ~ authUser.id|default('')) }}">
+                                <span class="nav-icon">
+                                    <i class="ph ph-user"></i>
+                                </span>
+                                <span class="nav-label">{{ t('nav.view_profile') }}</span>
+                            </a>
+                        {% endif %}
+                        <a class="sidebar-user-action sidebar-user-action--danger" href="{{ url('/logout') }}">
+                            <span class="nav-icon">
+                                <i class="ph ph-sign-out"></i>
+                            </span>
+                            <span class="nav-label">{{ t('nav.logout') }}</span>
+                        </a>
+                    </div>
+                    <button class="sidebar-user" id="sidebarUserBtn" type="button">
+                        <div class="sidebar-user-avatar">{{ initials }}</div>
+                        <div class="sidebar-user-info">
+                            <span class="sidebar-user-name">{{ authUser.name|default('') }}</span>
+                            <span class="sidebar-user-role">{{ authUser.role|default('')|capitalize }}</span>
+                        </div>
+                    </button>
+                </div>
+
+            </aside>
+        {% endif %}
+
+        <!-- -- Main Area -------------------------------------- -->
+        <div class="main-area">
+
+            {% if authUser %}
+                <header class="topbar">
+                    <button class="burger-btn" id="burgerBtn" aria-label="{{ t('common.toggle_menu') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+
+                    <div class="topbar-search" data-global-search>
+                        <i class="ph ph-magnifying-glass topbar-search-icon"></i>
+                        <input type="search"
+                            data-global-search-input
+                            data-endpoint="{{ url('/ajax/global-search') }}"
+                            placeholder="{{ t('topbar.search_placeholder') }}"
+                            autocomplete="off"
+                            spellcheck="false">
+                        <div class="topbar-search-dropdown" data-global-search-results></div>
+                    </div>
+
+                    <div class="topbar-actions">
+                        <a class="topbar-icon-btn" href="{{ url('/help') }}" title="{{ t('common.help') }}" aria-label="{{ t('common.help') }}">
+                            <span class="topbar-help-mark" aria-hidden="true">?</span>
+                        </a>
+                        <div class="profile-wrap" id="profileWrap">
+                            <button class="topbar-avatar" id="profileBtn" title="{{ authUser.name|default('') }}">
+                                {{ initials }}
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <div class="profile-dropdown-header">
+                                    <span class="profile-dropdown-name">{{ authUser.name|default('') }}</span>
+                                    <span class="profile-dropdown-role">{{ authUser.role|default('')|capitalize }}</span>
+                                </div>
+                                <div class="profile-dropdown-divider"></div>
+                                {% if admin %}
+                                    <a class="profile-dropdown-item" href="{{ url('/users/edit?id=' ~ authUser.id|default('')) }}">
+                                        <i class="ph ph-user"></i>
+                                        {{ t('nav.view_profile') }}
+                                    </a>
+                                {% endif %}
+                                <a class="profile-dropdown-item profile-dropdown-item--danger" href="{{ url('/logout') }}">
+                                    <i class="ph ph-sign-out"></i>
+                                    {{ t('nav.logout') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            {% endif %}
+
+            <main class="page-content">
+                {{ content|raw }}
+            </main>
+
+        </div>
+    </div>
+
+    <script>
+        window.I18N = {{ {
+            no_results: t('common.no_results'),
+            edit: t('common.edit'),
+            delete: t('common.delete'),
+            active: t('common.active'),
+            inactive: t('common.inactive'),
+            more_filters: t('common.more_filters'),
+            less_filters: t('common.less_filters'),
+            n_selected: t('common.n_selected'),
+            delete_selected: t('common.delete_selected'),
+            client: t('common.client'),
+            contact: t('common.contact'),
+            copied: t('common.copied'),
+            sector_delete_confirm: t('sectors.delete_confirm'),
+            tag_delete_confirm: t('tags.delete_confirm_links')
+        }|json_for_script }};
+    </script>
+    <script src="{{ url('/assets/js/admin.js') }}"></script>
+    {% for script in scripts|default([]) %}
+        <script src="{{ url('/assets/js/' ~ script) }}"></script>
+    {% endfor %}
+</body>
+
+</html>

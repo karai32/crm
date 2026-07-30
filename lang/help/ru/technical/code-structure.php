@@ -65,7 +65,7 @@ View + Layout → HTML   или   ApiResult → JSON',
 ├── Helpers/           общие функции представлений
 ├── Repositories/      запросы и получение данных через Query Builder
 ├── Services/          бизнес-процессы и интеграции
-└── Views/             PHP-шаблоны, layouts и partials
+└── Views/             Twig-шаблоны, layouts и legacy PHP-представления
 
 public_html/
 ├── index.php          единственная точка входа PHP
@@ -103,7 +103,7 @@ vendor/                зависимости Composer',
   → ClientController::show()
   → ClientRepository::find(42)
   → View::render(\'clients/show\', $data)
-  → app/Views/layouts/main.php
+  → app/Views/layouts/main.twig
   → HTML-ответ',
         ),
       ),
@@ -242,8 +242,8 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\'], [\'auth\' => \'
       'title' => 'Представления, layouts и JavaScript',
       'paragraphs' => 
       array (
-        0 => 'View::render() получает путь шаблона и массив данных, преобразует ключи массива в локальные переменные через extract(EXTR_SKIP), буферизует результат и вставляет его в layout. По умолчанию используется app/Views/layouts/main.php, а страницы входа используют layout auth. Общие части формы находятся в partial-файлах с именем, начинающимся с подчёркивания.',
-        1 => 'В представление должны приходить уже подготовленные данные. SQL и бизнес-решения в шаблоне недопустимы. Любые динамические значения экранируются через htmlspecialchars(..., ENT_QUOTES, UTF-8); функция t() уже возвращает экранированный перевод. URL строятся через Auth::url(), а POST-форма содержит Csrf::field().',
+        0 => 'View::render() получает путь шаблона и массив данных. Сначала он ищет файл .twig, рендерит его в строгом режиме и вставляет результат в Twig-layout. Для ещё не перенесённых .php-представлений временно действует fallback через extract(EXTR_SKIP). По умолчанию используется app/Views/layouts/main.twig, а страницы входа используют layout auth.twig.',
+        1 => 'В представление должны приходить уже подготовленные данные. SQL и бизнес-решения в шаблоне недопустимы. Twig автоматически экранирует динамические значения; URL строятся функцией url(), переводы — t(), а POST-форма добавляет csrf_field(). Фильтр raw применяется только к уже доверенной HTML-разметке layout или helper-функции.',
         2 => 'CSS и JavaScript не собираются bundler-ом. Контроллер передаёт имена дополнительных файлов в styles и scripts, layout подключает их из public_html/assets. JavaScript отвечает за поведение интерфейса и AJAX, но сервер повторно проверяет доступ и входные данные: браузерная проверка не является защитой.',
       ),
       'examples' => 
@@ -260,15 +260,15 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\'], [\'auth\' => \'
         ),
         1 => 
         array (
-          'title' => 'Безопасный PHP-шаблон формы',
-          'code' => '<form method="post" action="<?= htmlspecialchars(Auth::url(\'/projects/store\'), ENT_QUOTES, \'UTF-8\') ?>">
-    <?= Csrf::field() ?>
+          'title' => 'Безопасный Twig-шаблон формы',
+          'code' => '<form method="post" action="{{ url(\'/projects/store\') }}">
+    {{ csrf_field() }}
     <input
         name="name"
-        value="<?= htmlspecialchars($name ?? \'\', ENT_QUOTES, \'UTF-8\') ?>"
+        value="{{ name|default(\'\') }}"
         required
     >
-    <button type="submit"><?= t(\'common.save\') ?></button>
+    <button type="submit">{{ t(\'common.save\') }}</button>
 </form>',
         ),
       ),
@@ -412,10 +412,10 @@ JSON API
           'title' => 'Минимальный комплект новой сущности',
           'code' => 'app/Repositories/ProjectRepository.php
 app/Controllers/ProjectController.php
-app/Views/projects/index.php
-app/Views/projects/create.php
-app/Views/projects/edit.php
-app/Views/projects/_form.php
+app/Views/projects/index.twig
+app/Views/projects/create.twig
+app/Views/projects/edit.twig
+app/Views/projects/_form.twig
 public_html/assets/js/projects.js        # если нужно поведение
 public_html/assets/css/projects.css      # если базовых стилей недостаточно
 lang/ru.php, lang/en.php, lang/es.php
@@ -440,7 +440,6 @@ public_html/index.php                    # require_once, объект, марш�
           'title' => 'Базовые проверки изменённых PHP-файлов',
           'code' => 'php -l app/Controllers/ProjectController.php
 php -l app/Repositories/ProjectRepository.php
-php -l app/Views/projects/index.php
 composer check-platform-reqs --no-dev',
         ),
       ),
