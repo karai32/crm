@@ -13,7 +13,7 @@ return array (
       'paragraphs' => 
       array (
         0 => 'Ниже описана установка на чистый сервер Ubuntu 24.04 LTS с Nginx, PHP-FPM и MySQL. Другой современный Linux также подходит, если в нём установлен PHP нужной версии, однако названия пакетов и пути к конфигурации могут отличаться. Для рабочего окружения рекомендуется 64-разрядная система, два ядра процессора, 2 ГБ оперативной памяти и отдельное дисковое пространство для базы, журналов и загружаемых файлов. Для небольшой базы достаточно 20 ГБ, но фактический объём следует рассчитывать по количеству контактов, импортов и сроку хранения резервных копий.',
-        1 => 'Приложению требуется PHP 8.4 или новее. В точке входа Composer-зависимости намеренно не подключаются на более старой версии PHP. PHP должен быть установлен одновременно для FPM, который обслуживает сайт, и для CLI, который запускает служебные команды и еженедельный отчёт. Обе среды должны использовать одну основную версию PHP и одинаковый набор расширений.',
+        1 => 'Приложение поддерживает PHP 8.4 и 8.5. В точке входа Composer-зависимости намеренно не подключаются на неподдерживаемой версии PHP. PHP должен быть установлен одновременно для FPM, который обслуживает сайт, и для CLI, который запускает служебные команды и еженедельный отчёт. Обе среды должны использовать одну основную версию PHP и одинаковый набор расширений.',
         2 => 'База данных должна поддерживать InnoDB, utf8mb4, внешние ключи, JSON-поля, FULLTEXT-индексы и реально применять CHECK-ограничения. Требуется MySQL 8.0.16 или новее либо актуальная поддерживаемая версия MariaDB с включённой проверкой CHECK. Веб-сервер должен передавать все неизвестные маршруты в public_html/index.php, принимать методы GET, POST, PATCH и DELETE, обслуживать HTTPS и разрешать загрузку CSV/XLSX.',
       ),
     ),
@@ -58,14 +58,14 @@ sudo ufw enable',
       array (
         0 => 
         array (
-          'title' => 'Установка PHP 8.4 и расширений',
+          'title' => 'Установка PHP 8.5 и расширений',
           'code' => 'sudo apt install -y \\
-  php8.4-fpm php8.4-cli php8.4-mysql php8.4-curl \\
-  php8.4-mbstring php8.4-xml php8.4-zip php8.4-gd
+  php8.5-fpm php8.5-cli php8.5-mysql php8.5-curl \\
+  php8.5-mbstring php8.5-xml php8.5-zip php8.5-gd
 
-php8.4 --version
-php8.4 -m | grep -E \'curl|dom|fileinfo|gd|mbstring|PDO|pdo_mysql|SimpleXML|xmlreader|xmlwriter|zip\'
-sudo systemctl enable --now php8.4-fpm nginx mysql cron',
+php8.5 --version
+php8.5 -m | grep -E \'curl|dom|fileinfo|gd|mbstring|PDO|pdo_mysql|SimpleXML|xmlreader|xmlwriter|zip\'
+sudo systemctl enable --now php8.5-fpm nginx mysql cron',
         ),
       ),
     ),
@@ -82,7 +82,7 @@ sudo systemctl enable --now php8.4-fpm nginx mysql cron',
       array (
         0 => 
         array (
-          'title' => '/etc/php/8.4/fpm/conf.d/99-contactcore.ini',
+          'title' => '/etc/php/8.5/fpm/conf.d/99-contactcore.ini',
           'code' => 'date.timezone = Europe/Madrid
 memory_limit = 512M
 upload_max_filesize = 25M
@@ -103,12 +103,12 @@ session.use_strict_mode = 1',
         1 => 
         array (
           'title' => 'Применение и проверка настроек',
-          'code' => 'sudo cp /etc/php/8.4/fpm/conf.d/99-contactcore.ini \\
-  /etc/php/8.4/cli/conf.d/99-contactcore.ini
-sudo php-fpm8.4 -t
-sudo systemctl restart php8.4-fpm
-php8.4 --ini
-php8.4 -r "echo ini_get(\'memory_limit\'), PHP_EOL;"',
+          'code' => 'sudo cp /etc/php/8.5/fpm/conf.d/99-contactcore.ini \\
+  /etc/php/8.5/cli/conf.d/99-contactcore.ini
+sudo php-fpm8.5 -t
+sudo systemctl restart php8.5-fpm
+php8.5 --ini
+php8.5 -r "echo ini_get(\'memory_limit\'), PHP_EOL;"',
         ),
       ),
     ),
@@ -146,7 +146,7 @@ php8.4 -r "echo ini_get(\'memory_limit\'), PHP_EOL;"',
     location ~ \\.php$ {
         try_files $uri =404;
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.5-fpm.sock;
         fastcgi_read_timeout 300s;
     }
 

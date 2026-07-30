@@ -1,6 +1,6 @@
 <?php
 $isEdit = $isEdit ?? false;
-$sectorData = $isEdit ? $sector : ['name' => $name ?? ''];
+$sectorData = $sector ?? [];
 $sectorId = (int) ($sectorData['id'] ?? 0);
 $selectedIcon = ($sectorData['icon'] ?? null) ?: ($defaultIcon ?? 'crosshair');
 ?>

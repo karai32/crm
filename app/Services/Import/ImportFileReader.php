@@ -103,9 +103,8 @@ class ImportFileReader
             $headers = [];
             try {
                 foreach ($this->activeSheet($reader)->getRowIterator() as $row) {
-                    if ($headers === []) {
-                        $headers = $this->normalizeHeaders(array_map([$this, 'cellText'], $row->cells));
-                    }
+                    $headers = $this->normalizeHeaders(array_map([$this, 'cellText'], $row->cells));
+                    break;
                 }
             } finally {
                 $reader->close();

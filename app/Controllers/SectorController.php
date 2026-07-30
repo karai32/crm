@@ -35,12 +35,7 @@ class SectorController
 
     public function create(): void
     {
-        View::render('sectors/_form', [
-            'isEdit' => false,
-            'title'  => Lang::get('sectors.create_title'),
-            'styles' => ['settings.css'],
-            'error'  => null,
-        ]);
+        $this->renderForm(false);
     }
 
     public function store(): void
@@ -48,13 +43,7 @@ class SectorController
         $name = trim($_POST['name'] ?? '');
 
         if ($name === '') {
-            View::render('sectors/_form', [
-                'isEdit' => false,
-                'title'  => Lang::get('sectors.create_title'),
-                'styles' => ['settings.css'],
-                'error'  => Lang::get('sectors.name_required'),
-                'name'   => $name,
-            ]);
+            $this->renderForm(false, ['name' => $name], Lang::get('sectors.name_required'));
             return;
         }
 
@@ -73,15 +62,7 @@ class SectorController
             return;
         }
 
-        View::render('sectors/_form', [
-            'isEdit'          => true,
-            'title'            => Lang::get('sectors.edit_title'),
-            'styles'           => ['settings.css'],
-            'sector'           => $sector,
-            'error'            => null,
-            'recommendedIcons' => $this->icons->recommended(),
-            'defaultIcon'      => $this->icons->defaultIcon(),
-        ]);
+        $this->renderForm(true, $sector);
     }
 
     public function update(): void
@@ -100,20 +81,11 @@ class SectorController
         }
 
         if ($name === '' || !$this->icons->isValid($iconInput)) {
-            View::render('sectors/_form', [
-                'isEdit'          => true,
-                'title'            => Lang::get('sectors.edit_title'),
-                'styles'           => ['settings.css'],
-                'error'            => $name === '' ? Lang::get('sectors.name_required') : Lang::get('sectors.choose_icon'),
-                'recommendedIcons' => $this->icons->recommended(),
-                'defaultIcon'      => $this->icons->defaultIcon(),
-                'sector'           => [
-                    'id'        => $id,
-                    'name'      => $name,
-                    'icon'      => $icon,
-                    'is_active' => $isActive,
-                ],
-            ]);
+            $this->renderForm(
+                true,
+                ['id' => $id, 'name' => $name, 'icon' => $icon, 'is_active' => $isActive],
+                $name === '' ? Lang::get('sectors.name_required') : Lang::get('sectors.choose_icon')
+            );
             return;
         }
 
@@ -130,5 +102,18 @@ class SectorController
         }
 
         Auth::redirect('/sectors');
+    }
+
+    private function renderForm(bool $isEdit, array $sector = [], ?string $error = null): void
+    {
+        View::render('sectors/_form', [
+            'isEdit' => $isEdit,
+            'title' => Lang::get($isEdit ? 'sectors.edit_title' : 'sectors.create_title'),
+            'styles' => ['settings.css'],
+            'sector' => $sector,
+            'error' => $error,
+            'recommendedIcons' => $isEdit ? $this->icons->recommended() : [],
+            'defaultIcon' => $this->icons->defaultIcon(),
+        ]);
     }
 }

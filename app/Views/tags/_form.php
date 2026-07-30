@@ -1,6 +1,6 @@
 <?php
 $isEdit = $isEdit ?? false;
-$tagData = $isEdit ? $tag : ['name' => $name ?? '', 'color' => $color ?? ''];
+$tagData = $tag ?? [];
 $tagId = (int) ($tagData['id'] ?? 0);
 ?>
 <div class="page-header settings-header">

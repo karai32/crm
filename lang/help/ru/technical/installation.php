@@ -12,7 +12,7 @@ return array (
       'title' => 'Перед установкой',
       'paragraphs' => 
       array (
-        0 => 'Эта инструкция продолжает раздел «Сервер». Перед началом должны быть готовы домен, HTTPS-сервер с Nginx, PHP-FPM 8.4 или новее, MySQL, Composer и все перечисленные PHP-расширения. Пользователь deploy должен иметь возможность размещать код, а www-data — запускать приложение и записывать рабочие данные в storage.',
+        0 => 'Эта инструкция продолжает раздел «Сервер». Перед началом должны быть готовы домен, HTTPS-сервер с Nginx, PHP-FPM 8.4 или 8.5, MySQL, Composer и все перечисленные PHP-расширения. Пользователь deploy должен иметь возможность размещать код, а www-data — запускать приложение и записывать рабочие данные в storage.',
         1 => 'Установка выполняется последовательно: разместить код и зависимости, создать базу, заполнить конфигурацию, настроить права, создать первого администратора, проверить внешние сервисы и cron, затем пройти итоговую проверку. Команды ниже используют каталог /var/www/contactcore, базу crm, пользователя deploy и группу www-data; при другой структуре все пути и имена нужно менять согласованно.',
       ),
     ),
@@ -194,7 +194,7 @@ sudo chmod 640 config/*.php',
         0 => 
         array (
           'title' => 'Хеширование пароля и добавление администратора',
-          'code' => 'php8.4 -r "echo password_hash(\'REPLACE_WITH_STRONG_PASSWORD\', PASSWORD_DEFAULT), PHP_EOL;"
+          'code' => 'php8.5 -r "echo password_hash(\'REPLACE_WITH_STRONG_PASSWORD\', PASSWORD_DEFAULT), PHP_EOL;"
 
 mysql -u contactcore -p crm
 
@@ -222,7 +222,7 @@ WHERE name = \'admin\';',
         array (
           'title' => 'Ручная проверка отчёта',
           'code' => 'cd /var/www/contactcore
-sudo -u www-data /usr/bin/php8.4 bin/weekly-report.php
+sudo -u www-data /usr/bin/php8.5 bin/weekly-report.php
 tail -n 50 storage/app.log',
         ),
         1 => 
@@ -231,7 +231,7 @@ tail -n 50 storage/app.log',
           'code' => 'SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-0 8 * * 1 www-data cd /var/www/contactcore && /usr/bin/php8.4 bin/weekly-report.php >> storage/weekly-report-cron.log 2>&1',
+0 8 * * 1 www-data cd /var/www/contactcore && /usr/bin/php8.5 bin/weekly-report.php >> storage/weekly-report-cron.log 2>&1',
         ),
         2 => 
         array (
@@ -259,7 +259,7 @@ sudo journalctl -u cron --since today --no-pager',
         array (
           'title' => 'Проверка внешних соединений',
           'code' => 'curl -I https://generativelanguage.googleapis.com/
-php8.4 -r "var_dump(checkdnsrr(\'gmail.com\', \'MX\'));"
+php8.5 -r "var_dump(checkdnsrr(\'gmail.com\', \'MX\'));"
 openssl s_client -connect smtp.example.com:465 -servername smtp.example.com </dev/null',
         ),
       ),
@@ -281,10 +281,10 @@ openssl s_client -connect smtp.example.com:465 -servername smtp.example.com </de
           'title' => 'Техническая проверка',
           'code' => 'cd /var/www/contactcore
 composer check-platform-reqs --no-dev
-php8.4 -l public_html/index.php
+php8.5 -l public_html/index.php
 sudo nginx -t
-sudo php-fpm8.4 -t
-sudo systemctl --no-pager --full status nginx php8.4-fpm mysql cron
+sudo php-fpm8.5 -t
+sudo systemctl --no-pager --full status nginx php8.5-fpm mysql cron
 curl -I https://crm.example.com/login
 tail -n 100 storage/app.log',
         ),
@@ -317,7 +317,7 @@ mysqldump --single-transaction --quick --routines --triggers \\
 # Сначала разместите проверенную новую версию кода.
 composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 composer check-platform-reqs --no-dev
-sudo systemctl restart php8.4-fpm
+sudo systemctl restart php8.5-fpm
 sudo nginx -t && sudo systemctl reload nginx',
         ),
         2 => 

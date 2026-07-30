@@ -33,13 +33,7 @@ class TagController
 
     public function create(): void
     {
-        View::render('tags/_form', [
-            'isEdit' => false,
-            'title'   => Lang::get('tags.create_title'),
-            'styles'  => ['settings.css'],
-            'scripts' => ['color-picker.js'],
-            'error'   => null,
-        ]);
+        $this->renderForm(false);
     }
 
     public function store(): void
@@ -48,14 +42,7 @@ class TagController
         $color = $this->cleanColor($_POST['color'] ?? '');
 
         if ($name === '') {
-            View::render('tags/_form', [
-                'isEdit' => false,
-                'title'  => Lang::get('tags.create_title'),
-                'styles' => ['settings.css'],
-                'error'  => Lang::get('tags.name_required'),
-                'name'   => $name,
-                'color'  => $color,
-            ]);
+            $this->renderForm(false, ['name' => $name, 'color' => $color], Lang::get('tags.name_required'));
             return;
         }
 
@@ -74,14 +61,7 @@ class TagController
             return;
         }
 
-        View::render('tags/_form', [
-            'isEdit'  => true,
-            'title'   => Lang::get('tags.edit_title'),
-            'styles'  => ['settings.css'],
-            'scripts' => ['color-picker.js'],
-            'tag'     => $tag,
-            'error'   => null,
-        ]);
+        $this->renderForm(true, $tag);
     }
 
     public function update(): void
@@ -98,18 +78,11 @@ class TagController
         }
 
         if ($name === '') {
-            View::render('tags/_form', [
-                'isEdit'  => true,
-                'title'   => Lang::get('tags.edit_title'),
-                'styles'  => ['settings.css'],
-                'scripts' => ['color-picker.js'],
-                'error'   => Lang::get('tags.name_required'),
-                'tag'     => [
-                    'id'    => $id,
-                    'name'  => $name,
-                    'color' => $color,
-                ],
-            ]);
+            $this->renderForm(
+                true,
+                ['id' => $id, 'name' => $name, 'color' => $color],
+                Lang::get('tags.name_required')
+            );
             return;
         }
 
@@ -137,5 +110,17 @@ class TagController
         }
 
         return preg_match('/^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/', $color) ? $color : null;
+    }
+
+    private function renderForm(bool $isEdit, array $tag = [], ?string $error = null): void
+    {
+        View::render('tags/_form', [
+            'isEdit' => $isEdit,
+            'title' => Lang::get($isEdit ? 'tags.edit_title' : 'tags.create_title'),
+            'styles' => ['settings.css'],
+            'scripts' => ['color-picker.js'],
+            'tag' => $tag,
+            'error' => $error,
+        ]);
     }
 }

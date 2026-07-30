@@ -33,19 +33,9 @@ class CustomFieldController
         ]);
     }
 
-
-
     public function create(): void
     {
-        View::render('custom-fields/_form', [
-            'isEdit'  => false,
-            'title'       => Lang::get('cf.create_title'),
-            'styles'      => ['settings.css'],
-            'scripts'     => ['custom-fields.js'],
-            'field'       => ['entity_type' => 'contact', 'field_type' => 'text', 'is_filterable' => 1, 'sort_order' => 0],
-            'optionsText' => '',
-            'error'       => null,
-        ]);
+        $this->renderForm(false);
     }
 
     public function store(): void
@@ -54,14 +44,7 @@ class CustomFieldController
         $options = $this->optionsFromRequest();
 
         if ($data['name'] === '' || $data['slug'] === '') {
-            View::render('custom-fields/_form', [
-                'isEdit'     => false,
-                'title'       => Lang::get('cf.create_title'),
-                'styles'      => ['settings.css'],
-                'field'       => $data,
-                'optionsText' => $_POST['options'] ?? '',
-                'error'       => Lang::get('cf.name_slug_required'),
-            ]);
+            $this->renderForm(false, $data, (string) ($_POST['options'] ?? ''), Lang::get('cf.name_slug_required'));
             return;
         }
 
@@ -80,17 +63,7 @@ class CustomFieldController
             return;
         }
 
-        $options = array_column($this->customFields->optionsForField((int) $field['id']), 'value');
-
-        View::render('custom-fields/_form', [
-            'isEdit'     => true,
-            'title'       => Lang::get('cf.edit_title'),
-            'styles'      => ['settings.css'],
-            'scripts'     => ['custom-fields.js'],
-            'field'       => $field,
-            'optionsText' => implode("\n", $options),
-            'error'       => null,
-        ]);
+        $this->renderForm(true, $field);
     }
 
     public function update(): void
@@ -110,14 +83,7 @@ class CustomFieldController
         if ($data['name'] === '' || $data['slug'] === '') {
             $data['id'] = $id;
 
-            View::render('custom-fields/_form', [
-                'isEdit'     => true,
-                'title'       => Lang::get('cf.edit_title'),
-                'styles'      => ['settings.css'],
-                'field'       => $data,
-                'optionsText' => $_POST['options'] ?? '',
-                'error'       => Lang::get('cf.name_slug_required'),
-            ]);
+            $this->renderForm(true, $data, (string) ($_POST['options'] ?? ''), Lang::get('cf.name_slug_required'));
             return;
         }
 
@@ -169,4 +135,28 @@ class CustomFieldController
         return ['text', 'textarea', 'number', 'date', 'email', 'url', 'select', 'checkbox'];
     }
 
+    private function renderForm(
+        bool $isEdit,
+        array $field = [],
+        ?string $optionsText = null,
+        ?string $error = null
+    ): void {
+        if (!$isEdit && $field === []) {
+            $field = ['entity_type' => 'contact', 'field_type' => 'text', 'is_filterable' => 1, 'sort_order' => 0];
+        }
+        if ($optionsText === null && $isEdit) {
+            $options = array_column($this->customFields->optionsForField((int) ($field['id'] ?? 0)), 'value');
+            $optionsText = implode("\n", $options);
+        }
+
+        View::render('custom-fields/_form', [
+            'isEdit' => $isEdit,
+            'title' => Lang::get($isEdit ? 'cf.edit_title' : 'cf.create_title'),
+            'styles' => ['settings.css'],
+            'scripts' => ['custom-fields.js'],
+            'field' => $field,
+            'optionsText' => $optionsText ?? '',
+            'error' => $error,
+        ]);
+    }
 }
