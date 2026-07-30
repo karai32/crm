@@ -26,7 +26,7 @@ return [
             'paragraphs' => [
                 'Контроллер подготавливает данные и вызывает View::render(). Первый аргумент задаёт представление относительно app/Views, второй — переменные страницы, третий при необходимости меняет layout. View извлекает данные через extract(..., EXTR_SKIP), буферизует вывод представления и передаёт готовый фрагмент в layout как переменную content.',
                 'Основной layout находится в app/Views/layouts/main.php. Он формирует общий каркас: sidebar, topbar, глобальный поиск, профиль, основную область и набор общих переводов window.I18N. base.css и admin.js подключаются всегда. Дополнительные CSS- и JS-файлы контроллер передаёт в массивах styles и scripts; страничные скрипты загружаются после admin.js.',
-                'URL внутри HTML нужно строить через Auth::url(). Приложение может быть установлено не только в корне домена, и жёсткая ссылка вида /ajax/tags/search способна потерять базовый путь. Заголовок, стили, скрипты и все данные, необходимые представлению, должны быть объявлены в одном вызове рендера.',
+                'URL внутри HTML нужно строить через helper url(), который вызывает Auth::url() и экранирует результат. Приложение может быть установлено не только в корне домена, и жёсткая ссылка вида /ajax/tags/search способна потерять базовый путь. Заголовок, стили, скрипты и все данные, необходимые представлению, должны быть объявлены в одном вызове рендера.',
             ],
             'examples' => [
                 [
@@ -41,12 +41,12 @@ return [
             'paragraphs' => [
                 'Представления сгруппированы по разделам: app/Views/contacts, clients, users и так далее. Файлы index.php отвечают за списки, общий _form.php напрямую обслуживает создание и редактирование, а show.php выводит карточку. Режим формы передаётся контроллером через isEdit. Повторяемые элементы, не принадлежащие одному разделу, размещаются в app/Views/partials; так реализован ввод пользовательского поля.',
                 'Представление не должно выполнять SQL и принимать бизнес-решения. Допустимы подготовка текста, сбор URL, выбор CSS-класса и небольшое преобразование уже загруженных данных. Если шаблону требуется новый набор записей, его получает контроллер через репозиторий до View::render().',
-                'Любые данные пользователя и базы выводятся через htmlspecialchars(..., ENT_QUOTES, UTF-8). Переводы получают функцией t() или Lang::get(); второй вариант применяется, когда нужны подстановки. Массив, передаваемый в data-атрибут, сначала сериализуется json_encode(), затем экранируется для HTML. Динамические значения нельзя вставлять в inline JavaScript конкатенацией строк.',
+                'Данные пользователя и базы выводятся через короткий helper e() из Illuminate Support. Переводы получают функцией t() или Lang::get(); второй вариант применяется, когда нужны подстановки. Массив, передаваемый в data-атрибут, сначала сериализуется json_encode(), затем экранируется через e(). Динамические значения нельзя вставлять в inline JavaScript конкатенацией строк.',
             ],
             'examples' => [
                 [
                     'title' => 'Безопасная передача данных из PHP в компонент',
-                    'code' => "<?php \$selectedJson = json_encode(\$selected, JSON_UNESCAPED_UNICODE); ?>\n\n<div class=\"token-picker\"\n     data-endpoint=\"<?= htmlspecialchars(Auth::url('/ajax/projects/search'), ENT_QUOTES, 'UTF-8') ?>\"\n     data-name=\"project_ids[]\"\n     data-selected=\"<?= htmlspecialchars(\$selectedJson, ENT_QUOTES, 'UTF-8') ?>\">\n</div>",
+                    'code' => "<?php \$selectedJson = json_encode(\$selected, JSON_UNESCAPED_UNICODE); ?>\n\n<div class=\"token-picker\"\n     data-endpoint=\"<?= url('/ajax/projects/search') ?>\"\n     data-name=\"project_ids[]\"\n     data-selected=\"<?= e(\$selectedJson) ?>\">\n</div>",
                 ],
             ],
         ],
@@ -91,7 +91,7 @@ return [
             'examples' => [
                 [
                     'title' => 'Минимальная безопасная форма',
-                    'code' => "<form method=\"post\" action=\"<?= htmlspecialchars(Auth::url('/projects/store'), ENT_QUOTES, 'UTF-8') ?>\">\n    <?= Csrf::field() ?>\n    <input name=\"name\" required>\n    <button type=\"submit\">Save</button>\n</form>",
+                    'code' => "<form method=\"post\" action=\"<?= url('/projects/store') ?>\">\n    <?= Csrf::field() ?>\n    <input name=\"name\" required>\n    <button type=\"submit\">Save</button>\n</form>",
                 ],
             ],
         ],

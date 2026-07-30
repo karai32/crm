@@ -1,5 +1,10 @@
 <?php
 
+function url(string $path): string
+{
+    return e(Auth::url($path));
+}
+
 function paginationRange(int $current, int $last): array
 {
     $pages = [];

@@ -14,14 +14,14 @@
 </div>
 
 <?php if (!empty($error)): ?>
-    <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-error"><?= e($error) ?></div>
 <?php endif; ?>
 
-<form class="auth-form" method="post" action="<?= htmlspecialchars(Auth::url('/login'), ENT_QUOTES, 'UTF-8') ?>">
+<form class="auth-form" method="post" action="<?= url('/login') ?>">
     <?= Csrf::field() ?>
     <div class="field">
         <label for="email"><?= t('auth.email') ?></label>
-        <input id="email" type="email" name="email" value="<?= htmlspecialchars($email ?? '', ENT_QUOTES, 'UTF-8') ?>" autocomplete="email" required autofocus>
+        <input id="email" type="email" name="email" value="<?= e($email ?? '') ?>" autocomplete="email" required autofocus>
     </div>
 
     <div class="field">
@@ -30,8 +30,8 @@
             <input id="password" type="password" name="password" autocomplete="current-password" required>
             <button class="password-toggle" type="button"
                     data-password-toggle="password"
-                    data-show-label="<?= htmlspecialchars(Lang::get('common.show_password'), ENT_QUOTES, 'UTF-8') ?>"
-                    data-hide-label="<?= htmlspecialchars(Lang::get('common.hide_password'), ENT_QUOTES, 'UTF-8') ?>"
+                    data-show-label="<?= e(Lang::get('common.show_password')) ?>"
+                    data-hide-label="<?= e(Lang::get('common.hide_password')) ?>"
                     aria-label="<?= t('common.show_password') ?>" aria-pressed="false">
                 <i class="ph ph-eye password-toggle-icon password-toggle-icon-show" aria-hidden="true"></i>
                 <i class="ph ph-eye-closed password-toggle-icon password-toggle-icon-hide" aria-hidden="true"></i>

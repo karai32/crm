@@ -16,14 +16,14 @@
 </div>
 
 <?php if (!empty($error)): ?>
-    <div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-error"><?= e($error) ?></div>
 <?php endif; ?>
 
 <?php if (!empty($message)): ?>
-    <div class="alert alert-success"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-success"><?= e($message) ?></div>
 <?php endif; ?>
 
-<form class="auth-form" method="post" action="<?= htmlspecialchars(Auth::url('/login/verify'), ENT_QUOTES, 'UTF-8') ?>">
+<form class="auth-form" method="post" action="<?= url('/login/verify') ?>">
     <?= Csrf::field() ?>
     <div class="field">
         <label for="code"><?= t('auth.2fa_code') ?></label>
@@ -33,7 +33,7 @@
     <button class="btn btn-primary auth-submit" type="submit"><?= t('auth.2fa_verify') ?></button>
 </form>
 
-<form class="auth-secondary-form" method="post" action="<?= htmlspecialchars(Auth::url('/login/resend-code'), ENT_QUOTES, 'UTF-8') ?>">
+<form class="auth-secondary-form" method="post" action="<?= url('/login/resend-code') ?>">
     <?= Csrf::field() ?>
     <button class="btn btn-outlined auth-submit" type="submit" <?= empty($canResend) ? 'disabled' : '' ?>><?= t('auth.2fa_resend') ?></button>
 </form>

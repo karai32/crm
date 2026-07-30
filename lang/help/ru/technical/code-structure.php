@@ -243,7 +243,7 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\'], [\'auth\' => \'
       'paragraphs' => 
       array (
         0 => 'View::render() получает путь шаблона и массив данных, преобразует ключи массива в локальные переменные через extract(EXTR_SKIP), буферизует результат и вставляет его в layout. По умолчанию используется app/Views/layouts/main.php, а страницы входа используют layout auth. Общие части формы находятся в partial-файлах с именем, начинающимся с подчёркивания.',
-        1 => 'В представление должны приходить уже подготовленные данные. SQL и бизнес-решения в шаблоне недопустимы. Любые динамические значения экранируются через htmlspecialchars(..., ENT_QUOTES, UTF-8); функция t() уже возвращает экранированный перевод. URL строятся через Auth::url(), а POST-форма содержит Csrf::field().',
+        1 => 'В представление должны приходить уже подготовленные данные. SQL и бизнес-решения в шаблоне недопустимы. Динамические значения экранируются функцией e() из Illuminate Support, а внутренние URL строятся через helper url() из app/Helpers/view_helpers.php. Функция t() уже возвращает экранированный перевод, а POST-форма содержит Csrf::field().',
         2 => 'CSS и JavaScript не собираются bundler-ом. Контроллер передаёт имена дополнительных файлов в styles и scripts, layout подключает их из public_html/assets. JavaScript отвечает за поведение интерфейса и AJAX, но сервер повторно проверяет доступ и входные данные: браузерная проверка не является защитой.',
       ),
       'examples' => 
@@ -261,11 +261,11 @@ $router->get(\'/projects/{id}\', [$projectController, \'show\'], [\'auth\' => \'
         1 => 
         array (
           'title' => 'Безопасный PHP-шаблон формы',
-          'code' => '<form method="post" action="<?= htmlspecialchars(Auth::url(\'/projects/store\'), ENT_QUOTES, \'UTF-8\') ?>">
+          'code' => '<form method="post" action="<?= url(\'/projects/store\') ?>">
     <?= Csrf::field() ?>
     <input
         name="name"
-        value="<?= htmlspecialchars($name ?? \'\', ENT_QUOTES, \'UTF-8\') ?>"
+        value="<?= e($name ?? \'\') ?>"
         required
     >
     <button type="submit"><?= t(\'common.save\') ?></button>
