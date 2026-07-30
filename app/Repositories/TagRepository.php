@@ -1,152 +1,86 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+
 class TagRepository
 {
     // array<{id, name, slug, color, created_at, updated_at}>
     public function first(int $limit = 50): array
     {
-        $statement = Database::connect()->prepare('SELECT * FROM tags ORDER BY name ASC LIMIT :limit');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('tags')->orderBy('name')->limit($limit)
+        );
     }
 
     // array<{id, name, slug, color, created_at, updated_at}>
     public function all(string $sort = 'name', string $dir = 'asc'): array
     {
-        $pdo = Database::connect();
-
-        $allowed  = ['name' => 'name', 'slug' => 'slug'];
-        $orderCol = $allowed[$sort] ?? 'name';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-
-        $statement = $pdo->prepare("SELECT * FROM tags ORDER BY {$orderCol} {$orderDir}");
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows($this->ordered($sort, $dir));
     }
 
     // int
     public function count(): int
     {
-        $pdo  = Database::connect();
-        $stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM tags');
-        $stmt->execute();
-
-        return (int) ($stmt->fetch()['total'] ?? 0);
+        return Database::table('tags')->count();
     }
 
     // array<{id, name, slug, color, created_at, updated_at}>
     public function paginate(int $page, int $perPage, string $sort = 'name', string $dir = 'asc'): array
     {
-        $pdo      = Database::connect();
-        $allowed  = ['name' => 'name', 'slug' => 'slug'];
-        $orderCol = $allowed[$sort] ?? 'name';
-        $orderDir = $dir === 'asc' ? 'ASC' : 'DESC';
-        $offset   = ($page - 1) * $perPage;
-
-        $stmt = $pdo->prepare("SELECT * FROM tags ORDER BY {$orderCol} {$orderDir} LIMIT :limit OFFSET :offset");
-        $stmt->bindValue('limit',  $perPage, PDO::PARAM_INT);
-        $stmt->bindValue('offset', $offset,  PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->ordered($sort, $dir)
+                ->limit($perPage)
+                ->offset(($page - 1) * $perPage)
+        );
     }
 
     // array<{id, name, slug, color, created_at, updated_at}>
     public function filter(string $name = ''): array
     {
-        $pdo = Database::connect();
-        $sql = 'SELECT * FROM tags';
-        $params = [];
-
-        if ($name !== '') {
-            $sql .= ' WHERE name LIKE :name';
-            $params['name'] = '%' . $name . '%';
-        }
-
-        $statement = $pdo->prepare($sql . ' ORDER BY name ASC');
-        $statement->execute($params);
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('tags')
+                ->when($name !== '', fn ($query) => $query->where('name', 'like', '%' . $name . '%'))
+                ->orderBy('name')
+        );
     }
 
     // ?{id, name, slug, color, created_at, updated_at}
     public function find(int $id): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM tags WHERE id = :id LIMIT 1');
-        $statement->execute(['id' => $id]);
-        $tag = $statement->fetch();
-
-        return $tag ?: null;
+        return Database::row(Database::table('tags')->where('id', $id));
     }
 
     // ?{id, name, slug, color, created_at, updated_at}
     public function findByName(string $name): ?array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('SELECT * FROM tags WHERE name = :name LIMIT 1');
-        $statement->execute(['name' => $name]);
-        $tag = $statement->fetch();
-
-        return $tag ?: null;
+        return Database::row(Database::table('tags')->where('name', $name));
     }
 
     // array<{id, name, slug, color}>
     public function search(string $query, int $limit = 20, int $offset = 0): array
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            SELECT id, name, slug, color
-            FROM tags
-            WHERE name LIKE :query
-            ORDER BY name ASC
-            LIMIT :limit OFFSET :offset
-        ');
-
-        $statement->bindValue('query', '%' . $query . '%');
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-
-        return $statement->fetchAll();
+        return Database::rows(
+            Database::table('tags')
+                ->select(['id', 'name', 'slug', 'color'])
+                ->where('name', 'like', '%' . $query . '%')
+                ->orderBy('name')
+                ->limit($limit)
+                ->offset($offset)
+        );
     }
 
     public function create(string $name, ?string $color): int
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            INSERT INTO tags (name, slug, color)
-            VALUES (:name, :slug, :color)
-        ');
-
-        $statement->execute([
+        return Database::table('tags')->insertGetId([
             'name' => $name,
             'slug' => $this->slug($name),
             'color' => $color,
         ]);
-
-        return (int) $pdo->lastInsertId();
     }
 
     public function update(int $id, string $name, ?string $color): void
     {
-        $pdo = Database::connect();
-
-        $statement = $pdo->prepare('
-            UPDATE tags
-            SET name = :name, slug = :slug, color = :color
-            WHERE id = :id
-        ');
-
-        $statement->execute([
-            'id' => $id,
+        Database::table('tags')->where('id', $id)->update([
             'name' => $name,
             'slug' => $this->slug($name),
             'color' => $color,
@@ -155,11 +89,15 @@ class TagRepository
 
     public function delete(int $id): void
     {
-        $pdo = Database::connect();
-
         // Contact and client tag links use ON DELETE CASCADE in the schema.
-        $statement = $pdo->prepare('DELETE FROM tags WHERE id = :id');
-        $statement->execute(['id' => $id]);
+        Database::table('tags')->where('id', $id)->delete();
+    }
+
+    private function ordered(string $sort, string $dir): Builder
+    {
+        $column = in_array($sort, ['name', 'slug'], true) ? $sort : 'name';
+
+        return Database::table('tags')->orderBy($column, $dir === 'asc' ? 'asc' : 'desc');
     }
 
     private function slug(string $name): string

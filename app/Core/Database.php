@@ -1,62 +1,58 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Builder;
+
 class Database
 {
+    private static ?Capsule $capsule = null;
+
+    public static function connection(): Connection
+    {
+        return self::capsule()->getConnection();
+    }
+
     public static function connect(): PDO
     {
-        static $pdo = null;
+        return self::connection()->getPdo();
+    }
 
-        if ($pdo instanceof PDO) {
-            return $pdo;
-        }
+    public static function table(string $table): Builder
+    {
+        return self::connection()->table($table);
+    }
 
-        $config = require __DIR__ . '/../../config/database.php';
-
-        $dsn = sprintf(
-            'mysql:host=%s;dbname=%s;charset=%s',
-            $config['host'],
-            $config['database'],
-            $config['charset']
+    public static function rows(Builder $query): array
+    {
+        return array_map(
+            static fn (object $row): array => (array) $row,
+            $query->get()->all()
         );
+    }
 
-        $pdo = new PDO($dsn, $config['user'], $config['password'], [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_STRINGIFY_FETCHES  => true,
-        ]);
+    public static function row(Builder $query): ?array
+    {
+        $row = $query->first();
 
-        return $pdo;
+        return $row === null ? null : (array) $row;
     }
 
     /**
-     * Executes a unit of work in a transaction. When the caller already owns a
-     * transaction (API batch or import row), the callback joins it instead of
-     * trying to start a nested PDO transaction.
+     * Query Builder and legacy PDO repositories share the same connection, so
+     * one transaction covers both styles during the incremental migration.
+     * Nested operations keep the existing join semantics instead of creating
+     * savepoints, as expected by API batches and import rows.
      */
     public static function transaction(callable $callback): mixed
     {
-        $pdo = self::connect();
-        $ownsTransaction = !$pdo->inTransaction();
+        $connection = self::connection();
 
-        if ($ownsTransaction) {
-            $pdo->beginTransaction();
+        if ($connection->getPdo()->inTransaction()) {
+            return $callback();
         }
 
-        try {
-            $result = $callback();
-
-            if ($ownsTransaction) {
-                $pdo->commit();
-            }
-
-            return $result;
-        } catch (Throwable $exception) {
-            if ($ownsTransaction && $pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-
-            throw $exception;
-        }
+        return $connection->transaction(static fn () => $callback());
     }
 
     public static function isIntegrityViolation(Throwable $exception): bool
@@ -69,5 +65,33 @@ class Database
     {
         return self::isIntegrityViolation($exception)
             && str_contains(strtolower($exception->getMessage()), strtolower($constraint));
+    }
+
+    private static function capsule(): Capsule
+    {
+        if (self::$capsule instanceof Capsule) {
+            return self::$capsule;
+        }
+
+        $config = require __DIR__ . '/../../config/database.php';
+        $capsule = new Capsule();
+        $capsule->addConnection([
+            'driver' => 'mysql',
+            'host' => $config['host'],
+            'port' => $config['port'] ?? 3306,
+            'database' => $config['database'],
+            'username' => $config['user'],
+            'password' => $config['password'],
+            'charset' => $config['charset'],
+            'collation' => $config['collation'] ?? 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'options' => [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_STRINGIFY_FETCHES => true,
+            ],
+        ]);
+
+        return self::$capsule = $capsule;
     }
 }

@@ -37,7 +37,8 @@ Controller             — доступ, ввод, выбор сценария
         │           │
         └─────┬─────┘
               ▼
-           MySQL/PDO
+            MySQL
+    (Query Builder / PDO)
               │
               ▼
 View + Layout → HTML   или   ApiResult → JSON',

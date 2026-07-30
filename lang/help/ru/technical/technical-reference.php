@@ -35,7 +35,7 @@ CODE,
             'title' => 'Среда выполнения и зависимости',
             'paragraphs' => [
                 'Рабочий минимум проекта — PHP 8.3. public_html/index.php намеренно не подключает Composer autoload на более старой версии. Нужна MySQL-совместимая база с InnoDB, utf8mb4, внешними ключами, JSON и FULLTEXT. Рекомендуемая серверная схема — Nginx или Apache, PHP-FPM и отдельный PHP CLI той же версии.',
-                'Composer устанавливает phpoffice/phpspreadsheet ^5.8 и phpmailer/phpmailer ^7.1. PhpSpreadsheet читает и создаёт XLSX; PHPMailer отправляет еженедельные отчёты и подготовленные 2FA-письма. В проекте нет package.json, сборщика и npm-зависимостей: CSS и JavaScript хранятся как готовые assets.',
+                'Composer устанавливает illuminate/database ~13.0, phpoffice/phpspreadsheet ^5.8 и phpmailer/phpmailer ^7.1. Illuminate Database предоставляет Query Builder и общее подключение без установки Laravel; PhpSpreadsheet читает и создаёт XLSX; PHPMailer отправляет еженедельные отчёты и подготовленные 2FA-письма. В проекте нет package.json, сборщика и npm-зависимостей: CSS и JavaScript хранятся как готовые assets.',
                 'Критичные PHP-возможности: PDO MySQL, curl, mbstring, fileinfo, dom, SimpleXML, XMLReader/XMLWriter, zip, zlib, gd, iconv, ctype, filter, hash и OpenSSL. Код также использует random_bytes, password_hash/password_verify, checkdnsrr, flock, finfo, set_time_limit и файловые сессии.',
             ],
             'examples' => [
@@ -463,7 +463,7 @@ JSON,
             'id' => 'reference-core-classes',
             'title' => 'Основные инфраструктурные классы',
             'paragraphs' => [
-                'Core-классы не образуют framework, но задают общие соглашения. Router сопоставляет методы и пути; View подключает шаблон и layout; Database создаёт один PDO на запрос; Auth управляет сессией и правами; Csrf создаёт и проверяет токен; Lang загружает локаль; LoginThrottle ограничивает вход.',
+                'Core-классы не образуют framework, но задают общие соглашения. Router сопоставляет методы и пути; View подключает шаблон и layout; Database настраивает Illuminate Database и предоставляет общее подключение Query Builder/PDO; Auth управляет сессией и правами; Csrf создаёт и проверяет токен; Lang загружает локаль; LoginThrottle ограничивает вход.',
                 'IdList нормализует массив положительных уникальных id. Slugger оставляет ASCII-буквы и цифры, заменяя остальные группы дефисом. SortableTrait валидирует sort/dir и рассчитывает страницы. ControllerHelperTrait обрабатывает nullable strings, id-массивы, tag-фильтры и значения пользовательских фильтров.',
             ],
             'examples' => [
@@ -472,7 +472,7 @@ JSON,
                     'code' => <<<'CODE'
 Router                 HTTP method/path dispatch
 View                   PHP view + layout rendering
-Database               shared PDO connection
+Database               shared Query Builder/PDO connection
 Auth                   session, remember-me, roles, permissions
 Csrf                   session token and hidden field
 LoginThrottle          file-backed login limiting
