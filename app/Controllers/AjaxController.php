@@ -1,5 +1,8 @@
 <?php
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+
 class AjaxController
 {
     private ContactRepository $contacts;
@@ -221,11 +224,6 @@ class AjaxController
             return;
         }
 
-        if (!function_exists('curl_init')) {
-            $this->json(['error' => 'PHP cURL extension is not installed'], 500);
-            return;
-        }
-
         $website = 'https://' . $domain;
         $prompt = <<<PROMPT
             You are given an email domain: {$domain}
@@ -255,35 +253,33 @@ class AjaxController
             'tools' => [['url_context' => (object) []]],
         ];
 
-        $curl = curl_init('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent');
-        curl_setopt_array($curl, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'x-goog-api-key: ' . $apiKey,
-            ],
-            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 60,
-        ]);
-
-        $responseBody = curl_exec($curl);
-        $curlError = curl_error($curl);
-        $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-        curl_close($curl);
-
-        if ($responseBody === false) {
-            $this->json(['error' => 'Gemini connection failed: ' . $curlError], 502);
+        try {
+            $geminiResponse = (new Client())->request(
+                'POST',
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent',
+                [
+                    'headers' => [
+                        'x-goog-api-key' => $apiKey,
+                    ],
+                    'json' => $payload,
+                    'connect_timeout' => 10,
+                    'timeout' => 60,
+                    'http_errors' => false,
+                ]
+            );
+        } catch (GuzzleException $exception) {
+            $this->json(['error' => 'Gemini connection failed: ' . $exception->getMessage()], 502);
             return;
         }
 
+        $responseBody = (string) $geminiResponse->getBody();
         $response = json_decode($responseBody, true);
         if (!is_array($response)) {
             $this->json(['error' => 'Gemini returned invalid JSON'], 502);
             return;
         }
 
+        $status = $geminiResponse->getStatusCode();
         if ($status < 200 || $status >= 300) {
             $message = $response['error']['message'] ?? 'Gemini API request failed';
             $this->json(['error' => $message, 'gemini_response' => $response], 502);

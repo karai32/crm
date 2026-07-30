@@ -51,8 +51,8 @@ sudo ufw enable',
       'title' => 'PHP и системные расширения',
       'paragraphs' => 
       array (
-        0 => 'Обязательны PHP-FPM, PHP CLI и расширения pdo_mysql, curl, mbstring, fileinfo, dom, simplexml, xml, xmlreader, xmlwriter, zip, zlib, gd, iconv, ctype, filter и hash. OpenSSL нужен для защищённого SMTP и HTTPS. Расширения ctype, filter, hash, iconv, fileinfo, zlib и OpenSSL обычно входят в базовые пакеты PHP, но их наличие всё равно следует проверить.',
-        1 => 'cURL используется для запросов к Gemini, PDO MySQL — для базы данных, fileinfo — для проверки типа импортируемого файла, а XML/ZIP/GD/mbstring требуются PhpSpreadsheet для чтения и создания XLSX. Функции checkdnsrr, set_time_limit, random_bytes, password_hash, flock и работа с файлами не должны быть отключены директивой disable_functions.',
+        0 => 'Обязательны PHP-FPM, PHP CLI и расширения pdo_mysql, mbstring, fileinfo, dom, simplexml, xml, xmlreader, xmlwriter, zip, zlib, gd, iconv, ctype, filter и hash. Для внешних HTTP-запросов рекомендуется расширение curl. OpenSSL нужен для защищённого SMTP и HTTPS. Расширения ctype, filter, hash, iconv, fileinfo, zlib и OpenSSL обычно входят в базовые пакеты PHP, но их наличие всё равно следует проверить.',
+        1 => 'Guzzle выполняет запросы к Gemini через cURL, а при отсутствии расширения может использовать PHP streams. PDO MySQL нужен для базы данных, fileinfo — для проверки типа импортируемого файла, а XML/ZIP/GD/mbstring требуются PhpSpreadsheet для чтения и создания XLSX. Функции checkdnsrr, set_time_limit, random_bytes, password_hash, flock и работа с файлами не должны быть отключены директивой disable_functions.',
       ),
       'examples' => 
       array (
