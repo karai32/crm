@@ -130,7 +130,7 @@ function apiMethodClass(string $m): string
                         <?php endif; ?>
                     </td>
                     <td class="col-log-time" title="<?= htmlspecialchars($log['created_at'], ENT_QUOTES, 'UTF-8') ?>">
-                        <?= htmlspecialchars(date('d M H:i:s', strtotime($log['created_at'])), ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars(formatDate($log['created_at'] ?? null, 'd M H:i:s'), ENT_QUOTES, 'UTF-8') ?>
                     </td>
                     <td class="col-log-key">
                         <?php if (!empty($log['key_name'])): ?>

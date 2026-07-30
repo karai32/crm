@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
 
 class ClientRepository
 {
@@ -125,7 +126,7 @@ class ClientRepository
     public function update(int $id, array $data): void
     {
         $current = $this->find($id);
-        $now     = date('Y-m-d H:i:s');
+        $now     = Carbon::now()->toDateTimeString();
 
         $data['is_web_connected'] = (int) (bool) ($data['is_web_connected'] ?? ($current['is_web_connected'] ?? false));
         $data['is_active'] = (int) (bool) ($data['is_active'] ?? ($current['is_active'] ?? true));

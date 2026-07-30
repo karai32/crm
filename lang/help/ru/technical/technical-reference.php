@@ -463,7 +463,7 @@ JSON,
             'id' => 'reference-core-classes',
             'title' => 'Основные инфраструктурные классы',
             'paragraphs' => [
-                'Core-классы не образуют framework, но задают общие соглашения. Router сопоставляет методы и пути; View подключает шаблон и layout; Database настраивает Illuminate Database и предоставляет общее подключение Query Builder/PDO; Auth управляет сессией и правами; Csrf создаёт и проверяет токен; Lang загружает локаль; LoginThrottle ограничивает вход.',
+                'Core-классы не образуют framework, но задают общие соглашения. Router сопоставляет методы и пути; View подключает шаблон и layout; Database настраивает Illuminate Database и предоставляет Query Builder и транзакции; Auth управляет сессией и правами; Csrf создаёт и проверяет токен; Lang загружает локаль; LoginThrottle ограничивает вход.',
                 'IdList нормализует массив положительных уникальных id. Illuminate Support формирует slug через Str::slug() с транслитерацией Unicode. SortableTrait валидирует sort/dir и рассчитывает страницы. ControllerHelperTrait обрабатывает nullable strings, id-массивы, tag-фильтры и значения пользовательских фильтров.',
             ],
             'examples' => [
@@ -472,7 +472,7 @@ JSON,
                     'code' => <<<'CODE'
 Router                 HTTP method/path dispatch
 View                   PHP view + layout rendering
-Database               shared Query Builder/PDO connection
+Database               shared Query Builder connection and transactions
 Auth                   session, remember-me, roles, permissions
 Csrf                   session token and hidden field
 LoginThrottle          file-backed login limiting

@@ -183,17 +183,15 @@ class Auth
         }
 
         try {
-            $pdo  = Database::connect();
             // $user: ?{id, role_id, name, email, password_hash, is_active, last_login_at, created_at, updated_at, role}
-            $stmt = $pdo->prepare('
-                SELECT users.*, roles.name AS role
-                FROM users
-                INNER JOIN roles ON roles.id = users.role_id
-                WHERE users.id = :id AND users.is_active = 1
-                LIMIT 1
-            ');
-            $stmt->execute(['id' => (int) $data['user_id']]);
-            $user = $stmt->fetch();
+            $user = Database::row(
+                Database::table('users')
+                    ->join('roles', 'roles.id', '=', 'users.role_id')
+                    ->select('users.*')
+                    ->addSelect('roles.name AS role')
+                    ->where('users.id', (int) $data['user_id'])
+                    ->where('users.is_active', 1)
+            );
         } catch (Throwable) {
             return;
         }
@@ -226,19 +224,11 @@ class Auth
         }
 
         try {
-            $pdo = Database::connect();
-            $statement = $pdo->prepare('
-                SELECT permission_key, is_allowed
-                FROM user_permissions
-                WHERE user_id = :user_id
-            ');
-            $statement->execute(['user_id' => $userId]);
-
-            $permissions = [];
-
-            foreach ($statement->fetchAll() as $row) {
-                $permissions[$row['permission_key']] = (int) $row['is_allowed'] === 1;
-            }
+            $permissions = Database::table('user_permissions')
+                ->where('user_id', $userId)
+                ->pluck('is_allowed', 'permission_key')
+                ->map(static fn (mixed $allowed): bool => (int) $allowed === 1)
+                ->all();
 
             $cache[$userId] = $permissions;
 

@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\JoinClause;
+
 class ExportService
 {
     public function fieldDefinitions(string $entity, array $customFields): array
@@ -11,11 +14,11 @@ class ExportService
 
     public function query(string $entity, array $filters, array $fields, array $fieldDefs): array
     {
-        [$sql, $params, $headers] = $entity === 'clients'
-            ? $this->buildClientsSql($filters, $fields, $fieldDefs)
-            : $this->buildContactsSql($filters, $fields, $fieldDefs);
+        [$query, $headers] = $entity === 'clients'
+            ? $this->buildClientsQuery($filters, $fields, $fieldDefs)
+            : $this->buildContactsQuery($filters, $fields, $fieldDefs);
 
-        return ['sql' => $sql, 'params' => $params, 'headers' => $headers];
+        return ['query' => $query, 'headers' => $headers];
     }
 
     // ── Field definitions ──────────────────────────────────────────────────
@@ -79,250 +82,213 @@ class ExportService
 
     public function sanitizeFields(array $selected, array $fieldDefs): array
     {
-        $valid = array_values(array_intersect($selected, array_keys($fieldDefs)));
+        $valid = array_values(array_unique(array_intersect($selected, array_keys($fieldDefs))));
         return empty($valid) ? ['id'] : $valid;
     }
 
-    // ── Internal SQL builders ──────────────────────────────────────────────
+    // ── Query builders ─────────────────────────────────────────────────────
 
-    private function buildContactsSql(array $filters, array $fields, array $fieldDefs): array
+    private function buildContactsQuery(array $filters, array $fields, array $fieldDefs): array
     {
-        $selectClauses  = [];
-        $subqueryJoins  = [];
-        $needTags       = false;
-        $needClients    = false;
-        $needCfv        = false;
-        $cfIds          = [];
-        $baseColumns    = ['id', 'full_name', 'email', 'phone', 'company', 'created_at', 'updated_at'];
-        $headers        = [];
+        $query = Database::table('contacts');
+        $selects = [];
+        $headers = [];
+        $customFieldIds = [];
+        $baseColumns = ['id', 'full_name', 'email', 'phone', 'company', 'created_at', 'updated_at'];
 
         foreach ($fields as $field) {
             if (!isset($fieldDefs[$field])) {
                 continue;
             }
+
             $headers[] = $fieldDefs[$field]['label'];
 
             if ($field === 'tags') {
-                $needTags        = true;
-                $selectClauses[] = 'COALESCE(_tags_agg.tag_names, \'\') AS `tags`';
+                $query->leftJoinSub(
+                    $this->tagsQuery('contact_tags', 'contact_id'),
+                    '_tags_agg',
+                    fn (JoinClause $join) => $join->on('_tags_agg.contact_id', '=', 'contacts.id')
+                );
+                $selects[] = Database::raw("COALESCE(_tags_agg.tag_names, '') AS `tags`");
             } elseif ($field === 'client_names') {
-                $needClients     = true;
-                $selectClauses[] = 'COALESCE(_cl_agg.client_names, \'\') AS `client_names`';
+                $query->leftJoinSub(
+                    $this->contactClientsQuery(),
+                    '_cl_agg',
+                    fn (JoinClause $join) => $join->on('_cl_agg.contact_id', '=', 'contacts.id')
+                );
+                $selects[] = Database::raw("COALESCE(_cl_agg.client_names, '') AS `client_names`");
             } elseif (str_starts_with($field, 'cf_')) {
-                $cfId          = (int) substr($field, 3);
-                $cfIds[]       = $cfId;
-                $needCfv       = true;
-                $selectClauses[] = 'COALESCE(_cfv_agg.cf_' . $cfId . ', \'\') AS `cf_' . $cfId . '`';
+                $customFieldIds[] = $id = (int) substr($field, 3);
+                $selects[] = Database::raw("COALESCE(_cfv_agg.cf_{$id}, '') AS `cf_{$id}`");
             } elseif (in_array($field, $baseColumns, true)) {
-                $selectClauses[] = 'contacts.' . $field;
+                $selects[] = 'contacts.' . $field;
             }
         }
 
-        if ($needTags) {
-            $subqueryJoins[] = "LEFT JOIN (
-                SELECT ct.contact_id,
-                       GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ', ') AS tag_names
-                FROM contact_tags ct
-                INNER JOIN tags t ON t.id = ct.tag_id
-                GROUP BY ct.contact_id
-            ) _tags_agg ON _tags_agg.contact_id = contacts.id";
+        if ($customFieldIds !== []) {
+            $query->leftJoinSub(
+                $this->customFieldsQuery('contact', $customFieldIds),
+                '_cfv_agg',
+                fn (JoinClause $join) => $join->on('_cfv_agg.entity_id', '=', 'contacts.id')
+            );
         }
 
-        if ($needClients) {
-            $subqueryJoins[] = "LEFT JOIN (
-                SELECT cc.contact_id,
-                       GROUP_CONCAT(DISTINCT cl.commercial_name ORDER BY cl.commercial_name SEPARATOR ', ') AS client_names
-                FROM client_contacts cc
-                INNER JOIN clients cl ON cl.id = cc.client_id
-                GROUP BY cc.contact_id
-            ) _cl_agg ON _cl_agg.contact_id = contacts.id";
+        $query->select($selects ?: ['contacts.id']);
+        $this->applyLikeFilters($query, 'contacts', $filters, ['full_name', 'email', 'phone']);
+
+        if (($filters['company'] ?? '') === 'company') {
+            $query->where('contacts.company', '!=', '');
+        } elseif (($filters['company'] ?? '') === 'person') {
+            $query->where('contacts.company', '');
         }
 
-        if ($needCfv && !empty($cfIds)) {
-            $cfCases = [];
-            foreach ($cfIds as $cfId) {
-                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN CONVERT(COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) USING utf8mb4) END) AS cf_" . $cfId;
-            }
-            $subqueryJoins[] = "LEFT JOIN (
-                SELECT entity_id, " . implode(', ', $cfCases) . "
-                FROM custom_field_values
-                WHERE entity_type = 'contact'
-                GROUP BY entity_id
-            ) _cfv_agg ON _cfv_agg.entity_id = contacts.id";
+        if (!empty($filters['client_id'])) {
+            $query->whereExists(fn (Builder $related) => $related
+                ->selectRaw('1')
+                ->from('client_contacts')
+                ->whereColumn('client_contacts.contact_id', 'contacts.id')
+                ->where('client_contacts.client_id', (int) $filters['client_id']));
         }
 
-        [$whereSql, $params] = $this->buildContactsFilterSql($filters);
+        $this->applyTagFilter($query, 'contacts', 'contact_tags', 'contact_id', $filters);
 
-        $sql = "
-            SELECT " . implode(', ', $selectClauses ?: ['contacts.id']) . "
-            FROM contacts
-            " . implode("\n", $subqueryJoins) . "
-            " . $whereSql . "
-            ORDER BY contacts.id DESC
-        ";
-
-        return [$sql, $params, $headers];
+        return [$query->orderByDesc('contacts.id'), $headers];
     }
 
-    private function buildClientsSql(array $filters, array $fields, array $fieldDefs): array
+    private function buildClientsQuery(array $filters, array $fields, array $fieldDefs): array
     {
-        $selectClauses  = [];
-        $subqueryJoins  = [];
-        $needSector     = false;
-        $needTags       = false;
-        $needContacts   = false;
-        $needCfv        = false;
-        $cfIds          = [];
-        $baseColumns    = ['id', 'commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes', 'created_at', 'updated_at'];
-        $headers        = [];
+        $query = Database::table('clients');
+        $selects = [];
+        $headers = [];
+        $customFieldIds = [];
+        $baseColumns = ['id', 'commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes', 'created_at', 'updated_at'];
 
         foreach ($fields as $field) {
             if (!isset($fieldDefs[$field])) {
                 continue;
             }
+
             $headers[] = $fieldDefs[$field]['label'];
 
             if ($field === 'sector_name') {
-                $needSector      = true;
-                $selectClauses[] = 'COALESCE(_sect.name, \'\') AS `sector_name`';
+                $query->leftJoin('sectors as _sect', '_sect.id', '=', 'clients.sector_id');
+                $selects[] = Database::raw("COALESCE(_sect.name, '') AS `sector_name`");
             } elseif ($field === 'tags') {
-                $needTags        = true;
-                $selectClauses[] = 'COALESCE(_tags_agg.tag_names, \'\') AS `tags`';
+                $query->leftJoinSub(
+                    $this->tagsQuery('client_tags', 'client_id'),
+                    '_tags_agg',
+                    fn (JoinClause $join) => $join->on('_tags_agg.client_id', '=', 'clients.id')
+                );
+                $selects[] = Database::raw("COALESCE(_tags_agg.tag_names, '') AS `tags`");
             } elseif ($field === 'contact_count') {
-                $needContacts    = true;
-                $selectClauses[] = 'COALESCE(_cc_agg.contact_count, 0) AS `contact_count`';
+                $query->leftJoinSub(
+                    $this->contactCountsQuery(),
+                    '_cc_agg',
+                    fn (JoinClause $join) => $join->on('_cc_agg.client_id', '=', 'clients.id')
+                );
+                $selects[] = Database::raw('COALESCE(_cc_agg.contact_count, 0) AS `contact_count`');
             } elseif (str_starts_with($field, 'cf_')) {
-                $cfId          = (int) substr($field, 3);
-                $cfIds[]       = $cfId;
-                $needCfv       = true;
-                $selectClauses[] = 'COALESCE(_cfv_agg.cf_' . $cfId . ', \'\') AS `cf_' . $cfId . '`';
+                $customFieldIds[] = $id = (int) substr($field, 3);
+                $selects[] = Database::raw("COALESCE(_cfv_agg.cf_{$id}, '') AS `cf_{$id}`");
             } elseif (in_array($field, $baseColumns, true)) {
-                $selectClauses[] = 'clients.' . $field;
+                $selects[] = 'clients.' . $field;
             }
         }
 
-        if ($needSector) {
-            $subqueryJoins[] = 'LEFT JOIN sectors _sect ON _sect.id = clients.sector_id';
+        if ($customFieldIds !== []) {
+            $query->leftJoinSub(
+                $this->customFieldsQuery('client', $customFieldIds),
+                '_cfv_agg',
+                fn (JoinClause $join) => $join->on('_cfv_agg.entity_id', '=', 'clients.id')
+            );
         }
 
-        if ($needTags) {
-            $subqueryJoins[] = "LEFT JOIN (
-                SELECT ct.client_id,
-                       GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ', ') AS tag_names
-                FROM client_tags ct
-                INNER JOIN tags t ON t.id = ct.tag_id
-                GROUP BY ct.client_id
-            ) _tags_agg ON _tags_agg.client_id = clients.id";
-        }
-
-        if ($needContacts) {
-            $subqueryJoins[] = "LEFT JOIN (
-                SELECT client_id, COUNT(*) AS contact_count
-                FROM client_contacts
-                GROUP BY client_id
-            ) _cc_agg ON _cc_agg.client_id = clients.id";
-        }
-
-        if ($needCfv && !empty($cfIds)) {
-            $cfCases = [];
-            foreach ($cfIds as $cfId) {
-                $cfCases[] = "MAX(CASE WHEN field_id = " . $cfId . " THEN CONVERT(COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) USING utf8mb4) END) AS cf_" . $cfId;
-            }
-            $subqueryJoins[] = "LEFT JOIN (
-                SELECT entity_id, " . implode(', ', $cfCases) . "
-                FROM custom_field_values
-                WHERE entity_type = 'client'
-                GROUP BY entity_id
-            ) _cfv_agg ON _cfv_agg.entity_id = clients.id";
-        }
-
-        [$whereSql, $params] = $this->buildClientsFilterSql($filters);
-
-        $sql = "
-            SELECT " . implode(', ', $selectClauses ?: ['clients.id']) . "
-            FROM clients
-            " . implode("\n", $subqueryJoins) . "
-            " . $whereSql . "
-            ORDER BY clients.id DESC
-        ";
-
-        return [$sql, $params, $headers];
-    }
-
-    // ── Filter SQL builders (mirrors repository logic) ─────────────────────
-
-    private function buildContactsFilterSql(array $filters): array
-    {
-        $where  = [];
-        $params = [];
-
-        foreach (['full_name', 'email', 'phone'] as $field) {
-            if (!empty($filters[$field])) {
-                $where[]         = "contacts.{$field} LIKE :{$field}";
-                $params[$field]  = '%' . $filters[$field] . '%';
-            }
-        }
-
-        if (!empty($filters['company'])) {
-            if ($filters['company'] === 'company') {
-                $where[] = "contacts.company != ''";
-            } elseif ($filters['company'] === 'person') {
-                $where[] = "contacts.company = ''";
-            }
-        }
-
-        if (!empty($filters['client_id'])) {
-            $where[] = 'EXISTS (SELECT 1 FROM client_contacts WHERE client_contacts.contact_id = contacts.id AND client_contacts.client_id = :client_id)';
-            $params['client_id'] = (int) $filters['client_id'];
-        }
-
-        $tagIds = $this->cleanTagIds($filters);
-        if (!empty($tagIds)) {
-            $placeholders = [];
-            foreach ($tagIds as $i => $tagId) {
-                $p              = 'tag_id_' . $i;
-                $placeholders[] = ':' . $p;
-                $params[$p]     = $tagId;
-            }
-            $where[] = 'EXISTS (SELECT 1 FROM contact_tags WHERE contact_tags.contact_id = contacts.id AND contact_tags.tag_id IN (' . implode(',', $placeholders) . '))';
-        }
-
-        $whereSql = empty($where) ? '' : 'WHERE ' . implode(' AND ', $where);
-
-        return [$whereSql, $params];
-    }
-
-    private function buildClientsFilterSql(array $filters): array
-    {
-        $where  = [];
-        $params = [];
-
-        foreach (['commercial_name', 'legal_name', 'city', 'country', 'province'] as $field) {
-            if (!empty($filters[$field])) {
-                $where[]        = "clients.{$field} LIKE :{$field}";
-                $params[$field] = '%' . $filters[$field] . '%';
-            }
-        }
+        $query->select($selects ?: ['clients.id']);
+        $this->applyLikeFilters(
+            $query,
+            'clients',
+            $filters,
+            ['commercial_name', 'legal_name', 'city', 'country', 'province']
+        );
 
         if (!empty($filters['sector_id'])) {
-            $where[]           = 'clients.sector_id = :sector_id';
-            $params['sector_id'] = (int) $filters['sector_id'];
+            $query->where('clients.sector_id', (int) $filters['sector_id']);
         }
 
-        $tagIds = $this->cleanTagIds($filters);
-        if (!empty($tagIds)) {
-            $placeholders = [];
-            foreach ($tagIds as $i => $tagId) {
-                $p              = 'tag_id_' . $i;
-                $placeholders[] = ':' . $p;
-                $params[$p]     = $tagId;
+        $this->applyTagFilter($query, 'clients', 'client_tags', 'client_id', $filters);
+
+        return [$query->orderByDesc('clients.id'), $headers];
+    }
+
+    private function tagsQuery(string $pivotTable, string $entityColumn): Builder
+    {
+        return Database::table($pivotTable . ' as entity_tags')
+            ->join('tags as export_tags', 'export_tags.id', '=', 'entity_tags.tag_id')
+            ->select('entity_tags.' . $entityColumn)
+            ->selectRaw("GROUP_CONCAT(DISTINCT export_tags.name ORDER BY export_tags.name SEPARATOR ', ') AS tag_names")
+            ->groupBy('entity_tags.' . $entityColumn);
+    }
+
+    private function contactClientsQuery(): Builder
+    {
+        return Database::table('client_contacts as cc')
+            ->join('clients as cl', 'cl.id', '=', 'cc.client_id')
+            ->select('cc.contact_id')
+            ->selectRaw("GROUP_CONCAT(DISTINCT cl.commercial_name ORDER BY cl.commercial_name SEPARATOR ', ') AS client_names")
+            ->groupBy('cc.contact_id');
+    }
+
+    private function contactCountsQuery(): Builder
+    {
+        return Database::table('client_contacts')
+            ->select('client_id')
+            ->selectRaw('COUNT(*) AS contact_count')
+            ->groupBy('client_id');
+    }
+
+    private function customFieldsQuery(string $entityType, array $fieldIds): Builder
+    {
+        $query = Database::table('custom_field_values')
+            ->select('entity_id')
+            ->where('entity_type', $entityType)
+            ->groupBy('entity_id');
+
+        foreach ($fieldIds as $fieldId) {
+            $query->selectRaw(
+                "MAX(CASE WHEN field_id = ? THEN CONVERT(COALESCE(value_text, CAST(value_number AS CHAR), CAST(value_date AS CHAR), CAST(value_bool AS CHAR)) USING utf8mb4) END) AS `cf_{$fieldId}`",
+                [$fieldId]
+            );
+        }
+
+        return $query;
+    }
+
+    private function applyLikeFilters(Builder $query, string $table, array $filters, array $fields): void
+    {
+        foreach ($fields as $field) {
+            if (!empty($filters[$field])) {
+                $query->where($table . '.' . $field, 'like', '%' . $filters[$field] . '%');
             }
-            $where[] = 'EXISTS (SELECT 1 FROM client_tags WHERE client_tags.client_id = clients.id AND client_tags.tag_id IN (' . implode(',', $placeholders) . '))';
+        }
+    }
+
+    private function applyTagFilter(
+        Builder $query,
+        string $table,
+        string $pivotTable,
+        string $entityColumn,
+        array $filters
+    ): void {
+        $tagIds = $this->cleanTagIds($filters);
+        if ($tagIds === []) {
+            return;
         }
 
-        $whereSql = empty($where) ? '' : 'WHERE ' . implode(' AND ', $where);
-
-        return [$whereSql, $params];
+        $query->whereExists(fn (Builder $tags) => $tags
+            ->selectRaw('1')
+            ->from($pivotTable)
+            ->whereColumn($pivotTable . '.' . $entityColumn, $table . '.id')
+            ->whereIn($pivotTable . '.tag_id', $tagIds));
     }
 
     private function cleanTagIds(array $source): array
@@ -330,5 +296,4 @@ class ExportService
         $ids = array_map('intval', (array) ($source['tag_ids'] ?? []));
         return array_values(array_unique(array_filter($ids, fn ($id) => $id > 0)));
     }
-
 }

@@ -17,14 +17,13 @@ require_once $root . '/app/Core/Database.php';
 require_once $root . '/app/Services/MailerService.php';
 require_once $root . '/app/Services/WeeklyReportService.php';
 
-$pdo  = Database::connect();
-$stmt = $pdo->query("
-    SELECT u.name, u.email
-    FROM users u
-    INNER JOIN roles r ON r.id = u.role_id
-    WHERE r.name = 'admin' AND u.is_active = 1
-");
-$recipients = $stmt->fetchAll();
+$recipients = Database::rows(
+    Database::table('users as u')
+        ->join('roles as r', 'r.id', '=', 'u.role_id')
+        ->select(['u.name', 'u.email'])
+        ->where('r.name', 'admin')
+        ->where('u.is_active', 1)
+);
 
 if (empty($recipients)) {
     logApplicationError('Weekly report: no admin recipients found.');

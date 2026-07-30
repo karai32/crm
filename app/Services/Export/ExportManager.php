@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Carbon;
+
 class ExportManager
 {
     private ExportService $queries;
@@ -32,7 +34,7 @@ class ExportManager
 
     public function filename(string $entity, string $format): string
     {
-        return $this->entity($entity) . '-' . date('Y-m-d-H-i-s') . '.' . $this->format($format);
+        return $this->entity($entity) . '-' . Carbon::now()->format('Y-m-d-H-i-s') . '.' . $this->format($format);
     }
 
     public function writeCsv(

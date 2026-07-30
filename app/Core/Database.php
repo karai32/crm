@@ -9,14 +9,9 @@ class Database
 {
     private static ?Capsule $capsule = null;
 
-    public static function connection(): Connection
+    private static function connection(): Connection
     {
         return self::capsule()->getConnection();
-    }
-
-    public static function connect(): PDO
-    {
-        return self::connection()->getPdo();
     }
 
     public static function table(string $table): Builder
@@ -44,17 +39,12 @@ class Database
         return $row === null ? null : (array) $row;
     }
 
-    /**
-     * Query Builder and legacy PDO repositories share the same connection, so
-     * one transaction covers both styles during the incremental migration.
-     * Nested operations keep the existing join semantics instead of creating
-     * savepoints, as expected by API batches and import rows.
-     */
+    /** Nested operations join the transaction opened by the outer business scenario. */
     public static function transaction(callable $callback): mixed
     {
         $connection = self::connection();
 
-        if ($connection->getPdo()->inTransaction()) {
+        if ($connection->transactionLevel() > 0) {
             return $callback();
         }
 

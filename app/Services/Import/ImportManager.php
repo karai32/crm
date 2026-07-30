@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Carbon;
+
 class ImportManager
 {
     private const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -41,7 +43,7 @@ class ImportManager
             return ['success' => false, 'message' => 'Could not create the import directory.'];
         }
 
-        $stored = $entityType . '-' . date('Y-m-d-H-i-s') . '-' . bin2hex(random_bytes(6)) . '.' . $extension;
+        $stored = $entityType . '-' . Carbon::now()->format('Y-m-d-H-i-s') . '-' . bin2hex(random_bytes(6)) . '.' . $extension;
         $target = $directory . '/' . $stored;
         if (!move_uploaded_file((string) $file['tmp_name'], $target)) {
             return ['success' => false, 'message' => 'Could not save uploaded file.'];

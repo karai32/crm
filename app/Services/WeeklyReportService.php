@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 
 class WeeklyReportService
@@ -37,7 +38,6 @@ class WeeklyReportService
 
     public function collect(string $from = ''): array
     {
-        $pdo = Database::connect();
         $now = Carbon::now();
         $to = $now->toDateTimeString();
         $from = $from !== ''
@@ -47,89 +47,83 @@ class WeeklyReportService
         return [
             'period_from'   => $from,
             'period_to'     => $to,
-            'new_contacts'  => $this->queryNewContacts($pdo, $from, $to),
-            'top_clients'   => $this->queryTopClients($pdo, $from, $to),
-            'new_clients'   => $this->queryNewClients($pdo, $from, $to),
-            'web_connected' => $this->queryWebConnected($pdo, $from, $to),
-            'deactivated'   => $this->queryDeactivated($pdo, $from, $to),
+            'new_contacts'  => $this->queryNewContacts($from, $to),
+            'top_clients'   => $this->queryTopClients($from, $to),
+            'new_clients'   => $this->queryNewClients($from, $to),
+            'web_connected' => $this->queryWebConnected($from, $to),
+            'deactivated'   => $this->queryDeactivated($from, $to),
         ];
     }
 
     // array<{full_name, email, company, created_at}>
-    private function queryNewContacts(PDO $pdo, string $from, string $to): array
+    private function queryNewContacts(string $from, string $to): array
     {
-        $stmt = $pdo->prepare("
-            SELECT full_name, email, company, created_at
-            FROM contacts
-            WHERE created_at >= :from AND created_at < :to
-              AND full_name NOT LIKE '%http%'
-              AND full_name NOT LIKE '%://%'
-              AND full_name NOT LIKE '%www.%'
-              AND LENGTH(full_name) < 150
-            ORDER BY created_at DESC
-        ");
-        $stmt->execute(compact('from', 'to'));
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->during(Database::table('contacts'), 'created_at', $from, $to)
+                ->select(['full_name', 'email', 'company', 'created_at'])
+                ->where('full_name', 'not like', '%http%')
+                ->where('full_name', 'not like', '%://%')
+                ->where('full_name', 'not like', '%www.%')
+                ->whereRaw('LENGTH(full_name) < 150')
+                ->orderByDesc('created_at')
+        );
     }
 
     // array<{client_id, commercial_name, new_contacts_count}>
-    private function queryTopClients(PDO $pdo, string $from, string $to): array
+    private function queryTopClients(string $from, string $to): array
     {
-        $stmt = $pdo->prepare('
-            SELECT c.id AS client_id, c.commercial_name, COUNT(cc.contact_id) AS new_contacts_count
-            FROM clients c
-            INNER JOIN client_contacts cc ON cc.client_id = c.id
-            INNER JOIN contacts ct        ON ct.id = cc.contact_id
-            WHERE ct.created_at >= :from AND ct.created_at < :to
-            GROUP BY c.id, c.commercial_name
-            ORDER BY new_contacts_count DESC
-            LIMIT 10
-        ');
-        $stmt->execute(compact('from', 'to'));
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->during(
+                Database::table('clients as c')
+                    ->join('client_contacts as cc', 'cc.client_id', '=', 'c.id')
+                    ->join('contacts as ct', 'ct.id', '=', 'cc.contact_id'),
+                'ct.created_at',
+                $from,
+                $to
+            )
+                ->select(['c.id AS client_id', 'c.commercial_name'])
+                ->selectRaw('COUNT(cc.contact_id) AS new_contacts_count')
+                ->groupBy(['c.id', 'c.commercial_name'])
+                ->orderByDesc('new_contacts_count')
+                ->limit(10)
+        );
     }
 
     // array<{commercial_name, legal_name, created_at}>
-    private function queryNewClients(PDO $pdo, string $from, string $to): array
+    private function queryNewClients(string $from, string $to): array
     {
-        $stmt = $pdo->prepare('
-            SELECT commercial_name, legal_name, created_at
-            FROM clients
-            WHERE created_at >= :from AND created_at < :to
-            ORDER BY created_at DESC
-        ');
-        $stmt->execute(compact('from', 'to'));
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->during(Database::table('clients'), 'created_at', $from, $to)
+                ->select(['commercial_name', 'legal_name', 'created_at'])
+                ->orderByDesc('created_at')
+        );
     }
 
     // array<{commercial_name, is_web_connected_date}>
-    private function queryWebConnected(PDO $pdo, string $from, string $to): array
+    private function queryWebConnected(string $from, string $to): array
     {
-        $stmt = $pdo->prepare('
-            SELECT commercial_name, is_web_connected_date
-            FROM clients
-            WHERE is_web_connected = 1
-              AND is_web_connected_date >= :from
-              AND is_web_connected_date < :to
-            ORDER BY is_web_connected_date DESC
-        ');
-        $stmt->execute(compact('from', 'to'));
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->during(Database::table('clients'), 'is_web_connected_date', $from, $to)
+                ->select(['commercial_name', 'is_web_connected_date'])
+                ->where('is_web_connected', 1)
+                ->orderByDesc('is_web_connected_date')
+        );
     }
 
     // array<{commercial_name, is_active_date}>
-    private function queryDeactivated(PDO $pdo, string $from, string $to): array
+    private function queryDeactivated(string $from, string $to): array
     {
-        $stmt = $pdo->prepare('
-            SELECT commercial_name, is_active_date
-            FROM clients
-            WHERE is_active = 0
-              AND is_active_date >= :from
-              AND is_active_date < :to
-            ORDER BY is_active_date DESC
-        ');
-        $stmt->execute(compact('from', 'to'));
-        return $stmt->fetchAll();
+        return Database::rows(
+            $this->during(Database::table('clients'), 'is_active_date', $from, $to)
+                ->select(['commercial_name', 'is_active_date'])
+                ->where('is_active', 0)
+                ->orderByDesc('is_active_date')
+        );
+    }
+
+    private function during(Builder $query, string $column, string $from, string $to): Builder
+    {
+        return $query->where($column, '>=', $from)->where($column, '<', $to);
     }
 
     public function buildHtml(array $data): string

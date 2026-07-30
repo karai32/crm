@@ -5,12 +5,6 @@ $maxSectorCount = 1;
 if (!empty($clientsBySector)) {
     $maxSectorCount = max(array_column($clientsBySector, 'clients_count')) ?: 1;
 }
-
-function fmtDate(string $date): string
-{
-    $ts = strtotime($date);
-    return $ts ? date('M j, Y', $ts) : $date;
-}
 ?>
 
 <div class="dashboard-header">
@@ -127,7 +121,7 @@ function fmtDate(string $date): string
                                 </td>
                                 <td>
                                     <span class="created-date">
-                                        <?= htmlspecialchars(!empty($contact['created_at']) ? fmtDate($contact['created_at']) : '-', ENT_QUOTES, 'UTF-8') ?>
+                                        <?= htmlspecialchars(formatDate($contact['created_at'] ?? null, 'M j, Y'), ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                             </tr>

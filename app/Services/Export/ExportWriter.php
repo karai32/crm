@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\Query\Builder;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
 
@@ -7,11 +8,10 @@ class ExportWriter
 {
     public function csv(array $plan, $output): int
     {
-        $statement = $this->statement($plan['sql'], $plan['params']);
         fputcsv($output, $plan['headers']);
         $rows = 0;
 
-        while ($row = $statement->fetch(PDO::FETCH_NUM)) {
+        foreach ($this->rows($plan['query']) as $row) {
             fputcsv($output, array_map([$this, 'safeCell'], $row));
             $rows++;
         }
@@ -24,7 +24,6 @@ class ExportWriter
             throw new RuntimeException('OpenSpout is required for XLSX exports.');
         }
 
-        $statement = $this->statement($plan['sql'], $plan['params']);
         $writer = new XlsxWriter();
         $writer->openToFile($target);
 
@@ -33,7 +32,7 @@ class ExportWriter
             $writer->addRow(Row::fromValues($plan['headers']));
 
             $rows = 0;
-            while ($row = $statement->fetch(PDO::FETCH_NUM)) {
+            foreach ($this->rows($plan['query']) as $row) {
                 $writer->addRow(Row::fromValues(array_map([$this, 'safeCell'], $row)));
                 $rows++;
             }
@@ -44,18 +43,16 @@ class ExportWriter
         return $rows;
     }
 
-    private function statement(string $sql, array $params): PDOStatement
+    private function rows(Builder $query): iterable
     {
-        $pdo = Database::connect();
-        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
-            $pdo->exec('SET SESSION group_concat_max_len = 65535');
+        $connection = $query->getConnection();
+        if ($connection->getDriverName() === 'mysql') {
+            $connection->statement('SET SESSION group_concat_max_len = 65535');
         }
-        $statement = $pdo->prepare($sql);
-        foreach ($params as $key => $value) {
-            $statement->bindValue($key, $value);
+
+        foreach ($query->cursor() as $row) {
+            yield array_values((array) $row);
         }
-        $statement->execute();
-        return $statement;
     }
 
     private function safeCell(mixed $value): mixed

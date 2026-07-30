@@ -123,8 +123,8 @@ $basicAuth = $clientId . ':' . $secret;
                                 <span class="tag-badge api-badge-revoked"><?= t('api.disabled') ?></span>
                             <?php endif; ?>
                         </td>
-                        <td class="col-date-muted"><?= $key['last_used_at'] ? htmlspecialchars(date('d M Y', strtotime($key['last_used_at'])), ENT_QUOTES, 'UTF-8') : '-' ?></td>
-                        <td class="col-date-muted"><?= htmlspecialchars(date('d M Y', strtotime($key['created_at'])), ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="col-date-muted"><?= htmlspecialchars(formatDate($key['last_used_at'] ?? null), ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="col-date-muted"><?= htmlspecialchars(formatDate($key['created_at'] ?? null), ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="col-actions">
                             <div class="action-links">
                                 <?php if ($needsSync): ?>

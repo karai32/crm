@@ -1,8 +1,23 @@
 <?php
 
+use Illuminate\Support\Carbon;
+
 function url(string $path): string
 {
     return e(Auth::url($path));
+}
+
+function formatDate(?string $value, string $format = 'd M Y', string $fallback = '-'): string
+{
+    if ($value === null || trim($value) === '') {
+        return $fallback;
+    }
+
+    try {
+        return Carbon::parse($value)->format($format);
+    } catch (Throwable) {
+        return $value;
+    }
 }
 
 function paginationRange(int $current, int $last): array
