@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Carbon;
+
 $root = dirname(__DIR__);
 
 function logApplicationError(string $message): void
@@ -32,8 +34,8 @@ if (empty($recipients)) {
 $service  = new WeeklyReportService();
 $data     = $service->collect();
 
-$from    = date('d/m/Y', strtotime($data['period_from']));
-$to      = date('d/m/Y', strtotime($data['period_to']));
+$from    = Carbon::parse($data['period_from'])->format('d/m/Y');
+$to      = Carbon::parse($data['period_to'])->format('d/m/Y');
 $subject = "Informe Semanal CRM — Del {$from} al {$to}";
 
 $htmlBody = $service->buildHtml($data);

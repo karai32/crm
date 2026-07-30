@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Carbon;
+
 class WeeklyReportService
 {
     private function baseUrl(): string
@@ -13,8 +15,8 @@ class WeeklyReportService
     private function dateRangeParams(array $data): array
     {
         return [
-            'created_from' => date('Y-m-d', strtotime($data['period_from'])),
-            'created_to'   => date('Y-m-d', strtotime($data['period_to'])),
+            'created_from' => Carbon::parse($data['period_from'])->toDateString(),
+            'created_to'   => Carbon::parse($data['period_to'])->toDateString(),
         ];
     }
 
@@ -36,11 +38,11 @@ class WeeklyReportService
     public function collect(string $from = ''): array
     {
         $pdo = Database::connect();
-        $to  = date('Y-m-d H:i:s');
-
-        if ($from === '') {
-            $from = date('Y-m-d H:i:s', strtotime('-7 days'));
-        }
+        $now = Carbon::now();
+        $to = $now->toDateTimeString();
+        $from = $from !== ''
+            ? Carbon::parse($from)->toDateTimeString()
+            : $now->copy()->subWeek()->toDateTimeString();
 
         return [
             'period_from'   => $from,
@@ -132,9 +134,9 @@ class WeeklyReportService
 
     public function buildHtml(array $data): string
     {
-        $from = date('d/m/Y', strtotime($data['period_from']));
-        $to   = date('d/m/Y', strtotime($data['period_to']));
-        $now  = date('d/m/Y \a \l\a\s H:i');
+        $from = $this->formatDate($data['period_from']);
+        $to   = $this->formatDate($data['period_to']);
+        $now  = Carbon::now()->format('d/m/Y \a \l\a\s H:i');
 
         $nc  = $data['new_contacts'];
         $tc  = $data['top_clients'];
@@ -176,7 +178,7 @@ class WeeklyReportService
             foreach ($wc as $r) {
                 $rows .= '<tr>'
                     . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">' . $this->e($r['commercial_name']) . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b;white-space:nowrap">' . date('d/m/Y', strtotime($r['is_web_connected_date'])) . '</td>'
+                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b;white-space:nowrap">' . $this->formatDate($r['is_web_connected_date']) . '</td>'
                     . '</tr>';
             }
             $body .= $this->buildSection(
@@ -194,7 +196,7 @@ class WeeklyReportService
             foreach ($de as $r) {
                 $rows .= '<tr>'
                     . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">' . $this->e($r['commercial_name']) . '</td>'
-                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b;white-space:nowrap">' . date('d/m/Y', strtotime($r['is_active_date'])) . '</td>'
+                    . '<td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#64748b;white-space:nowrap">' . $this->formatDate($r['is_active_date']) . '</td>'
                     . '</tr>';
             }
             $body .= $this->buildSection(
@@ -227,8 +229,8 @@ class WeeklyReportService
 
     public function buildText(array $data): string
     {
-        $from = date('d/m/Y', strtotime($data['period_from']));
-        $to   = date('d/m/Y', strtotime($data['period_to']));
+        $from = $this->formatDate($data['period_from']);
+        $to   = $this->formatDate($data['period_to']);
 
         $lines   = [];
         $lines[] = "INFORME SEMANAL CRM — Del $from al $to";
@@ -264,7 +266,7 @@ class WeeklyReportService
             $lines[] = '';
         }
 
-        $lines[] = 'Generado el ' . date('d/m/Y H:i');
+        $lines[] = 'Generado el ' . Carbon::now()->format('d/m/Y H:i');
 
         return implode("\n", $lines);
     }
@@ -340,6 +342,11 @@ class WeeklyReportService
         $str = strip_tags($str);
         $str = preg_replace('/\s+/', ' ', $str);
         return mb_substr(trim($str), 0, $maxLen);
+    }
+
+    private function formatDate(string $value): string
+    {
+        return Carbon::parse($value)->format('d/m/Y');
     }
 
     private function e(string $str): string

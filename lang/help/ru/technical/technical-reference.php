@@ -464,7 +464,7 @@ JSON,
             'title' => 'Основные инфраструктурные классы',
             'paragraphs' => [
                 'Core-классы не образуют framework, но задают общие соглашения. Router сопоставляет методы и пути; View подключает шаблон и layout; Database настраивает Illuminate Database и предоставляет общее подключение Query Builder/PDO; Auth управляет сессией и правами; Csrf создаёт и проверяет токен; Lang загружает локаль; LoginThrottle ограничивает вход.',
-                'IdList нормализует массив положительных уникальных id. Slugger оставляет ASCII-буквы и цифры, заменяя остальные группы дефисом. SortableTrait валидирует sort/dir и рассчитывает страницы. ControllerHelperTrait обрабатывает nullable strings, id-массивы, tag-фильтры и значения пользовательских фильтров.',
+                'IdList нормализует массив положительных уникальных id. Illuminate Support формирует slug через Str::slug() с транслитерацией Unicode. SortableTrait валидирует sort/dir и рассчитывает страницы. ControllerHelperTrait обрабатывает nullable strings, id-массивы, tag-фильтры и значения пользовательских фильтров.',
             ],
             'examples' => [
                 [
@@ -478,7 +478,7 @@ Csrf                   session token and hidden field
 LoginThrottle          file-backed login limiting
 Lang                   locale dictionary
 IdList                 positive unique integer arrays
-Slugger                ASCII kebab-case slug
+Illuminate Support     Unicode slug и работа с датами через Carbon
 SortableTrait          sort, direction and pagination
 ControllerHelperTrait  common request normalization
 CODE,

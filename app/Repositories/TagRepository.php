@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Str;
 
 class TagRepository
 {
@@ -102,7 +103,7 @@ class TagRepository
 
     private function slug(string $name): string
     {
-        $slug = Slugger::make($name);
+        $slug = Str::slug($name);
 
         return $slug !== '' ? $slug : 'tag-' . time();
     }

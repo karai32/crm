@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 abstract class AbstractImportProcessor
 {
     protected TagRepository $tags;
@@ -150,7 +152,7 @@ abstract class AbstractImportProcessor
 
     private function slug(string $value): string
     {
-        $slug = Slugger::make($value);
+        $slug = Str::slug($value);
         return $slug !== '' ? $slug : 'custom-field-' . substr(hash('sha256', $value), 0, 12);
     }
 

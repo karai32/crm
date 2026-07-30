@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 class CustomFieldController
 {
     use SortableTrait;
@@ -144,7 +146,7 @@ class CustomFieldController
         return [
             'entity_type' => in_array($_POST['entity_type'] ?? '', ['contact', 'client'], true) ? $_POST['entity_type'] : 'contact',
             'name' => $name,
-            'slug' => Slugger::make($slug !== '' ? $slug : $name),
+            'slug' => Str::slug($slug !== '' ? $slug : $name),
             'field_type' => in_array($_POST['field_type'] ?? '', $this->fieldTypes(), true) ? $_POST['field_type'] : 'text',
             'is_required' => isset($_POST['is_required']) ? 1 : 0,
             'is_filterable' => isset($_POST['is_filterable']) ? 1 : 0,

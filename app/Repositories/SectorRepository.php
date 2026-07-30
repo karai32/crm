@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Str;
 
 class SectorRepository
 {
@@ -126,7 +127,7 @@ class SectorRepository
 
     private function slug(string $name): string
     {
-        $slug = Slugger::make($name);
+        $slug = Str::slug($name);
 
         return $slug !== '' ? $slug : 'sector-' . time();
     }

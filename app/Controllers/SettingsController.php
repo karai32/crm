@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Carbon;
+
 class SettingsController
 {
     private SettingsRepository $prefs;
@@ -26,12 +28,12 @@ class SettingsController
     {
         $user    = Auth::user();
         $service = new WeeklyReportService();
-        $dayOfWeek = (int) date('N'); // 1=Monday … 7=Sunday
-        $mondayTs  = mktime(0, 0, 0) - ($dayOfWeek - 1) * 86400;
-        $data    = $service->collect(date('Y-m-d 00:00:00', $mondayTs));
+        $data = $service->collect(
+            Carbon::now()->startOfWeek(Carbon::MONDAY)->startOfDay()->toDateTimeString()
+        );
 
-        $from    = date('d/m/Y', strtotime($data['period_from']));
-        $to      = date('d/m/Y', strtotime($data['period_to']));
+        $from    = Carbon::parse($data['period_from'])->format('d/m/Y');
+        $to      = Carbon::parse($data['period_to'])->format('d/m/Y');
         $subject = "Informe CRM (manual) — Del {$from} al {$to}";
 
         $ok = MailerService::send(
