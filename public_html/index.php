@@ -38,14 +38,14 @@ function logApplicationError(string $message): void
 
 $autoloadPath = __DIR__ . '/../vendor/autoload.php';
 
-if (file_exists($autoloadPath) && PHP_VERSION_ID >= 80300) {
+if (file_exists($autoloadPath) && PHP_VERSION_ID >= 80400) {
     try {
         require_once $autoloadPath;
     } catch (Throwable $exception) {
         error_log('Composer autoload unavailable: ' . $exception->getMessage());
     }
 } elseif (file_exists($autoloadPath)) {
-    error_log('Composer autoload skipped: PHP 8.3 or newer is required for installed dependencies. Current PHP: ' . PHP_VERSION);
+    error_log('Composer autoload skipped: PHP 8.4 or newer is required for installed dependencies. Current PHP: ' . PHP_VERSION);
 }
 
 require_once __DIR__ . '/../app/Core/Lang.php';

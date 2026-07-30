@@ -392,7 +392,7 @@ return [
     'auth.code_resent'         => 'Отправлен новый код подтверждения.',
 
     // ── Exports (extended) ─────────────────────────────────────────────────────
-    'exports.phpspreadsheet_missing' => 'PhpSpreadsheet не установлен. Экспорт в XLSX недоступен. Выполните:',
+    'exports.openspout_missing' => 'OpenSpout не установлен. Экспорт в XLSX недоступен. Выполните:',
     'exports.download_btn'           => 'Скачать :entity',
     'exports.selection'              => 'Выбор',
     'exports.entity'                 => 'Тип',

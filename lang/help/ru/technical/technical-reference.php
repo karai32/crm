@@ -34,17 +34,17 @@ CODE,
             'id' => 'reference-runtime',
             'title' => 'Среда выполнения и зависимости',
             'paragraphs' => [
-                'Рабочий минимум проекта — PHP 8.3. public_html/index.php намеренно не подключает Composer autoload на более старой версии. Нужна MySQL-совместимая база с InnoDB, utf8mb4, внешними ключами, JSON и FULLTEXT. Рекомендуемая серверная схема — Nginx или Apache, PHP-FPM и отдельный PHP CLI той же версии.',
-                'Composer устанавливает illuminate/database ~13.0, guzzlehttp/guzzle ^8.0, phpoffice/phpspreadsheet ^5.8 и phpmailer/phpmailer ^7.1. Illuminate Database предоставляет Query Builder и общее подключение без установки Laravel; Guzzle выполняет внешние HTTP-запросы; PhpSpreadsheet читает и создаёт XLSX; PHPMailer отправляет еженедельные отчёты и подготовленные 2FA-письма. В проекте нет package.json, сборщика и npm-зависимостей: CSS и JavaScript хранятся как готовые assets.',
+                'Рабочий минимум проекта — PHP 8.4. public_html/index.php намеренно не подключает Composer autoload на более старой версии. Нужна MySQL-совместимая база с InnoDB, utf8mb4, внешними ключами, JSON и FULLTEXT. Рекомендуемая серверная схема — Nginx или Apache, PHP-FPM и отдельный PHP CLI той же версии.',
+                'Composer устанавливает illuminate/database ~13.0, guzzlehttp/guzzle ^8.0, openspout/openspout ^5.8 и phpmailer/phpmailer ^7.1. Illuminate Database предоставляет Query Builder и общее подключение без установки Laravel; Guzzle выполняет внешние HTTP-запросы; OpenSpout потоково читает и создаёт XLSX; PHPMailer отправляет еженедельные отчёты и подготовленные 2FA-письма. В проекте нет package.json, сборщика и npm-зависимостей: CSS и JavaScript хранятся как готовые assets.',
                 'Критичные PHP-возможности: PDO MySQL, mbstring, fileinfo, dom, SimpleXML, XMLReader/XMLWriter, zip, zlib, gd, iconv, ctype, filter, hash и OpenSSL. Для Guzzle рекомендуется расширение curl; без него библиотека может использовать PHP streams. Код также использует random_bytes, password_hash/password_verify, checkdnsrr, flock, finfo, set_time_limit и файловые сессии.',
             ],
             'examples' => [
                 [
                     'title' => 'Быстрая проверка среды',
                     'code' => <<<'SHELL'
-php8.3 --version
+php8.4 --version
 composer check-platform-reqs --no-dev
-php8.3 -m | grep -E 'curl|dom|fileinfo|gd|mbstring|PDO|pdo_mysql|SimpleXML|xmlreader|xmlwriter|zip'
+php8.4 -m | grep -E 'curl|dom|fileinfo|gd|mbstring|PDO|pdo_mysql|SimpleXML|xmlreader|xmlwriter|zip'
 mysql --version
 SHELL,
                 ],
@@ -501,8 +501,8 @@ cd /var/www/contactcore
 composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 composer check-platform-reqs --no-dev
 
-php8.3 -l public_html/index.php
-find app config bin lang public_html -name '*.php' -print0 | xargs -0 -n1 php8.3 -l
+php8.4 -l public_html/index.php
+find app config bin lang public_html -name '*.php' -print0 | xargs -0 -n1 php8.4 -l
 
 # Только для чистой базы: schema.sql содержит DROP TABLE
 mysql -u crm_user -p crm < database/schema.sql
@@ -511,7 +511,7 @@ mysql -u crm_user -p crm < database/schema.sql
 mysql -u crm_user -p crm < database/migrations/20260729_fail_closed_permissions.sql
 mysql -u crm_user -p crm < database/migrations/20260729_enforce_database_constraints.sql
 
-sudo -u www-data /usr/bin/php8.3 bin/weekly-report.php
+sudo -u www-data /usr/bin/php8.4 bin/weekly-report.php
 tail -n 50 storage/app.log
 SHELL,
                 ],
@@ -521,7 +521,7 @@ SHELL,
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-0 8 * * 1 www-data cd /var/www/contactcore && /usr/bin/php8.3 bin/weekly-report.php >> storage/weekly-report-cron.log 2>&1
+0 8 * * 1 www-data cd /var/www/contactcore && /usr/bin/php8.4 bin/weekly-report.php >> storage/weekly-report-cron.log 2>&1
 CRON,
                 ],
             ],

@@ -392,7 +392,7 @@ return [
     'auth.code_resent'         => 'A new verification code has been sent.',
 
     // ── Exports (extended) ─────────────────────────────────────────────────────
-    'exports.phpspreadsheet_missing' => 'PhpSpreadsheet is not installed. XLSX export is unavailable. Run:',
+    'exports.openspout_missing' => 'OpenSpout is not installed. XLSX export is unavailable. Run:',
     'exports.download_btn'           => 'Download :entity',
     'exports.selection'              => 'Selection',
     'exports.entity'                 => 'Entity',

@@ -13,7 +13,7 @@ return array (
       'paragraphs' => 
       array (
         0 => 'Ниже описана установка на чистый сервер Ubuntu 24.04 LTS с Nginx, PHP-FPM и MySQL. Другой современный Linux также подходит, если в нём установлен PHP нужной версии, однако названия пакетов и пути к конфигурации могут отличаться. Для рабочего окружения рекомендуется 64-разрядная система, два ядра процессора, 2 ГБ оперативной памяти и отдельное дисковое пространство для базы, журналов и загружаемых файлов. Для небольшой базы достаточно 20 ГБ, но фактический объём следует рассчитывать по количеству контактов, импортов и сроку хранения резервных копий.',
-        1 => 'Приложению требуется PHP 8.3 или новее. В точке входа Composer-зависимости намеренно не подключаются на более старой версии PHP. PHP должен быть установлен одновременно для FPM, который обслуживает сайт, и для CLI, который запускает служебные команды и еженедельный отчёт. Обе среды должны использовать одну основную версию PHP и одинаковый набор расширений.',
+        1 => 'Приложению требуется PHP 8.4 или новее. В точке входа Composer-зависимости намеренно не подключаются на более старой версии PHP. PHP должен быть установлен одновременно для FPM, который обслуживает сайт, и для CLI, который запускает служебные команды и еженедельный отчёт. Обе среды должны использовать одну основную версию PHP и одинаковый набор расширений.',
         2 => 'База данных должна поддерживать InnoDB, utf8mb4, внешние ключи, JSON-поля, FULLTEXT-индексы и реально применять CHECK-ограничения. Требуется MySQL 8.0.16 или новее либо актуальная поддерживаемая версия MariaDB с включённой проверкой CHECK. Веб-сервер должен передавать все неизвестные маршруты в public_html/index.php, принимать методы GET, POST, PATCH и DELETE, обслуживать HTTPS и разрешать загрузку CSV/XLSX.',
       ),
     ),
@@ -52,20 +52,20 @@ sudo ufw enable',
       'paragraphs' => 
       array (
         0 => 'Обязательны PHP-FPM, PHP CLI и расширения pdo_mysql, mbstring, fileinfo, dom, simplexml, xml, xmlreader, xmlwriter, zip, zlib, gd, iconv, ctype, filter и hash. Для внешних HTTP-запросов рекомендуется расширение curl. OpenSSL нужен для защищённого SMTP и HTTPS. Расширения ctype, filter, hash, iconv, fileinfo, zlib и OpenSSL обычно входят в базовые пакеты PHP, но их наличие всё равно следует проверить.',
-        1 => 'Guzzle выполняет запросы к Gemini через cURL, а при отсутствии расширения может использовать PHP streams. PDO MySQL нужен для базы данных, fileinfo — для проверки типа импортируемого файла, а XML/ZIP/GD/mbstring требуются PhpSpreadsheet для чтения и создания XLSX. Функции checkdnsrr, set_time_limit, random_bytes, password_hash, flock и работа с файлами не должны быть отключены директивой disable_functions.',
+        1 => 'Guzzle выполняет запросы к Gemini через cURL, а при отсутствии расширения может использовать PHP streams. PDO MySQL нужен для базы данных, fileinfo — для проверки типа импортируемого файла, а DOM, libxml, XMLReader и ZIP требуются OpenSpout для потокового чтения и создания XLSX. Функции checkdnsrr, set_time_limit, random_bytes, password_hash, flock и работа с файлами не должны быть отключены директивой disable_functions.',
       ),
       'examples' => 
       array (
         0 => 
         array (
-          'title' => 'Установка PHP 8.3 и расширений',
+          'title' => 'Установка PHP 8.4 и расширений',
           'code' => 'sudo apt install -y \\
-  php8.3-fpm php8.3-cli php8.3-mysql php8.3-curl \\
-  php8.3-mbstring php8.3-xml php8.3-zip php8.3-gd
+  php8.4-fpm php8.4-cli php8.4-mysql php8.4-curl \\
+  php8.4-mbstring php8.4-xml php8.4-zip php8.4-gd
 
-php8.3 --version
-php8.3 -m | grep -E \'curl|dom|fileinfo|gd|mbstring|PDO|pdo_mysql|SimpleXML|xmlreader|xmlwriter|zip\'
-sudo systemctl enable --now php8.3-fpm nginx mysql cron',
+php8.4 --version
+php8.4 -m | grep -E \'curl|dom|fileinfo|gd|mbstring|PDO|pdo_mysql|SimpleXML|xmlreader|xmlwriter|zip\'
+sudo systemctl enable --now php8.4-fpm nginx mysql cron',
         ),
       ),
     ),
@@ -75,14 +75,14 @@ sudo systemctl enable --now php8.3-fpm nginx mysql cron',
       'title' => 'Настройки PHP-FPM и лимиты',
       'paragraphs' => 
       array (
-        0 => 'Импорт XLSX может потреблять заметно больше памяти, чем размер самого файла. Для обычной установки разумная отправная точка — memory_limit 512M, upload_max_filesize 25M и post_max_size 32M. post_max_size должен быть больше upload_max_filesize, а лимит Nginx — не меньше обоих. Если предполагаются особенно большие файлы, лимиты следует увеличивать вместе и контролировать память сервера.',
+        0 => 'OpenSpout обрабатывает XLSX потоково, поэтому импорт не загружает всю книгу в память. Для обычной установки разумная отправная точка — memory_limit 512M, upload_max_filesize 25M и post_max_size 32M. post_max_size должен быть больше upload_max_filesize, а лимит Nginx — не меньше обоих. Если предполагаются особенно большие файлы, лимиты загрузки следует увеличивать согласованно и контролировать временное дисковое пространство.',
         1 => 'Обработка импорта выполняется синхронно и внутри приложения снимает PHP-лимит времени, поэтому fastcgi_read_timeout Nginx должен быть достаточно большим. В рабочем окружении выключите display_errors, включите log_errors, установите часовой пояс и безопасные параметры сессионных cookie. Изменения нужны в конфигурации FPM; для cron проверьте также отдельный php.ini CLI.',
       ),
       'examples' => 
       array (
         0 => 
         array (
-          'title' => '/etc/php/8.3/fpm/conf.d/99-contactcore.ini',
+          'title' => '/etc/php/8.4/fpm/conf.d/99-contactcore.ini',
           'code' => 'date.timezone = Europe/Madrid
 memory_limit = 512M
 upload_max_filesize = 25M
@@ -103,12 +103,12 @@ session.use_strict_mode = 1',
         1 => 
         array (
           'title' => 'Применение и проверка настроек',
-          'code' => 'sudo cp /etc/php/8.3/fpm/conf.d/99-contactcore.ini \\
-  /etc/php/8.3/cli/conf.d/99-contactcore.ini
-sudo php-fpm8.3 -t
-sudo systemctl restart php8.3-fpm
-php8.3 --ini
-php8.3 -r "echo ini_get(\'memory_limit\'), PHP_EOL;"',
+          'code' => 'sudo cp /etc/php/8.4/fpm/conf.d/99-contactcore.ini \\
+  /etc/php/8.4/cli/conf.d/99-contactcore.ini
+sudo php-fpm8.4 -t
+sudo systemctl restart php8.4-fpm
+php8.4 --ini
+php8.4 -r "echo ini_get(\'memory_limit\'), PHP_EOL;"',
         ),
       ),
     ),
@@ -146,7 +146,7 @@ php8.3 -r "echo ini_get(\'memory_limit\'), PHP_EOL;"',
     location ~ \\.php$ {
         try_files $uri =404;
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
         fastcgi_read_timeout 300s;
     }
 

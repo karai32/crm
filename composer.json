@@ -1,9 +1,10 @@
 {
     "license": "proprietary",
     "require": {
-        "phpoffice/phpspreadsheet": "^5.8",
+        "php": "~8.4.0 || ~8.5.0",
         "phpmailer/phpmailer": "^7.1",
         "illuminate/database": "~13.0",
-        "guzzlehttp/guzzle": "^8.0"
+        "guzzlehttp/guzzle": "^8.0",
+        "openspout/openspout": "^5.8"
     }
 }

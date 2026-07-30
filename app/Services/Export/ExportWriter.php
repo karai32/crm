@@ -1,5 +1,8 @@
 <?php
 
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
+
 class ExportWriter
 {
     public function csv(array $plan, $output): int
@@ -17,33 +20,36 @@ class ExportWriter
 
     public function xlsx(array $plan, string $title, string $target): int
     {
-        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
-            throw new RuntimeException('PhpSpreadsheet is required for XLSX exports.');
+        if (!class_exists(XlsxWriter::class)) {
+            throw new RuntimeException('OpenSpout is required for XLSX exports.');
         }
 
         $statement = $this->statement($plan['sql'], $plan['params']);
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle($title);
-        $sheet->fromArray($plan['headers'], null, 'A1');
+        $writer = new XlsxWriter();
+        $writer->openToFile($target);
 
-        $rowNumber = 2;
-        while ($row = $statement->fetch(PDO::FETCH_NUM)) {
-            $sheet->fromArray(array_map([$this, 'safeCell'], $row), null, 'A' . $rowNumber++);
+        try {
+            $writer->getCurrentSheet()->setName($title);
+            $writer->addRow(Row::fromValues($plan['headers']));
+
+            $rows = 0;
+            while ($row = $statement->fetch(PDO::FETCH_NUM)) {
+                $writer->addRow(Row::fromValues(array_map([$this, 'safeCell'], $row)));
+                $rows++;
+            }
+        } finally {
+            $writer->close();
         }
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->setPreCalculateFormulas(false);
-        $writer->save($target);
-        $spreadsheet->disconnectWorksheets();
-
-        return $rowNumber - 2;
+        return $rows;
     }
 
     private function statement(string $sql, array $params): PDOStatement
     {
         $pdo = Database::connect();
-        $pdo->exec('SET SESSION group_concat_max_len = 65535');
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+            $pdo->exec('SET SESSION group_concat_max_len = 65535');
+        }
         $statement = $pdo->prepare($sql);
         foreach ($params as $key => $value) {
             $statement->bindValue($key, $value);

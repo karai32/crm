@@ -29,8 +29,8 @@ class ImportManager
         if (!in_array($extension, ['csv', 'xlsx'], true)) {
             return ['success' => false, 'message' => 'Only CSV and XLSX files are supported.'];
         }
-        if ($extension === 'xlsx' && !class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
-            return ['success' => false, 'message' => 'PhpSpreadsheet is required for XLSX imports.'];
+        if ($extension === 'xlsx' && !class_exists(\OpenSpout\Reader\XLSX\Reader::class)) {
+            return ['success' => false, 'message' => 'OpenSpout is required for XLSX imports.'];
         }
         if (!$this->validMime((string) $file['tmp_name'], $extension)) {
             return ['success' => false, 'message' => 'The uploaded file type does not match its extension.'];

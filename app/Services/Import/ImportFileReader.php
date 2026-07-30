@@ -1,5 +1,12 @@
 <?php
 
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Cell\FormulaCell;
+use OpenSpout\Common\Entity\Cell\TextRunCell;
+use OpenSpout\Reader\XLSX\Options as XlsxReaderOptions;
+use OpenSpout\Reader\XLSX\Reader as XlsxReader;
+use OpenSpout\Reader\XLSX\Sheet as XlsxSheet;
+
 class ImportFileReader
 {
     public function preview(string $path, string $fileType, int $limit = 10): array
@@ -61,44 +68,21 @@ class ImportFileReader
 
     private function xlsxRows(string $path): Generator
     {
-        if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
-            throw new RuntimeException('PhpSpreadsheet is required for XLSX imports.');
-        }
+        $headers = [];
 
-        $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($path);
-        $reader->setReadDataOnly(true);
-        $spreadsheet = $reader->load($path);
-
-        try {
-            $sheet = $spreadsheet->getActiveSheet();
-            $headers = [];
-
-            foreach ($sheet->getRowIterator() as $sheetRow) {
-                $rowNumber = $sheetRow->getRowIndex();
-                $cells = [];
-                $iterator = $sheetRow->getCellIterator();
-                $iterator->setIterateOnlyExistingCells(false);
-
-                foreach ($iterator as $cell) {
-                    $cells[] = trim((string) $cell->getFormattedValue());
-                }
-
-                if ($rowNumber === 1) {
-                    $headers = $this->normalizeHeaders($cells);
-                    continue;
-                }
-                if ($headers === []) {
-                    continue;
-                }
-
-                $row = $this->combine($headers, $cells);
-                if ($this->hasValues($row)) {
-                    yield ['row_number' => $rowNumber, 'headers' => $headers, 'row' => $row];
-                }
+        foreach ($this->xlsxValues($path) as $rowNumber => $cells) {
+            if ($rowNumber === 1) {
+                $headers = $this->normalizeHeaders($cells);
+                continue;
             }
-        } finally {
-            $spreadsheet->disconnectWorksheets();
-            unset($spreadsheet);
+            if ($headers === []) {
+                continue;
+            }
+
+            $row = $this->combine($headers, $cells);
+            if ($this->hasValues($row)) {
+                yield ['row_number' => $rowNumber, 'headers' => $headers, 'row' => $row];
+            }
         }
     }
 
@@ -114,19 +98,19 @@ class ImportFileReader
     private function headers(string $path, string $fileType): array
     {
         if ($fileType === 'xlsx') {
-            if (!class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
-                return [];
-            }
-            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($path);
-            $reader->setReadDataOnly(true);
-            $spreadsheet = $reader->load($path);
+            $reader = $this->xlsxReader();
+            $reader->open($path);
+            $headers = [];
             try {
-                return $this->normalizeHeaders(
-                    $spreadsheet->getActiveSheet()->rangeToArray('A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . '1')[0] ?? []
-                );
+                foreach ($this->activeSheet($reader)->getRowIterator() as $row) {
+                    if ($headers === []) {
+                        $headers = $this->normalizeHeaders(array_map([$this, 'cellText'], $row->cells));
+                    }
+                }
             } finally {
-                $spreadsheet->disconnectWorksheets();
+                $reader->close();
             }
+            return $headers;
         }
 
         $handle = fopen($path, 'rb');
@@ -159,5 +143,67 @@ class ImportFileReader
             }
         }
         return false;
+    }
+
+    private function xlsxValues(string $path): Generator
+    {
+        $reader = $this->xlsxReader();
+        $reader->open($path);
+
+        try {
+            foreach ($this->activeSheet($reader)->getRowIterator() as $rowNumber => $row) {
+                yield $rowNumber => array_map([$this, 'cellText'], $row->cells);
+            }
+        } finally {
+            $reader->close();
+        }
+    }
+
+    private function xlsxReader(): XlsxReader
+    {
+        if (!class_exists(XlsxReader::class)) {
+            throw new RuntimeException('OpenSpout is required for XLSX imports.');
+        }
+
+        return new XlsxReader(new XlsxReaderOptions(
+            SHOULD_FORMAT_DATES: true,
+            SHOULD_PRESERVE_EMPTY_ROWS: true
+        ));
+    }
+
+    private function activeSheet(XlsxReader $reader): XlsxSheet
+    {
+        $first = null;
+        foreach ($reader->getSheetIterator() as $sheet) {
+            $first ??= $sheet;
+            if ($sheet->isActive()) {
+                return $sheet;
+            }
+        }
+
+        return $first ?? throw new RuntimeException('The XLSX file has no worksheets.');
+    }
+
+    private function cellText(Cell $cell): string
+    {
+        if ($cell instanceof TextRunCell) {
+            return trim($cell->getStringValue());
+        }
+
+        $value = $cell instanceof FormulaCell
+            ? ($cell->getComputedValue() ?? $cell->getValue())
+            : $cell->getValue();
+
+        if ($value instanceof DateTimeInterface) {
+            return $value->format('Y-m-d H:i:s');
+        }
+        if ($value instanceof DateInterval) {
+            return $value->format('%r%a days %H:%I:%S');
+        }
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        return trim((string) ($value ?? ''));
     }
 }

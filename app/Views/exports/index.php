@@ -10,7 +10,7 @@ $entityLabel      = $entity === 'contacts' ? Lang::get('contacts.title') : Lang:
 $otherEntity      = $entity === 'contacts' ? 'clients' : 'contacts';
 $otherEntityLabel = $entity === 'contacts' ? Lang::get('clients.title') : Lang::get('contacts.title');
 
-$xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
+$xlsxAvailable = class_exists(\OpenSpout\Writer\XLSX\Writer::class);
 
 ?>
 
@@ -22,10 +22,10 @@ $xlsxAvailable = class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class);
     </div>
 </div>
 
-<?php if (isset($_GET['error']) && $_GET['error'] === 'phpspreadsheet'): ?>
+<?php if (isset($_GET['error']) && $_GET['error'] === 'openspout'): ?>
 <div class="export-notice">
     <i class="ph ph-warning"></i>
-    <?= t('exports.phpspreadsheet_missing') ?> <code>composer require phpoffice/phpspreadsheet</code>
+    <?= t('exports.openspout_missing') ?> <code>composer require openspout/openspout</code>
 </div>
 <?php endif; ?>
 

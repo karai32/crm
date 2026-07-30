@@ -73,8 +73,8 @@ class ExportController
         }
 
         // XLSX
-        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
-            Auth::redirect('/exports?entity=' . $entity . '&error=phpspreadsheet');
+        if (!class_exists(\OpenSpout\Writer\XLSX\Writer::class)) {
+            Auth::redirect('/exports?entity=' . $entity . '&error=openspout');
         }
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
