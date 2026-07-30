@@ -4,7 +4,6 @@
         "phpoffice/phpspreadsheet": "^5.8",
         "phpmailer/phpmailer": "^7.1",
         "illuminate/database": "~13.0",
-        "guzzlehttp/guzzle": "^8.0",
-        "twig/twig": "^3.28"
+        "guzzlehttp/guzzle": "^8.0"
     }
 }
