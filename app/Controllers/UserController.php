@@ -49,7 +49,8 @@ class UserController
     {
         $defaultRole = $this->users->findRoleByName('user');
 
-        View::render('users/create', [
+        View::render('users/_form', [
+            'isEdit' => false,
             'title'   => Lang::get('users.create_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['users.js'],
@@ -91,7 +92,8 @@ class UserController
             return;
         }
 
-        View::render('users/edit', [
+        View::render('users/_form', [
+            'isEdit' => true,
             'title'   => Lang::get('users.edit_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['users.js'],
@@ -176,7 +178,8 @@ class UserController
     // Re-renders the create/edit form with submitted values and an error message.
     private function renderFormError(string $form, array $user, string $errorKey): void
     {
-        View::render('users/' . $form, [
+        View::render('users/_form', [
+            'isEdit' => $form === 'edit',
             'title'  => Lang::get($form === 'create' ? 'users.create_title' : 'users.edit_title'),
             'styles' => ['settings.css'],
             'user'   => $user,

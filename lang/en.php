@@ -373,6 +373,7 @@ return [
     // ── Contacts (extended) ────────────────────────────────────────────────────
     'contacts.name_required'      => 'Full name is required.',
     'contacts.email_already_used' => 'A contact with this email already exists.',
+    'contacts.internal_email' => 'Internal company emails cannot be added as contacts.',
     'contacts.invalid_email_mx'   => 'Invalid email (no MX record)',
     'contacts.no_clients_linked'  => 'No clients linked.',
 

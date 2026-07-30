@@ -35,7 +35,8 @@ class CustomFieldController
 
     public function create(): void
     {
-        View::render('custom-fields/create', [
+        View::render('custom-fields/_form', [
+            'isEdit'  => false,
             'title'       => Lang::get('cf.create_title'),
             'styles'      => ['settings.css'],
             'scripts'     => ['custom-fields.js'],
@@ -51,7 +52,8 @@ class CustomFieldController
         $options = $this->optionsFromRequest();
 
         if ($data['name'] === '' || $data['slug'] === '') {
-            View::render('custom-fields/create', [
+            View::render('custom-fields/_form', [
+                'isEdit'     => false,
                 'title'       => Lang::get('cf.create_title'),
                 'styles'      => ['settings.css'],
                 'field'       => $data,
@@ -78,7 +80,8 @@ class CustomFieldController
 
         $options = array_column($this->customFields->optionsForField((int) $field['id']), 'value');
 
-        View::render('custom-fields/edit', [
+        View::render('custom-fields/_form', [
+            'isEdit'     => true,
             'title'       => Lang::get('cf.edit_title'),
             'styles'      => ['settings.css'],
             'scripts'     => ['custom-fields.js'],
@@ -105,7 +108,8 @@ class CustomFieldController
         if ($data['name'] === '' || $data['slug'] === '') {
             $data['id'] = $id;
 
-            View::render('custom-fields/edit', [
+            View::render('custom-fields/_form', [
+                'isEdit'     => true,
                 'title'       => Lang::get('cf.edit_title'),
                 'styles'      => ['settings.css'],
                 'field'       => $data,

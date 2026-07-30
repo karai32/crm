@@ -40,6 +40,12 @@ abstract class AbstractApiService
             } catch (ApiException $exception) {
                 $details = $exception->details() ?: [$exception->getMessage()];
                 $results[] = $this->batchError($index, $exception->errorCode(), $details);
+            } catch (WriteException $exception) {
+                $results[] = $this->batchError(
+                    $index,
+                    $exception->apiCode(),
+                    [$exception->getMessage()]
+                );
             } catch (PDOException $exception) {
                 $code = Database::isIntegrityViolation($exception) ? 'conflict' : 'server_error';
                 $message = $code === 'conflict'

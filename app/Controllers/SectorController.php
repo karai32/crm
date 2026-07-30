@@ -35,7 +35,8 @@ class SectorController
 
     public function create(): void
     {
-        View::render('sectors/create', [
+        View::render('sectors/_form', [
+            'isEdit' => false,
             'title'  => Lang::get('sectors.create_title'),
             'styles' => ['settings.css'],
             'error'  => null,
@@ -47,7 +48,8 @@ class SectorController
         $name = trim($_POST['name'] ?? '');
 
         if ($name === '') {
-            View::render('sectors/create', [
+            View::render('sectors/_form', [
+                'isEdit' => false,
                 'title'  => Lang::get('sectors.create_title'),
                 'styles' => ['settings.css'],
                 'error'  => Lang::get('sectors.name_required'),
@@ -71,7 +73,8 @@ class SectorController
             return;
         }
 
-        View::render('sectors/edit', [
+        View::render('sectors/_form', [
+            'isEdit'          => true,
             'title'            => Lang::get('sectors.edit_title'),
             'styles'           => ['settings.css'],
             'sector'           => $sector,
@@ -97,7 +100,8 @@ class SectorController
         }
 
         if ($name === '' || !$this->icons->isValid($iconInput)) {
-            View::render('sectors/edit', [
+            View::render('sectors/_form', [
+                'isEdit'          => true,
                 'title'            => Lang::get('sectors.edit_title'),
                 'styles'           => ['settings.css'],
                 'error'            => $name === '' ? Lang::get('sectors.name_required') : Lang::get('sectors.choose_icon'),

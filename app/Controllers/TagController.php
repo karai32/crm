@@ -33,7 +33,8 @@ class TagController
 
     public function create(): void
     {
-        View::render('tags/create', [
+        View::render('tags/_form', [
+            'isEdit' => false,
             'title'   => Lang::get('tags.create_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['color-picker.js'],
@@ -47,7 +48,8 @@ class TagController
         $color = $this->cleanColor($_POST['color'] ?? '');
 
         if ($name === '') {
-            View::render('tags/create', [
+            View::render('tags/_form', [
+                'isEdit' => false,
                 'title'  => Lang::get('tags.create_title'),
                 'styles' => ['settings.css'],
                 'error'  => Lang::get('tags.name_required'),
@@ -72,7 +74,8 @@ class TagController
             return;
         }
 
-        View::render('tags/edit', [
+        View::render('tags/_form', [
+            'isEdit'  => true,
             'title'   => Lang::get('tags.edit_title'),
             'styles'  => ['settings.css'],
             'scripts' => ['color-picker.js'],
@@ -95,7 +98,8 @@ class TagController
         }
 
         if ($name === '') {
-            View::render('tags/edit', [
+            View::render('tags/_form', [
+                'isEdit'  => true,
                 'title'   => Lang::get('tags.edit_title'),
                 'styles'  => ['settings.css'],
                 'scripts' => ['color-picker.js'],

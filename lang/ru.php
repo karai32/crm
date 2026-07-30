@@ -373,6 +373,7 @@ return [
     // ── Contacts (extended) ────────────────────────────────────────────────────
     'contacts.name_required'      => 'Полное имя обязательно.',
     'contacts.email_already_used' => 'Контакт с таким email уже существует.',
+    'contacts.internal_email' => 'Внутренние email компании нельзя добавлять как контакты.',
     'contacts.invalid_email_mx'   => 'Недействительный email (нет записи MX)',
     'contacts.no_clients_linked'  => 'Клиенты не привязаны.',
 

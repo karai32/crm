@@ -83,24 +83,6 @@ class ContactApiService extends AbstractApiService
     {
         $this->requireRecord($this->contacts->find($id), 'contact');
         $body = $this->expandCustomFieldKeys($body);
-        $errors = [];
-
-        if (array_key_exists('full_name', $body) && trim((string) ($body['full_name'] ?? '')) === '') {
-            $errors[] = 'full_name cannot be empty';
-        }
-
-        if (array_key_exists('email', $body)) {
-            $email = trim((string) ($body['email'] ?? ''));
-            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'email is invalid';
-            } elseif ($email !== '' && $this->contacts->emailTakenByOther($email, $id)) {
-                $errors[] = 'email is already used by another contact';
-            }
-        }
-
-        if ($errors !== []) {
-            throw new ApiException(422, 'validation_error', 'Contact validation failed', $errors);
-        }
 
         $changes = [];
 
@@ -108,17 +90,7 @@ class ContactApiService extends AbstractApiService
             if (!array_key_exists($field, $body)) {
                 continue;
             }
-            $changes[$field] = $field === 'full_name'
-                ? trim((string) ($body[$field] ?? ''))
-                : ($field === 'company'
-                    ? trim((string) ($body[$field] ?? ''))
-                    : $this->nullableString($body[$field]));
-        }
-
-        if (array_key_exists('email', $body)) {
-            $inspection = EmailInspector::inspect($changes['email']);
-            $changes['is_corporate_email'] = $inspection['is_corporate_email'];
-            $changes['email_status']       = $inspection['email_status'];
+            $changes[$field] = $body[$field];
         }
 
         if (array_key_exists('custom_fields', $body) && !is_array($body['custom_fields'])) {
@@ -167,25 +139,6 @@ class ContactApiService extends AbstractApiService
     {
         $item = $this->expandCustomFieldKeys($item);
 
-        $fullName = trim((string) ($item['full_name'] ?? ''));
-        $email = trim((string) ($item['email'] ?? ''));
-        $errors = [];
-
-        if ($fullName === '') {
-            $errors[] = 'full_name is required';
-        }
-        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'email is invalid';
-        }
-        if ($errors !== []) {
-            throw new ApiException(422, 'validation_error', 'Contact validation failed', $errors);
-        }
-        if ($email !== '' && str_contains(strtolower($email), 'unanime')) {
-            throw new ApiException(422, 'internal_email', 'Internal company emails cannot be added as contacts');
-        }
-        if ($email !== '' && $this->contacts->emailExists($email)) {
-            throw new ApiException(409, 'duplicate_contact', 'Contact with this email already exists');
-        }
         if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
             throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
         }
@@ -194,7 +147,6 @@ class ContactApiService extends AbstractApiService
         [$tagIds, $tagCreated] = $this->resolveTagIds($this->splitNames($item['tags'] ?? null));
         [$clientIds, $clientCreated] = $this->resolveClientIds($this->splitNames($item['clients'] ?? null));
 
-        $inspection = EmailInspector::inspect($email === '' ? null : $email);
         [$customFields, $customValues] = $this->customFieldWriteData(
             'contact',
             is_array($item['custom_fields'] ?? null) ? $item['custom_fields'] : [],
@@ -202,12 +154,10 @@ class ContactApiService extends AbstractApiService
         );
         $contactId = $this->contactWriter->create(
             data: [
-                'full_name'          => $fullName,
-                'email'              => $email === '' ? null : $email,
-                'phone'              => $this->nullableString($item['phone'] ?? null),
-                'company'            => trim((string) ($item['company'] ?? '')),
-                'is_corporate_email' => $inspection['is_corporate_email'],
-                'email_status'       => $inspection['email_status'],
+                'full_name' => $item['full_name'] ?? '',
+                'email' => $item['email'] ?? null,
+                'phone' => $item['phone'] ?? null,
+                'company' => $item['company'] ?? '',
             ],
             tagIds: $tagIds,
             clientIds: $clientIds,

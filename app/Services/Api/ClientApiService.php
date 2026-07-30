@@ -79,19 +79,12 @@ class ClientApiService extends AbstractApiService
     {
         $this->requireRecord($this->clients->find($id), 'client');
         $body = $this->expandCustomFieldKeys($body);
-        if (array_key_exists('commercial_name', $body) && trim((string) ($body['commercial_name'] ?? '')) === '') {
-            throw new ApiException(422, 'validation_error', 'commercial_name cannot be empty');
-        }
-        if (array_key_exists('commercial_name', $body)
-            && $this->clients->commercialNameTakenByOther((string) $body['commercial_name'], $id)) {
-            throw new ApiException(409, 'duplicate_client', 'Client with this commercial_name already exists');
-        }
 
         $changes = [];
 
         foreach (['commercial_name', 'legal_name', 'cif', 'address', 'postal_code', 'city', 'province', 'country', 'website', 'notes'] as $field) {
             if (array_key_exists($field, $body)) {
-                $changes[$field] = $this->nullableString($body[$field]);
+                $changes[$field] = $body[$field];
             }
         }
 
@@ -138,13 +131,6 @@ class ClientApiService extends AbstractApiService
     {
         $item = $this->expandCustomFieldKeys($item);
 
-        $commercialName = trim((string) ($item['commercial_name'] ?? ''));
-        if ($commercialName === '') {
-            throw new ApiException(422, 'validation_error', 'Client validation failed', ['commercial_name is required']);
-        }
-        if ($this->clients->findByCommercialName($commercialName) !== null) {
-            throw new ApiException(409, 'duplicate_client', 'Client with this commercial_name already exists');
-        }
         if (!empty($item['custom_fields']) && !is_array($item['custom_fields'])) {
             throw new ApiException(422, 'validation_error', 'custom_fields must be an object');
         }
@@ -159,17 +145,17 @@ class ClientApiService extends AbstractApiService
         );
         $clientId = $this->clientWriter->create(
             data: [
-                'commercial_name' => $commercialName,
-                'legal_name' => $this->nullableString($item['legal_name'] ?? null),
-                'cif' => $this->nullableString($item['cif'] ?? null),
-                'address' => $this->nullableString($item['address'] ?? null),
-                'postal_code' => $this->nullableString($item['postal_code'] ?? null),
-                'city' => $this->nullableString($item['city'] ?? null),
-                'province' => $this->nullableString($item['province'] ?? null),
-                'country' => $this->nullableString($item['country'] ?? null),
+                'commercial_name' => $item['commercial_name'] ?? '',
+                'legal_name' => $item['legal_name'] ?? null,
+                'cif' => $item['cif'] ?? null,
+                'address' => $item['address'] ?? null,
+                'postal_code' => $item['postal_code'] ?? null,
+                'city' => $item['city'] ?? null,
+                'province' => $item['province'] ?? null,
+                'country' => $item['country'] ?? null,
                 'sector_id' => $sectorId,
-                'website' => $this->nullableString($item['website'] ?? null),
-                'notes' => $this->nullableString($item['notes'] ?? null),
+                'website' => $item['website'] ?? null,
+                'notes' => $item['notes'] ?? null,
             ],
             tagIds: $tagIds,
             customFields: $customFields,

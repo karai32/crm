@@ -72,18 +72,7 @@ class ContactController
 
     public function create(): void
     {
-        View::render('contacts/create', [
-            'title'            => Lang::get('contacts.create_title'),
-            'styles'           => ['contacts.css'],
-            'contact'          => [],
-            'tags'             => $this->tags->first(),
-            'selectedTagIds'   => [],
-            'clients'          => $this->contacts->firstClients(),
-            'selectedClientIds' => [],
-            'customFields'     => $this->customFields->fieldsForEntity('contact'),
-            'customValues'     => [],
-            'error'            => null,
-        ]);
+        $this->renderForm(false);
     }
 
     public function store(): void
@@ -94,37 +83,19 @@ class ContactController
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
-        $error = null;
-        if ($data['full_name'] === '') {
-            $error = Lang::get('contacts.name_required');
-        } elseif ($data['email'] !== null && $this->contacts->emailExists($data['email'])) {
-            $error = Lang::get('contacts.email_already_used');
-        }
-
-        if ($error !== null) {
-            View::render('contacts/create', [
-                'title'            => Lang::get('contacts.create_title'),
-                'styles'           => ['contacts.css'],
-                'contact'          => $data,
-                'tags'             => $this->tags->first(),
-                'selectedTagIds'   => $tagIds,
-                'clients'          => $this->contacts->firstClients(),
-                'selectedClientIds' => $clientIds,
-                'customFields'     => $customFields,
-                'customValues'     => $customValues,
-                'error'            => $error,
-            ]);
+        try {
+            $id = $this->contactWriter->create(
+                data: $data,
+                tagIds: $tagIds,
+                clientIds: $clientIds,
+                customFields: $customFields,
+                customValues: $customValues
+            );
+        } catch (WriteException $exception) {
+            $this->renderForm(false, $data, $tagIds, $clientIds, $customValues, Lang::get($exception->reason()));
             return;
         }
 
-        $data = array_merge($data, EmailInspector::inspect($data['email']));
-        $id = $this->contactWriter->create(
-            data: $data,
-            tagIds: $tagIds,
-            clientIds: $clientIds,
-            customFields: $customFields,
-            customValues: $customValues
-        );
         Auth::redirect('/contacts/show?id=' . $id);
     }
 
@@ -156,21 +127,7 @@ class ContactController
             return;
         }
 
-        $selectedTags = $this->entityTags->tagsForEntity('contact', (int) $contact['id']);
-        $selectedClients = $this->contacts->clientsForContact((int) $contact['id']);
-
-        View::render('contacts/edit', [
-            'title'            => Lang::get('contacts.edit_title'),
-            'styles'           => ['contacts.css'],
-            'contact'          => $contact,
-            'tags'             => $this->mergeSelectedRows($this->tags->first(), $selectedTags),
-            'selectedTagIds'   => array_map('intval', array_column($selectedTags, 'id')),
-            'clients'          => $this->mergeSelectedRows($this->contacts->firstClients(), $selectedClients),
-            'selectedClientIds' => array_map('intval', array_column($selectedClients, 'id')),
-            'customFields'     => $this->customFields->fieldsForEntity('contact'),
-            'customValues'     => $this->customFields->valuesForEntity('contact', (int) $contact['id']),
-            'error'            => null,
-        ]);
+        $this->renderForm(true, $contact);
     }
 
     public function update(): void
@@ -189,46 +146,24 @@ class ContactController
         $customFields = $this->customFields->fieldsForEntity('contact');
         $customValues = $_POST['custom_fields'] ?? [];
 
-        $error = null;
-        if ($data['full_name'] === '') {
-            $error = Lang::get('contacts.name_required');
-        } elseif ($data['email'] !== null && $this->contacts->emailTakenByOther($data['email'], $id)) {
-            $error = Lang::get('contacts.email_already_used');
+        if ($manualEmailState !== null) {
+            $data = array_merge($data, $manualEmailState);
         }
 
-        if ($error !== null) {
+        try {
+            $this->contactWriter->update(
+                id: $id,
+                changes: $data,
+                tagIds: $tagIds,
+                clientIds: $clientIds,
+                customFields: $customFields,
+                customValues: $customValues
+            );
+        } catch (WriteException $exception) {
             $data['id'] = $id;
-
-            if ($manualEmailState !== null) {
-                $data = array_merge($data, $manualEmailState);
-            }
-
-            View::render('contacts/edit', [
-                'title'            => Lang::get('contacts.edit_title'),
-                'styles'           => ['contacts.css'],
-                'contact'          => $data,
-                'tags'             => $this->tags->first(),
-                'selectedTagIds'   => $tagIds,
-                'clients'          => $this->contacts->firstClients(),
-                'selectedClientIds' => $clientIds,
-                'customFields'     => $customFields,
-                'customValues'     => $customValues,
-                'error'            => $error,
-            ]);
+            $this->renderForm(true, $data, $tagIds, $clientIds, $customValues, Lang::get($exception->reason()));
             return;
         }
-
-        $data = array_merge($data, $data['email'] !== null && $manualEmailState !== null
-            ? $manualEmailState
-            : EmailInspector::inspect($data['email']));
-        $this->contactWriter->update(
-            id: $id,
-            changes: $data,
-            tagIds: $tagIds,
-            clientIds: $clientIds,
-            customFields: $customFields,
-            customValues: $customValues
-        );
         Auth::redirect('/contacts/show?id=' . $id);
     }
 
@@ -294,6 +229,47 @@ class ContactController
             'phone'     => $this->emptyToNull($_POST['phone'] ?? ''),
             'company'   => trim($_POST['company'] ?? ''),
         ];
+    }
+
+    private function renderForm(
+        bool $isEdit,
+        array $contact = [],
+        ?array $selectedTagIds = null,
+        ?array $selectedClientIds = null,
+        ?array $customValues = null,
+        ?string $error = null
+    ): void {
+        $id = (int) ($contact['id'] ?? 0);
+
+        if ($selectedTagIds === null) {
+            $selectedTags = $id > 0 ? $this->entityTags->tagsForEntity('contact', $id) : [];
+            $selectedTagIds = array_map('intval', array_column($selectedTags, 'id'));
+        } else {
+            $selectedTags = $this->filterRowsByIds($this->tags->first(500), $selectedTagIds);
+        }
+
+        if ($selectedClientIds === null) {
+            $selectedClients = $id > 0 ? $this->contacts->clientsForContact($id) : [];
+            $selectedClientIds = array_map('intval', array_column($selectedClients, 'id'));
+        } else {
+            $selectedClients = $this->filterRowsByIds($this->contacts->firstClients(500), $selectedClientIds);
+        }
+
+        View::render('contacts/_form', [
+            'isEdit'            => $isEdit,
+            'title'             => Lang::get($isEdit ? 'contacts.edit_title' : 'contacts.create_title'),
+            'styles'            => ['contacts.css'],
+            'contact'           => $contact,
+            'tags'              => $this->mergeSelectedRows($this->tags->first(), $selectedTags),
+            'selectedTagIds'    => $selectedTagIds,
+            'clients'           => $this->mergeSelectedRows($this->contacts->firstClients(), $selectedClients),
+            'selectedClientIds' => $selectedClientIds,
+            'customFields'      => $this->customFields->fieldsForEntity('contact'),
+            'customValues'      => $customValues ?? ($id > 0
+                ? $this->customFields->valuesForEntity('contact', $id)
+                : []),
+            'error'             => $error,
+        ]);
     }
 
     private function filtersFromRequest(): array

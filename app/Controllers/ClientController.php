@@ -58,17 +58,7 @@ class ClientController
 
     public function create(): void
     {
-        View::render('clients/create', [
-            'title'        => Lang::get('clients.create_title'),
-            'styles'       => ['clients.css'],
-            'client'       => [],
-            'sectors'      => $this->sectors->active(),
-            'tags'         => $this->tags->first(),
-            'selectedTagIds' => [],
-            'customFields' => $this->customFields->fieldsForEntity('client'),
-            'customValues' => [],
-            'error'        => null,
-        ]);
+        $this->renderForm(false);
     }
 
     public function store(): void
@@ -78,34 +68,18 @@ class ClientController
         $customFields = $this->customFields->fieldsForEntity('client');
         $customValues = $_POST['custom_fields'] ?? [];
 
-        $error = null;
-        if ($data['commercial_name'] === '') {
-            $error = Lang::get('clients.name_required');
-        } elseif ($this->clients->findByCommercialName($data['commercial_name']) !== null) {
-            $error = Lang::get('clients.name_already_used');
-        }
-
-        if ($error !== null) {
-            View::render('clients/create', [
-                'title'        => Lang::get('clients.create_title'),
-                'styles'       => ['clients.css'],
-                'client'       => $data,
-                'sectors'      => $this->sectors->active(),
-                'tags'         => $this->tags->first(),
-                'selectedTagIds' => $tagIds,
-                'customFields' => $customFields,
-                'customValues' => $customValues,
-                'error'        => $error,
-            ]);
+        try {
+            $id = $this->clientWriter->create(
+                data: $data,
+                tagIds: $tagIds,
+                customFields: $customFields,
+                customValues: $customValues
+            );
+        } catch (WriteException $exception) {
+            $this->renderForm(false, $data, $tagIds, $customValues, Lang::get($exception->reason()));
             return;
         }
 
-        $id = $this->clientWriter->create(
-            data: $data,
-            tagIds: $tagIds,
-            customFields: $customFields,
-            customValues: $customValues
-        );
         Auth::redirect('/clients/show?id=' . $id);
     }
 
@@ -138,19 +112,7 @@ class ClientController
             return;
         }
 
-        $selectedTags = $this->entityTags->tagsForEntity('client', (int) $client['id']);
-
-        View::render('clients/edit', [
-            'title'        => Lang::get('clients.edit_title'),
-            'styles'       => ['clients.css'],
-            'client'       => $client,
-            'sectors'      => $this->sectors->active(),
-            'tags'         => $this->mergeSelectedRows($this->tags->first(), $selectedTags),
-            'selectedTagIds' => array_map('intval', array_column($selectedTags, 'id')),
-            'customFields' => $this->customFields->fieldsForEntity('client'),
-            'customValues' => $this->customFields->valuesForEntity('client', (int) $client['id']),
-            'error'        => null,
-        ]);
+        $this->renderForm(true, $client);
     }
 
     public function update(): void
@@ -167,37 +129,20 @@ class ClientController
         $customFields = $this->customFields->fieldsForEntity('client');
         $customValues = $_POST['custom_fields'] ?? [];
 
-        $error = null;
-        if ($data['commercial_name'] === '') {
-            $error = Lang::get('clients.name_required');
-        } elseif ($this->clients->commercialNameTakenByOther($data['commercial_name'], $id)) {
-            $error = Lang::get('clients.name_already_used');
-        }
-
-        if ($error !== null) {
+        try {
+            $this->clientWriter->update(
+                id: $id,
+                changes: $data,
+                tagIds: $tagIds,
+                customFields: $customFields,
+                customValues: $customValues
+            );
+        } catch (WriteException $exception) {
             $data['id'] = $id;
-
-            View::render('clients/edit', [
-                'title'        => Lang::get('clients.edit_title'),
-                'styles'       => ['clients.css'],
-                'client'       => $data,
-                'sectors'      => $this->sectors->active(),
-                'tags'         => $this->tags->first(),
-                'selectedTagIds' => $tagIds,
-                'customFields' => $customFields,
-                'customValues' => $customValues,
-                'error'        => $error,
-            ]);
+            $this->renderForm(true, $data, $tagIds, $customValues, Lang::get($exception->reason()));
             return;
         }
 
-        $this->clientWriter->update(
-            id: $id,
-            changes: $data,
-            tagIds: $tagIds,
-            customFields: $customFields,
-            customValues: $customValues
-        );
         Auth::redirect('/clients/show?id=' . $id);
     }
 
@@ -253,6 +198,38 @@ class ClientController
             'is_web_connected' => isset($_POST['is_web_connected']) ? 1 : 0,
             'is_active'        => isset($_POST['is_active']) ? 1 : 0,
         ];
+    }
+
+    private function renderForm(
+        bool $isEdit,
+        array $client = [],
+        ?array $selectedTagIds = null,
+        ?array $customValues = null,
+        ?string $error = null
+    ): void {
+        $id = (int) ($client['id'] ?? 0);
+
+        if ($selectedTagIds === null) {
+            $selectedTags = $id > 0 ? $this->entityTags->tagsForEntity('client', $id) : [];
+            $selectedTagIds = array_map('intval', array_column($selectedTags, 'id'));
+        } else {
+            $selectedTags = $this->filterRowsByIds($this->tags->first(500), $selectedTagIds);
+        }
+
+        View::render('clients/_form', [
+            'isEdit'        => $isEdit,
+            'title'         => Lang::get($isEdit ? 'clients.edit_title' : 'clients.create_title'),
+            'styles'        => ['clients.css'],
+            'client'        => $client,
+            'sectors'       => $this->sectors->active(),
+            'tags'          => $this->mergeSelectedRows($this->tags->first(), $selectedTags),
+            'selectedTagIds' => $selectedTagIds,
+            'customFields'  => $this->customFields->fieldsForEntity('client'),
+            'customValues'  => $customValues ?? ($id > 0
+                ? $this->customFields->valuesForEntity('client', $id)
+                : []),
+            'error'         => $error,
+        ]);
     }
 
     private function filtersFromRequest(): array

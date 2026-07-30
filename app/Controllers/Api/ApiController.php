@@ -107,6 +107,11 @@ final class ApiController
                 $exception->details()
             );
             $result = new ApiResult($exception->status(), $error);
+        } catch (WriteException $exception) {
+            $result = new ApiResult(
+                $exception->status(),
+                $this->error($exception->apiCode(), $exception->getMessage())
+            );
         } catch (PDOException $exception) {
             if (Database::isIntegrityViolation($exception)) {
                 $result = new ApiResult(409, $this->error('conflict', 'A record with these values already exists'));

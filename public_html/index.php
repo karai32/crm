@@ -74,6 +74,7 @@ require_once __DIR__ . '/../app/Repositories/ExportRepository.php';
 require_once __DIR__ . '/../app/Repositories/AiRepository.php';
 require_once __DIR__ . '/../app/Repositories/ImportRepository.php';
 require_once __DIR__ . '/../app/Services/AuthService.php';
+require_once __DIR__ . '/../app/Services/WriteException.php';
 require_once __DIR__ . '/../app/Services/EmailInspector.php';
 require_once __DIR__ . '/../app/Services/ContactWriteService.php';
 require_once __DIR__ . '/../app/Services/ClientWriteService.php';

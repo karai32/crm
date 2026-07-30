@@ -6,7 +6,6 @@ class ContactImportProcessor extends AbstractImportProcessor
     private ContactWriteService $contactWriter;
     private ClientWriteService $clientWriter;
     private array $clientCache = [];
-    private array $emailCache = [];
 
     public function __construct()
     {
@@ -22,26 +21,12 @@ class ContactImportProcessor extends AbstractImportProcessor
 
     public function process(array $mapped, array $raw, array $mapping, array $customFieldTypes): void
     {
-        $fullName = trim((string) ($mapped['full_name'] ?? ''));
-        $email = trim((string) ($mapped['email'] ?? ''));
-
-        if ($fullName === '') {
-            throw new ImportRowException('Full name is required.');
-        }
-        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new ImportRowException('Invalid email: ' . $email);
-        }
-        if ($email !== '' && $this->emailExists($email)) {
-            throw new ImportRowException('Duplicate email: ' . $email, 'skipped');
-        }
-
         $data = [
-            'full_name' => $fullName,
-            'email' => $this->nullable($email),
-            'phone' => $this->nullable($mapped['phone'] ?? null),
-            'company' => trim((string) ($mapped['company'] ?? '')),
+            'full_name' => $mapped['full_name'] ?? '',
+            'email' => $mapped['email'] ?? null,
+            'phone' => $mapped['phone'] ?? null,
+            'company' => $mapped['company'] ?? '',
         ];
-        $data = array_merge($data, EmailInspector::inspect($data['email'], false));
 
         $clientId = $this->clientId(
             (string) ($mapped['client'] ?? ''),
@@ -60,26 +45,14 @@ class ContactImportProcessor extends AbstractImportProcessor
             clientIds: $clientId === null ? [] : [$clientId],
             customFields: $customFields,
             customValues: $customValues,
-            applyCustomFieldDefaults: false
+            applyCustomFieldDefaults: false,
+            checkEmailDns: false
         );
 
         if ($tagIds !== [] && $clientId !== null) {
             $this->entityTags->add('client', [$clientId], $tagIds);
         }
 
-        if ($email !== '') {
-            $this->emailCache[$this->lower($email)] = true;
-        }
-
-    }
-
-    private function emailExists(string $email): bool
-    {
-        $key = $this->lower($email);
-        if (isset($this->emailCache[$key])) {
-            return true;
-        }
-        return $this->contacts->emailExists($email);
     }
 
     private function clientId(string $name, string $sector): ?int

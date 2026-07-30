@@ -2,6 +2,10 @@
 
 final class ClientWriteService
 {
+    public const NAME_REQUIRED = 'clients.name_required';
+    public const NAME_DUPLICATE = 'clients.name_already_used';
+    public const NOT_FOUND = 'clients.not_found';
+
     private ClientRepository $clients;
     private EntityTagRepository $entityTags;
     private CustomFieldRepository $customFields;
@@ -25,8 +29,9 @@ final class ClientWriteService
         bool $applyCustomFieldDefaults = true
     ): int {
         $data = $this->normalize($data);
+        $this->validate($data, null);
 
-        return Database::transaction(function () use (
+        return $this->transaction(function () use (
             $data,
             $tagIds,
             $contactIds,
@@ -65,12 +70,13 @@ final class ClientWriteService
     ): void {
         $current = $this->clients->find($id);
         if ($current === null) {
-            throw new RuntimeException('Client not found.');
+            throw new WriteException(self::NOT_FOUND, 'Client not found.', 404);
         }
 
         $data = $this->normalize(array_replace($current, $changes));
+        $this->validate($data, $id);
 
-        Database::transaction(function () use ($id, $data, $tagIds, $customFields, $customValues): void {
+        $this->transaction(function () use ($id, $data, $tagIds, $customFields, $customValues): void {
             $this->clients->update($id, $data);
 
             if ($tagIds !== null) {
@@ -111,5 +117,36 @@ final class ClientWriteService
     {
         $value = trim((string) ($value ?? ''));
         return $value === '' ? null : $value;
+    }
+
+    private function validate(array $data, ?int $excludeId): void
+    {
+        if ($data['commercial_name'] === '') {
+            throw new WriteException(self::NAME_REQUIRED, 'Commercial name is required.');
+        }
+
+        $duplicate = $excludeId === null
+            ? $this->clients->findByCommercialName($data['commercial_name']) !== null
+            : $this->clients->commercialNameTakenByOther($data['commercial_name'], $excludeId);
+        if ($duplicate) {
+            throw new WriteException(self::NAME_DUPLICATE, 'Client with this commercial name already exists.', 409);
+        }
+    }
+
+    private function transaction(callable $callback): mixed
+    {
+        try {
+            return Database::transaction($callback);
+        } catch (PDOException $exception) {
+            if (Database::violatesConstraint($exception, 'uq_clients_commercial_name')) {
+                throw new WriteException(
+                    self::NAME_DUPLICATE,
+                    'Client with this commercial name already exists.',
+                    409,
+                    $exception
+                );
+            }
+            throw $exception;
+        }
     }
 }

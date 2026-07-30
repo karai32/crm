@@ -154,6 +154,17 @@ class ImportManager
                     $status = $exception->rowStatus();
                     $status === 'skipped' ? $skipped++ : $errors++;
                     $this->imports->recordIssue($batchId, $rowNumber, $row, $status, $exception->getMessage());
+                } catch (WriteException $exception) {
+                    $processor = $this->processor($entityType);
+                    $status = $exception->status() === 409 ? 'skipped' : 'error';
+                    $status === 'skipped' ? $skipped++ : $errors++;
+                    $this->imports->recordIssue(
+                        $batchId,
+                        $rowNumber,
+                        $row,
+                        $status,
+                        $exception->getMessage()
+                    );
                 } catch (PDOException $exception) {
                     $processor = $this->processor($entityType);
                     error_log("Import row {$rowNumber} database error: " . $exception->getMessage());
