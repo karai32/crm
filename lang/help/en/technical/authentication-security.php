@@ -60,7 +60,7 @@ CODE,
             'paragraphs' => [
                 'Passwords are never stored as plain text. UserController uses password_hash($password, PASSWORD_DEFAULT), and users.password_hash is 255 characters long, leaving room for future changes to PHP’s PASSWORD_DEFAULT algorithm. Verification uses password_verify() only; hashes must not be compared as strings or decrypted.',
                 'The current interface only requires a non-empty password when creating an account. There is no minimum length, common or compromised-password check, or server-side maximum. The HTML field also has no minlength. The browser checks email through type=email, but the server only trims it; a UNIQUE index on users.email with case-insensitive utf8mb4_unicode_ci collation enforces uniqueness.',
-                'password_needs_rehash() is not called after a successful login. Existing hashes therefore do not update automatically when PHP’s algorithm or parameters change. One password policy should cover installer-created administrators, user creation, and password changes, and hash migration should run after a successful password_verify().',
+                'password_needs_rehash() is not called after a successful login. Existing hashes therefore do not update automatically when PHP’s algorithm or parameters change. One password policy should cover installer-created administrators, user creation, and password changes, and hash upgrades should run after a successful password_verify().',
             ],
             'examples' => [[
                 'title' => 'Recommended hash-update point',
@@ -174,7 +174,7 @@ PHP,
             'title' => 'How permissions are resolved',
             'paragraphs' => [
                 'Auth::can() follows a fail-closed contract. It first requires a session user and checks that the supplied key is registered in permissionDefinitions. A typo or unknown key therefore returns false even for an administrator. For a known key, admin receives access without querying user_permissions.',
-                'For a regular user, userPermissions() reads their rows once per HTTP request and caches an associative array. Explicit is_allowed = 1 permits an action; is_allowed = 0 denies it. An absent row also means denial. UserController stores an explicit decision for every known key when creating and editing users; a new permission must be granted to existing users separately or through a migration. The schema and 20260729_fail_closed_permissions.sql give is_allowed a safe DEFAULT 0.',
+                'For a regular user, userPermissions() reads their rows once per HTTP request and caches an associative array. Explicit is_allowed = 1 permits an action; is_allowed = 0 denies it. An absent row also means denial. UserController stores an explicit decision for every known key when creating and editing users; a new permission must be granted to existing users separately through settings or a manually executed SQL command. The current schema gives is_allowed a safe DEFAULT 0.',
                 'If reading user_permissions throws an exception, Auth logs the error and uses an empty permission set. A regular user receives no protected operations in that request. This favors security over availability: a database failure must not temporarily expand privileges.',
             ],
             'examples' => [[
@@ -387,7 +387,7 @@ CODE,
             'id' => 'security-known-gaps',
             'title' => 'Priority technical debt',
             'paragraphs' => [
-                'Permissions are already fail-closed, web-route policies are centralized in Router, and access to the AI page and AJAX is aligned to admin. Adding a permission still requires migration of explicit values for existing users. The remaining high priority is to check activity and current role in live sessions and revoke all sessions and remember tokens after account deactivation or password/role changes.',
+                'Permissions are already fail-closed, web-route policies are centralized in Router, and access to the AI page and AJAX is aligned to admin. Adding a permission still requires explicit values to be assigned manually for existing users. The remaining high priority is to check activity and current role in live sessions and revoke all sessions and remember tokens after account deactivation or password/role changes.',
                 'The next level is to add Secure to the persistent cookie, make logout a CSRF-protected POST, introduce explicit idle and absolute session timeouts, strict password policy and rehashing, and decide whether to enable or remove inactive 2FA code. LoginThrottle should move to reliable centralized storage with IP/risk limits that do not make account denial easy.',
                 'Further work includes server-side URL-scheme validation, removing unsafe-inline from CSP, automatic security audit, log redaction and retention, API rate limiting, API-key expiry and rotation, dependency scanning, and regular access-matrix integration tests. These items describe current implementation boundaries; update documentation with each actual contract fix.',
             ],

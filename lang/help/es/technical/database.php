@@ -368,23 +368,20 @@ LIMIT 50;',
         ],
         [
             'id' => 'database-schema-changes',
-            'title' => 'Cambios de estructura y migraciones',
+            'title' => 'Cambios de estructura',
             'paragraphs' => [
-                'database/schema.sql es una instantánea completa para una instalación limpia. Al principio desactiva la comprobación de claves foráneas y ejecuta DROP TABLE, por lo que utilizar este archivo sobre una base de datos en producción destruiría los datos. Para actualizar un sistema existente se emplean archivos SQL secuenciales independientes en database/migrations; todavía no existe un runner automático ni una tabla de versiones aplicadas.',
-                'Cada cambio debe prepararse como un archivo SQL independiente con una fecha y un nombre únicos, aplicarse primero a una copia de la base y registrarse en un historial de despliegue externo. El archivo solo debe contener la transición de una versión de la estructura a la siguiente; después de comprobarlo, schema.sql se actualiza para las instalaciones nuevas. Las migraciones 20260729 primero cambian los permisos al modo fail-closed y después añaden restricciones UNIQUE y CHECK tras diagnosticar los datos existentes.',
+                'database/schema.sql es una instantánea completa para una instalación limpia. Al principio desactiva la comprobación de claves foráneas y ejecuta DROP TABLE, por lo que utilizar este archivo sobre una base de datos en producción destruiría los datos. El proyecto no dispone de un sistema de migraciones, archivos SQL de actualización sucesivos ni una tabla de versiones. El administrador modifica manualmente una base existente mediante un cliente SQL.',
+                'Cada cambio de estructura se prepara y comprueba primero sobre una copia de la base; después se aplica manualmente en producción y se registra en un historial de despliegue externo. Tras comprobarlo, database/schema.sql se actualiza para que las instalaciones nuevas reciban la estructura actual. La instantánea actual ya contiene los valores fail-closed de los permisos, índices UNIQUE y restricciones CHECK.',
                 'Antes de ejecutar ALTER TABLE, haga una copia de seguridad, evalúe el tamaño y el bloqueo de la tabla y prepare la compatibilidad del código para un despliegue por etapas. DDL en MySQL puede realizar un commit implícito, por lo que no debe suponerse que un START TRANSACTION normal revertirá con seguridad un cambio de estructura. El rollback debe describirse por separado y probarse en una base de datos de prueba.',
             ],
             'examples' => [
                 [
-                    'title' => 'Estructura de migraciones recomendada',
+                    'title' => 'Fuente de la estructura actual',
                     'code' => 'database/
-├── schema.sql
-└── migrations/
-    ├── 20260729_fail_closed_permissions.sql
-    └── 20260729_enforce_database_constraints.sql',
+└── schema.sql    # estructura completa para una instalación limpia',
                 ],
                 [
-                    'title' => 'Ejemplo de una migración directa',
+                    'title' => 'Ejemplo de cambio manual de estructura',
                     'code' => 'ALTER TABLE contacts
     ADD COLUMN source VARCHAR(100) NULL AFTER company,
     ADD INDEX idx_contacts_source (source);
@@ -417,7 +414,9 @@ WHERE TABLE_SCHEMA = DATABASE()
                 ],
                 [
                     'title' => 'Lista de comprobación para cambiar el modelo',
-                    'code' => '[ ] migración independiente y schema.sql actualizado
+                    'code' => '[ ] cambio manual comprobado sobre una copia de la base
+[ ] base de producción actualizada y cambio registrado externamente
+[ ] database/schema.sql actualizado para una instalación limpia
 [ ] tipos compatibles de claves foráneas
 [ ] restricciones UNIQUE, FOREIGN KEY e índices necesarios
 [ ] Repository y límite transaccional del Service

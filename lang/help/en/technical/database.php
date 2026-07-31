@@ -362,21 +362,18 @@ PHP,
         ],
         [
             'id' => 'database-schema-changes',
-            'title' => 'Schema changes and migrations',
+            'title' => 'Schema changes',
             'paragraphs' => [
-                'database/schema.sql is a complete snapshot for a clean installation. It begins by disabling foreign-key checks and running DROP TABLE, so executing it on a production database destroys data. Existing systems are updated with separate sequential SQL files in database/migrations; there is currently no automatic runner or applied-version table.',
-                'Each change must be a separate SQL file with a unique date and name, applied first to a database copy and recorded in an external deployment log. The file should contain only the transition from one schema version to the next, while schema.sql is updated for new installations after verification. The 20260729 migrations first make permissions fail-closed and then add UNIQUE and CHECK constraints after diagnosing existing data.',
+                'database/schema.sql is a complete snapshot for a clean installation. It begins by disabling foreign-key checks and running DROP TABLE, so executing it on a production database destroys data. The project has no migration system, sequential SQL update files, or version-tracking table. The administrator changes an existing database manually through an SQL client.',
+                'Each schema change is prepared and verified on a database copy, then applied manually to production and recorded in an external deployment log. After verification, database/schema.sql is updated so that new installations receive the current structure. The current snapshot already contains fail-closed permission defaults, UNIQUE indexes, and CHECK constraints.',
                 'Before ALTER TABLE, create a backup, estimate table size and locking, and plan code compatibility for staged deployment. MySQL DDL may perform an implicit commit, so a normal START TRANSACTION cannot be assumed to roll back a schema change. Document rollback separately and test it on a test database.',
             ],
             'examples' => [
-                ['title' => 'Recommended migration structure', 'code' => <<<'CODE'
+                ['title' => 'Current schema source', 'code' => <<<'CODE'
 database/
-├── schema.sql
-└── migrations/
-    ├── 20260729_fail_closed_permissions.sql
-    └── 20260729_enforce_database_constraints.sql
+└── schema.sql    # complete schema for a clean installation
 CODE],
-                ['title' => 'Example forward migration', 'code' => <<<'SQL'
+                ['title' => 'Example manual schema change', 'code' => <<<'SQL'
 ALTER TABLE contacts
     ADD COLUMN source VARCHAR(100) NULL AFTER company,
     ADD INDEX idx_contacts_source (source);
@@ -404,7 +401,9 @@ WHERE TABLE_SCHEMA = DATABASE()
   AND TABLE_NAME = 'contacts';
 SQL],
                 ['title' => 'Model-change checklist', 'code' => <<<'CODE'
-[ ] separate migration and updated schema.sql
+[ ] manual change verified on a database copy
+[ ] production database updated and change recorded externally
+[ ] database/schema.sql updated for a clean installation
 [ ] compatible foreign-key types
 [ ] required UNIQUE, FOREIGN KEY, and indexes
 [ ] Repository and Service transaction boundary

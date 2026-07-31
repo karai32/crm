@@ -17,7 +17,7 @@ return [
                 'title' => 'Main sources of truth',
                 'code' => <<<'CODE'
 Routes                 public_html/index.php
-Database contract      database/schema.sql + database/migrations/*.sql
+Database contract      database/schema.sql
 Permissions            app/Core/Auth.php
 API authentication     app/Services/Api/ApiAuthenticator.php
 API protocol/scopes    app/Controllers/ApiController.php
@@ -88,7 +88,7 @@ app/
   Views/                PHP templates and layouts
 bin/                    CLI entry points
 config/                 local configuration and secrets
-database/               schema.sql and manual migrations
+database/               schema.sql for clean installations
 lang/                   UI and help translations
 public_html/            document root and static assets
 storage/                runtime state and private files
@@ -449,7 +449,7 @@ CODE,
             'id' => 'reference-commands',
             'title' => 'Development and maintenance commands',
             'paragraphs' => [
-                'The project defines no Composer scripts, PHPUnit configuration, or separate migration runner. Composer installs dependencies, database/schema.sql deploys the schema, and php -l checks syntax. A schema change after first launch requires a separate coordinated SQL update script: rerunning schema.sql deletes existing tables and data.',
+                'The project defines no Composer scripts, PHPUnit configuration, or migration system. Composer installs dependencies, database/schema.sql deploys a clean database, and php -l checks syntax. The administrator prepares changes to an existing database, verifies them on a copy, and applies them manually through an SQL client. Rerunning schema.sql deletes existing tables and data.',
                 'The weekly report runs only through PHP CLI. By default, collect() covers the previous seven days and emails every active admin. Before cron, run the command manually as the same system user. npm install and asset compilation are unnecessary.',
             ],
             'examples' => [
@@ -465,9 +465,8 @@ find app config bin lang public_html -name '*.php' -print0 | xargs -0 -n1 php8.5
 # Only for an empty database: schema.sql contains DROP TABLE
 mysql -u crm_user -p crm < database/schema.sql
 
-# For an existing database: apply unapplied migrations in order
-mysql -u crm_user -p crm < database/migrations/20260729_fail_closed_permissions.sql
-mysql -u crm_user -p crm < database/migrations/20260729_enforce_database_constraints.sql
+# There is no automatic command for an existing database:
+# prepare and verify the SQL, then apply it manually through an SQL client
 
 sudo -u www-data /usr/bin/php8.5 bin/weekly-report.php
 tail -n 50 storage/app.log
@@ -485,7 +484,7 @@ CRON],
             'title' => 'Change-consistency checks',
             'paragraphs' => [
                 'ContactCore uses explicit registration rather than automatic discovery. A new class needs require_once in public_html/index.php before a dependent object is created. A new controller must be instantiated, routed, and protected with Auth/CSRF. A new asset is passed through styles or scripts in View::render. New interface text is added to every supported locale.',
-                'Changing an entity usually affects schema or update SQL, Repository, Controller/Service, View, filters, import, export, API, reports, and documentation. Not every module must change, but each must be reviewed deliberately. Migration of existing records and fail-closed behavior are especially important for a new permission or scope.',
+                'Changing an entity usually affects schema or a manual SQL update, Repository, Controller/Service, View, filters, import, export, API, reports, and documentation. Not every module must change, but each must be reviewed deliberately. Manually updating existing records and preserving fail-closed behavior are especially important for a new permission or scope.',
                 'Before delivery, check all PHP syntax, actual HTTP paths, the access matrix, CSRF, SQL on clean and existing databases, locales, mobile display, the error log, and related batch operations. The technical reference is updated only with exact values from accepted code.',
             ],
             'examples' => [[

@@ -18,7 +18,7 @@ return [
                     'title' => 'Principales fuentes de verdad',
                     'code' => <<<'CODE'
 Routes                 public_html/index.php
-Database contract      database/schema.sql + database/migrations/*.sql
+Database contract      database/schema.sql
 Permissions            app/Core/Auth.php
 API authentication     app/Services/Api/ApiAuthenticator.php
 API protocol/scopes    app/Controllers/ApiController.php
@@ -95,7 +95,7 @@ app/
   Views/                PHP templates and layouts
 bin/                    CLI entry points
 config/                 local configuration and secrets
-database/               schema.sql and manual migrations
+database/               schema.sql para instalaciones limpias
 lang/                   UI and help translations
 public_html/            document root and static assets
 storage/                runtime state and private files
@@ -489,7 +489,7 @@ CODE,
             'id' => 'reference-commands',
             'title' => 'Comandos de desarrollo y mantenimiento',
             'paragraphs' => [
-                'El proyecto no define scripts de Composer, una configuración de PHPUnit ni un migration runner independiente. Las dependencias se instalan mediante Composer, el esquema se despliega importando database/schema.sql y la sintaxis se comprueba con php -l. Para modificar el esquema después de la primera ejecución se necesita un script SQL de actualización independiente y coordinado: volver a ejecutar schema.sql eliminará las tablas y los datos existentes.',
+                'El proyecto no define scripts de Composer, una configuración de PHPUnit ni un sistema de migraciones. Las dependencias se instalan mediante Composer, una base limpia se despliega importando database/schema.sql y la sintaxis se comprueba con php -l. El administrador prepara los cambios de una base existente, los comprueba sobre una copia y los aplica manualmente mediante un cliente SQL. Volver a ejecutar schema.sql eliminará las tablas y los datos existentes.',
                 'El informe semanal solo se ejecuta mediante PHP CLI. De forma predeterminada, collect() toma los últimos siete días y envía un correo a todos los admin activos. Antes de programarlo en cron, el comando debe ejecutarse manualmente con el mismo usuario del sistema. No es necesario ejecutar npm install ni compilar assets.',
             ],
             'examples' => [
@@ -507,9 +507,8 @@ find app config bin lang public_html -name '*.php' -print0 | xargs -0 -n1 php8.5
 # Solo para una base de datos vacía: schema.sql contiene DROP TABLE
 mysql -u crm_user -p crm < database/schema.sql
 
-# Para una base existente: aplicar en orden las migraciones aún no ejecutadas
-mysql -u crm_user -p crm < database/migrations/20260729_fail_closed_permissions.sql
-mysql -u crm_user -p crm < database/migrations/20260729_enforce_database_constraints.sql
+# Para una base existente no hay ningún comando automático:
+# prepare y compruebe el SQL y aplíquelo manualmente mediante un cliente SQL
 
 sudo -u www-data /usr/bin/php8.5 bin/weekly-report.php
 tail -n 50 storage/app.log
@@ -531,7 +530,7 @@ CRON,
             'title' => 'Control de coherencia de los cambios',
             'paragraphs' => [
                 'ContactCore utiliza registro explícito, no discovery automático. Una clase nueva debe cargarse mediante require_once en public_html/index.php antes de crear un objeto que dependa de ella. Un controlador nuevo debe crearse, registrar su ruta y protegerse mediante Auth/CSRF. Un asset nuevo se pasa a través de styles o scripts en View::render. Un texto nuevo de la interfaz se añade a todos los idiomas compatibles.',
-                'Modificar una entidad suele afectar al schema o a una actualización SQL, Repository, Controller/Service, View, los filtros, la importación, la exportación, la API, los informes y la documentación. No todos los módulos tienen que cambiar necesariamente, pero cada uno debe revisarse de forma consciente. Para un permission o scope nuevo son especialmente importantes la migración de los registros existentes y el comportamiento fail-closed.',
+                'Modificar una entidad suele afectar al schema o a una actualización SQL manual, Repository, Controller/Service, View, los filtros, la importación, la exportación, la API, los informes y la documentación. No todos los módulos tienen que cambiar necesariamente, pero cada uno debe revisarse de forma consciente. Para un permission o scope nuevo son especialmente importantes la actualización manual de los registros existentes y el comportamiento fail-closed.',
                 'Antes de entregar un cambio se comprueban la sintaxis de todos los archivos PHP, las rutas HTTP reales, la matriz de acceso, CSRF, SQL sobre una base limpia y otra existente, los idiomas, la visualización móvil, el registro de errores y las operaciones por lotes relacionadas. La referencia técnica solo se actualiza con valores exactos del código aceptado.',
             ],
             'examples' => [

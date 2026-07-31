@@ -339,7 +339,7 @@ PHP,
             'examples' => [[
                 'title' => 'New-resource checklist',
                 'code' => <<<'CODE'
-[ ] Repository and migration/indexes
+[ ] Repository and manual schema change/indexes
 [ ] ResourceApiService implements 5 methods
 [ ] resource name is permitted through ApiController::SCOPES
 [ ] require_once for the service and an item in $apiControllers

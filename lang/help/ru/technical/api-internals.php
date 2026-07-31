@@ -366,7 +366,7 @@ PHP,
                 [
                     'title' => 'Контрольный список нового ресурса',
                     'code' => <<<'CODE'
-[ ] Repository и миграция/индексы
+[ ] Repository и ручное изменение схемы/индексы
 [ ] ResourceApiService implements 5 methods
 [ ] имя ресурса разрешено через ApiController::SCOPES
 [ ] require_once сервиса и элемент в $apiControllers

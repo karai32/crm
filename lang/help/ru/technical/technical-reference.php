@@ -18,7 +18,7 @@ return [
                     'title' => 'Основные источники истины',
                     'code' => <<<'CODE'
 Routes                 public_html/index.php
-Database contract      database/schema.sql + database/migrations/*.sql
+Database contract      database/schema.sql
 Permissions            app/Core/Auth.php
 API authentication     app/Services/Api/ApiAuthenticator.php
 API protocol/scopes    app/Controllers/ApiController.php
@@ -95,7 +95,7 @@ app/
   Views/                PHP templates and layouts
 bin/                    CLI entry points
 config/                 local configuration and secrets
-database/               schema.sql and manual migrations
+database/               schema.sql for clean installations
 lang/                   UI and help translations
 public_html/            document root and static assets
 storage/                runtime state and private files
@@ -489,7 +489,7 @@ CODE,
             'id' => 'reference-commands',
             'title' => 'Команды разработки и обслуживания',
             'paragraphs' => [
-                'Проект не определяет Composer scripts, PHPUnit-конфигурацию или отдельный migration runner. Установка зависимостей выполняется Composer, схема разворачивается импортом database/schema.sql, а синтаксис проверяется php -l. Изменение схемы после первого запуска требует отдельного согласованного SQL-скрипта обновления: повторный schema.sql удалит существующие таблицы и данные.',
+                'Проект не определяет Composer scripts, PHPUnit-конфигурацию или систему миграций. Установка зависимостей выполняется Composer, схема чистой базы разворачивается импортом database/schema.sql, а синтаксис проверяется php -l. Изменения существующей базы администратор подготавливает, проверяет на копии и выполняет вручную через SQL-клиент. Повторный запуск schema.sql удалит существующие таблицы и данные.',
                 'Еженедельный отчёт запускается только через PHP CLI. По умолчанию collect() берёт последние семь дней и отправляет письмо всем активным admin. Перед cron команда выполняется вручную от того же системного пользователя. npm install и сборку assets запускать не требуется.',
             ],
             'examples' => [
@@ -507,9 +507,8 @@ find app config bin lang public_html -name '*.php' -print0 | xargs -0 -n1 php8.5
 # Только для чистой базы: schema.sql содержит DROP TABLE
 mysql -u crm_user -p crm < database/schema.sql
 
-# Для существующей базы: применить ещё не выполненные миграции по порядку
-mysql -u crm_user -p crm < database/migrations/20260729_fail_closed_permissions.sql
-mysql -u crm_user -p crm < database/migrations/20260729_enforce_database_constraints.sql
+# Для существующей базы автоматической команды нет:
+# подготовьте и проверьте SQL, затем примените его вручную через SQL-клиент
 
 sudo -u www-data /usr/bin/php8.5 bin/weekly-report.php
 tail -n 50 storage/app.log
@@ -531,7 +530,7 @@ CRON,
             'title' => 'Контроль согласованности изменений',
             'paragraphs' => [
                 'ContactCore использует явную регистрацию вместо автоматического discovery. Новый класс нужно подключить require_once в public_html/index.php до создания зависимого объекта. Новый контроллер необходимо создать, зарегистрировать маршрут и защитить Auth/CSRF. Новый asset передаётся через styles или scripts в View::render. Новый текст интерфейса добавляется во все поддерживаемые локали.',
-                'Изменение сущности обычно затрагивает schema или SQL-обновление, Repository, Controller/Service, View, фильтры, импорт, экспорт, API, отчёты и документацию. Не каждый модуль обязательно меняется, но каждый должен быть проверен осознанно. Для нового permission или scope особенно важны миграция существующих записей и fail-closed поведение.',
+                'Изменение сущности обычно затрагивает schema или ручное SQL-обновление, Repository, Controller/Service, View, фильтры, импорт, экспорт, API, отчёты и документацию. Не каждый модуль обязательно меняется, но каждый должен быть проверен осознанно. Для нового permission или scope особенно важны ручное обновление существующих записей и fail-closed поведение.',
                 'Перед передачей изменения проверяются синтаксис всех PHP-файлов, реальные HTTP-пути, матрица доступа, CSRF, SQL на чистой и существующей базе, локали, мобильное отображение, журнал ошибок и связанные пакетные операции. Технический справочник обновляется только точными значениями из принятого кода.',
             ],
             'examples' => [

@@ -123,7 +123,7 @@ return [
             'examples' => [
                 [
                     'title' => 'Qué comprobar al añadir una regla nueva',
-                    'code' => "[ ] HTML: Controller y formulario\n[ ] API: ApiService, formato de error y transacción\n[ ] Import: mapping, processor y error de fila\n[ ] Repository: consultas de lectura y escritura\n[ ] Export: campo nuevo y filtros\n[ ] Database: constraint, índice o migración\n[ ] Help: descripción de usuario y técnica",
+                    'code' => "[ ] HTML: Controller y formulario\n[ ] API: ApiService, formato de error y transacción\n[ ] Import: mapping, processor y error de fila\n[ ] Repository: consultas de lectura y escritura\n[ ] Export: campo nuevo y filtros\n[ ] Database: constraint, índice o cambio manual de estructura\n[ ] Help: descripción de usuario y técnica",
                 ],
             ],
         ],

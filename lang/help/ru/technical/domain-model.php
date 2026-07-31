@@ -123,7 +123,7 @@ return [
             'examples' => [
                 [
                     'title' => 'Что проверить при добавлении нового правила',
-                    'code' => "[ ] HTML: Controller и форма\n[ ] API: ApiService, формат ошибки и транзакция\n[ ] Import: mapping, processor и ошибка строки\n[ ] Repository: запросы чтения и записи\n[ ] Export: новое поле и фильтры\n[ ] Database: constraint, индекс или миграция\n[ ] Help: пользовательское и техническое описание",
+                    'code' => "[ ] HTML: Controller и форма\n[ ] API: ApiService, формат ошибки и транзакция\n[ ] Import: mapping, processor и ошибка строки\n[ ] Repository: запросы чтения и записи\n[ ] Export: новое поле и фильтры\n[ ] Database: constraint, индекс или ручное изменение схемы\n[ ] Help: пользовательское и техническое описание",
                 ],
             ],
         ],

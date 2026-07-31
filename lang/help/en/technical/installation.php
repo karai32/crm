@@ -28,7 +28,7 @@ SHELL,
         ]]],
         ['id' => 'installation-database', 'title' => 'Creating and configuring the database', 'paragraphs' => [
             'Create a separate database and MySQL user exclusively for ContactCore. Use utf8mb4. The application needs permission to read and modify data, create indexes, and work with tables. Do not use the root account in config/database.php or expose port 3306 externally unless specifically required.',
-            'database/schema.sql is intended for the initial installation. It specifies the crm database and DROP TABLE commands at the beginning. The database name in config/database.php must therefore match the schema, or the first commands in the file must be changed before import. Never run this file again over a production database: it deletes existing data. Updates use sequential SQL files from database/migrations; there is currently no automatic runner or version-tracking table.',
+            'database/schema.sql is intended for the initial installation. It specifies the crm database and DROP TABLE commands at the beginning. The database name in config/database.php must therefore match the schema, or the first commands in the file must be changed before import. Never run this file again over a production database: it deletes existing data. The administrator prepares and applies schema changes to an existing database manually through an SQL client after creating a backup. The project has no migration system, sequential update files, or version-tracking table.',
         ], 'examples' => [
             ['title' => 'Application database and user', 'code' => <<<'SQL'
 sudo mysql
@@ -196,7 +196,7 @@ SHELL,
         ]]],
         ['id' => 'installation-maintenance', 'title' => 'Backups, updates, and monitoring', 'paragraphs' => [
             'A backup must include the MySQL database, active config files, and required storage data—especially original import files if they must be retained. Encrypt backups, move them to another server or object storage, and test restoration regularly. Sessions and temporary tokens normally do not need to be restored.',
-            'Before an update, back up the database and configuration. Deploy the new code, run composer install against the existing composer.lock, check platform requirements again, and restart PHP-FPM. Never apply database/schema.sql as an update. Run unapplied SQL files from database/migrations in order according to the release instructions; there is currently no automatic migration runner.',
+            'Before an update, back up the database and configuration. Deploy the new code, run composer install against the existing composer.lock, check platform requirements again, and restart PHP-FPM. Never apply database/schema.sql as an update. If a release requires schema or data changes, prepare and verify the necessary SQL commands on a database copy, then apply them manually to production. The project does not run database updates automatically.',
             'Monitor free space, TLS certificate expiry, Nginx/PHP-FPM/MySQL/cron health, growth of storage/app.log, and the weekly-report log. Configure log rotation and alerts for 5xx responses. Update the OS and Composer dependencies in a test environment first, not directly on the production CRM.',
         ], 'examples' => [
             ['title' => 'Manual database backup', 'code' => <<<'SHELL'

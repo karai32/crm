@@ -181,7 +181,7 @@ CODE,
 [ ] Import: mapping, processor, and row error
 [ ] Repository: read and write queries
 [ ] Export: new field and filters
-[ ] Database: constraint, index, or migration
+[ ] Database: constraint, index, or manual schema change
 [ ] Help: user and technical description
 CODE,
             ]],

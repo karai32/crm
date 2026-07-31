@@ -366,7 +366,7 @@ PHP,
                 [
                     'title' => 'Lista de comprobación de un recurso nuevo',
                     'code' => <<<'CODE'
-[ ] Repository y migración/índices
+[ ] Repository y cambio manual de estructura/índices
 [ ] ResourceApiService implementa los 5 métodos
 [ ] nombre de recurso permitido mediante ApiController::SCOPES
 [ ] require_once del servicio y elemento en $apiControllers
