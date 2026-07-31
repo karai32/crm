@@ -117,6 +117,18 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/web-interface-ajax.php',
 ),
+            'api-internals' => array (
+  'title' => 'Estructura interna de la API',
+  'description' => 'Enrutamiento, autenticación, scopes, servicios de recursos, transacciones y registro de la API.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/api-internals.php',
+),
+            'import-export' => array (
+  'title' => 'Importación y exportación',
+  'description' => 'Carga y lectura de CSV/XLSX, asignación de columnas, procesamiento por filas y generación de exportaciones.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/import-export.php',
+),
         ],
     ],
 ];
