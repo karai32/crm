@@ -83,19 +83,19 @@ return [
         'pages' => [
             'server' => array (
   'title' => 'Server',
-  'description' => '',
+  'description' => 'Preparing the operating system, PHP-FPM, Nginx, network, and HTTPS for ContactCore.',
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/server.php',
 ),
             'installation' => array (
   'title' => 'Installation',
-  'description' => '',
+  'description' => 'Installing ContactCore, preparing the database and configuration, first launch, and platform verification.',
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/installation.php',
 ),
             'code-structure' => array (
   'title' => 'Code structure',
-  'description' => '',
+  'description' => 'ContactCore architecture, request lifecycle, and rules for developing new features.',
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/code-structure.php',
 ),
@@ -108,4 +108,3 @@ return [
         ],
     ],
 ];
-
