@@ -101,11 +101,22 @@ return [
 ),
             'database' => array (
   'title' => 'Base de datos',
-  'description' => '',
+  'description' => 'Estructura MySQL, relaciones entre entidades, integridad de los datos y reglas para modificar el modelo.',
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/database.php',
+),
+            'domain-model' => array (
+  'title' => 'Modelo de dominio',
+  'description' => 'Significado de las principales entidades de ContactCore, sus relaciones, estados y reglas de negocio.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/domain-model.php',
+),
+            'web-interface-ajax' => array (
+  'title' => 'Interfaz web y AJAX',
+  'description' => 'Interfaz HTML de servidor, componentes del cliente, contratos AJAX y flujos interactivos.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/web-interface-ajax.php',
 ),
         ],
     ],
 ];
-
