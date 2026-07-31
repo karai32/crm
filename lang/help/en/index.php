@@ -101,9 +101,21 @@ return [
 ),
             'database' => array (
   'title' => 'Database',
-  'description' => '',
+  'description' => 'MySQL schema, relationships between entities, data integrity, and rules for changing the model.',
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/database.php',
+),
+            'domain-model' => array (
+  'title' => 'Domain model',
+  'description' => 'Meaning of the core ContactCore entities, their relationships, states, and required business rules.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/domain-model.php',
+),
+            'web-interface-ajax' => array (
+  'title' => 'Web interface and AJAX',
+  'description' => 'Server-rendered HTML interface, client-side components, AJAX contracts, and interactive workflows.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/web-interface-ajax.php',
 ),
         ],
     ],
