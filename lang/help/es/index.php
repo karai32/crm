@@ -129,6 +129,18 @@ return [
   'icon' => 'ph-arrow-elbow-down-right',
   'file' => __DIR__ . '/technical/import-export.php',
 ),
+            'authentication-security' => array (
+  'title' => 'Autorización y seguridad',
+  'description' => 'Inicio de sesión, sesiones, remember-me, permisos, CSRF, claves de API y límites de seguridad de la aplicación.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/authentication-security.php',
+),
+            'technical-reference' => array (
+  'title' => 'Referencia técnica',
+  'description' => 'Índice rápido de la estructura del proyecto, configuración, rutas, tipos, estados, límites y comandos de mantenimiento.',
+  'icon' => 'ph-arrow-elbow-down-right',
+  'file' => __DIR__ . '/technical/technical-reference.php',
+),
         ],
     ],
 ];
