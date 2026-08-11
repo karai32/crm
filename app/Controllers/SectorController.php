@@ -2,7 +2,7 @@
 
 class SectorController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
 
     private SectorRepository $sectors;
     private PhosphorIconCatalog $icons;
@@ -57,8 +57,7 @@ class SectorController
         $sector = $this->sectors->find($id);
 
         if ($sector === null) {
-            http_response_code(404);
-            echo 'Sector not found';
+            $this->notFound('Sector not found');
             return;
         }
 
@@ -75,8 +74,7 @@ class SectorController
         $sector = $this->sectors->find($id);
 
         if ($sector === null) {
-            http_response_code(404);
-            echo 'Sector not found';
+            $this->notFound('Sector not found');
             return;
         }
 

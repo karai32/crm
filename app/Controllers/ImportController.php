@@ -2,7 +2,7 @@
 
 class ImportController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
 
     private ImportRepository $imports;
     private ImportManager $manager;
@@ -76,8 +76,7 @@ class ImportController
         $batch = $this->imports->findBatch($batchId);
 
         if ($batch === null) {
-            http_response_code(404);
-            echo 'Import batch not found';
+            $this->notFound('Import batch not found');
             return;
         }
 
@@ -98,8 +97,7 @@ class ImportController
         );
 
         if ($result === null) {
-            http_response_code(404);
-            echo 'Import batch not found';
+            $this->notFound('Import batch not found');
             return;
         }
 

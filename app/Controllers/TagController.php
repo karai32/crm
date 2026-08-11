@@ -2,7 +2,7 @@
 
 class TagController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
 
     private TagRepository $tags;
 
@@ -56,8 +56,7 @@ class TagController
         $tag = $this->tags->find($id);
 
         if ($tag === null) {
-            http_response_code(404);
-            echo 'Tag not found';
+            $this->notFound('Tag not found');
             return;
         }
 
@@ -72,8 +71,7 @@ class TagController
         $tag = $this->tags->find($id);
 
         if ($tag === null) {
-            http_response_code(404);
-            echo 'Tag not found';
+            $this->notFound('Tag not found');
             return;
         }
 

@@ -7,6 +7,12 @@ trait ControllerHelperTrait
         return Strings::nullable($value);
     }
 
+    protected function notFound(string $message): void
+    {
+        http_response_code(404);
+        echo $message;
+    }
+
     protected function cleanIds(mixed $ids): array
     {
         return IdList::normalize($ids);

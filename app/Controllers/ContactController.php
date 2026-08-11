@@ -296,8 +296,7 @@ class ContactController
         $contact = $this->contacts->find($id);
 
         if ($contact === null) {
-            http_response_code(404);
-            echo 'Contact not found';
+            $this->notFound('Contact not found');
             return null;
         }
 

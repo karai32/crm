@@ -2,7 +2,7 @@
 
 class UserController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
 
     private UserRepository $users;
 
@@ -204,8 +204,7 @@ class UserController
         $user = $this->users->find($id);
 
         if ($user === null) {
-            http_response_code(404);
-            echo 'User not found';
+            $this->notFound('User not found');
             return null;
         }
 

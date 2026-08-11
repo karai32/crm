@@ -4,7 +4,7 @@ use Illuminate\Support\Str;
 
 class CustomFieldController
 {
-    use SortableTrait;
+    use SortableTrait, ControllerHelperTrait;
 
     private CustomFieldRepository $customFields;
 
@@ -58,8 +58,7 @@ class CustomFieldController
         $field = $this->customFields->find((int) ($_GET['id'] ?? 0));
 
         if ($field === null) {
-            http_response_code(404);
-            echo 'Custom field not found';
+            $this->notFound('Custom field not found');
             return;
         }
 
@@ -72,8 +71,7 @@ class CustomFieldController
         $field = $this->customFields->find($id);
 
         if ($field === null) {
-            http_response_code(404);
-            echo 'Custom field not found';
+            $this->notFound('Custom field not found');
             return;
         }
 

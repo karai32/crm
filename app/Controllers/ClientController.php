@@ -257,8 +257,7 @@ class ClientController
         $client = $this->clients->find($id);
 
         if ($client === null) {
-            http_response_code(404);
-            echo 'Client not found';
+            $this->notFound('Client not found');
             return null;
         }
 
