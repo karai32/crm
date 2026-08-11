@@ -89,7 +89,9 @@ abstract class AbstractApiService
                 continue;
             }
             $fields[] = $field;
-            $values[(int) $field['id']] = $value;
+            $values[(int) $field['id']] = $field['field_type'] === 'checkbox'
+                ? $this->checkboxValue($value)
+                : $value;
             $processedSlugs[] = $field['slug'];
         }
 
@@ -142,6 +144,17 @@ abstract class AbstractApiService
     protected function nullableString(mixed $value): ?string
     {
         return Strings::nullable($value);
+    }
+
+    // "false" is truthy in PHP like any other non-empty string, so a JSON caller sending the
+    // literal string "false" for a checkbox field would otherwise be stored as checked/true.
+    private function checkboxValue(mixed $value): int
+    {
+        if (is_string($value) && strtolower(trim($value)) === 'false') {
+            return 0;
+        }
+
+        return $value ? 1 : 0;
     }
 
     // Accepts a single name, a comma-separated string of names, or a JSON array of names.

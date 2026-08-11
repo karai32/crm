@@ -232,7 +232,7 @@ class ContactRepository
     {
         $query = Database::table('contacts');
 
-        foreach (['full_name', 'email', 'phone'] as $field) {
+        foreach (['full_name', 'email', 'phone', 'company'] as $field) {
             if (!empty($filters[$field])) {
                 $query->where("contacts.{$field}", 'like', '%' . $filters[$field] . '%');
             }

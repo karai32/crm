@@ -88,7 +88,7 @@ final class ContactWriteService
             unset($data['is_corporate_email'], $data['email_status']);
         }
         $data = $this->prepare($data, $checkEmailDns);
-        $this->validate($data, $id, false);
+        $this->validate($data, $id, $emailChanged);
 
         $this->transaction(function () use (
             $id,
