@@ -273,9 +273,6 @@ class ClientRepository
             $tagIds[] = $filters['tag_id'];
         }
 
-        $tagIds = array_map('intval', $tagIds);
-        $tagIds = array_filter($tagIds, fn ($id) => $id > 0);
-
-        return array_values(array_unique($tagIds));
+        return IdList::normalize($tagIds);
     }
 }

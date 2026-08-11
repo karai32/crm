@@ -293,7 +293,6 @@ class ExportService
 
     private function cleanTagIds(array $source): array
     {
-        $ids = array_map('intval', (array) ($source['tag_ids'] ?? []));
-        return array_values(array_unique(array_filter($ids, fn ($id) => $id > 0)));
+        return IdList::normalize($source['tag_ids'] ?? []);
     }
 }
