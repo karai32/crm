@@ -83,6 +83,11 @@ class Auth
             self::tryRememberLogin();
         }
 
+        if (self::check() && !self::sessionUserActive()) {
+            self::logout();
+            return false;
+        }
+
         return self::check();
     }
 
@@ -206,6 +211,25 @@ class Auth
         @unlink($file);
         self::issueRememberToken((int) $user['id']);
         self::login($user);
+    }
+
+    private static function sessionUserActive(): bool
+    {
+        $userId = (int) ($_SESSION['user']['id'] ?? 0);
+        if ($userId <= 0) {
+            return false;
+        }
+
+        try {
+            $row = Database::row(
+                Database::table('users')->where('id', $userId)->where('is_active', 1)->select('id')
+            );
+        } catch (Throwable $exception) {
+            error_log('Unable to verify active user: ' . $exception->getMessage());
+            return false;
+        }
+
+        return $row !== null;
     }
 
     // array<permission_key, bool>
