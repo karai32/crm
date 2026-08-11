@@ -54,24 +54,16 @@ class AuthController
 
         LoginThrottle::clear($email);
 
-        // 2FA temporarily disabled — skip email verification
-        // if (!$this->twoFactorService->start($user)) {
-        //     View::render('auth/login', [
-        //         'title' => 'Login',
-        //         'error' => 'Password is correct, but the verification email could not be sent. Check mail settings.',
-        //         'email' => $email,
-        //     ], 'auth');
-        //     return;
-        // }
-        // Auth::redirect('/login/verify');
-
-        $this->authService->completeLogin($user);
-
-        if (!empty($_POST['remember_me'])) {
-            Auth::issueRememberToken((int) $user['id']);
+        if (!$this->twoFactorService->start($user, !empty($_POST['remember_me']))) {
+            View::render('auth/login', [
+                'title' => Lang::get('auth.login_title'),
+                'error' => Lang::get('auth.2fa_send_failed'),
+                'email' => $email,
+            ], 'auth');
+            return;
         }
 
-        Auth::redirect('/dashboard');
+        Auth::redirect('/login/verify');
     }
 
     public function showTwoFactor(): void
@@ -100,6 +92,7 @@ class AuthController
         }
 
         $code = trim($_POST['code'] ?? '');
+        $remember = $this->twoFactorService->pendingRemember();
         $user = $this->twoFactorService->verify($code);
 
         if ($user === null) {
@@ -114,6 +107,11 @@ class AuthController
         }
 
         $this->authService->completeLogin($user);
+
+        if ($remember) {
+            Auth::issueRememberToken((int) $user['id']);
+        }
+
         Auth::redirect('/dashboard');
     }
 

@@ -390,6 +390,7 @@ return [
     'auth.invalid_code'        => 'Código de verificación inválido o caducado.',
     'auth.please_wait'         => 'Espera antes de solicitar otro código.',
     'auth.code_resent'         => 'Se ha enviado un nuevo código de verificación.',
+    'auth.2fa_send_failed'     => 'La contraseña es correcta, pero no se pudo enviar el correo de verificación. Revisa la configuración de correo.',
 
     // ── Exports (extended) ─────────────────────────────────────────────────────
     'exports.openspout_missing' => 'OpenSpout no está instalado. La exportación XLSX no está disponible. Ejecuta:',

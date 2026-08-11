@@ -390,6 +390,7 @@ return [
     'auth.invalid_code'        => 'Invalid or expired verification code.',
     'auth.please_wait'         => 'Please wait before requesting another code.',
     'auth.code_resent'         => 'A new verification code has been sent.',
+    'auth.2fa_send_failed'     => 'Password is correct, but the verification email could not be sent. Check mail settings.',
 
     // ── Exports (extended) ─────────────────────────────────────────────────────
     'exports.openspout_missing' => 'OpenSpout is not installed. XLSX export is unavailable. Run:',

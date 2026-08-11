@@ -239,20 +239,17 @@ CODE,
             'title' => 'Two-factor verification',
             'paragraphs' => [
                 'TwoFactorService implements a six-digit, single-use email code. The session stores a password_hash rather than the code, a copy of minimal user data, a 10-minute expiry, last-send time, and attempt count. Resending is allowed after 60 seconds and creates a new code. After more than five failed checks, pending state is deleted.',
-                '/login/verify and /login/resend-code routes, the view, and MailerService delivery are registered. However, the call to TwoFactorService::start() in AuthController::login() is commented out. The current production path calls completeLogin() immediately after a valid password, so 2FA is not an active security measure and must not be advertised as enabled.',
-                'Simply uncommenting the code is insufficient for mature 2FA. Define whether it is required per user or role, protect email changes, tie remember-me to successful second verification, log events, design recovery and backup codes, centralize attempt and send limits, and test SMTP failure. Email codes protect less than TOTP or WebAuthn and depend on mailbox security.',
+                '/login/verify and /login/resend-code routes, the view, and MailerService delivery are registered, and AuthController::login() now calls TwoFactorService::start() after a valid password. completeLogin() only runs once verifyTwoFactor() accepts the code, so a correct password alone no longer opens a session; a persistent remember-me token is issued at that same point rather than immediately after the password, so it cannot be obtained without passing the second factor.',
+                'Enabling the code path was not enough on its own: remember-me now issues its token only after verifyTwoFactor() succeeds, closing the gap where a correct password alone produced a persistent credential. What remains: 2FA is required for every account rather than opt-in per user or role, email changes are not specially protected, no event is logged on success, failure, or resend, there is no recovery/backup-code path if the mailbox is unreachable, attempt and send limits live only in the per-login session rather than being centralized, and SMTP failure during login has not been tested under real load. Email codes also protect less than TOTP or WebAuthn and depend on mailbox security.',
             ],
             'examples' => [[
-                'title' => 'Current and prepared behavior',
+                'title' => 'Current behavior',
                 'code' => <<<'CODE'
 Current:
-  password valid → completeLogin() → dashboard
-
-Implemented but disabled:
   password valid → TwoFactorService::start()
                  → email code
                  → /login/verify
-                 → completeLogin() → dashboard
+                 → correct code → completeLogin() → optional remember token → dashboard
 CODE,
             ]],
         ],
@@ -342,7 +339,7 @@ CODE,
             'title' => 'Access lifecycle and audit',
             'paragraphs' => [
                 'An administrator can deactivate a user, change role, permissions, email, and password, or permanently delete an inactive record. The interface prevents deactivating or deleting the current account. Deleting a user cascades to user_permissions, while related user_id values in log tables generally become NULL.',
-                'An active session does not recheck users.is_active or the database role on every request. The role is stored as a string in session user, so a deactivated user continues until the session ends, and a changed role takes effect after a new login. Changing a password likewise does not destroy active sessions or all remember tokens. Remember-me restoration does recheck activity and current role.',
+                'Auth::ensureAuthenticated() now re-checks users.is_active against the database on every request that requires login, so a deactivated account is logged out on its very next request instead of surviving for the rest of a 30-day session. The role itself is still only a cached string in session user and is not re-verified the same way, so a changed role still takes effect only after a new login or a remember-token restoration. Changing a password likewise does not destroy other active sessions or all remember tokens. Remember-me restoration does recheck activity and current role.',
                 'schema.sql contains audit_logs, but current code does not record logins, logouts, failures, role or permission changes, key creation, or administrative changes there. last_login_at and api_logs cover only part of the picture. Incident investigation needs an immutable audit with actor, action, target, time, IP, request id, and a safe change description without passwords or secrets.',
             ],
             'examples' => [[
@@ -387,18 +384,19 @@ CODE,
             'id' => 'security-known-gaps',
             'title' => 'Priority technical debt',
             'paragraphs' => [
-                'Permissions are already fail-closed, web-route policies are centralized in Router, and access to the AI page and AJAX is aligned to admin. Adding a permission still requires explicit values to be assigned manually for existing users. The remaining high priority is to check activity and current role in live sessions and revoke all sessions and remember tokens after account deactivation or password/role changes.',
-                'The next level is to add Secure to the persistent cookie, make logout a CSRF-protected POST, introduce explicit idle and absolute session timeouts, strict password policy and rehashing, and decide whether to enable or remove inactive 2FA code. LoginThrottle should move to reliable centralized storage with IP/risk limits that do not make account denial easy.',
+                'Permissions are already fail-closed, web-route policies are centralized in Router, and access to the AI page and AJAX is aligned to admin. Adding a permission still requires explicit values to be assigned manually for existing users. Live sessions now re-check account activity on every request, so account deactivation takes effect on the next request rather than the remainder of a 30-day session; the remaining high priority is doing the same for a changed role, and building a way to force-revoke a specific user\'s other sessions and remember tokens on demand (password/role changes still only apply on the next login).',
+                'The next level is to add Secure to the persistent cookie, make logout a CSRF-protected POST, introduce explicit idle and absolute session timeouts, strict password policy and rehashing, and extend 2FA — now enabled for every login — with a per-role requirement, recovery/backup codes, and event logging. LoginThrottle should move to reliable centralized storage with IP/risk limits that do not make account denial easy.',
                 'Further work includes server-side URL-scheme validation, removing unsafe-inline from CSP, automatic security audit, log redaction and retention, API rate limiting, API-key expiry and rotation, dependency scanning, and regular access-matrix integration tests. These items describe current implementation boundaries; update documentation with each actual contract fix.',
             ],
             'examples' => [[
                 'title' => 'Hardening order',
                 'code' => <<<'CODE'
-P0  revoke access on account/password/role changes
+P0  revoke access on account deactivation — done
+P0  revoke access on password/role changes and on demand — open
 
 P1  Secure remember cookie + POST logout
 P1  explicit session timeouts and password policy
-P1  decide and complete 2FA
+P1  2FA recovery codes, per-role requirement, and event logging
 P1  centralized login throttling and security audit
 
 P2  strict URL validation and CSP without unsafe-inline

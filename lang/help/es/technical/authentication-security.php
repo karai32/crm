@@ -259,21 +259,18 @@ CODE,
             'title' => 'Verificación en dos pasos',
             'paragraphs' => [
                 'TwoFactorService implementa un código de un solo uso de seis cifras enviado por correo electrónico. La sesión no guarda el código, sino un password_hash, una copia de los datos mínimos del usuario, una duración de 10 minutos, la hora del último envío y un contador de intentos. El reenvío se permite después de 60 segundos y genera un código nuevo. Tras superar cinco comprobaciones fallidas se elimina el estado pending.',
-                'Las rutas /login/verify y /login/resend-code, la vista y el envío mediante MailerService están registrados. Sin embargo, la llamada a TwoFactorService::start() está comentada en AuthController::login(). El flujo actual de producción llama directamente a completeLogin() después de validar la contraseña; por tanto, 2FA no es actualmente una medida de seguridad activa y no debe anunciarse a los usuarios como habilitada.',
-                'Quitar los comentarios no basta para disponer de una 2FA madura. Hay que definir si es obligatoria por usuario o rol, proteger el cambio de correo electrónico, vincular remember-me a una segunda comprobación correcta, registrar los eventos, diseñar la recuperación y los códigos de respaldo, limitar de forma centralizada los intentos y envíos, y probar los fallos SMTP. Un código por correo protege menos que TOTP o WebAuthn y depende de la seguridad del buzón.',
+                'Las rutas /login/verify y /login/resend-code, la vista y el envío mediante MailerService están registrados, y AuthController::login() ahora llama a TwoFactorService::start() tras validar la contraseña. completeLogin() solo se ejecuta cuando verifyTwoFactor() acepta el código, de modo que una contraseña correcta por sí sola ya no abre sesión; el token persistente de «recordarme» se emite en ese mismo punto, no justo después de la contraseña, por lo que no puede obtenerse sin superar el segundo factor.',
+                'Activar el flujo no bastaba por sí solo: remember-me ahora emite su token únicamente cuando verifyTwoFactor() tiene éxito, cerrando el hueco por el que una contraseña correcta por sí sola producía una credencial persistente. Queda pendiente: la 2FA es obligatoria para toda cuenta en lugar de configurable por usuario o rol, el cambio de correo electrónico no está especialmente protegido, no se registra ningún evento en el éxito, el fallo o el reenvío, no existe recuperación ni códigos de respaldo si el buzón es inaccesible, los límites de intentos y envíos solo viven en la sesión de cada inicio de sesión en lugar de estar centralizados, y el fallo de SMTP durante el login no se ha probado bajo carga real. Un código por correo también protege menos que TOTP o WebAuthn y depende de la seguridad del buzón.',
             ],
             'examples' => [
                 [
-                    'title' => 'Comportamiento actual y comportamiento preparado',
+                    'title' => 'Comportamiento actual',
                     'code' => <<<'CODE'
 Current:
-  password valid → completeLogin() → dashboard
-
-Implemented but disabled:
   password valid → TwoFactorService::start()
                  → email code
                  → /login/verify
-                 → completeLogin() → dashboard
+                 → correct code → completeLogin() → optional remember token → dashboard
 CODE,
                 ],
             ],
@@ -370,7 +367,7 @@ CODE,
             'title' => 'Ciclo de vida del acceso y auditoría',
             'paragraphs' => [
                 'Un administrador puede desactivar un usuario, cambiar su rol, permisos, correo y contraseña, o eliminar definitivamente un registro ya inactivo. La interfaz no permite desactivar ni eliminar la propia cuenta actual. Al eliminar un usuario se borran en cascada sus user_permissions, mientras que los user_id asociados en otras tablas de registro suelen convertirse en NULL.',
-                'Una sesión activa no vuelve a comprobar users.is_active ni el rol en la base de datos en cada solicitud. El rol se almacena como cadena en session user, por lo que un usuario desactivado puede seguir trabajando hasta que termine su sesión existente, y un cambio de rol solo entra en vigor tras volver a iniciar sesión. Cambiar la contraseña tampoco destruye las sesiones activas ni todos los tokens remember-me. En la recuperación mediante remember-me sí se vuelven a comprobar la actividad y el rol actual.',
+                'Auth::ensureAuthenticated() ahora vuelve a comprobar users.is_active en la base de datos en cada solicitud que exige sesión, por lo que una cuenta desactivada pierde el acceso en su siguiente solicitud en lugar de mantenerlo durante el resto de una sesión de 30 días. El rol sigue siendo solo una cadena en caché dentro de session user y no se vuelve a verificar del mismo modo, por lo que un cambio de rol solo entra en vigor tras volver a iniciar sesión o recuperar la sesión mediante remember-me. Cambiar la contraseña tampoco destruye otras sesiones activas ni todos los tokens remember-me. En la recuperación mediante remember-me sí se vuelven a comprobar la actividad y el rol actual.',
                 'schema.sql contiene audit_logs, pero el código actual no registra en esa tabla los inicios y cierres de sesión, intentos fallidos, cambios de roles y permisos, creación de claves ni cambios administrativos. last_login_at y api_logs solo cubren una parte. Para investigar incidentes se necesita una auditoría inmutable con actor, action, target, hora, IP, request id y una descripción segura del cambio sin contraseñas ni secretos.',
             ],
             'examples' => [
@@ -419,19 +416,20 @@ CODE,
             'id' => 'security-known-gaps',
             'title' => 'Deuda técnica prioritaria',
             'paragraphs' => [
-                'Los permisos ya aplican fail-closed, las políticas de las rutas web están centralizadas en Router y el acceso a la página de IA y a su AJAX está alineado con el nivel admin. Al añadir un permission sigue siendo necesario asignar manualmente valores explícitos a los usuarios existentes. La prioridad alta pendiente es comprobar la actividad y el rol actual del usuario en una sesión viva, y revocar todas las sesiones y tokens remember-me cuando se desactive la cuenta o se cambien la contraseña o el rol.',
-                'El siguiente nivel consiste en añadir Secure a la cookie persistente, convertir logout en un POST con CSRF, introducir timeouts explícitos de inactividad y duración absoluta, una política estricta de contraseñas y rehash, y decidir si se activa realmente o se elimina el código 2FA inactivo. LoginThrottle debe trasladarse a un almacenamiento centralizado fiable y complementarse con límites por IP/riesgo sin facilitar el bloqueo de cuentas ajenas.',
+                'Los permisos ya aplican fail-closed, las políticas de las rutas web están centralizadas en Router y el acceso a la página de IA y a su AJAX está alineado con el nivel admin. Al añadir un permission sigue siendo necesario asignar manualmente valores explícitos a los usuarios existentes. Las sesiones activas ya vuelven a comprobar la actividad de la cuenta en cada solicitud, por lo que la desactivación surte efecto en la siguiente solicitud en lugar de durante el resto de una sesión de 30 días; la prioridad alta pendiente es hacer lo mismo con un cambio de rol y disponer de una forma de revocar bajo demanda otras sesiones y tokens remember-me de un usuario concreto (los cambios de contraseña o rol solo se aplican todavía en el siguiente inicio de sesión).',
+                'El siguiente nivel consiste en añadir Secure a la cookie persistente, convertir logout en un POST con CSRF, introducir timeouts explícitos de inactividad y duración absoluta, una política estricta de contraseñas y rehash, y ampliar la 2FA —ahora activa en todo inicio de sesión— con exigencia por rol, códigos de recuperación y registro de eventos. LoginThrottle debe trasladarse a un almacenamiento centralizado fiable y complementarse con límites por IP/riesgo sin facilitar el bloqueo de cuentas ajenas.',
                 'Después se necesitan validación de esquemas URL en el servidor, eliminación de unsafe-inline en la CSP, security audit automático, enmascaramiento y retention de registros, rate limiting de la API, caducidad y rotación de claves de API, análisis de dependencias y pruebas de integración periódicas de la matriz de acceso. Estos puntos describen los límites actuales de la implementación; la documentación debe actualizarse al mismo tiempo que se corrige cada contrato.',
             ],
             'examples' => [
                 [
                     'title' => 'Orden de refuerzo',
                     'code' => <<<'CODE'
-P0  revoke access on account/password/role changes
+P0  revoke access on account deactivation — done
+P0  revoke access on password/role changes and on demand — open
 
 P1  Secure remember cookie + POST logout
 P1  explicit session timeouts and password policy
-P1  decide and complete 2FA
+P1  2FA recovery codes, per-role requirement, and event logging
 P1  centralized login throttling and security audit
 
 P2  strict URL validation and CSP without unsafe-inline

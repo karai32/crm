@@ -7,7 +7,7 @@ class TwoFactorService
     private const RESEND_SECONDS = 60;
     private const MAX_ATTEMPTS = 5;
 
-    public function start(array $user): bool
+    public function start(array $user, bool $remember = false): bool
     {
         $code = (string) random_int(100000, 999999);
 
@@ -22,6 +22,7 @@ class TwoFactorService
             'expires_at' => time() + self::CODE_TTL_SECONDS,
             'last_sent_at' => time(),
             'attempts' => 0,
+            'remember' => $remember,
         ];
 
         return $this->sendCode($user['email'], $user['name'], $code);
@@ -35,7 +36,13 @@ class TwoFactorService
             return false;
         }
 
-        return $this->start($pending['user']);
+        return $this->start($pending['user'], (bool) ($pending['remember'] ?? false));
+    }
+
+    // Must be read before verify(), which clears the pending payload on success.
+    public function pendingRemember(): bool
+    {
+        return (bool) ($this->pending()['remember'] ?? false);
     }
 
     public function verify(string $code): ?array
