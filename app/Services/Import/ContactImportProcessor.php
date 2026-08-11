@@ -39,7 +39,7 @@ class ContactImportProcessor extends AbstractImportProcessor
             $mapping,
             $customFieldTypes
         );
-        $contactId = $this->contactWriter->create(
+        $this->contactWriter->create(
             data: $data,
             tagIds: $tagIds,
             clientIds: $clientId === null ? [] : [$clientId],
@@ -48,11 +48,6 @@ class ContactImportProcessor extends AbstractImportProcessor
             applyCustomFieldDefaults: false,
             checkEmailDns: false
         );
-
-        if ($tagIds !== [] && $clientId !== null) {
-            $this->entityTags->add('client', [$clientId], $tagIds);
-        }
-
     }
 
     private function clientId(string $name, string $sector): ?int

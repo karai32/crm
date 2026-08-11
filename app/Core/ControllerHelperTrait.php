@@ -4,8 +4,7 @@ trait ControllerHelperTrait
 {
     protected function emptyToNull(string $value): ?string
     {
-        $value = trim($value);
-        return $value === '' ? null : $value;
+        return Strings::nullable($value);
     }
 
     protected function cleanIds(mixed $ids): array

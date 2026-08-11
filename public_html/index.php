@@ -53,6 +53,7 @@ Lang::load($_SESSION['lang'] ?? 'es');
 
 require_once __DIR__ . '/../app/Core/Router.php';
 require_once __DIR__ . '/../app/Core/IdList.php';
+require_once __DIR__ . '/../app/Core/Strings.php';
 require_once __DIR__ . '/../app/Core/SortableTrait.php';
 require_once __DIR__ . '/../app/Core/ControllerHelperTrait.php';
 require_once __DIR__ . '/../app/Helpers/view_helpers.php';

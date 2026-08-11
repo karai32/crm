@@ -179,7 +179,6 @@ final class ContactWriteService
 
     private function nullableString(mixed $value): ?string
     {
-        $value = trim((string) ($value ?? ''));
-        return $value === '' ? null : $value;
+        return Strings::nullable($value);
     }
 }

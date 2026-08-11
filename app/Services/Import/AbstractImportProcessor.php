@@ -112,8 +112,7 @@ abstract class AbstractImportProcessor
 
     protected function nullable(mixed $value): ?string
     {
-        $value = trim((string) ($value ?? ''));
-        return $value === '' ? null : $value;
+        return Strings::nullable($value);
     }
 
     protected function boolValue(string $value): int

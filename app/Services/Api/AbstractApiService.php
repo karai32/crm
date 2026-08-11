@@ -141,8 +141,7 @@ abstract class AbstractApiService
 
     protected function nullableString(mixed $value): ?string
     {
-        $value = trim((string) ($value ?? ''));
-        return $value === '' ? null : $value;
+        return Strings::nullable($value);
     }
 
     // Accepts a single name, a comma-separated string of names, or a JSON array of names.
