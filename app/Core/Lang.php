@@ -25,10 +25,15 @@ class Lang
     public static function get(string $key, array $replace = []): string
     {
         $str = self::$strings[$key] ?? $key;
-        foreach ($replace as $k => $v) {
-            $str = str_replace(':' . $k, (string) $v, $str);
+        if ($replace === []) {
+            return $str;
         }
-        return $str;
+
+        $pairs = [];
+        foreach ($replace as $k => $v) {
+            $pairs[':' . $k] = (string) $v;
+        }
+        return strtr($str, $pairs);
     }
 
     public static function locale(): string
