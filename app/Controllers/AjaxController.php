@@ -207,7 +207,7 @@ class AjaxController
         $contact = $this->contacts->find((int) ($_POST['contact_id'] ?? 0));
         $email = trim((string) ($contact['email'] ?? ''));
 
-        if ($contact === null || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        if ($contact === null || !EmailInspector::isValid($email)) {
             $this->json(['error' => 'Contact does not have a valid email address'], 422);
             return;
         }

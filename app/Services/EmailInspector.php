@@ -110,13 +110,18 @@ class EmailInspector
      * loops (e.g. CSV import) -- thousands of blocking DNS calls in one
      * request will exceed the PHP/nginx timeout.
      */
+    public static function isValid(string $email): bool
+    {
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
     public static function inspect(?string $email, bool $checkDns = true): array
     {
         if ($email === null || trim($email) === '') {
             return ['is_corporate_email' => null, 'email_status' => null];
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!self::isValid($email)) {
             return ['is_corporate_email' => null, 'email_status' => 'invalid'];
         }
 

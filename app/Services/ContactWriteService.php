@@ -145,7 +145,7 @@ final class ContactWriteService
         if ($email === null) {
             return;
         }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!EmailInspector::isValid($email)) {
             throw new WriteException(self::EMAIL_INVALID, 'Email is invalid.');
         }
         if ($rejectInternalEmail && str_contains(strtolower($email), 'unanime')) {
