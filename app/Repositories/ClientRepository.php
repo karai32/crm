@@ -131,10 +131,10 @@ class ClientRepository
         $data['is_web_connected'] = (int) (bool) ($data['is_web_connected'] ?? ($current['is_web_connected'] ?? false));
         $data['is_active'] = (int) (bool) ($data['is_active'] ?? ($current['is_active'] ?? true));
 
-        $data['is_web_connected_date'] = ($current && (int) ($data['is_web_connected'] ?? $current['is_web_connected']) !== (int) $current['is_web_connected'])
+        $data['is_web_connected_date'] = ($current && $data['is_web_connected'] !== (int) $current['is_web_connected'])
             ? $now : null;
 
-        $data['is_active_date'] = ($current && (int) ($data['is_active'] ?? $current['is_active']) !== (int) $current['is_active'])
+        $data['is_active_date'] = ($current && $data['is_active'] !== (int) $current['is_active'])
             ? $now : null;
 
         if ($data['is_web_connected_date'] === null) {
