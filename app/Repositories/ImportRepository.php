@@ -4,12 +4,6 @@ use Illuminate\Database\Query\Builder;
 
 class ImportRepository
 {
-    // array<{id, user_id, original_filename, stored_filename, file_type, entity_type, status, total_rows, imported_rows, skipped_rows, error_rows, field_mapping, started_at, finished_at, created_at, user_name}>
-    public function allBatches(string $sort = 'id', string $dir = 'desc'): array
-    {
-        return Database::rows($this->orderedBatches($sort, $dir)->limit(50));
-    }
-
     // int
     public function countBatches(): int
     {

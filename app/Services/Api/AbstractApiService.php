@@ -141,11 +141,6 @@ abstract class AbstractApiService
         return $record;
     }
 
-    protected function nullableString(mixed $value): ?string
-    {
-        return Strings::nullable($value);
-    }
-
     // "false" is truthy in PHP like any other non-empty string, so a JSON caller sending the
     // literal string "false" for a checkbox field would otherwise be stored as checked/true.
     private function checkboxValue(mixed $value): int
