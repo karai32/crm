@@ -54,10 +54,9 @@ class SectorController
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $sector = $this->sectors->find($id);
+        $sector = $this->findOrNotFound($this->sectors->find($id), 'Sector not found');
 
         if ($sector === null) {
-            $this->notFound('Sector not found');
             return;
         }
 
@@ -71,10 +70,9 @@ class SectorController
         $iconInput = $_POST['icon'] ?? null;
         $icon = $this->icons->normalize($iconInput);
         $isActive = isset($_POST['is_active']) ? 1 : 0;
-        $sector = $this->sectors->find($id);
+        $sector = $this->findOrNotFound($this->sectors->find($id), 'Sector not found');
 
         if ($sector === null) {
-            $this->notFound('Sector not found');
             return;
         }
 

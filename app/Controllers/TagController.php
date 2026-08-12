@@ -53,10 +53,9 @@ class TagController
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $tag = $this->tags->find($id);
+        $tag = $this->findOrNotFound($this->tags->find($id), 'Tag not found');
 
         if ($tag === null) {
-            $this->notFound('Tag not found');
             return;
         }
 
@@ -68,10 +67,9 @@ class TagController
         $id = (int) ($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $color = $this->cleanColor($_POST['color'] ?? '');
-        $tag = $this->tags->find($id);
+        $tag = $this->findOrNotFound($this->tags->find($id), 'Tag not found');
 
         if ($tag === null) {
-            $this->notFound('Tag not found');
             return;
         }
 

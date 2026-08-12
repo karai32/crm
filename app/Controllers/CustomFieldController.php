@@ -55,10 +55,9 @@ class CustomFieldController
 
     public function edit(): void
     {
-        $field = $this->customFields->find((int) ($_GET['id'] ?? 0));
+        $field = $this->findOrNotFound($this->customFields->find((int) ($_GET['id'] ?? 0)), 'Custom field not found');
 
         if ($field === null) {
-            $this->notFound('Custom field not found');
             return;
         }
 
@@ -68,10 +67,9 @@ class CustomFieldController
     public function update(): void
     {
         $id = (int) ($_POST['id'] ?? 0);
-        $field = $this->customFields->find($id);
+        $field = $this->findOrNotFound($this->customFields->find($id), 'Custom field not found');
 
         if ($field === null) {
-            $this->notFound('Custom field not found');
             return;
         }
 

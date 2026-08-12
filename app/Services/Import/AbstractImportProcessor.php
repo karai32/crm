@@ -110,11 +110,6 @@ abstract class AbstractImportProcessor
         return [$fields, $values];
     }
 
-    protected function nullable(mixed $value): ?string
-    {
-        return Strings::nullable($value);
-    }
-
     protected function boolValue(string $value): int
     {
         return in_array($this->lower(trim($value)), ['1', 'yes', 'true', 'si'], true) ? 1 : 0;

@@ -73,10 +73,9 @@ class ImportController
     public function errors(): void
     {
         $batchId = (int) ($_GET['id'] ?? 0);
-        $batch = $this->imports->findBatch($batchId);
+        $batch = $this->findOrNotFound($this->imports->findBatch($batchId), 'Import batch not found');
 
         if ($batch === null) {
-            $this->notFound('Import batch not found');
             return;
         }
 
@@ -90,14 +89,13 @@ class ImportController
 
     public function process(): void
     {
-        $result = $this->manager->process(
+        $result = $this->findOrNotFound($this->manager->process(
             (int) ($_POST['id'] ?? 0),
             $_POST['mapping'] ?? [],
             $_POST['custom_fields'] ?? []
-        );
+        ), 'Import batch not found');
 
         if ($result === null) {
-            $this->notFound('Import batch not found');
             return;
         }
 

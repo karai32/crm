@@ -30,7 +30,7 @@ class ExportService
             'full_name'    => ['label' => 'Full name',    'group' => 'Basic info'],
             'email'        => ['label' => 'Email',        'group' => 'Basic info'],
             'phone'        => ['label' => 'Phone',        'group' => 'Basic info'],
-            'company'   => ['label' => 'Company name', 'group' => 'Basic info'],
+            'company'      => ['label' => 'Company name', 'group' => 'Basic info'],
             'created_at'   => ['label' => 'Created',     'group' => 'Basic info'],
             'updated_at'   => ['label' => 'Updated',     'group' => 'Basic info'],
             'tags'         => ['label' => 'Tags',        'group' => 'Related data'],
@@ -47,7 +47,7 @@ class ExportService
         return $fields;
     }
 
-    private function clientsFieldDefs(array $customFields = []): array
+    private function clientsFieldDefs(array $customFields): array
     {
         $fields = [
             'id'              => ['label' => 'ID',              'group' => 'Basic info'],
@@ -279,7 +279,7 @@ class ExportService
         string $entityColumn,
         array $filters
     ): void {
-        $tagIds = $this->cleanTagIds($filters);
+        $tagIds = IdList::normalize($filters['tag_ids'] ?? []);
         if ($tagIds === []) {
             return;
         }
@@ -289,10 +289,5 @@ class ExportService
             ->from($pivotTable)
             ->whereColumn($pivotTable . '.' . $entityColumn, $table . '.id')
             ->whereIn($pivotTable . '.tag_id', $tagIds));
-    }
-
-    private function cleanTagIds(array $source): array
-    {
-        return IdList::normalize($source['tag_ids'] ?? []);
     }
 }

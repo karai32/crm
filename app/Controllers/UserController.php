@@ -73,7 +73,7 @@ class UserController
 
     public function edit(): void
     {
-        $user = $this->findUserOrFail((int) ($_GET['id'] ?? 0));
+        $user = $this->findOrNotFound($this->users->find((int) ($_GET['id'] ?? 0)), 'User not found');
 
         if ($user === null) {
             return;
@@ -85,7 +85,7 @@ class UserController
     public function update(): void
     {
         $id = (int) ($_POST['id'] ?? 0);
-        $existingUser = $this->findUserOrFail($id);
+        $existingUser = $this->findOrNotFound($this->users->find($id), 'User not found');
 
         if ($existingUser === null) {
             return;
@@ -197,18 +197,6 @@ class UserController
             'role_id' => (int) ($_POST['role_id'] ?? 0),
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
         ];
-    }
-
-    private function findUserOrFail(int $id): ?array
-    {
-        $user = $this->users->find($id);
-
-        if ($user === null) {
-            $this->notFound('User not found');
-            return null;
-        }
-
-        return $user;
     }
 
     private function permissionsWithDefault(bool $allowed): array

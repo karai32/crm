@@ -101,7 +101,7 @@ class ContactController
 
     public function show(): void
     {
-        $contact = $this->findContactOrFail((int) ($_GET['id'] ?? 0));
+        $contact = $this->findOrNotFound($this->contacts->find((int) ($_GET['id'] ?? 0)), 'Contact not found');
 
         if ($contact === null) {
             return;
@@ -121,7 +121,7 @@ class ContactController
 
     public function edit(): void
     {
-        $contact = $this->findContactOrFail((int) ($_GET['id'] ?? 0));
+        $contact = $this->findOrNotFound($this->contacts->find((int) ($_GET['id'] ?? 0)), 'Contact not found');
 
         if ($contact === null) {
             return;
@@ -133,7 +133,7 @@ class ContactController
     public function update(): void
     {
         $id = (int) ($_POST['id'] ?? 0);
-        $contact = $this->findContactOrFail($id);
+        $contact = $this->findOrNotFound($this->contacts->find($id), 'Contact not found');
 
         if ($contact === null) {
             return;
@@ -289,17 +289,5 @@ class ContactController
             'email_status'       => $_GET['email_status'] ?? '',
             'custom_fields'      => $this->customFieldFiltersFromRequest(),
         ];
-    }
-
-    private function findContactOrFail(int $id): ?array
-    {
-        $contact = $this->contacts->find($id);
-
-        if ($contact === null) {
-            $this->notFound('Contact not found');
-            return null;
-        }
-
-        return $contact;
     }
 }

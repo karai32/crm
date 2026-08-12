@@ -210,7 +210,7 @@ class ClientRepository
             $query->where('clients.sector_id', (int) $filters['sector_id']);
         }
 
-        $tagIds = $this->cleanTagFilterIds($filters);
+        $tagIds = IdList::normalize($filters['tag_ids'] ?? []);
 
         if (!empty($tagIds)) {
             $query->whereExists(fn (Builder $tags) => $tags
@@ -259,20 +259,5 @@ class ClientRepository
         }
 
         return $query;
-    }
-
-    private function cleanTagFilterIds(array $filters): array
-    {
-        $tagIds = $filters['tag_ids'] ?? [];
-
-        if (!is_array($tagIds)) {
-            $tagIds = [];
-        }
-
-        if (!empty($filters['tag_id'])) {
-            $tagIds[] = $filters['tag_id'];
-        }
-
-        return IdList::normalize($tagIds);
     }
 }

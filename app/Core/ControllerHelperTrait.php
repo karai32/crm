@@ -13,6 +13,16 @@ trait ControllerHelperTrait
         echo $message;
     }
 
+    protected function findOrNotFound(?array $entity, string $message): ?array
+    {
+        if ($entity === null) {
+            $this->notFound($message);
+            return null;
+        }
+
+        return $entity;
+    }
+
     protected function cleanIds(mixed $ids): array
     {
         return IdList::normalize($ids);

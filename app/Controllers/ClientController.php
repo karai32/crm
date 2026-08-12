@@ -85,7 +85,7 @@ class ClientController
 
     public function show(): void
     {
-        $client = $this->findClientOrFail((int) ($_GET['id'] ?? 0));
+        $client = $this->findOrNotFound($this->clients->find((int) ($_GET['id'] ?? 0)), 'Client not found');
 
         if ($client === null) {
             return;
@@ -106,7 +106,7 @@ class ClientController
 
     public function edit(): void
     {
-        $client = $this->findClientOrFail((int) ($_GET['id'] ?? 0));
+        $client = $this->findOrNotFound($this->clients->find((int) ($_GET['id'] ?? 0)), 'Client not found');
 
         if ($client === null) {
             return;
@@ -118,7 +118,7 @@ class ClientController
     public function update(): void
     {
         $id = (int) ($_POST['id'] ?? 0);
-        $client = $this->findClientOrFail($id);
+        $client = $this->findOrNotFound($this->clients->find($id), 'Client not found');
 
         if ($client === null) {
             return;
@@ -250,17 +250,5 @@ class ClientController
             'address'          => trim($_GET['address'] ?? ''),
             'custom_fields'    => $this->customFieldFiltersFromRequest(),
         ];
-    }
-
-    private function findClientOrFail(int $id): ?array
-    {
-        $client = $this->clients->find($id);
-
-        if ($client === null) {
-            $this->notFound('Client not found');
-            return null;
-        }
-
-        return $client;
     }
 }

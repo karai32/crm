@@ -246,7 +246,7 @@ class ContactRepository
                 ->where('client_contacts.client_id', (int) $filters['client_id']));
         }
 
-        $tagIds = $this->cleanTagFilterIds($filters);
+        $tagIds = IdList::normalize($filters['tag_ids'] ?? []);
 
         if (!empty($tagIds)) {
             $query->whereExists(fn (Builder $tags) => $tags
@@ -320,20 +320,5 @@ class ContactRepository
             ->whereNotNull('email')
             ->where('email', '!=', '')
             ->whereNull('is_corporate_email');
-    }
-
-    private function cleanTagFilterIds(array $filters): array
-    {
-        $tagIds = $filters['tag_ids'] ?? [];
-
-        if (!is_array($tagIds)) {
-            $tagIds = [];
-        }
-
-        if (!empty($filters['tag_id'])) {
-            $tagIds[] = $filters['tag_id'];
-        }
-
-        return IdList::normalize($tagIds);
     }
 }

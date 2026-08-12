@@ -99,7 +99,7 @@ class SectorRepository
     public function deleteOrDeactivate(int $id): void
     {
         if ($this->clientsCount($id) > 0) {
-            $this->deactivate($id);
+            Database::table('sectors')->where('id', $id)->update(['is_active' => 0]);
             return;
         }
 
@@ -110,11 +110,6 @@ class SectorRepository
     public function clientsCount(int $id): int
     {
         return Database::table('clients')->where('sector_id', $id)->count();
-    }
-
-    private function deactivate(int $id): void
-    {
-        Database::table('sectors')->where('id', $id)->update(['is_active' => 0]);
     }
 
     private function ordered(string $sort, string $dir): Builder
