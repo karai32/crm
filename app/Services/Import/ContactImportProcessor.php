@@ -72,9 +72,4 @@ class ContactImportProcessor extends AbstractImportProcessor
             'sector_id' => $this->sectorId($sector),
         ]);
     }
-
-    private function lower(string $value): string
-    {
-        return function_exists('mb_strtolower') ? mb_strtolower($value) : strtolower($value);
-    }
 }

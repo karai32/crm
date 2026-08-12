@@ -150,7 +150,7 @@ abstract class AbstractImportProcessor
         return $slug !== '' ? $slug : 'custom-field-' . substr(hash('sha256', $value), 0, 12);
     }
 
-    private function lower(string $value): string
+    protected function lower(string $value): string
     {
         return function_exists('mb_strtolower') ? mb_strtolower($value) : strtolower($value);
     }
