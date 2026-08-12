@@ -192,7 +192,16 @@ class HelpController
                 continue;
             }
 
-            if ($this->validContentPackage($content)) {
+            $isValidPackage = is_array($content)
+                && isset($content['ui'], $content['pages'], $content['technical'])
+                && is_array($content['ui'])
+                && is_array($content['pages'])
+                && is_array($content['technical'])
+                && isset($content['technical']['meta'], $content['technical']['pages'])
+                && is_array($content['technical']['meta'])
+                && is_array($content['technical']['pages']);
+
+            if ($isValidPackage) {
                 return [$locale, $content];
             }
 
@@ -200,17 +209,5 @@ class HelpController
         }
 
         throw new RuntimeException('No valid help content package is available');
-    }
-
-    private function validContentPackage(mixed $content): bool
-    {
-        return is_array($content)
-            && isset($content['ui'], $content['pages'], $content['technical'])
-            && is_array($content['ui'])
-            && is_array($content['pages'])
-            && is_array($content['technical'])
-            && isset($content['technical']['meta'], $content['technical']['pages'])
-            && is_array($content['technical']['meta'])
-            && is_array($content['technical']['pages']);
     }
 }

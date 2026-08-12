@@ -201,7 +201,7 @@ class ContactApiService extends AbstractApiService
         foreach ($names as $name) {
             $client = $this->clients->findByCommercialName($name);
             if ($client === null) {
-                $ids[] = $this->createBlankClient($name);
+                $ids[] = $this->clientWriter->create(['commercial_name' => $name]);
                 $created = true;
             } else {
                 $ids[] = (int) $client['id'];
@@ -209,13 +209,6 @@ class ContactApiService extends AbstractApiService
         }
 
         return [array_values(array_unique($ids)), $created];
-    }
-
-    private function createBlankClient(string $name): int
-    {
-        return $this->clientWriter->create([
-            'commercial_name' => $name,
-        ]);
     }
 
     private function formatClients(array $clients): array

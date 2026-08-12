@@ -59,7 +59,9 @@ class ImportMapping
 
         $mapping = [];
         foreach ($headers as $header) {
-            $mapping[$header] = $aliases[$this->lower(trim((string) $header))] ?? '';
+            $key = trim((string) $header);
+            $key = function_exists('mb_strtolower') ? mb_strtolower($key) : strtolower($key);
+            $mapping[$header] = $aliases[$key] ?? '';
         }
         return $mapping;
     }
@@ -101,10 +103,5 @@ class ImportMapping
             }
         }
         return $mapped;
-    }
-
-    private function lower(string $value): string
-    {
-        return function_exists('mb_strtolower') ? mb_strtolower($value) : strtolower($value);
     }
 }

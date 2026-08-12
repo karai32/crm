@@ -43,11 +43,14 @@ class ImportController
         $total = $this->imports->countBatches();
         [$page, $perPage, $totalPages] = $this->pageParams($total);
 
+        $entity = $preview['batch']['entity_type'] ?? $_POST['entity_type'] ?? $_GET['entity'] ?? 'contacts';
+        $entity = $entity === 'clients' ? 'clients' : 'contacts';
+
         View::render('imports/index', [
             'title'      => Lang::get('imports.title'),
             'styles'     => ['data.css', 'imports.css'],
             'scripts'    => ['imports-upload.js', 'imports-preview.js'],
-            'entity'     => $this->entityParam($preview),
+            'entity'     => $entity,
             'batches'    => $this->imports->paginateBatches($page, $perPage, $sort, $dir),
             'sort'       => $sort,
             'dir'        => $dir,
@@ -58,16 +61,6 @@ class ImportController
             'preview'    => $preview,
             'error'      => $error,
         ]);
-    }
-
-    private function entityParam(?array $preview): string
-    {
-        $entity = $preview['batch']['entity_type']
-            ?? $_POST['entity_type']
-            ?? $_GET['entity']
-            ?? 'contacts';
-
-        return $entity === 'clients' ? 'clients' : 'contacts';
     }
 
     public function errors(): void
