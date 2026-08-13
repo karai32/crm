@@ -12,6 +12,8 @@
 /storage/logs/
 /storage/exports/
 /storage/imports/
+/storage/sessions/
+/storage/remember/
 /storage/*.log
 /storage/login_throttle.json
 
