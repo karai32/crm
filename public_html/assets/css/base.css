@@ -2065,8 +2065,8 @@ tbody tr:hover td {
 
 .auth-link {
     display: inline-block;
-    margin-top: 8px;
-    font-size: 13px;
+    margin-top: 15px;
+    font-size: 15px;
 }
 
 .auth-code-input {
