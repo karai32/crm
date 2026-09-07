@@ -2063,6 +2063,12 @@ tbody tr:hover td {
     display: block;
 }
 
+.auth-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
 .auth-code-input {
     text-align: center;
     letter-spacing: 0.18em;

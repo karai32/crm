@@ -17,6 +17,10 @@
     <div class="alert alert-error"><?= e($error) ?></div>
 <?php endif; ?>
 
+<?php if (!empty($message ?? null)): ?>
+    <div class="alert alert-success"><?= e($message) ?></div>
+<?php endif; ?>
+
 <form class="auth-form" method="post" action="<?= url('/login') ?>">
     <?= Csrf::field() ?>
     <div class="field">
@@ -37,6 +41,7 @@
                 <i class="ph ph-eye-closed password-toggle-icon password-toggle-icon-hide" aria-hidden="true"></i>
             </button>
         </div>
+        <a class="auth-link" href="<?= url('/password/forgot') ?>"><?= t('auth.forgot_password') ?></a>
     </div>
 
     <div class="field checkbox-field">
